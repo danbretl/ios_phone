@@ -15,7 +15,6 @@
 #import "SettingsViewController.h"
 #import "WebConnector.h"
 #import "CoreDataModel.h"
-#import <YAJL/YAJL.h>
 
 @interface kwiqetAppDelegate : NSObject <UIApplicationDelegate, UITabBarControllerDelegate, SplashScreenViewControllerDelegate, WebConnectorDelegate> {
     
