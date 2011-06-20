@@ -24,11 +24,11 @@
 		32FD31F213AFD82C007549B6 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		32FD31F413AFD82C007549B6 /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
 		32FD31F613AFD82C007549B6 /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = System/Library/Frameworks/CoreData.framework; sourceTree = SDKROOT; };
-		32FD31FA13AFD82C007549B6 /* kwiqet-Info.plist */ = {isa = PBXFileReference; path = "kwiqet-Info.plist"; sourceTree = "<group>"; };
+		32FD31FA13AFD82C007549B6 /* kwiqet-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "kwiqet-Info.plist"; sourceTree = "<group>"; };
 		32FD31FC13AFD82C007549B6 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		32FD31FE13AFD82C007549B6 /* kwiqet-Prefix.pch */ = {isa = PBXFileReference; path = "kwiqet-Prefix.pch"; sourceTree = "<group>"; };
+		32FD31FE13AFD82C007549B6 /* kwiqet-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "kwiqet-Prefix.pch"; sourceTree = "<group>"; };
 		32FD31FF13AFD82C007549B6 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
-		32FD320113AFD82C007549B6 /* kwiqetAppDelegate.h */ = {isa = PBXFileReference; path = kwiqetAppDelegate.h; sourceTree = "<group>"; };
+		32FD320113AFD82C007549B6 /* kwiqetAppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = kwiqetAppDelegate.h; sourceTree = "<group>"; };
 		32FD320213AFD82C007549B6 /* kwiqetAppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = kwiqetAppDelegate.m; sourceTree = "<group>"; };
 		32FD320513AFD82C007549B6 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/MainWindow.xib; sourceTree = "<group>"; };
 		32FD320813AFD82C007549B6 /* kwiqet.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = kwiqet.xcdatamodel; sourceTree = "<group>"; };
