@@ -52,5 +52,7 @@
 	<array/>
 	<key>UTImportedTypeDeclarations</key>
 	<array/>
+	<key>UIPrerenderedIcon</key>
+	<true/>
 </dict>
 </plist>
