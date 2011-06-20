@@ -263,6 +263,37 @@
 			};
 			name = Release;
 		};
+		32FD321513AFE6A7007549B6 /* Ad Hoc */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_VERSION = com.apple.compilers.llvmgcc42;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 4.3;
+				OTHER_CFLAGS = "-DNS_BLOCK_ASSERTIONS=1";
+				SDKROOT = iphoneos;
+			};
+			name = "Ad Hoc";
+		};
+		32FD321613AFE6A7007549B6 /* Ad Hoc */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CODE_SIGN_IDENTITY = "iPhone Distribution: Abextra , Inc.";
+				COPY_PHASE_STRIP = YES;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "kwiqet/kwiqet-Prefix.pch";
+				INFOPLIST_FILE = "kwiqet/kwiqet-Info.plist";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE = "92254DAF-E653-42B8-A1F1-5EC32E395EE6";
+				VALIDATE_PRODUCT = YES;
+				WRAPPER_EXTENSION = app;
+			};
+			name = "Ad Hoc";
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -271,6 +302,7 @@
 			buildConfigurations = (
 				32FD320A13AFD82D007549B6 /* Debug */,
 				32FD320B13AFD82D007549B6 /* Release */,
+				32FD321513AFE6A7007549B6 /* Ad Hoc */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
@@ -280,6 +312,7 @@
 			buildConfigurations = (
 				32FD320D13AFD82D007549B6 /* Debug */,
 				32FD320E13AFD82D007549B6 /* Release */,
+				32FD321613AFE6A7007549B6 /* Ad Hoc */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
