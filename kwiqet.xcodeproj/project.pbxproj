@@ -14,7 +14,6 @@
 		32FD364A13AFF38A007549B6 /* kwiqetAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 32FD364913AFF38A007549B6 /* kwiqetAppDelegate.m */; };
 		32FD364C13AFF39B007549B6 /* MainWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = 32FD364B13AFF39B007549B6 /* MainWindow.xib */; };
 		32FD364F13AFF3B6007549B6 /* kwiqet.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 32FD364D13AFF3B6007549B6 /* kwiqet.xcdatamodeld */; };
-		32FD365113AFF3C1007549B6 /* kwiqet-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 32FD365013AFF3C1007549B6 /* kwiqet-Info.plist */; };
 		32FD365313AFF3DB007549B6 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 32FD365213AFF3DB007549B6 /* InfoPlist.strings */; };
 		32FD365613AFF3F7007549B6 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 32FD365513AFF3F7007549B6 /* main.m */; };
 		32FD373113AFF424007549B6 /* HelveticaNeueLTStd-BdCn.otf in Resources */ = {isa = PBXBuildFile; fileRef = 32FD369613AFF423007549B6 /* HelveticaNeueLTStd-BdCn.otf */; };
@@ -242,7 +241,6 @@
 		32FD364913AFF38A007549B6 /* kwiqetAppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = kwiqetAppDelegate.m; sourceTree = "<group>"; };
 		32FD364B13AFF39B007549B6 /* MainWindow.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = MainWindow.xib; sourceTree = "<group>"; };
 		32FD364E13AFF3B6007549B6 /* Abextra.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = Abextra.xcdatamodel; sourceTree = "<group>"; };
-		32FD365013AFF3C1007549B6 /* kwiqet-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "kwiqet-Info.plist"; sourceTree = "<group>"; };
 		32FD365213AFF3DB007549B6 /* InfoPlist.strings */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.strings; path = InfoPlist.strings; sourceTree = "<group>"; };
 		32FD365513AFF3F7007549B6 /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		32FD369613AFF423007549B6 /* HelveticaNeueLTStd-BdCn.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "HelveticaNeueLTStd-BdCn.otf"; sourceTree = "<group>"; };
@@ -502,6 +500,7 @@
 		32FD38B313AFF5DB007549B6 /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
 		32FD38B513AFF5EB007549B6 /* libz.1.2.3.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libz.1.2.3.dylib; path = usr/lib/libz.1.2.3.dylib; sourceTree = SDKROOT; };
 		32FD38B713AFF701007549B6 /* YAJL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = YAJL.framework; sourceTree = "<group>"; };
+		32FD38B913AFF9AA007549B6 /* kwiqet-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "kwiqet-Info.plist"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -589,7 +588,7 @@
 			isa = PBXGroup;
 			children = (
 				32FD381513AFF451007549B6 /* urls.plist */,
-				32FD365013AFF3C1007549B6 /* kwiqet-Info.plist */,
+				32FD38B913AFF9AA007549B6 /* kwiqet-Info.plist */,
 				32FD365213AFF3DB007549B6 /* InfoPlist.strings */,
 				32FD31FE13AFD82C007549B6 /* kwiqet-Prefix.pch */,
 				32FD365513AFF3F7007549B6 /* main.m */,
@@ -919,7 +918,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				32FD364C13AFF39B007549B6 /* MainWindow.xib in Resources */,
-				32FD365113AFF3C1007549B6 /* kwiqet-Info.plist in Resources */,
 				32FD365313AFF3DB007549B6 /* InfoPlist.strings in Resources */,
 				32FD373113AFF424007549B6 /* HelveticaNeueLTStd-BdCn.otf in Resources */,
 				32FD373213AFF424007549B6 /* HelveticaNeueLTStd-Cn.otf in Resources */,
@@ -1189,6 +1187,10 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "kwiqet/kwiqet-Prefix.pch";
 				INFOPLIST_FILE = "kwiqet/kwiqet-Info.plist";
+				OTHER_LDFLAGS = (
+					"-ObjC",
+					"-all_load",
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "92254DAF-E653-42B8-A1F1-5EC32E395EE6";
 				WRAPPER_EXTENSION = app;
@@ -1209,6 +1211,10 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "kwiqet/kwiqet-Prefix.pch";
 				INFOPLIST_FILE = "kwiqet/kwiqet-Info.plist";
+				OTHER_LDFLAGS = (
+					"-ObjC",
+					"-all_load",
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "92254DAF-E653-42B8-A1F1-5EC32E395EE6";
 				VALIDATE_PRODUCT = YES;
@@ -1246,6 +1252,10 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "kwiqet/kwiqet-Prefix.pch";
 				INFOPLIST_FILE = "kwiqet/kwiqet-Info.plist";
+				OTHER_LDFLAGS = (
+					"-ObjC",
+					"-all_load",
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "92254DAF-E653-42B8-A1F1-5EC32E395EE6";
 				VALIDATE_PRODUCT = YES;
