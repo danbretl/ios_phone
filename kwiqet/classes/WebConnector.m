@@ -7,6 +7,7 @@
 //
 
 #import "WebConnector.h"
+#import "JSON.h"
 
 int const WEB_CONNECTOR_TIMEOUT_LENGTH_DEFAULT = 20; // Had this at 5, but it seemed to be causing a lot of dropped connections. Maybe it was, maybe it wasn't - but for now we're going to have a ridiculously long timeout length.
 BOOL const WEB_CONNECTOR_ALLOW_SIMULTANEOUS_CONNECTIONS_DEFAULT = YES;

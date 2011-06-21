@@ -12,8 +12,17 @@
 #import "ASIHTTPRequest.h"
 #import "URLBuilder.h"
 
+@interface SettingsViewController()
+@property (nonatomic, retain) IBOutlet UIButton * attemptLoginButton;
+@property (nonatomic, retain) IBOutlet UIButton * resetMachineLearningButton;
+@property (nonatomic, retain) IBOutlet FBLoginButton * linkFacebookButton;
+@end
+
 @implementation SettingsViewController
-@synthesize attemptLoginButton,resetMachineLearning;
+
+@synthesize facebook;
+@synthesize attemptLoginButton,resetMachineLearningButton, linkFacebookButton;
+
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
@@ -27,7 +36,9 @@
 {
     [super dealloc];
     [attemptLoginButton release];
-    [resetMachineLearning release];
+    [resetMachineLearningButton release];
+    [linkFacebookButton release];
+    [facebook release];
 }
 
 - (void)didReceiveMemoryWarning
@@ -43,6 +54,9 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
+    
+    self.view.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+    
     // Do any additional setup after loading the view from its nib.
     //check if api key is present in user default. if so, show logout message.
     NSString * apiKey = [DefaultsModel retrieveAPIFromUserDefaults];
@@ -54,7 +68,7 @@
         [attemptLoginButton setTitle:@"Log In" forState: UIControlStateNormal];
         attemptLoginButton.tag = 2;
     }
-    
+        
     //setup fonts for uilabels
     UILabel *accountLabel = [[UILabel alloc]initWithFrame:CGRectMake(10, 80, 200, 40)];
     accountLabel.backgroundColor = [UIColor clearColor];
@@ -86,6 +100,23 @@
     [behaviorLabel release];
     [loginMessageLabel release];
     [resetMessageLabel release];
+    
+    self.linkFacebookButton = [[[FBLoginButton alloc] initWithFrame:CGRectZero] autorelease];
+    self.linkFacebookButton.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleTopMargin;
+    [self.linkFacebookButton addTarget:self action:@selector(linkFacebookButtonTouched) forControlEvents:UIControlEventTouchUpInside];
+    self.linkFacebookButton.isLoggedIn = NO; // This changes the image of the button appropriately, and also sets the size of the button accordingly.
+    self.linkFacebookButton.frame = CGRectMake(self.view.bounds.size.width - self.linkFacebookButton.bounds.size.width - 7, self.view.bounds.size.height - self.linkFacebookButton.bounds.size.height - 20, self.linkFacebookButton.frame.size.width, self.linkFacebookButton.frame.size.height);
+    [self.view addSubview:self.linkFacebookButton];
+    [self.view bringSubviewToFront:self.linkFacebookButton];
+    
+    NSUserDefaults * defaults = [NSUserDefaults standardUserDefaults];
+    if ([defaults objectForKey:@"FBAccessTokenKey"] && 
+        [defaults objectForKey:@"FBExpirationDateKey"]) {
+        self.facebook.accessToken = [defaults objectForKey:@"FBAccessTokenKey"];
+        self.facebook.expirationDate = [defaults objectForKey:@"FBExpirationDateKey"];
+    }
+    [self updateFacebookButtonIsLoggedIn:[self.facebook isSessionValid]];
+
 }
 
 -(void)viewDidAppear:(BOOL)animated {
@@ -113,7 +144,7 @@
     return (interfaceOrientation == UIInterfaceOrientationPortrait);
 }
 
--(IBAction)attemptLoginButtonTouched:(id)sender  {
+- (IBAction) attemptLoginButtonTouched:(id)sender  {
     NSLog(@"SettingsViewController attemptLoginButtonTouched");
     if ([sender tag] == 1) {
         
@@ -140,12 +171,61 @@
 }
 
 
--(IBAction)resetMachineLearningButtonTouched:(id)sender  {
+- (IBAction) resetMachineLearningButtonTouched:(id)sender  {
     UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Warning:" 
                                                     message:@"Reseting behavior will erase all history, thus losing your personalized recommendations. Are you sure you want to proceed?" delegate:self 
                                           cancelButtonTitle:@"Yes" otherButtonTitles:@"No",nil]; 
     [alert show]; 
     [alert release];
+}
+
+- (void) linkFacebookButtonTouched {
+    NSLog(@"linkFacebookButtonTouched");
+    if (!self.linkFacebookButton.isLoggedIn) {
+        NSLog(@"not logged in, logging in");
+        NSUserDefaults * defaults = [NSUserDefaults standardUserDefaults];
+        if ([defaults objectForKey:@"FBAccessTokenKey"] && [defaults objectForKey:@"FBExpirationDateKey"]) {
+            self.facebook.accessToken = [defaults objectForKey:@"FBAccessTokenKey"];
+            self.facebook.expirationDate = [defaults objectForKey:@"FBExpirationDateKey"];
+        }
+        if (![self.facebook isSessionValid]) {
+            NSLog(@"session is not valid, authorizing");
+            NSArray * permissions = [NSArray arrayWithObjects:@"user_events", @"create_event", @"rsvp_event", nil];
+            [self.facebook authorize:permissions delegate:self];
+        } else {
+            [self updateFacebookButtonIsLoggedIn:YES];
+        }
+    } else {
+        NSLog(@"logged in, logging out");
+        [self.facebook logout:self];
+    }
+}
+
+- (void)fbDidLogin {
+    NSLog(@"fbDidLogin");
+    NSUserDefaults * defaults = [NSUserDefaults standardUserDefaults];
+    [defaults setObject:[facebook accessToken] forKey:@"FBAccessTokenKey"];
+    [defaults setObject:[facebook expirationDate] forKey:@"FBExpirationDateKey"];
+    [defaults synchronize];
+    [self updateFacebookButtonIsLoggedIn:YES];
+}
+
+- (void)fbDidNotLogin:(BOOL)cancelled {
+    [self updateFacebookButtonIsLoggedIn:NO];
+}
+
+- (void) fbDidLogout {
+    [self updateFacebookButtonIsLoggedIn:NO];
+    NSLog(@"fbDidLogin");
+    // We don't really NEED to do the following, but I think it provides a "more trustworthy" user experience. If we didn't do the following, then the user could touch to disconnect facebook, then touch to connect facebook again, and they might automatically be connected without any sort of dialog or anything (because the access token was still valid for the given expiration date). That is convenient, but a user would rarely be trying to do this, and I would argue that it would be more likely that logout and login would be touched in a way that would expect a dialog. (Bad sentence, but hopefully you get my point.)
+    NSUserDefaults * defaults = [NSUserDefaults standardUserDefaults];
+    [defaults removeObjectForKey:@"FBAccessTokenKey"];
+    [defaults removeObjectForKey:@"FBExpirationDateKey"];
+}
+
+- (void) updateFacebookButtonIsLoggedIn:(BOOL)isLoggedIn {
+    self.linkFacebookButton.isLoggedIn = isLoggedIn;
+    self.linkFacebookButton.frame = CGRectMake(self.view.bounds.size.width - self.linkFacebookButton.bounds.size.width - 7, self.view.bounds.size.height - self.linkFacebookButton.bounds.size.height - 20, self.linkFacebookButton.frame.size.width, self.linkFacebookButton.frame.size.height);
 }
 
 -(void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex 
@@ -155,7 +235,7 @@
 	if ([alertView.title isEqualToString:@"Warning:"]) {
 		if (buttonIndex == 0) {
             [self startResetingBehavior];
-            resetMachineLearning.userInteractionEnabled = NO;
+            resetMachineLearningButton.userInteractionEnabled = NO;
 		}
 		if (buttonIndex == 1) {	
             //do nothing
@@ -206,7 +286,7 @@
                           otherButtonTitles:nil];
     [alert show];
     [alert release];
-    resetMachineLearning.userInteractionEnabled = YES;
+    resetMachineLearningButton.userInteractionEnabled = YES;
     [[NSNotificationCenter defaultCenter] postNotificationName:@"learningBehaviorWasReset" object:nil];
 }
 
@@ -223,7 +303,7 @@
                           otherButtonTitles:nil];
     [alert show];
     [alert release];
-    resetMachineLearning.userInteractionEnabled = YES;
+    resetMachineLearningButton.userInteractionEnabled = YES;
 }
 
 @end

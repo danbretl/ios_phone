@@ -9,11 +9,13 @@
 #import "RegistrationViewController.h"
 #import "ASIFormDataRequest.h"
 #import "ASIHTTPRequest.h"
-#import "JSON.h"
 #import "URLBuilder.h"
 #import <YAJL/YAJL.h>
 #import "DefaultsModel.h"
+#import "JSON.h"
+
 #define kOFFSET_FOR_KEYBOARD 60.0
+
 @implementation RegistrationViewController
 @synthesize usernameField,passwordField,confirmPasswordField;
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil

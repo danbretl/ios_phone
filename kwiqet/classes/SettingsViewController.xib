@@ -77,6 +77,7 @@
 							<double key="NSSize">15</double>
 							<int key="NSfFlags">16</int>
 						</object>
+						<string key="IBUINormalTitle">Log In</string>
 						<reference key="IBUIHighlightedTitleColor" ref="879569962"/>
 						<object class="NSColor" key="IBUINormalTitleColor">
 							<int key="NSColorSpace">1</int>
@@ -97,6 +98,7 @@
 						<string key="NSFrame">{{143, 249}, {170, 30}}</string>
 						<reference key="NSSuperview" ref="191373211"/>
 						<reference key="NSWindow"/>
+						<reference key="NSNextKeyView"/>
 						<bool key="IBUIOpaque">NO</bool>
 						<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
 						<int key="IBUIContentHorizontalAlignment">0</int>
@@ -197,14 +199,6 @@
 					<int key="connectionID">13</int>
 				</object>
 				<object class="IBConnectionRecord">
-					<object class="IBCocoaTouchOutletConnection" key="connection">
-						<string key="label">resetMachineLearning</string>
-						<reference key="source" ref="372490531"/>
-						<reference key="destination" ref="668846646"/>
-					</object>
-					<int key="connectionID">14</int>
-				</object>
-				<object class="IBConnectionRecord">
 					<object class="IBCocoaTouchEventConnection" key="connection">
 						<string key="label">resetMachineLearningButtonTouched:</string>
 						<reference key="source" ref="668846646"/>
@@ -212,6 +206,14 @@
 						<int key="IBEventType">7</int>
 					</object>
 					<int key="connectionID">15</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBCocoaTouchOutletConnection" key="connection">
+						<string key="label">resetMachineLearningButton</string>
+						<reference key="source" ref="372490531"/>
+						<reference key="destination" ref="668846646"/>
+					</object>
+					<int key="connectionID">26</int>
 				</object>
 			</object>
 			<object class="IBMutableOrderedSet" key="objectRecords">
@@ -313,7 +315,7 @@
 				<reference key="dict.values" ref="0"/>
 			</object>
 			<nil key="sourceID"/>
-			<int key="maxID">21</int>
+			<int key="maxID">29</int>
 		</object>
 		<object class="IBClassDescriber" key="IBDocument.Classes">
 			<object class="NSMutableArray" key="referencedPartialClassDescriptions">
@@ -326,11 +328,13 @@
 						<object class="NSArray" key="dict.sortedKeys">
 							<bool key="EncodedWithXMLCoder">YES</bool>
 							<string>attemptLoginButtonTouched:</string>
+							<string>linkFacebookButtonTouched:</string>
 							<string>resetMachineLearningButtonTouched:</string>
 						</object>
 						<object class="NSMutableArray" key="dict.values">
 							<bool key="EncodedWithXMLCoder">YES</bool>
 							<string>id</string>
+							<string>UIButton</string>
 							<string>id</string>
 						</object>
 					</object>
@@ -339,6 +343,7 @@
 						<object class="NSArray" key="dict.sortedKeys">
 							<bool key="EncodedWithXMLCoder">YES</bool>
 							<string>attemptLoginButtonTouched:</string>
+							<string>linkFacebookButtonTouched:</string>
 							<string>resetMachineLearningButtonTouched:</string>
 						</object>
 						<object class="NSMutableArray" key="dict.values">
@@ -346,6 +351,10 @@
 							<object class="IBActionInfo">
 								<string key="name">attemptLoginButtonTouched:</string>
 								<string key="candidateClassName">id</string>
+							</object>
+							<object class="IBActionInfo">
+								<string key="name">linkFacebookButtonTouched:</string>
+								<string key="candidateClassName">UIButton</string>
 							</object>
 							<object class="IBActionInfo">
 								<string key="name">resetMachineLearningButtonTouched:</string>
@@ -358,10 +367,12 @@
 						<object class="NSArray" key="dict.sortedKeys">
 							<bool key="EncodedWithXMLCoder">YES</bool>
 							<string>attemptLoginButton</string>
-							<string>resetMachineLearning</string>
+							<string>linkFacebookButton</string>
+							<string>resetMachineLearningButton</string>
 						</object>
 						<object class="NSMutableArray" key="dict.values">
 							<bool key="EncodedWithXMLCoder">YES</bool>
+							<string>UIButton</string>
 							<string>UIButton</string>
 							<string>UIButton</string>
 						</object>
@@ -371,7 +382,8 @@
 						<object class="NSArray" key="dict.sortedKeys">
 							<bool key="EncodedWithXMLCoder">YES</bool>
 							<string>attemptLoginButton</string>
-							<string>resetMachineLearning</string>
+							<string>linkFacebookButton</string>
+							<string>resetMachineLearningButton</string>
 						</object>
 						<object class="NSMutableArray" key="dict.values">
 							<bool key="EncodedWithXMLCoder">YES</bool>
@@ -380,7 +392,11 @@
 								<string key="candidateClassName">UIButton</string>
 							</object>
 							<object class="IBToOneOutletInfo">
-								<string key="name">resetMachineLearning</string>
+								<string key="name">linkFacebookButton</string>
+								<string key="candidateClassName">UIButton</string>
+							</object>
+							<object class="IBToOneOutletInfo">
+								<string key="name">resetMachineLearningButton</string>
 								<string key="candidateClassName">UIButton</string>
 							</object>
 						</object>

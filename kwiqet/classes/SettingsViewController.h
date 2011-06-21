@@ -7,17 +7,26 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "FBConnect.h"
+#import "FBLoginButton.h"
 
+@interface SettingsViewController : UIViewController <FBSessionDelegate> {
 
-@interface SettingsViewController : UIViewController {
-    IBOutlet UIButton *attemptLoginButton;
-    IBOutlet UIButton *resetMachineLearning;
+    IBOutlet UIButton * attemptLoginButton;
+    IBOutlet UIButton * resetMachineLearningButton;
+    FBLoginButton * linkFacebookButton;
+    
+    Facebook * facebook;
     
 }
-@property(nonatomic,retain) IBOutlet UIButton *attemptLoginButton;
-@property(nonatomic,retain) IBOutlet UIButton *resetMachineLearning;
 
--(IBAction)attemptLoginButtonTouched:(id)sender;
--(IBAction)resetMachineLearningButtonTouched:(id)sender;
--(void)startResetingBehavior;
+- (IBAction) attemptLoginButtonTouched:(id)sender;
+
+- (IBAction) resetMachineLearningButtonTouched:(id)sender;
+- (void) startResetingBehavior;
+
+- (void) linkFacebookButtonTouched;
+@property (nonatomic, retain) Facebook * facebook;
+- (void) updateFacebookButtonIsLoggedIn:(BOOL)isLoggedIn;
+
 @end

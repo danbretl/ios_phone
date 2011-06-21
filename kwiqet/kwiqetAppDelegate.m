@@ -65,6 +65,7 @@
     self.settingsViewController = [[[SettingsViewController alloc] initWithNibName:@"SettingsViewController" bundle:[NSBundle mainBundle]] autorelease];
     UITabBarItem * settingsTabBarItem = [[[UITabBarItem alloc] initWithTitle:@"Settings" image:[UIImage imageNamed:@"tab_settings.png"] tag:2] autorelease];
     self.settingsViewController.tabBarItem = settingsTabBarItem;
+    self.settingsViewController.facebook = self.facebook;
     
     // Setting it all up
     self.tabBarController.viewControllers = [NSArray arrayWithObjects:self.featuredEventViewController, self.eventsNavController /*eventsViewController*/, self.settingsViewController, nil];
@@ -77,6 +78,22 @@
     [self.window makeKeyAndVisible];
     //[self animateSplashScreen];
     return YES;
+}
+
+// FOR NOW, the only reason we'd have to handle an open url is to handle Facebook's login response. If that ever changes, then the logic of this method will obviously have to get more complicated.
+- (BOOL)application:(UIApplication *)application handleOpenURL:(NSURL *)url {
+    BOOL returnVal = [self.facebook handleOpenURL:url];
+//    if (returnVal) {
+//        [[NSNotificationCenter defaultCenter] postNotificationName:@"HANDLED_FACEBOOK_OPEN_URL" object:self userInfo:nil];
+//    }
+    return returnVal;
+}
+
+- (Facebook *)facebook {
+    if (facebook == nil) {
+        facebook = [[Facebook alloc] initWithAppId:@"210861478950952"];
+    }
+    return facebook;
 }
 
 - (WebConnector *) webConnector {

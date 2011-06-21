@@ -15,6 +15,7 @@
 #import "SettingsViewController.h"
 #import "WebConnector.h"
 #import "CoreDataModel.h"
+#import "FBConnect.h"
 
 @interface kwiqetAppDelegate : NSObject <UIApplicationDelegate, UITabBarControllerDelegate, SplashScreenViewControllerDelegate, WebConnectorDelegate> {
     
@@ -33,6 +34,7 @@
     
     WebConnector * webConnector;
     CoreDataModel * coreDataModel;
+    Facebook * facebook;
     
 @private
     NSManagedObjectContext *managedObjectContext_;
@@ -51,6 +53,7 @@
 @property (nonatomic, readonly) BOOL categoryTreeHasBeenRetrieved;
 @property (nonatomic, readonly) WebConnector * webConnector;
 @property (nonatomic, readonly) CoreDataModel * coreDataModel;
+@property (nonatomic, readonly) Facebook * facebook;
 
 @property (nonatomic, retain, readonly) NSManagedObjectContext *managedObjectContext;
 @property (nonatomic, retain, readonly) NSManagedObjectModel *managedObjectModel;

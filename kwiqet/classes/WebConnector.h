@@ -9,8 +9,8 @@
 #import <Foundation/Foundation.h>
 #import "URLBuilder.h"
 #import "ASIHTTPRequest.h"
-#import "JSON.h"
 #import "ASIFormDataRequest.h"
+#import <YAJL/YAJL.h>
 
 extern int const WEB_CONNECTOR_TIMEOUT_LENGTH_DEFAULT;
 extern BOOL const WEB_CONNECTOR_ALLOW_SIMULTANEOUS_CONNECTIONS_DEFAULT;
