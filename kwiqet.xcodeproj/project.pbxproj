@@ -427,6 +427,7 @@
 		32733E2813B0FCBA0053C44A /* SBJsonParser.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SBJsonParser.m; path = kwiqet/classes/SBJsonParser.m; sourceTree = SOURCE_ROOT; };
 		32733E2913B0FCBA0053C44A /* SBJsonWriter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SBJsonWriter.h; path = kwiqet/classes/SBJsonWriter.h; sourceTree = SOURCE_ROOT; };
 		32733E2A13B0FCBA0053C44A /* SBJsonWriter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SBJsonWriter.m; path = kwiqet/classes/SBJsonWriter.m; sourceTree = SOURCE_ROOT; };
+		32B36CD913B27DF1004C2068 /* kwiqet 002.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "kwiqet 002.xcdatamodel"; sourceTree = "<group>"; };
 		32D7FEDC13B0BC43005E8406 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		32D7FEDF13B0BC5A005E8406 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/MainWindow.xib; sourceTree = "<group>"; };
 		32D7FF5913B0D382005E8406 /* Reachability.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Reachability.h; sourceTree = "<group>"; };
@@ -437,7 +438,7 @@
 		32FD31F413AFD82C007549B6 /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
 		32FD31F613AFD82C007549B6 /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = System/Library/Frameworks/CoreData.framework; sourceTree = SDKROOT; };
 		32FD31FE13AFD82C007549B6 /* kwiqet-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "kwiqet-Prefix.pch"; sourceTree = "<group>"; };
-		32FD364E13AFF3B6007549B6 /* Abextra.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = Abextra.xcdatamodel; sourceTree = "<group>"; };
+		32FD364E13AFF3B6007549B6 /* kwiqet 001.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "kwiqet 001.xcdatamodel"; sourceTree = "<group>"; };
 		32FD365513AFF3F7007549B6 /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		32FD381513AFF451007549B6 /* urls.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = urls.plist; sourceTree = "<group>"; };
 		32FD381A13AFF52F007549B6 /* ASIAuthenticationDialog.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASIAuthenticationDialog.h; sourceTree = "<group>"; };
@@ -1421,9 +1422,10 @@
 		32FD364D13AFF3B6007549B6 /* kwiqet.xcdatamodeld */ = {
 			isa = XCVersionGroup;
 			children = (
-				32FD364E13AFF3B6007549B6 /* Abextra.xcdatamodel */,
+				32B36CD913B27DF1004C2068 /* kwiqet 002.xcdatamodel */,
+				32FD364E13AFF3B6007549B6 /* kwiqet 001.xcdatamodel */,
 			);
-			currentVersion = 32FD364E13AFF3B6007549B6 /* Abextra.xcdatamodel */;
+			currentVersion = 32B36CD913B27DF1004C2068 /* kwiqet 002.xcdatamodel */;
 			path = kwiqet.xcdatamodeld;
 			sourceTree = "<group>";
 			versionGroupType = wrapper.xcdatamodel;

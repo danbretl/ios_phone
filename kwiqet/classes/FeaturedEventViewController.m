@@ -74,6 +74,7 @@ CGFloat const FEV_DESCRIPTION_LABEL_PADDING = 5.0;
 @property (retain) UIView * titleBarView;
 @property (retain) UILabel * titleLabel;
 @property (retain) UIView * detailsView;
+@property (retain) UIActionSheet * shareChoiceActionSheet;
 
 @property (retain) NSDate * mostRecentGetNewFeaturedEventSuggestionDate;
 @property (retain) UILabel * timeLabel;
@@ -89,9 +90,9 @@ CGFloat const FEV_DESCRIPTION_LABEL_PADDING = 5.0;
 @end
 
 @implementation FeaturedEventViewController
-@synthesize featuredEventManager, mostRecentGetNewFeaturedEventSuggestionDate, coreDataModel;
+@synthesize featuredEventManager, mostRecentGetNewFeaturedEventSuggestionDate, coreDataModel, facebook;
 @synthesize mapViewController;
-@synthesize actionBarView, letsGoButton, shareButton, scrollView, imageView, titleBarView, titleLabel, detailsView;
+@synthesize actionBarView, letsGoButton, shareButton, scrollView, imageView, titleBarView, titleLabel, detailsView, shareChoiceActionSheet;
 @synthesize timeLabel, dateLabel, venueNameLabel, addressFirstLineLabel, addressSecondLineLabel, phoneNumberButton, priceLabel, eventDetailsLabel, mapButton, noFeaturedEventView, refreshHeaderView;
 
 #pragma mark -
@@ -118,10 +119,12 @@ CGFloat const FEV_DESCRIPTION_LABEL_PADDING = 5.0;
     [titleBarView release];
     [titleLabel release];
     [detailsView release];
+    [shareChoiceActionSheet release];
     
     [featuredEventManager release];
     [webConnector release];
     [coreDataModel release];
+    [facebook release];
     [mostRecentGetNewFeaturedEventSuggestionDate release];
     [mapViewController release];
 
@@ -604,7 +607,78 @@ CGFloat const FEV_DESCRIPTION_LABEL_PADDING = 5.0;
     [[UIApplication sharedApplication] openURL:[NSURL URLWithString:[NSString stringWithFormat:@"tel:%@", self.featuredEventManager.featuredEvent.phone]]];
 }
 
--(IBAction)shareButtonClicked:(id)sender  {
+- (void)actionSheet:(UIActionSheet *)actionSheet didDismissWithButtonIndex:(NSInteger)buttonIndex {
+    if (buttonIndex == 0) {
+
+        [self makeAndShowEmailViewController];
+        
+    } else if (buttonIndex == 1) {
+        
+        Event * featuredEvent = self.featuredEventManager.featuredEvent;
+        
+        NSMutableDictionary * parameters = [NSMutableDictionary dictionary];
+        
+        NSString * title = featuredEvent.title;
+        [parameters setObject:title forKey:@"name"];
+        
+        NSDate * startDate = featuredEvent.startDatetime;
+        NSDate * endDate = [startDate dateByAddingTimeInterval:3600];
+        if ([featuredEvent.endTimeValid boolValue]) {
+            endDate = featuredEvent.endDatetime;
+        }
+        NSTimeInterval startDateTimeInterval = [startDate timeIntervalSince1970];
+        NSTimeInterval endDateTimeInterval = [endDate timeIntervalSince1970];
+        [parameters setObject:[NSString stringWithFormat:@"%.0f", startDateTimeInterval] forKey:@"start_time"];
+        [parameters setObject:[NSString stringWithFormat:@"%.0f", endDateTimeInterval] forKey:@"end_time"];
+        
+        NSString * locationName = featuredEvent.venue;
+        if (locationName) {
+            [parameters setObject:locationName forKey:@"location"];
+        }
+        
+//        NSMutableDictionary * venueDictionary = [NSMutableDictionary dictionary];
+//        if (featuredEvent.address) { 
+//            [venueDictionary setObject:featuredEvent.address forKey:@"street"];
+//        }
+//        if (featuredEvent.city) { 
+//            [venueDictionary setObject:featuredEvent.city forKey:@"city"];
+//        }
+//        if (featuredEvent.state) { 
+//            [venueDictionary setObject:featuredEvent.state forKey:@"state"];
+//        }
+//        if (featuredEvent.zip) { 
+//            [venueDictionary setObject:featuredEvent.zip forKey:@"zip"];
+//        }
+//        [venueDictionary setValue:@"USA" forKey:@"country"];
+//        if (featuredEvent.latitude) {
+//            [venueDictionary setObject:featuredEvent.latitude forKey:@"latitude"];
+//        }
+//        if (featuredEvent.longitude) {
+//            [venueDictionary setObject:featuredEvent.longitude forKey:@"longitude"];
+//        }
+//        [parameters setObject:venueDictionary forKey:@"venue"];
+        
+        if (featuredEvent.details) {
+            [parameters setObject:featuredEvent.details forKey:@"description"];
+        }
+        
+        NSLog(@"facebook event parameters: %@", parameters);
+        
+        [self.facebook requestWithGraphPath:@"me/events"
+                                  andParams:parameters  
+                              andHttpMethod:@"POST" 
+                                andDelegate:self];
+        
+    }
+    
+}
+
+- (void)request:(FBRequest *)request didFailWithError:(NSError *)error {
+    NSLog(@"Facebook request fail");
+}
+
+- (void) makeAndShowEmailViewController {
+    NSLog(@"Email"); // Email
     
     Event * featuredEvent = self.featuredEventManager.featuredEvent;
     NSString * emailTitle = featuredEvent.title ? featuredEvent.title : FEATURED_EVENT_TITLE_NOT_AVAILABLE;
@@ -638,6 +712,19 @@ CGFloat const FEV_DESCRIPTION_LABEL_PADDING = 5.0;
     if (controller) [self presentModalViewController:controller animated:YES];
     [controller release];
     [mailString release];
+}
+
+-(IBAction)shareButtonClicked:(id)sender  {
+    
+    NSLog(@"%d", [self.facebook isSessionValid]);
+    
+    if ([self.facebook isSessionValid]) {
+        self.shareChoiceActionSheet = [[[UIActionSheet alloc] initWithTitle:@"Share event using..." delegate:self cancelButtonTitle:@"Cancel" destructiveButtonTitle:nil otherButtonTitles:@"Send an email", @"Create Facebook event", nil] autorelease];
+        [self.shareChoiceActionSheet showFromRect:self.shareButton.frame inView:self.shareButton animated:YES];
+    } else {
+        [self makeAndShowEmailViewController];
+    }
+
 }
 
 - (void)mailComposeController:(MFMailComposeViewController*)controller  

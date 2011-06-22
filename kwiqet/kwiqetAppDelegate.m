@@ -51,6 +51,7 @@
     self.featuredEventViewController.coreDataModel = self.coreDataModel;
     UITabBarItem * featuredEventTabBarItem = [[[UITabBarItem alloc] initWithTabBarSystemItem:UITabBarSystemItemFeatured tag:0] autorelease];
     self.featuredEventViewController.tabBarItem = featuredEventTabBarItem;
+    self.featuredEventViewController.facebook = self.facebook;
     
     // Events List View Controller
     self.eventsViewController = [[[EventsViewController alloc] init] autorelease];
@@ -74,6 +75,13 @@
     
     // Taking care of assorted things...
     application.applicationSupportsShakeToEdit = YES; // This is the default iOS behavior. Any reason for setting it explicitly?
+    
+    NSUserDefaults * defaults = [NSUserDefaults standardUserDefaults];
+    if ([defaults objectForKey:@"FBAccessTokenKey"] && 
+        [defaults objectForKey:@"FBExpirationDateKey"]) {
+        self.facebook.accessToken = [defaults objectForKey:@"FBAccessTokenKey"];
+        self.facebook.expirationDate = [defaults objectForKey:@"FBExpirationDateKey"];
+    }
     
     [self.window makeKeyAndVisible];
     //[self animateSplashScreen];
@@ -237,6 +245,13 @@
 
 - (void)applicationWillEnterForeground:(UIApplication *)application {
     
+    NSUserDefaults * defaults = [NSUserDefaults standardUserDefaults];
+    if ([defaults objectForKey:@"FBAccessTokenKey"] && 
+        [defaults objectForKey:@"FBExpirationDateKey"]) {
+        self.facebook.accessToken = [defaults objectForKey:@"FBAccessTokenKey"];
+        self.facebook.expirationDate = [defaults objectForKey:@"FBExpirationDateKey"];
+    }
+    
     categoryTreeHasBeenRetrieved = NO || [DefaultsModel loadCategoryTreeHasBeenRetrieved];
     
     if (!self.categoryTreeHasBeenRetrieved) {
@@ -334,7 +349,13 @@
     
     NSError *error = nil;
     persistentStoreCoordinator_ = [[NSPersistentStoreCoordinator alloc] initWithManagedObjectModel:[self managedObjectModel]];
-    if (![persistentStoreCoordinator_ addPersistentStoreWithType:NSSQLiteStoreType configuration:nil URL:storeURL options:nil error:&error]) {
+    
+    NSDictionary * options = [NSDictionary dictionaryWithObjectsAndKeys:
+                              [NSNumber numberWithBool:YES], NSMigratePersistentStoresAutomaticallyOption,
+                              [NSNumber numberWithBool:YES], NSInferMappingModelAutomaticallyOption, 
+                              nil];
+    
+    if (![persistentStoreCoordinator_ addPersistentStoreWithType:NSSQLiteStoreType configuration:nil URL:storeURL options:options error:&error]) {
         /*
          Replace this implementation with code to handle the error appropriately.
          

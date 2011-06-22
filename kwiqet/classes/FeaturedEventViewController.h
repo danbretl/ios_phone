@@ -19,11 +19,12 @@
 #import "WebDataTranslator.h"
 #import "CoreDataModel.h"
 #import "MapViewController.h"
+#import "FBConnect.h"
 
 extern CGFloat const FEATURED_EVENT_MAP_BUTTON_INACTIVE_ALPHA;
 extern CGFloat const FEATURED_EVENT_BACKGROUND_COLOR_ALPHA;
 
-@interface FeaturedEventViewController : UIViewController <MFMailComposeViewControllerDelegate, WebConnectorDelegate, MapViewControllerDelegate>{
+@interface FeaturedEventViewController : UIViewController <MFMailComposeViewControllerDelegate, WebConnectorDelegate, MapViewControllerDelegate, UIActionSheetDelegate, FBRequestDelegate>{
 
     // Model, web, etc
     FeaturedEventManager * featuredEventManager;
@@ -31,6 +32,7 @@ extern CGFloat const FEATURED_EVENT_BACKGROUND_COLOR_ALPHA;
     WebDataTranslator * webDataTranslator;
     CoreDataModel * coreDataModel;
     NSDate * mostRecentGetNewFeaturedEventSuggestionDate;
+    Facebook * facebook;
         
     // Views
     UIView * actionBarView;
@@ -41,6 +43,7 @@ extern CGFloat const FEATURED_EVENT_BACKGROUND_COLOR_ALPHA;
     UIView * titleBarView;
     UILabel * titleLabel;
     UIView * detailsView;
+    UIActionSheet * shareChoiceActionSheet;
     
     UILabel * timeLabel;
     UILabel * dateLabel;
@@ -65,6 +68,7 @@ extern CGFloat const FEATURED_EVENT_BACKGROUND_COLOR_ALPHA;
 @property(nonatomic, retain) CoreDataModel * coreDataModel;
 @property(nonatomic,readonly) EGORefreshTableHeaderView *refreshHeaderView;
 @property (retain) MapViewController * mapViewController;
+@property (nonatomic, retain) Facebook * facebook;
 
 - (void) updateInterfaceFromFeaturedEvent:(Event *)featuredEvent;
 -(IBAction)makeMapView:(id)sender;
@@ -76,5 +80,6 @@ extern CGFloat const FEATURED_EVENT_BACKGROUND_COLOR_ALPHA;
 - (void) enableRefreshHeaderView;
 - (void) disableRefreshHeaderView;
 - (void) tempSolutionResetAndEnableLetsGoButton;
+- (void) makeAndShowEmailViewController;
 
 @end

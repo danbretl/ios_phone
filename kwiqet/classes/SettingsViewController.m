@@ -115,7 +115,6 @@
         self.facebook.accessToken = [defaults objectForKey:@"FBAccessTokenKey"];
         self.facebook.expirationDate = [defaults objectForKey:@"FBExpirationDateKey"];
     }
-    [self updateFacebookButtonIsLoggedIn:[self.facebook isSessionValid]];
 
 }
 
@@ -129,6 +128,9 @@
         [attemptLoginButton setTitle:@"Log In" forState: UIControlStateNormal];
         attemptLoginButton.tag = 2;
     }
+    
+    [self updateFacebookButtonIsLoggedIn:[self.facebook isSessionValid]];
+    
 }
 
 - (void)viewDidUnload
