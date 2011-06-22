@@ -16,6 +16,7 @@
 #import "WebConnector.h"
 #import "MapViewController.h"
 #import "WebDataTranslator.h"
+#import "ElasticUILabel.h"
 
 @protocol CardPageViewControllerDelegate;
 

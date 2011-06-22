@@ -33,29 +33,17 @@
     [eventTime release];
     [breadcrumbsLabel release];
     [eventDetailID release];
-    NSLog(@"1");
     [categoryColor release];
-    NSLog(@"1");
 	[phoneString release];
-    NSLog(@"1");
 	[eventStartDatetime release];
-    NSLog(@"1");
     [eventEndDatetime release];
-    NSLog(@"1");
 	[imageView release];
-    NSLog(@"1");
 	[eventDictionary release];
-    NSLog(@"1");
 	[scrollView release];
-    NSLog(@"1");
     [connectionErrorOnUserActionRequestAlertView release];
-    NSLog(@"1");
     [mapViewController release];
-    NSLog(@"1");
     [webConnector release];
-    NSLog(@"1");
     [webDataTranslator release];
-    NSLog(@"end");
     [super dealloc];
 	
 }
@@ -233,30 +221,37 @@
     [self.view addSubview:actionBar];
     [actionBar release];
     
+    ElasticUILabel * titleBar = [[ElasticUILabel alloc] initWithFrame:CGRectMake(0, 80, 320, 32)];
+    titleBar.color = categoryUIColor;
+    titleBar.text = titleText;
+    [self.view addSubview:titleBar];
+    [self.view bringSubviewToFront:titleBar];
+    
 	// set up scrollview
-	self.scrollView = [[[UIScrollView alloc]initWithFrame:CGRectMake(0, 80, 320, 428)] autorelease]; //size of screen - tab bar size = 428..left 44 for nav bar
+	self.scrollView = [[[UIScrollView alloc]initWithFrame:CGRectMake(0, 112, 320, 396)] autorelease]; //size of screen - tab bar size = 428..left 44 for nav bar
 	self.scrollView.bouncesZoom = YES;
 	// get the content size later after other sizes are calculated
     
-	UIImageView *titleBar = [[UIImageView alloc]initWithFrame:CGRectMake(0,0, 320, 32)];
-	titleBar.backgroundColor = categoryUIColor;
-	UILabel *titleTextField= [[UILabel alloc]init];
-	titleTextField.text = titleText;
-	titleTextField.frame = CGRectMake(5,5,310,34);
-	titleTextField.font = [UIFont fontWithName:@"HelveticaNeueLTStd-BdCn" size:25];
-	titleTextField.backgroundColor = [UIColor clearColor];
-	titleTextField.textColor=[UIColor whiteColor];
-	titleTextField.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleHeight;
-	titleTextField.textAlignment = UITextAlignmentLeft;
-	[titleBar addSubview:titleTextField];   
-    [self.scrollView addSubview:titleBar];
-    [self.scrollView bringSubviewToFront:titleBar];
     [titleBar release];
-	[titleTextField release];                         
-	
+        
+//	UIView * titleBar = [[UIView alloc]initWithFrame:CGRectMake(0,0, 320, 32)];
+//	titleBar.backgroundColor = categoryUIColor;
+//    [self.scrollView addSubview:titleBar];
+//    [self.scrollView bringSubviewToFront:titleBar];
+//    [titleBar release];
+//	UILabel * titleTextField= [[UILabel alloc]init];
+//	titleTextField.text = titleText;
+//	titleTextField.frame = CGRectMake(5,5,310,34);
+//	titleTextField.font = [UIFont fontWithName:@"HelveticaNeueLTStd-BdCn" size:25];
+//	titleTextField.backgroundColor = [UIColor clearColor];
+//	titleTextField.textColor=[UIColor whiteColor];
+//	titleTextField.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleHeight;
+//	titleTextField.textAlignment = UITextAlignmentLeft;
+//	[titleBar addSubview:titleTextField];
+//	[titleTextField release];
 	
 	//make this image view a global so we can load asychronously.
-    self.imageView = [[[UIImageView alloc] initWithFrame:CGRectMake(0, 32, 320, 180)] autorelease];
+    self.imageView = [[[UIImageView alloc] initWithFrame:CGRectMake(0, 0, 320, 180)] autorelease];
     self.imageView.contentMode = UIViewContentModeScaleAspectFill;
     self.imageView.backgroundColor = [UIColor blackColor];
     self.imageView.layer.masksToBounds = YES;
@@ -278,7 +273,7 @@
 	[swipeToGoBack release];
     
     UIImageView *detailImageDividor = [[UIImageView alloc]initWithImage:[UIImage imageNamed:@"eventcard.png"]];
-    detailImageDividor.frame = CGRectMake(0, 212, 320, 164);
+    detailImageDividor.frame = CGRectMake(0, 180, 320, 164);
     detailImageDividor.userInteractionEnabled = YES;
         // Startdate contains the Event Start dat e. 
         // / Startdate is split to get month date and Day Values..
@@ -468,7 +463,7 @@
     [detailImageDividor release];
     
 	//create the eventDetails frame dynamically
-	CGRect eventDetailsFrame = CGRectMake(5, 376, 310, 22.0);
+	CGRect eventDetailsFrame = CGRectMake(5, 344, 310, 22.0);
 	UILabel *eventDetails = [[UILabel alloc] initWithFrame:eventDetailsFrame];
 	eventDetails.adjustsFontSizeToFitWidth = NO;
 	eventDetails.font = [UIFont fontWithName:@"HelveticaNeue" size:16];
@@ -486,7 +481,7 @@
     [self.scrollView addSubview:eventDetails];
     [eventDetails release];
     //set contentSize for scroll view
-    int sizeOfScrollView = 425 + eventDetails.frame.size.height; //title + imageview + detailsImageDividor = 378. plus dynamic size of details
+    int sizeOfScrollView = 393 + eventDetails.frame.size.height; //title + imageview + detailsImageDividor = 378. plus dynamic size of details
     [self.scrollView setContentSize:CGSizeMake(320, sizeOfScrollView)];
     //    //add scrollview to view
     [self.view addSubview:self.scrollView];
