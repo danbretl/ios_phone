@@ -104,6 +104,10 @@ CGFloat const ELASTICUILABEL_GRADIENT_VIEW_WIDTH = 45.0;
     }
 }
 
+//- (void)flashScrollBar {
+//    [self.scrollView flashScrollIndicators];
+//}
+
 //- (void)wiggleLabel {
 //    
 //    void (^labelLeft)(void) = ^{
