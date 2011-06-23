@@ -75,6 +75,7 @@ CGFloat const FEV_DESCRIPTION_LABEL_PADDING = 5.0;
 @property (retain) UILabel * titleLabel;
 @property (retain) UIView * detailsView;
 @property (retain) UIActionSheet * shareChoiceActionSheet;
+@property (retain) WebActivityView * webActivityView;
 
 @property (retain) NSDate * mostRecentGetNewFeaturedEventSuggestionDate;
 @property (retain) UILabel * timeLabel;
@@ -92,7 +93,7 @@ CGFloat const FEV_DESCRIPTION_LABEL_PADDING = 5.0;
 @implementation FeaturedEventViewController
 @synthesize featuredEventManager, mostRecentGetNewFeaturedEventSuggestionDate, coreDataModel, facebook;
 @synthesize mapViewController;
-@synthesize actionBarView, letsGoButton, shareButton, scrollView, imageView, titleBarView, titleLabel, detailsView, shareChoiceActionSheet;
+@synthesize actionBarView, letsGoButton, shareButton, scrollView, imageView, titleBarView, titleLabel, detailsView, shareChoiceActionSheet, webActivityView;
 @synthesize timeLabel, dateLabel, venueNameLabel, addressFirstLineLabel, addressSecondLineLabel, phoneNumberButton, priceLabel, eventDetailsLabel, mapButton, noFeaturedEventView, refreshHeaderView;
 
 #pragma mark -
@@ -120,6 +121,7 @@ CGFloat const FEV_DESCRIPTION_LABEL_PADDING = 5.0;
     [titleLabel release];
     [detailsView release];
     [shareChoiceActionSheet release];
+    [webActivityView release];
     
     [featuredEventManager release];
     [webConnector release];
@@ -326,6 +328,11 @@ CGFloat const FEV_DESCRIPTION_LABEL_PADDING = 5.0;
     [self disableRefreshHeaderView];
     [self.scrollView addSubview:refreshHeaderView];
     
+    // Web activity view
+    self.webActivityView = [[[WebActivityView alloc] initWithSize:CGSizeMake(60.0, 60.0) centeredInFrame:self.view.frame] autorelease];
+    [self.view addSubview:self.webActivityView];
+    [self.view bringSubviewToFront:self.webActivityView];
+    
     [self suggestToGetNewFeaturedEvent]; NSLog(@"FROM EVENT DAY VIEW CONTROLLER VIEW DID LOAD LINE 291");
 }
 
@@ -378,10 +385,23 @@ CGFloat const FEV_DESCRIPTION_LABEL_PADDING = 5.0;
         self.mostRecentGetNewFeaturedEventSuggestionDate = [NSDate date];
         if (![self isLastFeaturedEventGetDateToday]) {
             [self.webConnector getFeaturedEvent];
+//            [self showWebActivityView];
         } else {
             [self updateInterfaceFromFeaturedEvent:self.featuredEventManager.featuredEvent];
         }        
     }
+}
+
+- (void) showWebActivityView {
+    [self.webActivityView showAnimated:NO];
+    self.view.userInteractionEnabled = NO;
+    [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:YES];
+}
+
+- (void) hideWebActivityView {
+    [self.webActivityView hideAnimated:NO];
+    self.view.userInteractionEnabled = YES;
+    [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO];
 }
 
 - (void) webConnector:(WebConnector *)webConnector getFeaturedEventSuccess:(ASIHTTPRequest *)request {
@@ -392,6 +412,7 @@ CGFloat const FEV_DESCRIPTION_LABEL_PADDING = 5.0;
     [self.featuredEventManager processAndAddOrUpdateFeaturedEventCoreDataObjectFromFeaturedEventJSONDictionary:featuredEventJSONDictionary];
     [DefaultsModel saveLastFeaturedEventGetDate:[NSDate date]];
     [self updateInterfaceFromFeaturedEvent:self.featuredEventManager.featuredEvent];
+//    [self hideWebActivityView];
 }
 
 - (void)webConnector:(WebConnector *)webConnector getFeaturedEventFailure:(ASIHTTPRequest *)request {
@@ -401,6 +422,7 @@ CGFloat const FEV_DESCRIPTION_LABEL_PADDING = 5.0;
 	NSLog(@"%@",error);
 	//[self serverError];
     [self updateInterfaceFromFeaturedEvent:self.featuredEventManager.featuredEvent]; // This could be an old featured event, or it could be nothing.
+//    [self hideWebActivityView];
 }
 
 - (void) enableRefreshHeaderView {
@@ -628,6 +650,16 @@ CGFloat const FEV_DESCRIPTION_LABEL_PADDING = 5.0;
         }
         NSTimeInterval startDateTimeInterval = [startDate timeIntervalSince1970];
         NSTimeInterval endDateTimeInterval = [endDate timeIntervalSince1970];
+        // TEMPORARY HACK FIX FOR FACEBOOK TIMEZONE PROBLEM
+        {
+            NSTimeZone * pacificTimeZone = [NSTimeZone timeZoneWithName:@"US/Pacific"];
+            NSTimeZone * easternTimeZone = [NSTimeZone timeZoneWithName:@"US/Eastern"]; // THIS SHOULD NOT BE HARDCODED AS THE EASTERN TIME ZONE - IT SHOULD BE THE TIME ZONE OF WHEREVER THE EVENT IS TAKING PLACE.
+            NSTimeInterval pacificInterval = [pacificTimeZone secondsFromGMT];
+            NSTimeInterval easternInterval = [easternTimeZone secondsFromGMT];
+            NSLog(@"%f %f", pacificInterval, easternInterval);
+            startDateTimeInterval += (easternInterval - pacificInterval);
+            endDateTimeInterval += (easternInterval - pacificInterval);
+        }
         [parameters setObject:[NSString stringWithFormat:@"%.0f", startDateTimeInterval] forKey:@"start_time"];
         [parameters setObject:[NSString stringWithFormat:@"%.0f", endDateTimeInterval] forKey:@"end_time"];
         
@@ -636,30 +668,30 @@ CGFloat const FEV_DESCRIPTION_LABEL_PADDING = 5.0;
             [parameters setObject:locationName forKey:@"location"];
         }
         
-//        NSMutableDictionary * venueDictionary = [NSMutableDictionary dictionary];
-//        if (featuredEvent.address) { 
-//            [venueDictionary setObject:featuredEvent.address forKey:@"street"];
-//        }
-//        if (featuredEvent.city) { 
-//            [venueDictionary setObject:featuredEvent.city forKey:@"city"];
-//        }
-//        if (featuredEvent.state) { 
-//            [venueDictionary setObject:featuredEvent.state forKey:@"state"];
-//        }
-//        if (featuredEvent.zip) { 
-//            [venueDictionary setObject:featuredEvent.zip forKey:@"zip"];
-//        }
-//        [venueDictionary setValue:@"USA" forKey:@"country"];
-//        if (featuredEvent.latitude) {
-//            [venueDictionary setObject:featuredEvent.latitude forKey:@"latitude"];
-//        }
-//        if (featuredEvent.longitude) {
-//            [venueDictionary setObject:featuredEvent.longitude forKey:@"longitude"];
-//        }
-//        [parameters setObject:venueDictionary forKey:@"venue"];
-        
+        if (featuredEvent.address) { 
+            [parameters setObject:featuredEvent.address forKey:@"street"];
+        }
+        if (featuredEvent.city) { 
+            [parameters setObject:featuredEvent.city forKey:@"city"];
+        }
+        if (featuredEvent.state) { 
+            [parameters setObject:featuredEvent.state forKey:@"state"];
+        }
+        if (featuredEvent.zip) { 
+            [parameters setObject:featuredEvent.zip forKey:@"zip"];
+        }
+        [parameters setValue:@"USA" forKey:@"country"];
+        if (featuredEvent.latitude) {
+            [parameters setObject:[NSString stringWithFormat:@"%@", featuredEvent.latitude] forKey:@"latitude"];
+        }
+        if (featuredEvent.longitude) {
+            [parameters setObject:[NSString stringWithFormat:@"%@", featuredEvent.longitude] forKey:@"longitude"];
+        }
         if (featuredEvent.details) {
             [parameters setObject:featuredEvent.details forKey:@"description"];
+        }
+        if (self.imageView.image) {
+            [parameters setObject:self.imageView.image forKey:@"picture"];
         }
         
         NSLog(@"facebook event parameters: %@", parameters);
@@ -673,8 +705,26 @@ CGFloat const FEV_DESCRIPTION_LABEL_PADDING = 5.0;
     
 }
 
+- (void)requestLoading:(FBRequest *)request {
+    NSLog(@"Facebook request loading...");
+    [self showWebActivityView];
+}
+
+- (void)request:(FBRequest *)request didLoad:(id)result {
+    NSLog(@"Facebook request loaded - %@", result);
+    [self hideWebActivityView];
+    if ([result objectForKey:@"id"]) {
+        NSString * eventID = [result objectForKey:@"id"];
+        //https://api.facebook.com/method/events.invite?eid=108920282534107&uids=28600139%2C615865238&personal_message=Test+invitation+-+just+ignore+this%21&access_token=210861478950952|2.AQCNMPA1uXDbeFfK.3600.1308855600.0-28600345|bqcrhIy1XJXkxRn4hL1x2TU2WrM&format=json
+        NSString * friendIDs = @"28600139,615865238"; // catie, pasha
+        NSString * message = @"Test - just ignore!";
+        [self.facebook requestWithMethodName:@"events.invite" andParams:[NSMutableDictionary dictionaryWithObjectsAndKeys:eventID, @"eid", friendIDs, @"uids", message, @"personal_message", nil] andHttpMethod:@"POST" andDelegate:self];
+    }
+}
+
 - (void)request:(FBRequest *)request didFailWithError:(NSError *)error {
-    NSLog(@"Facebook request fail");
+    NSLog(@"Facebook request fail - %@", error);
+    [self hideWebActivityView];
 }
 
 - (void) makeAndShowEmailViewController {

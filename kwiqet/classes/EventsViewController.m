@@ -83,8 +83,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 @property (nonatomic, retain) NSIndexPath * indexPathOfRowAttemptingToDelete;
 @property (nonatomic, retain) NSIndexPath * indexPathOfSelectedRow;
 @property (nonatomic, retain) EventViewController * cardPageViewController;
-@property (nonatomic, retain) UIActivityIndicatorView *loadingActivityView;
-@property (nonatomic, retain) UIImageView *loadingBackgroundView;
+@property (nonatomic, retain) WebActivityView * webActivityView;
 @property (nonatomic, retain) UIView * filtersBackgroundView;
 @property (nonatomic, retain) UIButton * recommendedFilterButton;
 @property (nonatomic, retain) UIButton * freeFilterButton;
@@ -107,8 +106,8 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 @end
 
 @implementation EventsViewController
-@synthesize myTableView,mySearchBar,searchResult, events,coreDataModel,loadingActivityView,concreteParentCategoriesDictionary,freeFilterButton,recommendedFilterButton,popularFilterButton,categoriesBackgroundView, selectedFilterView, filtersBackgroundView;
-@synthesize refreshHeaderView, loadingBackgroundView,concreteParentCategoriesArray;
+@synthesize myTableView,mySearchBar,searchResult, events,coreDataModel,webActivityView,concreteParentCategoriesDictionary,freeFilterButton,recommendedFilterButton,popularFilterButton,categoriesBackgroundView, selectedFilterView, filtersBackgroundView;
+@synthesize refreshHeaderView, concreteParentCategoriesArray;
 @synthesize filterString, categoryURI, filterStringProposed, categoryURIProposed;
 @synthesize isSearchOn;
 @synthesize problemView, problemLabel;
@@ -131,8 +130,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 	[events release];
     [coreDataModel release];
 	[refreshHeaderView release];
-	[loadingActivityView release];
-	[loadingBackgroundView release];
+	[webActivityView release];
     [filterString release];
     [categoryURI release];
     [filterStringProposed release];
@@ -309,16 +307,9 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     [self.problemView addSubview:self.problemLabel];    
     [self setProblemViewVisible:NO withMessage:@"Loading..." animated:NO];
     
-    CGFloat modalBackgroundSize = 60.0;
-    self.loadingBackgroundView = [[[UIImageView alloc] initWithFrame:CGRectMake(roundf((self.view.frame.size.width - modalBackgroundSize) / 2), roundf((self.view.frame.size.height - modalBackgroundSize) / 2), modalBackgroundSize, modalBackgroundSize)] autorelease];
-    self.loadingBackgroundView.backgroundColor = [UIColor colorWithWhite:0.25 alpha:0.15];
-    self.loadingBackgroundView.layer.cornerRadius = roundf(modalBackgroundSize / 2.0);
-    self.loadingBackgroundView.layer.masksToBounds = YES;
-    self.loadingActivityView = [[[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleWhiteLarge] autorelease];
-    self.loadingActivityView.frame = CGRectMake(roundf((self.loadingBackgroundView.frame.size.width - self.loadingActivityView.frame.size.width) / 2.0) , ((self.loadingBackgroundView.frame.size.height - self.loadingActivityView.frame.size.height) / 2.0), self.loadingActivityView.frame.size.width, self.loadingActivityView.frame.size.height);
-    [self.loadingBackgroundView addSubview:self.loadingActivityView];
-    [self.view addSubview:self.loadingBackgroundView];
-    self.loadingBackgroundView.alpha = 0.0;
+    CGFloat webActivityViewSize = 60.0;
+    self.webActivityView = [[[WebActivityView alloc] initWithSize:CGSizeMake(webActivityViewSize, webActivityViewSize) centeredInFrame:self.view.frame] autorelease];
+    [self.view addSubview:self.webActivityView];
     
     self.filterString = EVENTS_FILTER_RECOMMENDED;
     [self highlightFilterButtonForFilter:EVENTS_FILTER_RECOMMENDED];
@@ -1280,8 +1271,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     if (self.view.window) {
         
         // ACTIVITY VIEWS
-        [self.loadingActivityView startAnimating];
-        self.loadingBackgroundView.alpha = 1.0;
+        [self.webActivityView showAnimated:NO];
         
         // USER INTERACTION
         myTableView.userInteractionEnabled = NO;
@@ -1292,8 +1282,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 -(void)hideWebLoadingViews  {
 
     // ACTIVITY VIEWS
-    [self.loadingActivityView stopAnimating];
-    self.loadingBackgroundView.alpha = 0.0;
+    [self.webActivityView hideAnimated:NO];
 
     // REFRESH HEADER VIEW
     // It shouldn't be a problem if the refresh header view was not being used before, but we still call this code. Don't worry about it for now.

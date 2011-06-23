@@ -20,6 +20,7 @@
 #import "CoreDataModel.h"
 #import "MapViewController.h"
 #import "FBConnect.h"
+#import "WebActivityView.h"
 
 extern CGFloat const FEATURED_EVENT_MAP_BUTTON_INACTIVE_ALPHA;
 extern CGFloat const FEATURED_EVENT_BACKGROUND_COLOR_ALPHA;
@@ -44,6 +45,7 @@ extern CGFloat const FEATURED_EVENT_BACKGROUND_COLOR_ALPHA;
     UILabel * titleLabel;
     UIView * detailsView;
     UIActionSheet * shareChoiceActionSheet;
+    WebActivityView * webActivityView;
     
     UILabel * timeLabel;
     UILabel * dateLabel;
@@ -81,5 +83,7 @@ extern CGFloat const FEATURED_EVENT_BACKGROUND_COLOR_ALPHA;
 - (void) disableRefreshHeaderView;
 - (void) tempSolutionResetAndEnableLetsGoButton;
 - (void) makeAndShowEmailViewController;
+- (void) showWebActivityView;
+- (void) hideWebActivityView;
 
 @end

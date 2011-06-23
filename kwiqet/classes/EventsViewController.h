@@ -14,6 +14,7 @@
 #import "EventViewController.h"
 #import "EventTableViewCell.h"
 #import "WebDataTranslator.h"
+#import "WebActivityView.h"
 
 extern float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT;
 
@@ -44,8 +45,7 @@ extern float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT;
 	
     BOOL isCategoriesDrawerOpen;
 	
-	UIActivityIndicatorView *loadingActivityView;
-	UIImageView * loadingBackgroundView;
+    WebActivityView * webActivityView;
     UIView * categoriesBackgroundView;
     UIView * selectedFilterView;
     
