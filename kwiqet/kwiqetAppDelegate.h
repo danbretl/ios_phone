@@ -15,7 +15,7 @@
 #import "SettingsViewController.h"
 #import "WebConnector.h"
 #import "CoreDataModel.h"
-#import "FBConnect.h"
+#import "FacebookManager.h"
 
 @interface kwiqetAppDelegate : NSObject <UIApplicationDelegate, UITabBarControllerDelegate, SplashScreenViewControllerDelegate, WebConnectorDelegate> {
     
@@ -35,6 +35,7 @@
     WebConnector * webConnector;
     CoreDataModel * coreDataModel;
     Facebook * facebook;
+//    FacebookManager * facebookManager;
     
 @private
     NSManagedObjectContext *managedObjectContext_;

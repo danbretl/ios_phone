@@ -441,20 +441,6 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     return searchResult;
 }
 
-//- (LearnModel *)learnModel {
-//    if (learnModel == nil) {
-//        learnModel = [[LearnModel alloc] init];
-//    }
-//    return learnModel;
-//}
-
-//- (ListModel *) listModel {
-//    if (listModel == nil) {
-//        listModel = [[ListModel alloc] init];
-//    }
-//    return listModel;
-//}
-
 - (WebConnector *) webConnector {
     if (webConnector == nil) {
         webConnector = [[WebConnector alloc] init];

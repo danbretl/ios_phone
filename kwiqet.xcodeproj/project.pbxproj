@@ -167,6 +167,7 @@
 		3220DFB113B233470032C205 /* ElasticUILabel.m in Sources */ = {isa = PBXBuildFile; fileRef = 3220DFB013B233470032C205 /* ElasticUILabel.m */; };
 		3220DFB513B23B390032C205 /* GradientView.m in Sources */ = {isa = PBXBuildFile; fileRef = 3220DFB413B23B390032C205 /* GradientView.m */; };
 		3260038613B3A2B80054936A /* WebActivityView.m in Sources */ = {isa = PBXBuildFile; fileRef = 3260038513B3A2B80054936A /* WebActivityView.m */; };
+		3260038F13B3E9340054936A /* FacebookManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 3260038E13B3E9340054936A /* FacebookManager.m */; };
 		32733E1013B0FBBA0053C44A /* Facebook.m in Sources */ = {isa = PBXBuildFile; fileRef = 32733DF613B0FBBA0053C44A /* Facebook.m */; };
 		32733E1113B0FBBA0053C44A /* FBConnect.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 32733DF713B0FBBA0053C44A /* FBConnect.bundle */; };
 		32733E1213B0FBBA0053C44A /* FBDialog.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 32733DF913B0FBBA0053C44A /* FBDialog.bundle */; };
@@ -403,6 +404,8 @@
 		3220DFB413B23B390032C205 /* GradientView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GradientView.m; sourceTree = "<group>"; };
 		3260038413B3A2B80054936A /* WebActivityView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WebActivityView.h; sourceTree = "<group>"; };
 		3260038513B3A2B80054936A /* WebActivityView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = WebActivityView.m; sourceTree = "<group>"; };
+		3260038D13B3E9340054936A /* FacebookManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FacebookManager.h; sourceTree = "<group>"; };
+		3260038E13B3E9340054936A /* FacebookManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FacebookManager.m; sourceTree = "<group>"; };
 		32733DF413B0FBBA0053C44A /* facebook_ios_sdk_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = facebook_ios_sdk_Prefix.pch; path = kwiqet/classes/facebook_ios_sdk_Prefix.pch; sourceTree = SOURCE_ROOT; };
 		32733DF513B0FBBA0053C44A /* Facebook.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Facebook.h; path = kwiqet/classes/Facebook.h; sourceTree = SOURCE_ROOT; };
 		32733DF613B0FBBA0053C44A /* Facebook.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Facebook.m; path = kwiqet/classes/Facebook.m; sourceTree = SOURCE_ROOT; };
@@ -869,6 +872,8 @@
 				32FD387113AFF52F007549B6 /* WebDataTranslator.m */,
 				32FD387213AFF52F007549B6 /* WebUtil.h */,
 				32FD387313AFF52F007549B6 /* WebUtil.m */,
+				3260038D13B3E9340054936A /* FacebookManager.h */,
+				3260038E13B3E9340054936A /* FacebookManager.m */,
 			);
 			name = web;
 			sourceTree = "<group>";
@@ -1246,6 +1251,7 @@
 				3220DFB113B233470032C205 /* ElasticUILabel.m in Sources */,
 				3220DFB513B23B390032C205 /* GradientView.m in Sources */,
 				3260038613B3A2B80054936A /* WebActivityView.m in Sources */,
+				3260038F13B3E9340054936A /* FacebookManager.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
