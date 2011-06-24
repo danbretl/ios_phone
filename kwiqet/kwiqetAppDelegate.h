@@ -6,9 +6,7 @@
 //  Copyright 2011 __MyCompanyName__. All rights reserved.
 //
 
-
 #import <UIKit/UIKit.h>
-#import <CoreData/CoreData.h>
 #import "SplashScreenViewController.h"
 #import "FeaturedEventViewController.h"
 #import "EventsViewController.h"
@@ -18,10 +16,10 @@
 #import "FacebookManager.h"
 
 @interface kwiqetAppDelegate : NSObject <UIApplicationDelegate, UITabBarControllerDelegate, SplashScreenViewControllerDelegate, WebConnectorDelegate> {
+
+    UIWindow * window;
     
-    UIWindow *window;
-    
-	UITabBarController *tabBarController;
+	UITabBarController * tabBarController;
     FeaturedEventViewController * featuredEventViewController;
     UINavigationController * eventsNavController;
     EventsViewController * eventsViewController;
@@ -34,8 +32,7 @@
     
     WebConnector * webConnector;
     CoreDataModel * coreDataModel;
-    Facebook * facebook;
-//    FacebookManager * facebookManager;
+    FacebookManager * facebookManager;
     
 @private
     NSManagedObjectContext *managedObjectContext_;
@@ -54,7 +51,7 @@
 @property (nonatomic, readonly) BOOL categoryTreeHasBeenRetrieved;
 @property (nonatomic, readonly) WebConnector * webConnector;
 @property (nonatomic, readonly) CoreDataModel * coreDataModel;
-@property (nonatomic, readonly) Facebook * facebook;
+@property (nonatomic, readonly) FacebookManager * facebookManager;
 
 @property (nonatomic, retain, readonly) NSManagedObjectContext *managedObjectContext;
 @property (nonatomic, retain, readonly) NSManagedObjectModel *managedObjectModel;

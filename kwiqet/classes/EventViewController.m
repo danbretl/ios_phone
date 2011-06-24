@@ -49,7 +49,7 @@
 }
 
 #pragma request for event details
--(void)eventRequestWithID:(NSString*)eventID {    
+-(void)eventRequestWithID:(NSString*)eventID {
     URLBuilder *urlBuilder = [[URLBuilder alloc]init];
     NSURL *url = [urlBuilder buildCardURLWithID:eventID];
     NSLog(@"EventViewController eventRequestWithID - url is %@", url);

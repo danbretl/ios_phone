@@ -91,7 +91,7 @@ CGFloat const FEV_DESCRIPTION_LABEL_PADDING = 5.0;
 @end
 
 @implementation FeaturedEventViewController
-@synthesize featuredEventManager, mostRecentGetNewFeaturedEventSuggestionDate, coreDataModel, facebook;
+@synthesize featuredEventManager, mostRecentGetNewFeaturedEventSuggestionDate, coreDataModel, facebookManager;
 @synthesize mapViewController;
 @synthesize actionBarView, letsGoButton, shareButton, scrollView, imageView, titleBarView, titleLabel, detailsView, shareChoiceActionSheet, webActivityView;
 @synthesize timeLabel, dateLabel, venueNameLabel, addressFirstLineLabel, addressSecondLineLabel, phoneNumberButton, priceLabel, eventDetailsLabel, mapButton, noFeaturedEventView, refreshHeaderView;
@@ -126,7 +126,7 @@ CGFloat const FEV_DESCRIPTION_LABEL_PADDING = 5.0;
     [featuredEventManager release];
     [webConnector release];
     [coreDataModel release];
-    [facebook release];
+    [facebookManager release];
     [mostRecentGetNewFeaturedEventSuggestionDate release];
     [mapViewController release];
 
@@ -696,10 +696,10 @@ CGFloat const FEV_DESCRIPTION_LABEL_PADDING = 5.0;
         
         NSLog(@"facebook event parameters: %@", parameters);
         
-        [self.facebook requestWithGraphPath:@"me/events"
-                                  andParams:parameters  
-                              andHttpMethod:@"POST" 
-                                andDelegate:self];
+        [self.facebookManager.fb requestWithGraphPath:@"me/events"
+                                            andParams:parameters  
+                                        andHttpMethod:@"POST" 
+                                          andDelegate:self];
         
     }
     
@@ -718,7 +718,7 @@ CGFloat const FEV_DESCRIPTION_LABEL_PADDING = 5.0;
         //https://api.facebook.com/method/events.invite?eid=108920282534107&uids=28600139%2C615865238&personal_message=Test+invitation+-+just+ignore+this%21&access_token=210861478950952|2.AQCNMPA1uXDbeFfK.3600.1308855600.0-28600345|bqcrhIy1XJXkxRn4hL1x2TU2WrM&format=json
         NSString * friendIDs = @"28600139,615865238"; // catie, pasha
         NSString * message = @"Test - just ignore!";
-        [self.facebook requestWithMethodName:@"events.invite" andParams:[NSMutableDictionary dictionaryWithObjectsAndKeys:eventID, @"eid", friendIDs, @"uids", message, @"personal_message", nil] andHttpMethod:@"POST" andDelegate:self];
+        [self.facebookManager.fb requestWithMethodName:@"events.invite" andParams:[NSMutableDictionary dictionaryWithObjectsAndKeys:eventID, @"eid", friendIDs, @"uids", message, @"personal_message", nil] andHttpMethod:@"POST" andDelegate:self];
     }
 }
 
@@ -766,9 +766,9 @@ CGFloat const FEV_DESCRIPTION_LABEL_PADDING = 5.0;
 
 -(IBAction)shareButtonClicked:(id)sender  {
     
-    NSLog(@"%d", [self.facebook isSessionValid]);
+    NSLog(@"%d", [self.facebookManager.fb isSessionValid]);
     
-    if ([self.facebook isSessionValid]) {
+    if ([self.facebookManager.fb isSessionValid]) {
         self.shareChoiceActionSheet = [[[UIActionSheet alloc] initWithTitle:@"Share event using..." delegate:self cancelButtonTitle:@"Cancel" destructiveButtonTitle:nil otherButtonTitles:@"Send an email", @"Create Facebook event", nil] autorelease];
         [self.shareChoiceActionSheet showFromRect:self.shareButton.frame inView:self.shareButton animated:YES];
     } else {

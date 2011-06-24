@@ -22,7 +22,6 @@
 #pragma mark Application lifecycle
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
-    
     // Order of operations:
     // - kwiqetAppDelegate should make the categoryRequest (NOT the categoryTreeModel itself) immediately, IF the category tree has not already previous been retrieved and processed.
     categoryTreeHasBeenRetrieved = NO || [DefaultsModel loadCategoryTreeHasBeenRetrieved];
@@ -51,7 +50,7 @@
     self.featuredEventViewController.coreDataModel = self.coreDataModel;
     UITabBarItem * featuredEventTabBarItem = [[[UITabBarItem alloc] initWithTabBarSystemItem:UITabBarSystemItemFeatured tag:0] autorelease];
     self.featuredEventViewController.tabBarItem = featuredEventTabBarItem;
-    self.featuredEventViewController.facebook = self.facebook;
+    self.featuredEventViewController.facebookManager = self.facebookManager;
     
     // Events List View Controller
     self.eventsViewController = [[[EventsViewController alloc] init] autorelease];
@@ -66,7 +65,7 @@
     self.settingsViewController = [[[SettingsViewController alloc] initWithNibName:@"SettingsViewController" bundle:[NSBundle mainBundle]] autorelease];
     UITabBarItem * settingsTabBarItem = [[[UITabBarItem alloc] initWithTitle:@"Settings" image:[UIImage imageNamed:@"tab_settings.png"] tag:2] autorelease];
     self.settingsViewController.tabBarItem = settingsTabBarItem;
-    self.settingsViewController.facebook = self.facebook;
+    self.settingsViewController.facebookManager = self.facebookManager;
     
     // Setting it all up
     self.tabBarController.viewControllers = [NSArray arrayWithObjects:self.featuredEventViewController, self.eventsNavController /*eventsViewController*/, self.settingsViewController, nil];
@@ -76,12 +75,7 @@
     // Taking care of assorted things...
     application.applicationSupportsShakeToEdit = YES; // This is the default iOS behavior. Any reason for setting it explicitly?
     
-    NSUserDefaults * defaults = [NSUserDefaults standardUserDefaults];
-    if ([defaults objectForKey:@"FBAccessTokenKey"] && 
-        [defaults objectForKey:@"FBExpirationDateKey"]) {
-        self.facebook.accessToken = [defaults objectForKey:@"FBAccessTokenKey"];
-        self.facebook.expirationDate = [defaults objectForKey:@"FBExpirationDateKey"];
-    }
+    [self.facebookManager pullAuthenticationInfoFromDefaults];
     
     [self.window makeKeyAndVisible];
     //[self animateSplashScreen];
@@ -90,18 +84,18 @@
 
 // FOR NOW, the only reason we'd have to handle an open url is to handle Facebook's login response. If that ever changes, then the logic of this method will obviously have to get more complicated.
 - (BOOL)application:(UIApplication *)application handleOpenURL:(NSURL *)url {
-    BOOL returnVal = [self.facebook handleOpenURL:url];
+    BOOL returnVal = [self.facebookManager.fb handleOpenURL:url];
 //    if (returnVal) {
 //        [[NSNotificationCenter defaultCenter] postNotificationName:@"HANDLED_FACEBOOK_OPEN_URL" object:self userInfo:nil];
 //    }
     return returnVal;
 }
 
-- (Facebook *)facebook {
-    if (facebook == nil) {
-        facebook = [[Facebook alloc] initWithAppId:@"210861478950952"];
+- (FacebookManager *)facebookManager {
+    if (facebookManager == nil) {
+        facebookManager = [[FacebookManager alloc] init];
     }
-    return facebook;
+    return facebookManager;
 }
 
 - (WebConnector *) webConnector {
@@ -245,12 +239,7 @@
 
 - (void)applicationWillEnterForeground:(UIApplication *)application {
     
-    NSUserDefaults * defaults = [NSUserDefaults standardUserDefaults];
-    if ([defaults objectForKey:@"FBAccessTokenKey"] && 
-        [defaults objectForKey:@"FBExpirationDateKey"]) {
-        self.facebook.accessToken = [defaults objectForKey:@"FBAccessTokenKey"];
-        self.facebook.expirationDate = [defaults objectForKey:@"FBExpirationDateKey"];
-    }
+    [self.facebookManager pullAuthenticationInfoFromDefaults];
     
     categoryTreeHasBeenRetrieved = NO || [DefaultsModel loadCategoryTreeHasBeenRetrieved];
     

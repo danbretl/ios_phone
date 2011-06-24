@@ -19,7 +19,7 @@
 #import "WebDataTranslator.h"
 #import "CoreDataModel.h"
 #import "MapViewController.h"
-#import "FBConnect.h"
+#import "FacebookManager.h"
 #import "WebActivityView.h"
 
 extern CGFloat const FEATURED_EVENT_MAP_BUTTON_INACTIVE_ALPHA;
@@ -33,7 +33,7 @@ extern CGFloat const FEATURED_EVENT_BACKGROUND_COLOR_ALPHA;
     WebDataTranslator * webDataTranslator;
     CoreDataModel * coreDataModel;
     NSDate * mostRecentGetNewFeaturedEventSuggestionDate;
-    Facebook * facebook;
+    FacebookManager * facebookManager;
         
     // Views
     UIView * actionBarView;
@@ -70,7 +70,7 @@ extern CGFloat const FEATURED_EVENT_BACKGROUND_COLOR_ALPHA;
 @property(nonatomic, retain) CoreDataModel * coreDataModel;
 @property(nonatomic,readonly) EGORefreshTableHeaderView *refreshHeaderView;
 @property (retain) MapViewController * mapViewController;
-@property (nonatomic, retain) Facebook * facebook;
+@property (nonatomic, retain) FacebookManager * facebookManager;
 
 - (void) updateInterfaceFromFeaturedEvent:(Event *)featuredEvent;
 -(IBAction)makeMapView:(id)sender;

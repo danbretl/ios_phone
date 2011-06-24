@@ -20,7 +20,7 @@
 
 @implementation SettingsViewController
 
-@synthesize facebook;
+@synthesize facebookManager;
 @synthesize attemptLoginButton,resetMachineLearningButton, linkFacebookButton;
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
@@ -38,7 +38,7 @@
     [attemptLoginButton release];
     [resetMachineLearningButton release];
     [linkFacebookButton release];
-    [facebook release];
+    [facebookManager release];
 }
 
 - (void)didReceiveMemoryWarning
@@ -109,12 +109,7 @@
     [self.view addSubview:self.linkFacebookButton];
     [self.view bringSubviewToFront:self.linkFacebookButton];
     
-    NSUserDefaults * defaults = [NSUserDefaults standardUserDefaults];
-    if ([defaults objectForKey:@"FBAccessTokenKey"] && 
-        [defaults objectForKey:@"FBExpirationDateKey"]) {
-        self.facebook.accessToken = [defaults objectForKey:@"FBAccessTokenKey"];
-        self.facebook.expirationDate = [defaults objectForKey:@"FBExpirationDateKey"];
-    }
+    [self.facebookManager pullAuthenticationInfoFromDefaults];
 
 }
 
@@ -129,7 +124,7 @@
         attemptLoginButton.tag = 2;
     }
     
-    [self updateFacebookButtonIsLoggedIn:[self.facebook isSessionValid]];
+    [self updateFacebookButtonIsLoggedIn:[self.facebookManager.fb isSessionValid]];
     
 }
 
@@ -185,30 +180,23 @@
     NSLog(@"linkFacebookButtonTouched");
     if (!self.linkFacebookButton.isLoggedIn) {
         NSLog(@"not logged in, logging in");
-        NSUserDefaults * defaults = [NSUserDefaults standardUserDefaults];
-        if ([defaults objectForKey:@"FBAccessTokenKey"] && [defaults objectForKey:@"FBExpirationDateKey"]) {
-            self.facebook.accessToken = [defaults objectForKey:@"FBAccessTokenKey"];
-            self.facebook.expirationDate = [defaults objectForKey:@"FBExpirationDateKey"];
-        }
-        if (![self.facebook isSessionValid]) {
+        [self.facebookManager pullAuthenticationInfoFromDefaults];
+        if (![self.facebookManager.fb isSessionValid]) {
             NSLog(@"session is not valid, authorizing");
             NSArray * permissions = [NSArray arrayWithObjects:@"user_events", @"create_event", @"rsvp_event", nil];
-            [self.facebook authorize:permissions delegate:self];
+            [self.facebookManager.fb authorize:permissions delegate:self];
         } else {
             [self updateFacebookButtonIsLoggedIn:YES];
         }
     } else {
         NSLog(@"logged in, logging out");
-        [self.facebook logout:self];
+        [self.facebookManager.fb logout:self];
     }
 }
 
 - (void)fbDidLogin {
     NSLog(@"fbDidLogin");
-    NSUserDefaults * defaults = [NSUserDefaults standardUserDefaults];
-    [defaults setObject:[facebook accessToken] forKey:@"FBAccessTokenKey"];
-    [defaults setObject:[facebook expirationDate] forKey:@"FBExpirationDateKey"];
-    [defaults synchronize];
+    [self.facebookManager pushAuthenticationInfoToDefaults];
     [self updateFacebookButtonIsLoggedIn:YES];
 }
 
