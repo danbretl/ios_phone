@@ -9,15 +9,19 @@
 #import <UIKit/UIKit.h>
 #import "FacebookManager.h"
 #import "FBLoginButton.h"
+#import "CoreDataModel.h"
 
-@interface SettingsViewController : UIViewController <FBSessionDelegate> {
+@interface SettingsViewController : UIViewController <FBSessionDelegate, FBRequestDelegate> {
 
     IBOutlet UIButton * attemptLoginButton;
     IBOutlet UIButton * resetMachineLearningButton;
     FBLoginButton * linkFacebookButton;
     FacebookManager * facebookManager;
+    CoreDataModel * coreDataModel;
     
 }
+
+@property (nonatomic, retain) CoreDataModel * coreDataModel;
 
 - (IBAction) attemptLoginButtonTouched:(id)sender;
 

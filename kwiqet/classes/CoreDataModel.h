@@ -9,6 +9,7 @@
 #import <Foundation/Foundation.h>
 #import "Event.h"
 #import "Category.h"
+#import "Contact.h"
 
 @interface CoreDataModel : NSObject {
     NSManagedObjectContext * managedObjectContext;
@@ -44,5 +45,10 @@
 // Featured Events
 - (Event *) getFeaturedEvent;
 - (Event *) getOrCreateFeaturedEvent;
+
+// Contacts
+- (void) addContactWithFacebookID:(NSString *)fbID facebookName:(NSString *)fbName;
+- (void) addOrUpdateContactsFromFacebook:(NSArray *)fbContacts;
+- (NSArray *) getAllContacts;
 
 @end

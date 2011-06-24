@@ -25,10 +25,7 @@ static NSString * const FB_FACEBOOK_EXPIRATION_DATE_KEY = @"FBExpirationDateKey"
     }
     return facebook;
 }
-
-- (Facebook *)fb {
-    return self.facebook;
-}
+- (Facebook *)fb { return self.facebook; }
 
 - (void)pullAuthenticationInfoFromDefaults {
     NSUserDefaults * defaults = [NSUserDefaults standardUserDefaults];
@@ -44,6 +41,11 @@ static NSString * const FB_FACEBOOK_EXPIRATION_DATE_KEY = @"FBExpirationDateKey"
     [defaults setObject:self.fb.accessToken forKey:FB_FACEBOOK_ACCESS_TOKEN_KEY];
     [defaults setObject:self.fb.expirationDate forKey:FB_FACEBOOK_EXPIRATION_DATE_KEY];
     [defaults synchronize];
+}
+
+- (void)authorizeWithStandardPermissionsAndDelegate:(id<FBSessionDelegate>)delegate {
+    NSArray * permissions = [NSArray arrayWithObjects:@"user_events", @"create_event", @"rsvp_event", @"user_likes", @"user_interests", @"user_religion_politics", nil];
+    [self.fb authorize:permissions delegate:delegate];
 }
 
 @end

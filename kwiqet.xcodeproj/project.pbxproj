@@ -165,6 +165,7 @@
 		32041B6B13AFFE330072F95C /* YAJL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 32041B6A13AFFE330072F95C /* YAJL.framework */; };
 		32041B6D13AFFE7B0072F95C /* Entitlements.plist in Resources */ = {isa = PBXBuildFile; fileRef = 32041B6C13AFFE7B0072F95C /* Entitlements.plist */; };
 		3211538F13B4E56500DE5163 /* FacebookManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 3211538E13B4E56500DE5163 /* FacebookManager.m */; };
+		3211539213B5252700DE5163 /* Contact.m in Sources */ = {isa = PBXBuildFile; fileRef = 3211539113B5252600DE5163 /* Contact.m */; };
 		3220DFB113B233470032C205 /* ElasticUILabel.m in Sources */ = {isa = PBXBuildFile; fileRef = 3220DFB013B233470032C205 /* ElasticUILabel.m */; };
 		3220DFB513B23B390032C205 /* GradientView.m in Sources */ = {isa = PBXBuildFile; fileRef = 3220DFB413B23B390032C205 /* GradientView.m */; };
 		3260038613B3A2B80054936A /* WebActivityView.m in Sources */ = {isa = PBXBuildFile; fileRef = 3260038513B3A2B80054936A /* WebActivityView.m */; };
@@ -400,6 +401,8 @@
 		32041B6C13AFFE7B0072F95C /* Entitlements.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Entitlements.plist; sourceTree = "<group>"; };
 		3211538D13B4E56500DE5163 /* FacebookManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FacebookManager.h; sourceTree = "<group>"; };
 		3211538E13B4E56500DE5163 /* FacebookManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FacebookManager.m; sourceTree = "<group>"; };
+		3211539013B5252600DE5163 /* Contact.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Contact.h; path = classes/Contact.h; sourceTree = "<group>"; };
+		3211539113B5252600DE5163 /* Contact.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Contact.m; path = classes/Contact.m; sourceTree = "<group>"; };
 		3220DFAF13B233470032C205 /* ElasticUILabel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ElasticUILabel.h; sourceTree = "<group>"; };
 		3220DFB013B233470032C205 /* ElasticUILabel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ElasticUILabel.m; sourceTree = "<group>"; };
 		3220DFB313B23B390032C205 /* GradientView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GradientView.h; sourceTree = "<group>"; };
@@ -838,6 +841,8 @@
 				32FD382F13AFF52F007549B6 /* Category.m */,
 				32FD383613AFF52F007549B6 /* Event.h */,
 				32FD383713AFF52F007549B6 /* Event.m */,
+				3211539013B5252600DE5163 /* Contact.h */,
+				3211539113B5252600DE5163 /* Contact.m */,
 			);
 			name = "core data";
 			sourceTree = "<group>";
@@ -1252,6 +1257,7 @@
 				3220DFB513B23B390032C205 /* GradientView.m in Sources */,
 				3260038613B3A2B80054936A /* WebActivityView.m in Sources */,
 				3211538F13B4E56500DE5163 /* FacebookManager.m in Sources */,
+				3211539213B5252700DE5163 /* Contact.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

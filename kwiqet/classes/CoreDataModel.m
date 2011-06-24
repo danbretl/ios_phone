@@ -270,4 +270,76 @@
     return featuredEvent;
 }
 
+//////////////
+// CONTACTS //
+//////////////
+
+- (void)addOrUpdateContactsFromFacebook:(NSArray *)fbContacts {
+    NSLog(@"addOrUpdateContactsFromFacebook %@", fbContacts);
+    
+    if (fbContacts) {
+    
+        // Prepare the sorted array of Facebook contact IDs
+        NSArray * fbContactsSortedByID = [fbContacts sortedArrayUsingDescriptors:[NSArray arrayWithObject:[NSSortDescriptor sortDescriptorWithKey:@"id" ascending:YES]]];
+        NSMutableArray * fbIDs = [NSMutableArray array];
+        for (NSDictionary * contactDictionary in fbContactsSortedByID) {
+            [fbIDs addObject:[contactDictionary valueForKey:@"id"]];
+        }
+        
+        // Create the fetch request to get all Contacts matching the IDs
+        NSFetchRequest * fetchRequest = [[[NSFetchRequest alloc] init] autorelease];
+        [fetchRequest setEntity:[NSEntityDescription entityForName:@"Contact" inManagedObjectContext:self.managedObjectContext]];
+        [fetchRequest setPredicate: [NSPredicate predicateWithFormat: @"(fbID IN %@)", fbIDs]];
+        // Make sure the results will be sorted as well
+        [fetchRequest setSortDescriptors:[NSArray arrayWithObject:[NSSortDescriptor sortDescriptorWithKey:@"fbID" ascending:YES]]];
+        // Execute the fetch
+        NSError * error = nil;
+        NSArray * contactsMatchingIDs = [self.managedObjectContext executeFetchRequest:fetchRequest error:&error];
+        
+        int fbIDsArrayIndex = 0;
+        int contactsIndex = 0;
+        BOOL moreContactsToCheckAgainst = contactsMatchingIDs && contactsIndex < [contactsMatchingIDs count];
+        NSString * fbID;
+        Contact * contact;
+        
+        while (fbIDsArrayIndex < [fbIDs count]) {
+            
+            fbID = [fbIDs objectAtIndex:fbIDsArrayIndex];
+            
+            moreContactsToCheckAgainst &= contactsIndex < [contactsMatchingIDs count];
+            if (moreContactsToCheckAgainst) {
+                contact = (Contact *)[contactsMatchingIDs objectAtIndex:contactsIndex];
+            }
+            
+            if (!moreContactsToCheckAgainst ||
+                ![fbID isEqualToString:contact.fbID]) {
+                [self addContactWithFacebookID:fbID facebookName:[[fbContactsSortedByID objectAtIndex:fbIDsArrayIndex] valueForKey:@"name"]];
+            } else {
+                contactsIndex++;
+            }
+            
+            fbIDsArrayIndex++;
+            
+        }
+        
+    }
+    
+}
+
+- (void) addContactWithFacebookID:(NSString *)fbID facebookName:(NSString *)fbName {
+    Contact * newContact = [NSEntityDescription insertNewObjectForEntityForName:@"Contact" inManagedObjectContext:self.managedObjectContext];
+    newContact.fbID = fbID;
+    newContact.fbName = fbName;
+}
+
+- (NSArray *)getAllContacts {
+    NSFetchRequest * fetchRequest = [[NSFetchRequest alloc] init];
+	NSEntityDescription * entity = [NSEntityDescription entityForName:@"Contact" inManagedObjectContext:self.managedObjectContext];
+	[fetchRequest setEntity:entity];
+	NSError * error;
+	NSArray * fetchedObjects = [self.managedObjectContext executeFetchRequest:fetchRequest error:&error];
+    [fetchRequest release];
+    return fetchedObjects;
+}
+
 @end

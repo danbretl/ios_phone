@@ -18,5 +18,6 @@
 
 - (void) pullAuthenticationInfoFromDefaults;
 - (void) pushAuthenticationInfoToDefaults;
+- (void) authorizeWithStandardPermissionsAndDelegate:(id<FBSessionDelegate>)delegate;
 
 @end

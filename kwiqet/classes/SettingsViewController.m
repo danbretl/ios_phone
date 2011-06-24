@@ -11,6 +11,7 @@
 #import "DefaultsModel.h"
 #import "ASIHTTPRequest.h"
 #import "URLBuilder.h"
+#import "Contact.h"
 
 @interface SettingsViewController()
 @property (nonatomic, retain) IBOutlet UIButton * attemptLoginButton;
@@ -20,6 +21,7 @@
 
 @implementation SettingsViewController
 
+@synthesize coreDataModel;
 @synthesize facebookManager;
 @synthesize attemptLoginButton,resetMachineLearningButton, linkFacebookButton;
 
@@ -34,11 +36,12 @@
 
 - (void)dealloc
 {
-    [super dealloc];
     [attemptLoginButton release];
     [resetMachineLearningButton release];
     [linkFacebookButton release];
     [facebookManager release];
+    [coreDataModel release];
+    [super dealloc];
 }
 
 - (void)didReceiveMemoryWarning
@@ -183,8 +186,7 @@
         [self.facebookManager pullAuthenticationInfoFromDefaults];
         if (![self.facebookManager.fb isSessionValid]) {
             NSLog(@"session is not valid, authorizing");
-            NSArray * permissions = [NSArray arrayWithObjects:@"user_events", @"create_event", @"rsvp_event", nil];
-            [self.facebookManager.fb authorize:permissions delegate:self];
+            [self.facebookManager authorizeWithStandardPermissionsAndDelegate:self];
         } else {
             [self updateFacebookButtonIsLoggedIn:YES];
         }
@@ -198,6 +200,22 @@
     NSLog(@"fbDidLogin");
     [self.facebookManager pushAuthenticationInfoToDefaults];
     [self updateFacebookButtonIsLoggedIn:YES];
+    [self.facebookManager.fb requestWithGraphPath:@"me/friends" andDelegate:self];
+}
+
+- (void)requestLoading:(FBRequest *)request {
+    NSLog(@"FB request loading...");
+}
+
+- (void) request:(FBRequest *)request didLoad:(id)result {
+    NSLog(@"FB request success %@ - %@", request, result);
+    [self.coreDataModel addOrUpdateContactsFromFacebook:[result objectForKey:@"data"]];
+    [self.coreDataModel coreDataSave];
+    NSLog(@"%@", [self.coreDataModel getAllContacts]);
+}
+
+- (void)request:(FBRequest *)request didFailWithError:(NSError *)error {
+    NSLog(@"FB request failed - %@", error);
 }
 
 - (void)fbDidNotLogin:(BOOL)cancelled {

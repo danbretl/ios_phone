@@ -66,6 +66,7 @@
     UITabBarItem * settingsTabBarItem = [[[UITabBarItem alloc] initWithTitle:@"Settings" image:[UIImage imageNamed:@"tab_settings.png"] tag:2] autorelease];
     self.settingsViewController.tabBarItem = settingsTabBarItem;
     self.settingsViewController.facebookManager = self.facebookManager;
+    self.settingsViewController.coreDataModel = self.coreDataModel;
     
     // Setting it all up
     self.tabBarController.viewControllers = [NSArray arrayWithObjects:self.featuredEventViewController, self.eventsNavController /*eventsViewController*/, self.settingsViewController, nil];
