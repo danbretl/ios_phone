@@ -17,6 +17,9 @@
     NSPersistentStoreCoordinator * persistentStoreCoordinator;
     
     NSDictionary * tempSolutionCategoriesOrderDictionary;
+    
+    NSNumber * coreDataYes;
+    NSNumber * coreDataNo;
 }
 
 @property (nonatomic, retain) NSManagedObjectContext *managedObjectContext;
@@ -24,6 +27,10 @@
 @property (nonatomic, retain) NSPersistentStoreCoordinator *persistentStoreCoordinator;
 
 @property (nonatomic, readonly) NSDictionary * tempSolutionCategoriesOrderDictionary;
+
+// Util
+@property (nonatomic, readonly) NSNumber * coreDataYes;
+@property (nonatomic, readonly) NSNumber * coreDataNo;
 
 // General
 - (void) coreDataSave;
@@ -41,6 +48,7 @@
 - (void) deleteRegularEventForURI:(NSString*)eventID;
 - (NSArray *) getRegularEvents;
 - (void) deleteRegularEvents;
+- (void) deleteRegularEventsFromSearch;
 
 // Featured Events
 - (Event *) getFeaturedEvent;

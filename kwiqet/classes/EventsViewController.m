@@ -571,8 +571,6 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 
 - (void)webConnector:(WebConnector *)webConnector getEventsListSuccess:(ASIHTTPRequest *)request forSearchString:(NSString *)searchString {
     
-    
-    
 	// Use when fetching text data
 	NSString * stringFromRequest = [request responseString];
     // Parse request into searchResult array

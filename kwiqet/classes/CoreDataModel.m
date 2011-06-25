@@ -10,6 +10,7 @@
 
 @interface CoreDataModel()
 - (Event *) getFeaturedEventCreateIfDoesNotExist:(BOOL)createIfDoesNotExist;
+- (void) deleteEventsForPredicate:(NSPredicate *)predicate;
 @end
 
 @implementation CoreDataModel
@@ -21,7 +22,27 @@
     [managedObjectModel release];
     [persistentStoreCoordinator release];
     [tempSolutionCategoriesOrderDictionary release];
+    [coreDataYes release];
+    [coreDataNo release];
     [super dealloc];
+}
+
+//////////
+// Util //
+//////////
+
+- (NSNumber *)coreDataYes {
+    if (coreDataYes == nil) {
+        coreDataYes = [[NSNumber numberWithBool:YES] retain];
+    }
+    return coreDataYes;
+}
+
+- (NSNumber *)coreDataNo {
+    if (coreDataNo == nil) {
+        coreDataNo = [[NSNumber numberWithBool:NO] retain];
+    }
+    return coreDataNo;
 }
 
 /////////////
@@ -144,6 +165,31 @@
     return categoriesDictionary;
 }
 
+//////////////////////
+// EVENTS - GENERAL //
+//////////////////////
+
+- (void) deleteEventsForPredicate:(NSPredicate *)predicate {
+    
+    NSFetchRequest * fetchRequest = [[NSFetchRequest alloc] init];
+    
+    NSEntityDescription * entity = [NSEntityDescription entityForName:@"Event" inManagedObjectContext:self.managedObjectContext];
+    [fetchRequest setEntity:entity];
+    [fetchRequest setPredicate:predicate];
+    NSError * error;
+    NSArray * fetchedObjects = [[NSArray alloc]initWithArray:[self.managedObjectContext executeFetchRequest:fetchRequest error:&error]];
+    [fetchRequest release];
+    
+    for (NSManagedObject *managedObject in fetchedObjects) {
+        [self.managedObjectContext deleteObject:managedObject];
+    }
+    
+    [fetchedObjects release];
+    
+    [self coreDataSave];
+    
+}
+
 ////////////////////
 // REGULAR EVENTS //
 ////////////////////
@@ -178,45 +224,24 @@
     return fetchedObjects;
 }
 
--(void)deleteRegularEventForURI:(NSString*)eventID  {
-	NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
-	NSEntityDescription *entity = [NSEntityDescription entityForName:@"Event" 
-                                              inManagedObjectContext:self.managedObjectContext];
-	[fetchRequest setEntity:entity];
-    [fetchRequest setPredicate:[NSPredicate predicateWithFormat:@"uri == %@ && featured == %@", eventID, [NSNumber numberWithBool:NO]]];
+- (void)deleteRegularEventForURI:(NSString *)eventID {
     
-	NSError * error;
-
-	NSArray * fetchedObjects = [self.managedObjectContext executeFetchRequest:fetchRequest error:&error];
-    [fetchRequest release];
+    NSPredicate * predicate = [NSPredicate predicateWithFormat:@"uri == %@ && featured == %@", eventID, self.coreDataNo];
+    [self deleteEventsForPredicate:predicate];
     
-    if ([fetchedObjects count] > 0) {
-        NSManagedObject * managedObject = [fetchedObjects objectAtIndex:0];
-        [self.managedObjectContext deleteObject:managedObject];
-    }
-    
-    [self coreDataSave];
-
 }
 
 - (void) deleteRegularEvents {
     
-    NSFetchRequest * fetchRequest = [[NSFetchRequest alloc] init];
+    NSPredicate * predicate = [NSPredicate predicateWithFormat:@"featured == %@", self.coreDataNo];
+    [self deleteEventsForPredicate:predicate];
     
-    NSEntityDescription * entity = [NSEntityDescription entityForName:@"Event" inManagedObjectContext:self.managedObjectContext];
-    [fetchRequest setEntity:entity];
-    [fetchRequest setPredicate:[NSPredicate predicateWithFormat:@"featured == %@", [NSNumber numberWithBool:NO]]];
-    NSError * error;
-    NSArray * fetchedObjects = [[NSArray alloc]initWithArray:[self.managedObjectContext executeFetchRequest:fetchRequest error:&error]];
-    [fetchRequest release];
+}
+
+- (void) deleteRegularEventsFromSearch {
     
-    for (NSManagedObject *managedObject in fetchedObjects) {
-        [self.managedObjectContext deleteObject:managedObject];
-    }
-    
-    [fetchedObjects release];
-    
-    [self coreDataSave];
+    NSPredicate * predicate = [NSPredicate predicateWithFormat:@"featured == %@ && fromSearch == %@", self.coreDataNo, self.coreDataYes];
+    [self deleteEventsForPredicate:predicate];
     
 }
 
