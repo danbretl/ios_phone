@@ -17,35 +17,278 @@
 #define CGFLOAT_MAX_TEXT_SIZE 10000
 
 @interface EventViewController()
+@property (retain) UIView * navigationBar;
+@property (retain) UIButton * backButton;
+@property (retain) UIButton * logoButton;
+@property (retain) UIView * actionBar;
 @property (retain) UIButton * letsGoButton;
+@property (retain) UIButton * shareButton;
+@property (retain) UIButton * deleteButton;
+@property (retain) ElasticUILabel * titleBar;
+@property (retain) UIScrollView * scrollView;
+@property (retain) UIImageView * imageView;
+@property (retain) UILabel * breadcrumbsLabel;
+@property (retain) UIView * eventInfoDividerView;
+@property (retain) UILabel * monthLabel;
+@property (retain) UILabel * dayNumberLabel;
+@property (retain) UILabel * dayNameLabel;
+@property (retain) UILabel * priceLabel;
+@property (retain) UILabel * timeLabel;
+@property (retain) UILabel * venueLabel;
+@property (retain) UILabel * addressLabel;
+@property (retain) UILabel * cityStateZipLabel;
+@property (retain) UIButton * phoneNumberButton;
+@property (retain) UIButton * mapButton;
+@property (retain) UILabel * detailsLabel;
+
+- (void) backButtonPushed;
+- (void) logoButtonPushed;
+
 @end
 
 @implementation EventViewController
-@synthesize scrollView,eventDictionary,imageView,eventStartDatetime,eventEndDatetime,phoneString,categoryColor,eventDetailID,breadcrumbsLabel,eventTime,costString;
+@synthesize navigationBar, backButton, logoButton;
+@synthesize actionBar, letsGoButton, shareButton, deleteButton;
+@synthesize titleBar;
+@synthesize scrollView;
+@synthesize imageView, breadcrumbsLabel;
+@synthesize eventInfoDividerView;
+@synthesize monthLabel, dayNumberLabel, dayNameLabel;
+@synthesize priceLabel, timeLabel;
+@synthesize venueLabel, addressLabel, cityStateZipLabel, phoneNumberButton, mapButton;
+@synthesize detailsLabel;
+
+@synthesize eventDictionary,eventStartDatetime,eventEndDatetime,phoneString,categoryColor,eventDetailID,eventTime,costString;
 @synthesize delegate;
 @synthesize coreDataModel;
 @synthesize mapViewController;
-@synthesize letsGoButton;
 
 - (void)dealloc {
+    [navigationBar release];
+    [backButton release];
+    [logoButton release];
+    [actionBar release];
     [letsGoButton release];
+    [shareButton release];
+    [deleteButton release];
+    [titleBar release];
+    [scrollView release];
+    [imageView release];
+    [breadcrumbsLabel release];
+    [eventInfoDividerView release];
+    [monthLabel release];
+    [dayNumberLabel release];
+    [dayNameLabel release];
+    [priceLabel release];
+    [timeLabel release];
+    [venueLabel release];
+    [addressLabel release];
+    [cityStateZipLabel release];
+    [phoneNumberButton release];
+    [mapButton release];
+    [detailsLabel release];
+    
     [costString release];
     [eventTime release];
-    [breadcrumbsLabel release];
     [eventDetailID release];
     [categoryColor release];
 	[phoneString release];
 	[eventStartDatetime release];
     [eventEndDatetime release];
-	[imageView release];
 	[eventDictionary release];
-	[scrollView release];
     [connectionErrorOnUserActionRequestAlertView release];
     [mapViewController release];
     [webConnector release];
     [webDataTranslator release];
     [super dealloc];
 	
+}
+
+// Implement viewDidLoad to do additional setup after loading the view, typically from a nib.
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    
+    // Navigation bar
+    navigationBar = [[UIView alloc] initWithFrame:CGRectMake(0, 0, self.view.bounds.size.width, 44)];
+    self.navigationBar.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"navbar_blank.png"]];
+    [self.view addSubview:self.navigationBar];
+    {
+        // Back button
+        self.backButton = [UIButton buttonWithType:UIButtonTypeCustom];
+        self.backButton.frame = CGRectMake(10, 6, 74, 32);
+        [self.backButton setBackgroundImage:[UIImage imageNamed:@"btn_back.png"] forState: UIControlStateNormal];
+        [self.backButton addTarget:self action:@selector(backButtonPushed) forControlEvents:UIControlEventTouchUpInside];
+        [self.navigationBar addSubview:self.backButton];
+        
+        // Logo button
+        self.logoButton = [UIButton buttonWithType:UIButtonTypeCustom];
+        self.logoButton.frame = CGRectMake(135, 3, 53, 38);
+        [self.logoButton setBackgroundImage:[UIImage imageNamed:@"btn_logo.png"] forState: UIControlStateNormal];
+        [self.logoButton addTarget:self action:@selector(logoButtonPushed) forControlEvents:UIControlEventTouchUpInside];
+        [self.navigationBar addSubview:self.logoButton];
+    }
+    
+    // Action bar
+    actionBar = [[UIView alloc] initWithFrame:CGRectMake(0, CGRectGetMaxY(self.navigationBar.frame), self.view.bounds.size.width, 36)];
+    self.actionBar.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"actbar.png"]];
+    [self.view addSubview:self.actionBar];
+    {
+        // Action buttons
+        CGRect (^actionButtonFrameBlock) (CGFloat) = ^(CGFloat originX){
+            return CGRectMake(originX, 5, 100, 25);
+        };
+        
+        // Let's Go button
+        self.letsGoButton = [UIButton buttonWithType:UIButtonTypeCustom];
+        self.letsGoButton.frame = actionButtonFrameBlock(5);
+        [self.letsGoButton setBackgroundImage:[UIImage imageNamed:@"btn_letsgo.png"] forState: UIControlStateNormal];
+        [self.letsGoButton addTarget:self action:@selector(bookedButtonClicked:) forControlEvents:UIControlEventTouchUpInside];
+        [self.actionBar addSubview:self.letsGoButton];
+        
+        // Share button
+        self.shareButton = [UIButton buttonWithType:UIButtonTypeCustom];
+        self.shareButton.frame = actionButtonFrameBlock(110);
+        [self.shareButton setBackgroundImage:[UIImage imageNamed:@"btn_share.png"] forState: UIControlStateNormal];
+        [self.shareButton addTarget:self action:@selector(shareButtonClicked:) forControlEvents:UIControlEventTouchUpInside];
+        [self.actionBar addSubview:self.shareButton];
+        
+        // Delete button
+        self.deleteButton = [UIButton buttonWithType:UIButtonTypeCustom];
+        self.deleteButton.frame = actionButtonFrameBlock(215);
+        [self.deleteButton setBackgroundImage:[UIImage imageNamed:@"btn_delete.png"] forState: UIControlStateNormal];
+        [self.deleteButton addTarget:self action:@selector(deleteEvent:) forControlEvents:UIControlEventTouchUpInside];
+        [self.actionBar addSubview:self.deleteButton];
+    }
+    
+    // Title bar
+    titleBar = [[ElasticUILabel alloc] initWithFrame:CGRectMake(0, CGRectGetMaxY(self.actionBar.frame), self.view.bounds.size.width, 32)];
+    [self.view addSubview:self.titleBar];
+    [self.view bringSubviewToFront:self.titleBar];
+    
+    // Scroll view
+    CGFloat scrollViewOriginY = CGRectGetMaxY(self.titleBar.frame);
+	scrollView = [[UIScrollView alloc]initWithFrame:CGRectMake(0, scrollViewOriginY, self.view.bounds.size.width, self.view.bounds.size.height - scrollViewOriginY)];
+    [self.view addSubview:self.scrollView];
+    {
+        // Image view
+        imageView = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, self.scrollView.bounds.size.width, 180)];
+        self.imageView.contentMode = UIViewContentModeScaleAspectFill;
+        [self.scrollView addSubview:self.imageView];
+        // Image view gesture recognizer
+        UISwipeGestureRecognizer * swipeToGoBack = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(swipedToGoBack:)];
+        [self.imageView addGestureRecognizer:swipeToGoBack];
+        self.imageView.userInteractionEnabled = YES;
+        [swipeToGoBack release];
+        
+        // Breadcrumbs label
+        CGFloat breadcrumbsLabelHeight = 32.0;
+        float breadcrumbsLabelBackgroundColorWhite = 53.0/255.0;
+        float breadcrumbsLabelBackgroundAlpha = 0.9;
+        breadcrumbsLabel = [[UILabel alloc] initWithFrame:CGRectMake(0, self.imageView.bounds.size.height - breadcrumbsLabelHeight, self.imageView.bounds.size.width, breadcrumbsLabelHeight)];
+        self.breadcrumbsLabel.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleTopMargin;
+        self.breadcrumbsLabel.backgroundColor = [UIColor colorWithWhite:breadcrumbsLabelBackgroundColorWhite alpha:breadcrumbsLabelBackgroundAlpha];
+        self.breadcrumbsLabel.font = [UIFont fontWithName:@"Helvetica" size:12];
+        self.breadcrumbsLabel.textColor = [UIColor whiteColor];
+        [self.imageView addSubview:self.breadcrumbsLabel];
+        
+        // Event info divider view
+        eventInfoDividerView = [[UIView alloc] initWithFrame:CGRectMake(0, CGRectGetMaxY(self.imageView.frame), self.scrollView.bounds.size.width, 164)];
+        self.eventInfoDividerView.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"eventcard.png"]];
+        [self.scrollView addSubview:self.eventInfoDividerView];
+        {
+            // Date box
+            CGSize dateBoxSize = CGSizeMake(69, 65);
+            {
+                // Month label
+                monthLabel = [[UILabel alloc] initWithFrame:CGRectMake(0, 2, dateBoxSize.width, 18)];
+                self.monthLabel.backgroundColor = [UIColor clearColor];
+                self.monthLabel.font= [UIFont fontWithName:@"HelveticaNeue" size:12];
+                self.monthLabel.textAlignment = UITextAlignmentCenter;
+                [self.eventInfoDividerView addSubview:self.monthLabel];
+                
+                // Day number label
+                dayNumberLabel =[[UILabel alloc] initWithFrame:CGRectMake(0, CGRectGetMaxY(self.monthLabel.frame), dateBoxSize.width, 42)];
+                self.dayNumberLabel.backgroundColor = [UIColor clearColor];
+                self.dayNumberLabel.font= [UIFont fontWithName:@"HelveticaNeueLTStd-BdCn" size:33];
+                self.dayNumberLabel.textAlignment = UITextAlignmentCenter;
+                [self.eventInfoDividerView addSubview:self.dayNumberLabel];
+                
+                // Day name label
+                dayNameLabel =[[UILabel alloc] initWithFrame:CGRectMake(0, 46, dateBoxSize.width, 20)];
+                self.dayNameLabel.backgroundColor = [UIColor clearColor];
+                self.dayNameLabel.font= [UIFont fontWithName:@"HelveticaNeue" size:12];
+                self.dayNameLabel.textAlignment = UITextAlignmentCenter;
+                [self.eventInfoDividerView addSubview:self.dayNameLabel];
+            }
+            
+            // Price label
+            CGFloat priceLabelOriginX = 80;
+            priceLabel = [[UILabel alloc] initWithFrame:CGRectMake(priceLabelOriginX, 5, self.eventInfoDividerView.bounds.size.width - priceLabelOriginX, 15)];
+            self.priceLabel.backgroundColor = [UIColor clearColor];
+            self.priceLabel.font= [UIFont fontWithName:@"HelveticaNeue" size:14];
+            [self.eventInfoDividerView addSubview:self.priceLabel];
+            
+            // Time label
+            CGFloat timeLabelOriginX = priceLabelOriginX;
+            timeLabel = [[UILabel alloc] initWithFrame:CGRectMake(timeLabelOriginX, 37, self.eventInfoDividerView.bounds.size.width - timeLabelOriginX, 20)];
+            self.timeLabel.backgroundColor = [UIColor clearColor];
+            self.timeLabel.font= [UIFont fontWithName:@"HelveticaNeue" size:16];
+            [self.eventInfoDividerView addSubview:self.timeLabel];
+            
+            // Location box
+            //CGSize locationBoxSize = CGSizeMake(self.eventInfoDividerView.bounds.size.width, self.eventInfoDividerView.bounds.size.height - dateBoxSize.height);
+            {
+                                
+                // Venue label
+                venueLabel = [[UILabel alloc] initWithFrame:CGRectMake(10,75,317,30)];
+                self.venueLabel.backgroundColor = [UIColor clearColor];
+                self.venueLabel.font= [UIFont fontWithName:@"HelveticaNeueLTStd-MdCn" size:22];
+                [self.eventInfoDividerView addSubview:self.venueLabel];
+                
+                // Address label
+                addressLabel = [[UILabel alloc] initWithFrame:CGRectMake(10,91,200,25)];
+                self.addressLabel.backgroundColor = [UIColor clearColor];
+                self.addressLabel.font= [UIFont fontWithName:@"HelveticaNeue" size:14];
+                [self.eventInfoDividerView addSubview:self.addressLabel];
+                
+                // City State Zip label
+                cityStateZipLabel = [[UILabel alloc] initWithFrame:CGRectMake(10,106,200,25)];
+                self.cityStateZipLabel.backgroundColor = [UIColor clearColor];
+                self.cityStateZipLabel.font= [UIFont fontWithName:@"HelveticaNeue" size:14];
+                [self.eventInfoDividerView addSubview:self.cityStateZipLabel];
+                
+                // Phone number button
+                self.phoneNumberButton = [UIButton buttonWithType:UIButtonTypeCustom];
+                self.phoneNumberButton.frame = CGRectMake(6, 130, 150, 20);
+                [self.phoneNumberButton setTitle:self.phoneString forState:UIControlStateNormal];
+                [self.phoneNumberButton setTitleColor:[UIColor colorWithRed:0.2549 green:0.41568 blue:0.70196 alpha:1.0] forState:UIControlStateNormal];
+                [self.phoneNumberButton addTarget:self action:@selector(phoneCall:) forControlEvents:UIControlEventTouchUpInside];
+                self.phoneNumberButton.backgroundColor = [UIColor clearColor];
+                self.phoneNumberButton.titleLabel.font = [UIFont fontWithName:@"HelveticaNeueLTStd-BdCn" size:12];
+                self.phoneNumberButton.titleLabel.textAlignment = UITextAlignmentLeft;
+                [self.eventInfoDividerView addSubview:self.phoneNumberButton];
+                
+                // Map button
+                self.mapButton = [UIButton buttonWithType:UIButtonTypeCustom];
+                self.mapButton.frame = CGRectMake(240,105,64,20);
+                [self.mapButton setBackgroundImage:[UIImage imageNamed:@"btn_map.png"] forState: UIControlStateNormal];
+                [self.mapButton addTarget:self action:@selector(makeMapView:) forControlEvents:UIControlEventTouchUpInside];
+                [self.eventInfoDividerView addSubview:self.mapButton];
+                self.mapButton.enabled = NO;
+            }
+            
+            // Details text view
+            CGFloat detailsLabelHorizontalPadding = 5;
+            detailsLabel = [[UILabel alloc] initWithFrame:CGRectMake(detailsLabelHorizontalPadding, CGRectGetMaxY(self.eventInfoDividerView.frame), self.scrollView.bounds.size.width - 2 * detailsLabelHorizontalPadding, 0.0)];
+            self.detailsLabel.font = [UIFont fontWithName:@"HelveticaNeue" size:16];
+            self.detailsLabel.backgroundColor = [UIColor clearColor];
+            self.detailsLabel.numberOfLines = 0;
+            [self.scrollView addSubview:self.detailsLabel];
+        }
+        
+    }
+    
+    [self eventRequestWithID:self.eventDetailID];
 }
 
 #pragma request for event details
@@ -86,12 +329,6 @@
     [self makeSubViews];
 }
 
-// Implement viewDidLoad to do additional setup after loading the view, typically from a nib.
-- (void)viewDidLoad {
-    [super viewDidLoad];
-    [self eventRequestWithID:self.eventDetailID];
-}
-
 -(void)makeSubViews  {
     
     NSString *titleText = [WebUtil stringOrNil:[self.eventDictionary objectForKey:@"title"]];
@@ -101,7 +338,7 @@
         Startdate = @"Date not available";
     }
     NSString *StartTime = [WebUtil stringOrNil:[[[self.eventDictionary valueForKey:@"occurrences"]objectAtIndex:0]objectForKey:@"start_time"]];
-
+    
     NSString *EndTime = [WebUtil stringOrNil:[[[self.eventDictionary valueForKey:@"occurrences"]objectAtIndex:0]objectForKey:@"end_time"]];
     if ([EndTime isEqual:[NSNull null]]) {
         EndTime = @"";
@@ -167,332 +404,105 @@
     
     UIColor * categoryUIColor = [WebUtil colorFromHexString:self.categoryColor];
     
-    //start to create background
-    //make background color 15% alpha of category color
-    UIImageView * background = [[UIImageView alloc] initWithFrame:CGRectMake(0,0, 320, 480)];
-    background.backgroundColor = categoryUIColor;
-    background.alpha = .15;
-    [self.view addSubview:background];
-    [background release];
-	//---------------------------------setting up subviews
-    //	//custom nav bar with buttons
-	UIButton *backButton = [[UIButton alloc]initWithFrame:CGRectMake(10, 6,74,32)];
-	[backButton setBackgroundImage:[UIImage imageNamed:@"btn_back.png"] forState: UIControlStateNormal];
-	[backButton addTarget:self action:@selector(backButtonPushed) forControlEvents:UIControlEventTouchUpInside];
-	
-	UIButton *homeButton = [[UIButton alloc]initWithFrame:CGRectMake(135, 3,53,38)];
-	[homeButton setBackgroundImage:[UIImage imageNamed:@"btn_logo.png"] forState: UIControlStateNormal];
-	[homeButton addTarget:self action:@selector(logoButtonPushed) forControlEvents:UIControlEventTouchUpInside];
-	
-	UIImageView *navBar = [[UIImageView alloc]initWithImage:[UIImage imageNamed:@"navbar_blank.png"]];
-	navBar.frame = CGRectMake(0, 0, 320, 44);
-	
-	//adding content views
-	[self.view addSubview:navBar];
-	[self.view addSubview:backButton];
-	[self.view addSubview:homeButton];
+    self.view.backgroundColor = [categoryUIColor colorWithAlphaComponent:0.15];
     
-    [navBar release];
-    [backButton release];
-    [homeButton release];
-    //make action bar
-    UIImageView * actionBar = [[UIImageView alloc]initWithImage:[UIImage imageNamed:@"actbar.png"]];
-    actionBar.frame = CGRectMake(0, 44, 320, 36);
-    actionBar.userInteractionEnabled = YES;
-    
-    self.letsGoButton = [[[UIButton alloc]initWithFrame:CGRectMake(5, 5, 100, 25)] autorelease];
-    [self.letsGoButton setBackgroundImage:[UIImage imageNamed:@"btn_letsgo.png"] forState: UIControlStateNormal];
-    [self.letsGoButton addTarget:self action:@selector(bookedButtonClicked:) forControlEvents:UIControlEventTouchUpInside];
-    
-    UIButton *shareButton = [[UIButton alloc]initWithFrame:CGRectMake(110, 5, 100, 25)];
-    [shareButton setBackgroundImage:[UIImage imageNamed:@"btn_share.png"] forState: UIControlStateNormal];
-    [shareButton addTarget:self action:@selector(shareButtonClicked:) forControlEvents:UIControlEventTouchUpInside];
-    
-    UIButton *deleteButton = [[UIButton alloc]initWithFrame:CGRectMake(215, 5, 100, 25)];
-    [deleteButton setBackgroundImage:[UIImage imageNamed:@"btn_delete.png"] forState: UIControlStateNormal];
-    [deleteButton addTarget:self action:@selector(deleteEvent:) forControlEvents:UIControlEventTouchUpInside];
-    
-    [actionBar addSubview:self.letsGoButton];
-    [actionBar addSubview:shareButton];
-    [actionBar addSubview:deleteButton];
-    [shareButton release];
-    [deleteButton release];
-    
-    [self.view addSubview:actionBar];
-    [actionBar release];
-    
-    ElasticUILabel * titleBar = [[ElasticUILabel alloc] initWithFrame:CGRectMake(0, 80, 320, 32)];
     titleBar.color = categoryUIColor;
     titleBar.text = titleText;
-    [self.view addSubview:titleBar];
-    [self.view bringSubviewToFront:titleBar];
-    
-	// set up scrollview
-	self.scrollView = [[[UIScrollView alloc]initWithFrame:CGRectMake(0, 112, 320, 396)] autorelease]; //size of screen - tab bar size = 428..left 44 for nav bar
-	self.scrollView.bouncesZoom = YES;
-	// get the content size later after other sizes are calculated
-    
-    [titleBar release];
-        
-//	UIView * titleBar = [[UIView alloc]initWithFrame:CGRectMake(0,0, 320, 32)];
-//	titleBar.backgroundColor = categoryUIColor;
-//    [self.scrollView addSubview:titleBar];
-//    [self.scrollView bringSubviewToFront:titleBar];
-//    [titleBar release];
-//	UILabel * titleTextField= [[UILabel alloc]init];
-//	titleTextField.text = titleText;
-//	titleTextField.frame = CGRectMake(5,5,310,34);
-//	titleTextField.font = [UIFont fontWithName:@"HelveticaNeueLTStd-BdCn" size:25];
-//	titleTextField.backgroundColor = [UIColor clearColor];
-//	titleTextField.textColor=[UIColor whiteColor];
-//	titleTextField.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleHeight;
-//	titleTextField.textAlignment = UITextAlignmentLeft;
-//	[titleBar addSubview:titleTextField];
-//	[titleTextField release];
-	
-	//make this image view a global so we can load asychronously.
-    self.imageView = [[[UIImageView alloc] initWithFrame:CGRectMake(0, 0, 320, 180)] autorelease];
-    self.imageView.contentMode = UIViewContentModeScaleAspectFill;
-    self.imageView.backgroundColor = [UIColor blackColor];
-    self.imageView.layer.masksToBounds = YES;
-    [self.scrollView addSubview:self.imageView];
-    [self.scrollView sendSubviewToBack:self.imageView];
-    
-    //add breadcrumbs bar to imageFrame
-    self.breadcrumbsLabel = [[[UILabel alloc]initWithFrame:CGRectMake(0, 148, 320, 32)] autorelease];
-    self.breadcrumbsLabel.backgroundColor = [UIColor colorWithRed:53.0/255.0 green:53.0/255.0  blue:53.0/255.0  alpha:0.9];
-    self.breadcrumbsLabel.font = [UIFont fontWithName:@"Helvetica" size:12];
-    self.breadcrumbsLabel.textColor = [UIColor whiteColor];
-    self.breadcrumbsLabel.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleHeight;
-    self.breadcrumbsLabel.numberOfLines = 0;
-    [self.imageView addSubview:self.breadcrumbsLabel];
-    // Gesture recognizers
-    UISwipeGestureRecognizer * swipeToGoBack = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(swipedToGoBack:)];
-	[self.imageView addGestureRecognizer:swipeToGoBack];
-    self.imageView.userInteractionEnabled = YES;
-	[swipeToGoBack release];
-    
-    UIImageView *detailImageDividor = [[UIImageView alloc]initWithImage:[UIImage imageNamed:@"eventcard.png"]];
-    detailImageDividor.frame = CGRectMake(0, 180, 320, 164);
-    detailImageDividor.userInteractionEnabled = YES;
-        // Startdate contains the Event Start dat e. 
-        // / Startdate is split to get month date and Day Values..
-        Startdate=[Startdate stringByAppendingString:@" "];
-        Startdate=[Startdate stringByAppendingString:StartTime];
-        NSDateFormatter *dateFormat = [[NSDateFormatter alloc] init];
-        [dateFormat setDateFormat:@"YYYY-MM-dd HH:mm:ss"];            //@"yyyy-MM-dd HH:mm:ss"];
-        if ([Startdate 
-             isEqualToString:@"Date not available"]) {
-            Startdate=@"0000-00-00";
-        }
-        self.eventStartDatetime = [dateFormat dateFromString:Startdate];  
-        // Convert date object to desired output format
-        [dateFormat setDateFormat:@"MMM"];
-        
-        NSString *Month = [dateFormat stringFromDate:self.eventStartDatetime];  
-        NSString *CapMonth = [Month uppercaseString];
-        
-        UILabel *DisplayMonth =[[UILabel alloc]initWithFrame:CGRectMake(8, 2, 50,18)];
-        DisplayMonth.text=CapMonth;
-        DisplayMonth.backgroundColor = [UIColor clearColor];
-        DisplayMonth.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleHeight;
-        DisplayMonth.font= [UIFont fontWithName:@"HelveticaNeue" size:(12)];
-        DisplayMonth.numberOfLines = 0;
-        DisplayMonth.textAlignment = UITextAlignmentCenter;
-        [detailImageDividor addSubview:DisplayMonth];             
-        [DisplayMonth release];
-        
-        [dateFormat setDateFormat:@"d"];
-        
-        NSString *DayNum = [dateFormat stringFromDate:self.eventStartDatetime];  
-        
-        UILabel *DisplayDate =[[UILabel alloc]initWithFrame:CGRectMake(8, 20, 50,42)];
-        DisplayDate.text=DayNum;
-        DisplayDate.backgroundColor = [UIColor clearColor];
-        DisplayDate.textColor  = categoryUIColor;
-        DisplayDate.font= [UIFont fontWithName:@"HelveticaNeueLTStd-BdCn" size:33];
-        DisplayDate.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleHeight;
-        DisplayDate.numberOfLines = 0;
-        DisplayDate.textAlignment = UITextAlignmentCenter;
-        [detailImageDividor addSubview:DisplayDate];            
-        [DisplayDate release];  
-        
-        
-        [dateFormat setDateFormat:@"EEE"];
-        
-        NSString *Day = [dateFormat stringFromDate:self.eventStartDatetime];  
-        NSString *CapDay=[Day uppercaseString];
-        UILabel *DisplayDay =[[UILabel alloc]initWithFrame:CGRectMake(9, 46, 50,20)];
-        DisplayDay.text=CapDay;
-        DisplayDay.backgroundColor = [UIColor clearColor];
-        DisplayDay.font= [UIFont fontWithName:@"HelveticaNeue" size:(12)];
-        DisplayDay.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleHeight;
-        DisplayDay.numberOfLines = 0;
-        DisplayDay.textAlignment = UITextAlignmentCenter;
-        [detailImageDividor addSubview:DisplayDay];          
-        [DisplayDay release];
-        
-        //set time in proper position
-        [dateFormat setDateFormat:@"h:mm a"];
-        
-        NSString *beginTime = [dateFormat stringFromDate:self.eventStartDatetime];
 
-        if (EndTime.length == 0) {
-            self.eventTime = [NSString stringWithFormat:@"%@",beginTime];
-        }
-        else {
-            NSString *EndDateTimeString=[@"2011-02-16" stringByAppendingString:@" "];
-            EndDateTimeString=[EndDateTimeString stringByAppendingString:EndTime];
-            [dateFormat setDateFormat:@"yyyy-MM-dd HH:mm:ss"];
-            self.eventEndDatetime = [dateFormat dateFromString:EndDateTimeString];
-            [dateFormat setDateFormat:@"h:mm a"];
-            EndTime = [dateFormat stringFromDate:self.eventEndDatetime];
-            
-            self.eventTime = [NSString stringWithFormat:@"%@ - %@",beginTime,EndTime];
-        }
-    
-        //make price
-        NSString *myPriceTag = @"Price: ";
-        myPriceTag = [myPriceTag stringByAppendingString:self.costString];
-        UILabel *Price= [[UILabel alloc]init];
-        Price.text = myPriceTag;
-        Price.frame = CGRectMake(80,5,240,15);
-        Price.backgroundColor = [UIColor clearColor];
-        Price.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleHeight;
-        Price.font= [UIFont fontWithName:@"HelveticaNeue" size:(14)];
-        Price.numberOfLines = 0;
-        Price.textAlignment = UITextAlignmentLeft;
-        [detailImageDividor addSubview:Price]; 
-        /////here is where we add description subview
-        [Price release];
-
-        UILabel *Time= [[UILabel alloc]init];
-    
-        // HACK OVERRIDE TO AVOID DEALING WITH MESS ABOVE FOR A WHILE LONGER - THIS HACK ISN'T COVERING IT. THERE SEEMS TO BE A PROBLEM SERVERSIDE THAT SOME TIMES ARE NOT COMING IN RIGHT. MAYBE IT'S JUST A RANDOM SCRAPE PROBLEM SOMETIMES - I.E. THAT TIMES ARE JUST NOT RETRIEVED CORRECTLY SOMETIMES.
-        NSString * originalStartTimeString = [[[self.eventDictionary valueForKey:@"occurrences"]objectAtIndex:0]objectForKey:@"start_time"];
-        NSString * originalEndTimeString = [[[self.eventDictionary valueForKey:@"occurrences"]objectAtIndex:0]objectForKey:@"end_time"];
-        NSLog(@"originalstart - %@ originalend - %@", originalStartTimeString, originalEndTimeString);
-        if ((!originalStartTimeString || [originalStartTimeString isEqual:[NSNull null]] || [originalStartTimeString length] == 0 || [originalStartTimeString isEqualToString:@"00:00:00"]) &&
-            (!originalEndTimeString || [originalEndTimeString isEqual:[NSNull null]] || [originalEndTimeString length] == 0 || [originalEndTimeString isEqualToString:@"00:00:00"])) {
-            Time.text = @"Time not available";
-        } else {
-            Time.text = self.eventTime;
-        }
-    
-        Time.frame = CGRectMake(80,37,240,20);
-        Time.backgroundColor = [UIColor clearColor];
-        Time.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleHeight;
-        Time.font= [UIFont fontWithName:@"HelveticaNeue" size:(16)];
-        Time.numberOfLines = 0;
-        Time.textAlignment = UITextAlignmentLeft;
-        [detailImageDividor addSubview:Time];             
-        [Time release]; 
-        [dateFormat release];// release date formater..
-        
-//        UILabel *pointsLabel= [[UILabel alloc]init];
-//        pointsLabel.text = @"Points: +250";
-//        pointsLabel.frame = CGRectMake(80,50,240,15);
-//        pointsLabel.backgroundColor = [UIColor clearColor];
-//        pointsLabel.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleHeight;
-//        pointsLabel.font= [UIFont fontWithName:@"HelveticaNeue" size:(12)];
-//        pointsLabel.numberOfLines = 0;
-//        pointsLabel.textAlignment = UITextAlignmentLeft;
-//        [detailImageDividor addSubview:pointsLabel]; 
-//        /////here is where we add description subview
-//        [pointsLabel release];
-        
-        //add adress and venue name
-        UILabel *venueName= [[UILabel alloc]init];
-        venueName.text = venueString;
-        venueName.frame = CGRectMake(10,75,317,30);
-        venueName.backgroundColor = [UIColor clearColor];
-        venueName.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleHeight;
-        venueName.numberOfLines = 0;
-        venueName.font= [UIFont fontWithName:@"HelveticaNeueLTStd-MdCn" size:(22)];
-        venueName.textAlignment = UITextAlignmentLeft;
-        [detailImageDividor addSubview:venueName];            
-        [venueName release]; 
-        
-        UILabel *MainAddress= [[UILabel alloc]init];
-        MainAddress.text = address;
-        MainAddress.frame = CGRectMake(10,91,200,25);
-        MainAddress.backgroundColor = [UIColor clearColor];
-        MainAddress.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleHeight;
-        MainAddress.numberOfLines = 0;
-        MainAddress.font= [UIFont fontWithName:@"HelveticaNeue" size:(14)];
-        MainAddress.textAlignment = UITextAlignmentLeft;
-        [detailImageDividor addSubview:MainAddress];            
-        [MainAddress release]; 
-        
-        UILabel *fullAddressLabel= [[UILabel alloc]init];
-        fullAddressLabel.text = fullAddress;
-        fullAddressLabel.frame = CGRectMake(10,106,200,25);
-        fullAddressLabel.backgroundColor = [UIColor clearColor];
-        fullAddressLabel.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleHeight;
-        fullAddressLabel.numberOfLines = 0;
-        fullAddressLabel.font= [UIFont fontWithName:@"HelveticaNeue" size:(14)];
-        fullAddressLabel.textAlignment = UITextAlignmentLeft;
-        [detailImageDividor addSubview:fullAddressLabel];            
-        [fullAddressLabel release];
-        
-    UIButton *PhoneNum = [[UIButton alloc]init];
-    if ([self.phoneString isEqualToString:@"Phone number not available"]) {
-        PhoneNum.frame = CGRectMake(3,130,150,20);
+    // Startdate contains the Event Start dat e. 
+    // / Startdate is split to get month date and Day Values..
+    Startdate=[Startdate stringByAppendingString:@" "];
+    Startdate=[Startdate stringByAppendingString:StartTime];
+    NSDateFormatter *dateFormat = [[NSDateFormatter alloc] init];
+    [dateFormat setDateFormat:@"YYYY-MM-dd HH:mm:ss"];            //@"yyyy-MM-dd HH:mm:ss"];
+    if ([Startdate 
+         isEqualToString:@"Date not available"]) {
+        Startdate=@"0000-00-00";
     }
-    else  {
-        PhoneNum.frame = CGRectMake(6,130,80,20);
-    }                         
-        [PhoneNum setTitle:self.phoneString forState:UIControlStateNormal];
-        [PhoneNum setTitleColor:[UIColor colorWithRed:0.2549 green:0.41568 blue:0.70196 alpha:1.0]forState:UIControlStateNormal];
-        [PhoneNum addTarget:self action:@selector(phoneCall:) forControlEvents:UIControlEventTouchUpInside];
-        PhoneNum.backgroundColor = [UIColor clearColor];
-        PhoneNum.titleLabel.font = [UIFont fontWithName:@"HelveticaNeueLTStd-BdCn" size:(12)];
-        PhoneNum.titleLabel.textAlignment = UITextAlignmentLeft;
-        [detailImageDividor addSubview:PhoneNum];
-        [PhoneNum release];
-        
-        //add map button
-        UIButton *mapButton = [[UIButton alloc]initWithFrame:CGRectMake(240,105,64,20)];
-        [mapButton setBackgroundImage:[UIImage imageNamed:@"btn_map.png"] forState: UIControlStateNormal];
-        [mapButton addTarget:self action:@selector(makeMapView:) forControlEvents:UIControlEventTouchUpInside];
-        [detailImageDividor addSubview:mapButton];
-        [mapButton release];
-        
-    //add details to scrollview
-    [self.scrollView addSubview:detailImageDividor];
-    [detailImageDividor release];
+    self.eventStartDatetime = [dateFormat dateFromString:Startdate];  
+    // Convert date object to desired output format
+    [dateFormat setDateFormat:@"MMM"];
     
-	//create the eventDetails frame dynamically
-	CGRect eventDetailsFrame = CGRectMake(5, 344, 310, 22.0);
-	UILabel *eventDetails = [[UILabel alloc] initWithFrame:eventDetailsFrame];
-	eventDetails.adjustsFontSizeToFitWidth = NO;
-	eventDetails.font = [UIFont fontWithName:@"HelveticaNeue" size:16];
-    eventDetails.textColor = [UIColor blackColor];
-    eventDetails.backgroundColor = [UIColor clearColor];
-	eventDetails.textAlignment = UITextAlignmentLeft;
-	eventDetails.numberOfLines = 0;
-	eventDetails.text = descriptionText;
-	// since only the width is fixed I will use a really large height value
-	CGSize eventDetailsSize = [eventDetails.text sizeWithFont:eventDetails.font constrainedToSize:CGSizeMake(260.0, 4600.0)];
-	CGRect newFrame = eventDetails.frame;
-	newFrame.size.height = eventDetailsSize.height;
-	eventDetails.frame = newFrame;
-	//cleanup descriptionText bc it was allocated
-    [self.scrollView addSubview:eventDetails];
-    [eventDetails release];
-    //set contentSize for scroll view
-    int sizeOfScrollView = 393 + eventDetails.frame.size.height; //title + imageview + detailsImageDividor = 378. plus dynamic size of details
-    [self.scrollView setContentSize:CGSizeMake(320, sizeOfScrollView)];
-    //    //add scrollview to view
-    [self.view addSubview:self.scrollView];
+    NSString *Month = [dateFormat stringFromDate:self.eventStartDatetime];  
+    NSString *CapMonth = [Month uppercaseString];
+    
+    self.monthLabel.text=CapMonth;
+
+    [dateFormat setDateFormat:@"d"];
+    
+    NSString *DayNum = [dateFormat stringFromDate:self.eventStartDatetime];  
+    
+    self.dayNumberLabel.text = DayNum;
+    self.dayNumberLabel.textColor  = categoryUIColor;
+    
+    [dateFormat setDateFormat:@"EEE"];
+    
+    NSString * Day = [dateFormat stringFromDate:self.eventStartDatetime];  
+    NSString * CapDay=[Day uppercaseString];
+    self.dayNameLabel.text=CapDay;
+    
+    //set time in proper position
+    [dateFormat setDateFormat:@"h:mm a"];
+    
+    NSString *beginTime = [dateFormat stringFromDate:self.eventStartDatetime];
+    
+    if (EndTime.length == 0) {
+        self.eventTime = [NSString stringWithFormat:@"%@",beginTime];
+    }
+    else {
+        NSString *EndDateTimeString=[@"2011-02-16" stringByAppendingString:@" "];
+        EndDateTimeString=[EndDateTimeString stringByAppendingString:EndTime];
+        [dateFormat setDateFormat:@"yyyy-MM-dd HH:mm:ss"];
+        self.eventEndDatetime = [dateFormat dateFromString:EndDateTimeString];
+        [dateFormat setDateFormat:@"h:mm a"];
+        EndTime = [dateFormat stringFromDate:self.eventEndDatetime];
         
+        self.eventTime = [NSString stringWithFormat:@"%@ - %@",beginTime,EndTime];
+    }
+    
+    //make price
+    NSString *myPriceTag = @"Price: ";
+    myPriceTag = [myPriceTag stringByAppendingString:self.costString];
+    self.priceLabel.text = myPriceTag;
+    
+    
+    // HACK OVERRIDE TO AVOID DEALING WITH MESS ABOVE FOR A WHILE LONGER - THIS HACK ISN'T COVERING IT. THERE SEEMS TO BE A PROBLEM SERVERSIDE THAT SOME TIMES ARE NOT COMING IN RIGHT. MAYBE IT'S JUST A RANDOM SCRAPE PROBLEM SOMETIMES - I.E. THAT TIMES ARE JUST NOT RETRIEVED CORRECTLY SOMETIMES.
+    NSString * originalStartTimeString = [[[self.eventDictionary valueForKey:@"occurrences"]objectAtIndex:0]objectForKey:@"start_time"];
+    NSString * originalEndTimeString = [[[self.eventDictionary valueForKey:@"occurrences"]objectAtIndex:0]objectForKey:@"end_time"];
+    NSLog(@"originalstart - %@ originalend - %@", originalStartTimeString, originalEndTimeString);
+    if ((!originalStartTimeString || [originalStartTimeString isEqual:[NSNull null]] || [originalStartTimeString length] == 0 || [originalStartTimeString isEqualToString:@"00:00:00"]) &&
+        (!originalEndTimeString || [originalEndTimeString isEqual:[NSNull null]] || [originalEndTimeString length] == 0 || [originalEndTimeString isEqualToString:@"00:00:00"])) {
+        self.timeLabel.text = @"Time not available";
+    } else {
+        self.timeLabel.text = self.eventTime;
+    }
+    
+    self.venueLabel.text = venueString;
+    self.addressLabel.text = address;
+    self.cityStateZipLabel.text = fullAddress;
+    if ([self.phoneString isEqualToString:@"Phone number not available"]) {
+        self.phoneNumberButton.frame = CGRectMake(3,130,150,20);
+    } else  {
+        self.phoneNumberButton.frame = CGRectMake(6,130,80,20);
+    }
+    [self.phoneNumberButton setTitle:self.phoneString forState:UIControlStateNormal];
+        
+    self.detailsLabel.text = descriptionText;
+    //set contentSize for scroll view
+    CGSize detailsLabelSize = [self.detailsLabel.text sizeWithFont:self.detailsLabel.font constrainedToSize:CGSizeMake(self.detailsLabel.bounds.size.width, 10000)];
+    CGRect newFrame = self.detailsLabel.frame;
+    newFrame.size.height = detailsLabelSize.height;
+    self.detailsLabel.frame = newFrame;
+    [self.scrollView setContentSize:CGSizeMake(self.scrollView.bounds.size.width, CGRectGetMaxY(self.detailsLabel.frame))];
+    NSLog(@"%@ %@", NSStringFromCGSize(self.scrollView.contentSize), NSStringFromCGRect(self.detailsLabel.frame));
+    
 	//invoke the NSOperation
 	NSOperationQueue *queue = [[NSOperationQueue alloc]init];
 	NSInvocationOperation *operation = [[NSInvocationOperation alloc] 
 										initWithTarget:self
 										selector:@selector(loadImage) 
 										object:nil];
-
+    
 	[queue addOperation:operation];
     [operation release];
 	[queue release];
@@ -853,7 +863,7 @@
     self.mapViewController = nil;
 }
 
--(void)backButtonPushed  {
+- (void) backButtonPushed  {
     [self viewControllerIsFinished];
 }
 
