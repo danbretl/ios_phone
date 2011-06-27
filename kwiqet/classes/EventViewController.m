@@ -27,6 +27,7 @@
 @property (retain) ElasticUILabel * titleBar;
 @property (retain) UIScrollView * scrollView;
 @property (retain) UIImageView * imageView;
+@property (retain) UIView * breadcrumbsBar;
 @property (retain) UILabel * breadcrumbsLabel;
 @property (retain) UIView * eventInfoDividerView;
 @property (retain) UILabel * monthLabel;
@@ -40,6 +41,7 @@
 @property (retain) UIButton * phoneNumberButton;
 @property (retain) UIButton * mapButton;
 @property (retain) UILabel * detailsLabel;
+@property (nonatomic, retain) WebActivityView * webActivityView;
 
 - (void) backButtonPushed;
 - (void) logoButtonPushed;
@@ -47,23 +49,24 @@
 @end
 
 @implementation EventViewController
+@synthesize event;
 @synthesize navigationBar, backButton, logoButton;
 @synthesize actionBar, letsGoButton, shareButton, deleteButton;
 @synthesize titleBar;
 @synthesize scrollView;
-@synthesize imageView, breadcrumbsLabel;
+@synthesize imageView, breadcrumbsBar, breadcrumbsLabel;
 @synthesize eventInfoDividerView;
 @synthesize monthLabel, dayNumberLabel, dayNameLabel;
 @synthesize priceLabel, timeLabel;
 @synthesize venueLabel, addressLabel, cityStateZipLabel, phoneNumberButton, mapButton;
 @synthesize detailsLabel;
-
-@synthesize eventDictionary,eventStartDatetime,eventEndDatetime,phoneString,categoryColor,eventDetailID,eventTime,costString;
+@synthesize webActivityView;
 @synthesize delegate;
 @synthesize coreDataModel;
 @synthesize mapViewController;
 
 - (void)dealloc {
+    [event release];
     [navigationBar release];
     [backButton release];
     [logoButton release];
@@ -74,6 +77,7 @@
     [titleBar release];
     [scrollView release];
     [imageView release];
+    [breadcrumbsBar release];
     [breadcrumbsLabel release];
     [eventInfoDividerView release];
     [monthLabel release];
@@ -87,18 +91,10 @@
     [phoneNumberButton release];
     [mapButton release];
     [detailsLabel release];
-    
-    [costString release];
-    [eventTime release];
-    [eventDetailID release];
-    [categoryColor release];
-	[phoneString release];
-	[eventStartDatetime release];
-    [eventEndDatetime release];
-	[eventDictionary release];
+    [webActivityView release];
     [connectionErrorOnUserActionRequestAlertView release];
     [mapViewController release];
-    [webConnector release];
+    [webConnector release]; // ---?
     [webDataTranslator release];
     [super dealloc];
 	
@@ -173,6 +169,7 @@
         // Image view
         imageView = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, self.scrollView.bounds.size.width, 180)];
         self.imageView.contentMode = UIViewContentModeScaleAspectFill;
+        self.imageView.clipsToBounds = YES;
         [self.scrollView addSubview:self.imageView];
         // Image view gesture recognizer
         UISwipeGestureRecognizer * swipeToGoBack = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(swipedToGoBack:)];
@@ -180,16 +177,21 @@
         self.imageView.userInteractionEnabled = YES;
         [swipeToGoBack release];
         
+        // Breadcrumbs bar
+        CGFloat breadcrumbsBarHeight = 32.0;
+        float breadcrumbsBarBackgroundColorWhite = 53.0/255.0;
+        float breadcrumbsBarBackgroundAlpha = 0.9;
+        CGFloat breadcrumbsLabelHorizontalPadding = 8.0;
+        breadcrumbsBar = [[UIView alloc] initWithFrame:CGRectMake(0, self.imageView.bounds.size.height - breadcrumbsBarHeight, self.imageView.bounds.size.width, breadcrumbsBarHeight)];
+        self.breadcrumbsBar.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleTopMargin;
+        self.breadcrumbsBar.backgroundColor = [UIColor colorWithWhite:breadcrumbsBarBackgroundColorWhite alpha:breadcrumbsBarBackgroundAlpha];
+        [self.imageView addSubview:self.breadcrumbsBar];
         // Breadcrumbs label
-        CGFloat breadcrumbsLabelHeight = 32.0;
-        float breadcrumbsLabelBackgroundColorWhite = 53.0/255.0;
-        float breadcrumbsLabelBackgroundAlpha = 0.9;
-        breadcrumbsLabel = [[UILabel alloc] initWithFrame:CGRectMake(0, self.imageView.bounds.size.height - breadcrumbsLabelHeight, self.imageView.bounds.size.width, breadcrumbsLabelHeight)];
-        self.breadcrumbsLabel.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleTopMargin;
-        self.breadcrumbsLabel.backgroundColor = [UIColor colorWithWhite:breadcrumbsLabelBackgroundColorWhite alpha:breadcrumbsLabelBackgroundAlpha];
+        breadcrumbsLabel = [[UILabel alloc] initWithFrame:CGRectMake(breadcrumbsLabelHorizontalPadding, 0, self.breadcrumbsBar.bounds.size.width - 2 * breadcrumbsLabelHorizontalPadding, self.breadcrumbsBar.bounds.size.height)];
         self.breadcrumbsLabel.font = [UIFont fontWithName:@"Helvetica" size:12];
         self.breadcrumbsLabel.textColor = [UIColor whiteColor];
-        [self.imageView addSubview:self.breadcrumbsLabel];
+        self.breadcrumbsLabel.backgroundColor = [UIColor clearColor];
+        [self.breadcrumbsBar addSubview:self.breadcrumbsLabel];
         
         // Event info divider view
         eventInfoDividerView = [[UIView alloc] initWithFrame:CGRectMake(0, CGRectGetMaxY(self.imageView.frame), self.scrollView.bounds.size.width, 164)];
@@ -259,13 +261,12 @@
                 
                 // Phone number button
                 self.phoneNumberButton = [UIButton buttonWithType:UIButtonTypeCustom];
-                self.phoneNumberButton.frame = CGRectMake(6, 130, 150, 20);
-                [self.phoneNumberButton setTitle:self.phoneString forState:UIControlStateNormal];
+                self.phoneNumberButton.frame = CGRectMake(10, 130, 150, 20);
                 [self.phoneNumberButton setTitleColor:[UIColor colorWithRed:0.2549 green:0.41568 blue:0.70196 alpha:1.0] forState:UIControlStateNormal];
                 [self.phoneNumberButton addTarget:self action:@selector(phoneCall:) forControlEvents:UIControlEventTouchUpInside];
                 self.phoneNumberButton.backgroundColor = [UIColor clearColor];
                 self.phoneNumberButton.titleLabel.font = [UIFont fontWithName:@"HelveticaNeueLTStd-BdCn" size:12];
-                self.phoneNumberButton.titleLabel.textAlignment = UITextAlignmentLeft;
+                self.phoneNumberButton.contentHorizontalAlignment = UIControlContentHorizontalAlignmentLeft;
                 [self.eventInfoDividerView addSubview:self.phoneNumberButton];
                 
                 // Map button
@@ -288,224 +289,160 @@
         
     }
     
-    [self eventRequestWithID:self.eventDetailID];
+    CGFloat webActivityViewSize = 60.0;
+    webActivityView = [[WebActivityView alloc] initWithSize:CGSizeMake(webActivityViewSize, webActivityViewSize) centeredInFrame:self.view.frame];
+    [self.view addSubview:self.webActivityView];
+    [self.view bringSubviewToFront:self.webActivityView];
+    
+    if (self.event) {
+        [self updateViewsFromData];
+    }
 }
 
-#pragma request for event details
--(void)eventRequestWithID:(NSString*)eventID {
-    URLBuilder *urlBuilder = [[URLBuilder alloc]init];
-    NSURL *url = [urlBuilder buildCardURLWithID:eventID];
-    NSLog(@"EventViewController eventRequestWithID - url is %@", url);
-    ASIHTTPRequest * myRequest = [ASIHTTPRequest requestWithURL:url];
-    [myRequest setTimeOutSeconds:5];
-    [myRequest setDelegate:self];
-    [myRequest setRequestMethod:@"GET"];
-    [myRequest setDidFinishSelector:@selector(uploadFinished:)];
-    [myRequest setDidFailSelector:@selector(uploadFailed:)];
-    [myRequest startAsynchronous];
-    [urlBuilder release];
+-(void) showWebLoadingViews  {
+    if (self.view.window) {
+        // ACTIVITY VIEWS
+        [self.webActivityView showAnimated:NO];
+        // USER INTERACTION
+        self.view.userInteractionEnabled = NO;
+    }
 }
 
-- (void)uploadFinished:(ASIHTTPRequest *)request  {
-	[self buildArrayFromRequest:[request responseString]];
+-(void)hideWebLoadingViews  {
+    
+    // ACTIVITY VIEWS
+    [self.webActivityView hideAnimated:NO];
+    // USER INTERACTION
+    self.view.userInteractionEnabled = YES;
+    
 }
 
-- (void)uploadFailed:(ASIHTTPRequest *)request  {
-	NSString *statusMessage = [request responseStatusMessage];
-	NSLog(@"%@",statusMessage);
+- (void)setEvent:(Event *)theEvent {
+    if (event != theEvent) {
+        [event release];
+        event = [theEvent retain];
+        [self.webConnector getEventWithURI:self.event.uri];
+        [self showWebLoadingViews];
+    }
+}
+
+- (void)webConnector:(WebConnector *)webConnector getEventSuccess:(ASIHTTPRequest *)request forEventURI:(NSString *)eventURI {
+    NSString * responseString = [request responseString];
+    NSError *error = nil;
+    NSDictionary * eventDictionary = [responseString yajl_JSONWithOptions:YAJLParserOptionsAllowComments error:&error];
+    [self.coreDataModel updateEvent:self.event usingEventDictionary:eventDictionary featuredOverride:nil fromSearchOverride:nil];
+    [self updateViewsFromData];
+    [self hideWebLoadingViews];
+}
+
+- (void)webConnector:(WebConnector *)webConnector getEventFailure:(ASIHTTPRequest *)request forEventURI:(NSString *)eventURI {
+	NSString * statusMessage = [request responseStatusMessage];
+	NSLog(@"%@", statusMessage);
 	NSError *error = [request error];
-	NSLog(@"%@",error);
-	//[self serverError];
+	NSLog(@"%@", error);
+    UIAlertView * alertView = [[UIAlertView alloc] initWithTitle:@"Connection Error" message:WEB_CONNECTION_ERROR_MESSAGE_STANDARD delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil];
+    [alertView show];
+    [alertView release];
+    [self viewControllerIsFinished];
+    [self hideWebLoadingViews];
 }
 
--(void)buildArrayFromRequest:(NSString*)string  {
-	//take JSON and unpack it	
-	NSString *JSONString = string;
-	NSError *error = nil;
+-(void) updateViewsFromData {
     
-    self.eventDictionary = [JSONString yajl_JSONWithOptions:YAJLParserOptionsAllowComments error:&error];
+    NSString * EVENT_TIME_NOT_AVAILABLE = @"Time not available";
+    NSString * EVENT_DESCRIPTION_NOT_AVAILABLE = @"Description not available";
+    NSString * EVENT_ADDRESS_NOT_AVAILABLE = @"Address not available";
+    NSString * EVENT_PHONE_NOT_AVAILABLE = @"Phone number not available";
     
-    //create view
-    [self makeSubViews];
-}
-
--(void)makeSubViews  {
+    // Concrete parent category color
+    UIColor * concreteParentCategoryColor = self.event.concreteParentCategory.colorHex ? [WebUtil colorFromHexString:self.event.concreteParentCategory.colorHex] : [UIColor blackColor];
     
-    NSString *titleText = [WebUtil stringOrNil:[self.eventDictionary objectForKey:@"title"]];
-    //make check for date and time
-    NSString * Startdate = [WebUtil stringOrNil:[[[self.eventDictionary valueForKey:@"occurrences"]objectAtIndex:0]objectForKey:@"start_date"]];
-    if (Startdate.length == 0) {
-        Startdate = @"Date not available";
-    }
-    NSString *StartTime = [WebUtil stringOrNil:[[[self.eventDictionary valueForKey:@"occurrences"]objectAtIndex:0]objectForKey:@"start_time"]];
+    // Background
+    self.view.backgroundColor = [concreteParentCategoryColor colorWithAlphaComponent:0.15];
     
-    NSString *EndTime = [WebUtil stringOrNil:[[[self.eventDictionary valueForKey:@"occurrences"]objectAtIndex:0]objectForKey:@"end_time"]];
-    if ([EndTime isEqual:[NSNull null]]) {
-        EndTime = @"";
-    }    
-    NSString *descriptionText = [WebUtil stringOrNil:[self.eventDictionary objectForKey:@"description"]];
-    //check if descritption is empty
-    if (descriptionText.length == 0 ) {
-        descriptionText = @"Description not available";
-    }
+    // Title
+    self.titleBar.text = self.event.title;
+    self.titleBar.color = concreteParentCategoryColor;
     
-    NSString *venueString = [WebUtil stringOrNil:[[[[self.eventDictionary valueForKey:@"occurrences"]objectAtIndex:0]valueForKey:@"place"]valueForKey:@"title"]];
-    if (venueString.length == 0) {
-        venueString = @"-";
-    }
-    NSString *address = [WebUtil stringOrNil:[[[[[self.eventDictionary valueForKey:@"occurrences"]objectAtIndex:0]valueForKey:@"place"]valueForKey:@"point"]valueForKey:@"address"]];
-    if (address.length == 0) {
-        address = @"Address not available";
-    }
-    NSString *cityString = [WebUtil stringOrNil:[[[[[[self.eventDictionary valueForKey:@"occurrences"]objectAtIndex:0]valueForKey:@"place"]valueForKey:@"point"]valueForKey:@"city"]valueForKey:@"city"]];
-    if (cityString.length == 0) {
-        cityString = @"City not available";
-    }
-    NSString *stateString = [WebUtil stringOrNil:[[[[[[self.eventDictionary valueForKey:@"occurrences"]objectAtIndex:0]valueForKey:@"place"]valueForKey:@"point"]valueForKey:@"city"]valueForKey:@"state"]];
-    if (stateString.length == 0) {
-        stateString = @"State not available";
-    }
-    NSString *zipCodeString = [WebUtil stringOrNil:[[[[[self.eventDictionary valueForKey:@"occurrences"]objectAtIndex:0]valueForKey:@"place"]valueForKey:@"point"]valueForKey:@"zip"]];
-    if (zipCodeString.length == 0) {
-        zipCodeString = @"00000";
-    }
-    NSString *fullAddress = [NSString stringWithFormat:@"%@, %@ %@",cityString,stateString,zipCodeString];
+    // Date & Time
+    NSDateFormatter * dateFormatter = [[NSDateFormatter alloc] init];
+    // Month
+    [dateFormatter setDateFormat:@"MMM"];
+    NSString * month = [dateFormatter stringFromDate:self.event.startDateDatetime];
+    self.monthLabel.text = [month uppercaseString];
+    // Day number
+    [dateFormatter setDateFormat:@"d"];
+    NSString * dayNumber = [dateFormatter stringFromDate:self.event.startDateDatetime];
+    self.dayNumberLabel.text = dayNumber;
+    self.dayNumberLabel.textColor = concreteParentCategoryColor;
+    // Day name
+    [dateFormatter setDateFormat:@"EEE"];
+    NSString * dayName = [dateFormatter stringFromDate:self.event.startDateDatetime];
+    self.dayNameLabel.text = [dayName uppercaseString];
+    // Time
+    NSString * time = [self.webDataTranslator timeSpanStringFromStartDatetime:self.event.startTimeDatetime endDatetime:self.event.endTimeDatetime dataUnavailableString:EVENT_TIME_NOT_AVAILABLE];
+    self.timeLabel.text = time;
     
-    self.phoneString = [WebUtil stringOrNil:[[[[self.eventDictionary valueForKey:@"occurrences"]objectAtIndex:0]valueForKey:@"place"]valueForKey:@"phone"]];
-    if (self.phoneString.length == 0) {
-        self.phoneString = @"Phone number not available";
-    }
-    NSArray *price = [[[self.eventDictionary valueForKey:@"occurrences"]objectAtIndex:0]objectForKey:@"prices"];
-    NSString * costStringSetup;
+    NSString * price = [self.webDataTranslator priceRangeStringFromMinPrice:self.event.priceMinimum maxPrice:self.event.priceMaximum dataUnavailableString:nil];
+    self.priceLabel.text = [NSString stringWithFormat:@"Price: %@", price];
     
-    if ([price count] == 0) {
-        costStringSetup = @"No price available";
-    } else if ([price count] == 1) {
-        NSString * priceValue = [[price objectAtIndex:0] valueForKey:@"quantity"];
-        if ([priceValue intValue] == 0) {
-            priceValue = @"Free";
-            costStringSetup = priceValue;
+    // Location & Address
+    NSString * addressFirstLine = self.event.address;
+    NSString * addressSecondLine = [self.webDataTranslator addressSecondLineStringFromCity:self.event.city state:self.event.state zip:self.event.zip];
+    BOOL someLocationInfo = addressFirstLine || addressSecondLine;
+    if (!addressFirstLine) { addressFirstLine = EVENT_ADDRESS_NOT_AVAILABLE; }
+    self.addressLabel.text = addressFirstLine;
+    self.cityStateZipLabel.text = addressSecondLine;
+    
+    // Venue
+    NSString * venue = self.event.venue;
+    if (!venue) { 
+        if (someLocationInfo) {
+            venue = @"Location:";
         } else {
-            costStringSetup = [NSString stringWithFormat:@"$%@", priceValue];
+            venue = @"Location not available";
         }
-    } else {
-        // NOTE THAT WE ARE ASSUMING PRICES ARE INTs (OR THAT WE DON'T CARE WE ARE CHANGING THEM TO INTs) HERE
-        int minPrice = 100000;
-        int maxPrice = -100000;
-        for (int i=0; i < [price count]; i++) {
-            NSString * priceValue = [[price objectAtIndex:i] valueForKey:@"quantity"];
-            int priceValueInt = [priceValue intValue];
-            minPrice = MIN(minPrice, priceValueInt);
-            maxPrice = MAX(maxPrice, priceValueInt);
-        }
-        costStringSetup = [NSString stringWithFormat:@"$%d - $%d", minPrice, maxPrice];
     }
-    self.costString = costStringSetup;
+    self.venueLabel.text = venue;
     
-    UIColor * categoryUIColor = [WebUtil colorFromHexString:self.categoryColor];
+    // Map button
+    self.mapButton.enabled = self.event.latitude && self.event.longitude;
     
-    self.view.backgroundColor = [categoryUIColor colorWithAlphaComponent:0.15];
+    // Phone
+    NSString * phone = self.event.phone ? self.event.phone : EVENT_PHONE_NOT_AVAILABLE;
+    [self.phoneNumberButton setTitle:phone forState:UIControlStateNormal];
     
-    titleBar.color = categoryUIColor;
-    titleBar.text = titleText;
-
-    // Startdate contains the Event Start dat e. 
-    // / Startdate is split to get month date and Day Values..
-    Startdate=[Startdate stringByAppendingString:@" "];
-    Startdate=[Startdate stringByAppendingString:StartTime];
-    NSDateFormatter *dateFormat = [[NSDateFormatter alloc] init];
-    [dateFormat setDateFormat:@"YYYY-MM-dd HH:mm:ss"];            //@"yyyy-MM-dd HH:mm:ss"];
-    if ([Startdate 
-         isEqualToString:@"Date not available"]) {
-        Startdate=@"0000-00-00";
-    }
-    self.eventStartDatetime = [dateFormat dateFromString:Startdate];  
-    // Convert date object to desired output format
-    [dateFormat setDateFormat:@"MMM"];
-    
-    NSString *Month = [dateFormat stringFromDate:self.eventStartDatetime];  
-    NSString *CapMonth = [Month uppercaseString];
-    
-    self.monthLabel.text=CapMonth;
-
-    [dateFormat setDateFormat:@"d"];
-    
-    NSString *DayNum = [dateFormat stringFromDate:self.eventStartDatetime];  
-    
-    self.dayNumberLabel.text = DayNum;
-    self.dayNumberLabel.textColor  = categoryUIColor;
-    
-    [dateFormat setDateFormat:@"EEE"];
-    
-    NSString * Day = [dateFormat stringFromDate:self.eventStartDatetime];  
-    NSString * CapDay=[Day uppercaseString];
-    self.dayNameLabel.text=CapDay;
-    
-    //set time in proper position
-    [dateFormat setDateFormat:@"h:mm a"];
-    
-    NSString *beginTime = [dateFormat stringFromDate:self.eventStartDatetime];
-    
-    if (EndTime.length == 0) {
-        self.eventTime = [NSString stringWithFormat:@"%@",beginTime];
-    }
-    else {
-        NSString *EndDateTimeString=[@"2011-02-16" stringByAppendingString:@" "];
-        EndDateTimeString=[EndDateTimeString stringByAppendingString:EndTime];
-        [dateFormat setDateFormat:@"yyyy-MM-dd HH:mm:ss"];
-        self.eventEndDatetime = [dateFormat dateFromString:EndDateTimeString];
-        [dateFormat setDateFormat:@"h:mm a"];
-        EndTime = [dateFormat stringFromDate:self.eventEndDatetime];
-        
-        self.eventTime = [NSString stringWithFormat:@"%@ - %@",beginTime,EndTime];
-    }
-    
-    //make price
-    NSString *myPriceTag = @"Price: ";
-    myPriceTag = [myPriceTag stringByAppendingString:self.costString];
-    self.priceLabel.text = myPriceTag;
-    
-    
-    // HACK OVERRIDE TO AVOID DEALING WITH MESS ABOVE FOR A WHILE LONGER - THIS HACK ISN'T COVERING IT. THERE SEEMS TO BE A PROBLEM SERVERSIDE THAT SOME TIMES ARE NOT COMING IN RIGHT. MAYBE IT'S JUST A RANDOM SCRAPE PROBLEM SOMETIMES - I.E. THAT TIMES ARE JUST NOT RETRIEVED CORRECTLY SOMETIMES.
-    NSString * originalStartTimeString = [[[self.eventDictionary valueForKey:@"occurrences"]objectAtIndex:0]objectForKey:@"start_time"];
-    NSString * originalEndTimeString = [[[self.eventDictionary valueForKey:@"occurrences"]objectAtIndex:0]objectForKey:@"end_time"];
-    NSLog(@"originalstart - %@ originalend - %@", originalStartTimeString, originalEndTimeString);
-    if ((!originalStartTimeString || [originalStartTimeString isEqual:[NSNull null]] || [originalStartTimeString length] == 0 || [originalStartTimeString isEqualToString:@"00:00:00"]) &&
-        (!originalEndTimeString || [originalEndTimeString isEqual:[NSNull null]] || [originalEndTimeString length] == 0 || [originalEndTimeString isEqualToString:@"00:00:00"])) {
-        self.timeLabel.text = @"Time not available";
-    } else {
-        self.timeLabel.text = self.eventTime;
-    }
-    
-    self.venueLabel.text = venueString;
-    self.addressLabel.text = address;
-    self.cityStateZipLabel.text = fullAddress;
-    if ([self.phoneString isEqualToString:@"Phone number not available"]) {
-        self.phoneNumberButton.frame = CGRectMake(3,130,150,20);
-    } else  {
-        self.phoneNumberButton.frame = CGRectMake(6,130,80,20);
-    }
-    [self.phoneNumberButton setTitle:self.phoneString forState:UIControlStateNormal];
-        
-    self.detailsLabel.text = descriptionText;
+    // Description
+    NSString * descriptionString = self.event.details ? self.event.details : EVENT_DESCRIPTION_NOT_AVAILABLE;
+    self.detailsLabel.text = descriptionString;
     //set contentSize for scroll view
     CGSize detailsLabelSize = [self.detailsLabel.text sizeWithFont:self.detailsLabel.font constrainedToSize:CGSizeMake(self.detailsLabel.bounds.size.width, 10000)];
-    CGRect newFrame = self.detailsLabel.frame;
-    newFrame.size.height = detailsLabelSize.height;
-    self.detailsLabel.frame = newFrame;
+    CGRect detailsLabelFrame = self.detailsLabel.frame;
+    detailsLabelFrame.size.height = detailsLabelSize.height;
+    self.detailsLabel.frame = detailsLabelFrame;
     [self.scrollView setContentSize:CGSizeMake(self.scrollView.bounds.size.width, CGRectGetMaxY(self.detailsLabel.frame))];
-    NSLog(@"%@ %@", NSStringFromCGSize(self.scrollView.contentSize), NSStringFromCGRect(self.detailsLabel.frame));
     
-	//invoke the NSOperation
-	NSOperationQueue *queue = [[NSOperationQueue alloc]init];
-	NSInvocationOperation *operation = [[NSInvocationOperation alloc] 
-										initWithTarget:self
-										selector:@selector(loadImage) 
-										object:nil];
+    // Breadcrumbs
+    NSMutableString * breadcrumbsString = [self.event.concreteParentCategory.title mutableCopy];
+    NSArray * orderedConcreteCategoryBreadcrumbs = [self.event.concreteCategoryBreadcrumbs sortedArrayUsingDescriptors:[NSArray arrayWithObject:[NSSortDescriptor sortDescriptorWithKey:@"order" ascending:NO]]];
+    for (CategoryBreadcrumb * breadcrumb in orderedConcreteCategoryBreadcrumbs) {
+        [breadcrumbsString appendFormat:@", %@", breadcrumb.category.title];
+    }
+    self.breadcrumbsLabel.text = breadcrumbsString;
     
-	[queue addOperation:operation];
-    [operation release];
-	[queue release];
+	// If the image view is not already set, then attempt to load an image for this event.
+    if (self.imageView.image == nil) {
+        NSOperationQueue *queue = [[NSOperationQueue alloc]init];
+        NSInvocationOperation *operation = [[NSInvocationOperation alloc] 
+                                            initWithTarget:self
+                                            selector:@selector(loadImage) 
+                                            object:nil];
+        
+        [queue addOperation:operation];
+        [operation release];
+        [queue release];
+    }
+    
 }
 
 - (WebConnector *) webConnector {
@@ -621,67 +558,46 @@
 //methods for asychronous loading of imageView.  takes url from dictionary
 - (void)loadImage {
     //build url
-    NSString *urlplist = [[NSBundle mainBundle]
-						  pathForResource:@"urls" ofType:@"plist"];
-    NSDictionary *urlDictionary = [[NSDictionary alloc] initWithContentsOfFile:urlplist];
-    NSString *url = [urlDictionary valueForKey:@"base_url"];
-    NSString *imageLocation = [self.eventDictionary valueForKey:@"image"];
-    if ([imageLocation isEqual:[NSNull null]] || imageLocation.length == 0) {
-        imageLocation = [self.eventDictionary valueForKey:@"thumbnail_detail"];
+    NSString *urlplist = [[NSBundle mainBundle] pathForResource:@"urls" ofType:@"plist"];
+    NSDictionary * urlDictionary = [NSDictionary dictionaryWithContentsOfFile:urlplist];
+    NSString * url = [urlDictionary valueForKey:@"base_url"];
+    NSString * imageLocation = self.event.imageLocation;
+    if (imageLocation == nil) {
+        imageLocation = self.event.concreteParentCategory.thumbnail;
     }
-    NSString *final_url_string = [[NSString alloc]initWithString:[url stringByAppendingString:imageLocation]];
-	NSData* imageData = [[NSData alloc] initWithContentsOfURL:[NSURL URLWithString:final_url_string]];
-	UIImage* image = [[[UIImage alloc] initWithData:imageData] autorelease];
-	[imageData release];
-    [final_url_string release];
+    NSString * imageURL = [url stringByAppendingString:imageLocation];
+	NSData * imageData = [NSData dataWithContentsOfURL:[NSURL URLWithString:imageURL]];
+    UIImage * image = [UIImage imageWithData:imageData];
 	[self performSelectorOnMainThread:@selector(displayImage:) withObject:image waitUntilDone:NO];
-    
-    [urlDictionary release];
 }
 
 - (void)displayImage:(UIImage *)image {
-    NSLog(@"image is %f by %f", image.size.width, image.size.height);
-	[self.imageView setImage:image]; //UIImageView
-    //breadcrumbs
-    [self breadcrumbs];
-}
-
--(void)breadcrumbs  {
-    Category * concreteParentCategory = [self.coreDataModel getCategoryWithURI:[self.eventDictionary valueForKey:@"concrete_parent_category"]];
-    NSString * breadcrumbsString = [NSString stringWithFormat:@"   %@",concreteParentCategory.title];
-    NSArray * breadArray = [[NSArray alloc]initWithArray:[self.eventDictionary valueForKey:@"concrete_category_breadcrumbs"]];
-    for (int i = [breadArray count] - 1; i >= 0; i = i - 1) {
-        Category * nextCategory = [self.coreDataModel getCategoryWithURI:[breadArray objectAtIndex:i]];
-        breadcrumbsString = [breadcrumbsString stringByAppendingFormat:@", %@", nextCategory.title];
-    }
-    self.breadcrumbsLabel.text = breadcrumbsString;
-    [breadArray release];
+    //NSLog(@"image is %f by %f", image.size.width, image.size.height);
+	[self.imageView setImage:image];
 }
 
 ///send learned data to ML with tag G
 - (IBAction)bookedButtonClicked:(id)sender  {
-
+    
+    [self showWebLoadingViews];
+    
     // Add event to the device's iCal
     EKEventStore * eventStore = [[EKEventStore alloc] init];
     EKEvent * newEvent = [EKEvent eventWithEventStore:eventStore];
     
-    NSDictionary * betterEventDictionary = [self tempSolutionWellFormattedDataFromDictionary:self.eventDictionary];
-        
-    newEvent.title = [betterEventDictionary objectForKey:@"title"]; 
-    newEvent.startDate = [betterEventDictionary objectForKey:@"startDatetime"];
-    newEvent.allDay = ![[betterEventDictionary valueForKey:@"startTimeValid"] boolValue];
-    if ([[betterEventDictionary valueForKey:@"endDateValid"] boolValue]) {
-        newEvent.endDate = [betterEventDictionary valueForKey:@"endDatetime"];
+    newEvent.title = self.event.title;
+    newEvent.startDate = self.event.startDatetime;
+    NSLog(@"%@", newEvent.startDate);
+    newEvent.allDay = ![self.event.startTimeValid boolValue];
+    if ([self.event.endDateValid boolValue]) {
+        newEvent.endDate = self.event.endDatetime;
     } else {
         newEvent.endDate = [NSDate dateWithTimeInterval:3600 sinceDate:newEvent.startDate];
     }
-    newEvent.endDate = [NSDate dateWithTimeInterval:3600 sinceDate:newEvent.startDate];
-    NSLog(@"%@ to %@", newEvent.startDate, newEvent.endDate);
-    newEvent.location = [betterEventDictionary valueForKey:@"venue"];
-    
+    newEvent.location = self.event.venue;
     NSMutableString * iCalEventNotes = [NSMutableString string];
-    NSString * addressLineFirst = [betterEventDictionary valueForKey:@"address"];
-    NSString * addressLineSecond = [self.webDataTranslator addressSecondLineStringFromCity:[betterEventDictionary valueForKey:@"city"] state:[betterEventDictionary valueForKey:@"state"] zip:[betterEventDictionary valueForKey:@"zip"]];
+    NSString * addressLineFirst = self.event.address;
+    NSString * addressLineSecond = [self.webDataTranslator addressSecondLineStringFromCity:self.event.city state:self.event.state zip:self.event.zip];
     if (addressLineFirst) { 
         [iCalEventNotes appendFormat:@"%@\n", addressLineFirst]; 
     }
@@ -691,26 +607,28 @@
     if (addressLineFirst || addressLineSecond) {
         [iCalEventNotes appendString:@"\n"];
     }
-    if ([betterEventDictionary valueForKey:@"details"]) {
-        [iCalEventNotes appendString:[betterEventDictionary valueForKey:@"details"]];
+    if (self.event.details) {
+        [iCalEventNotes appendString:self.event.details];
     }
     newEvent.notes = iCalEventNotes;
     
     [newEvent setCalendar:[eventStore defaultCalendarForNewEvents]];
     NSError * err;
     [eventStore saveEvent:newEvent span:EKSpanThisEvent error:&err];
-    if (err != nil) { NSLog(@"error"); NSLog(@"%@", [err userInfo]);}
+    if (err != nil) { NSLog(@"error"); }
     [eventStore release];
-        
-    // Show alert
-    UIAlertView * alert = [[UIAlertView alloc] initWithTitle:@"Event added to Calendar!" message:[NSString stringWithFormat:@"The event \"%@\" has been added to your calendar.", [betterEventDictionary valueForKey:@"title"]] delegate:nil cancelButtonTitle:@"Ok" otherButtonTitles:nil];
-    [alert show];
-    [alert release];
     
+    // Send learned data to the web
+    [self.webConnector sendLearnedDataAboutEvent:self.event.uri withUserAction:@"G"];
+    
+    // Change appearance of "Let's Go" button
     [self.letsGoButton setBackgroundImage:[UIImage imageNamed:@"btn_going.png"] forState: UIControlStateNormal];
     self.letsGoButton.enabled = NO;
-
-    [self.webConnector sendLearnedDataAboutEvent:[self.eventDictionary objectForKey:@"resource_uri"] withUserAction:@"G"];
+    
+	// Show alert
+	UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Event added to Calendar!" message:[NSString stringWithFormat:@"The event \"%@\" has been added to your calendar.", self.event.title] delegate:nil cancelButtonTitle:@"Ok" otherButtonTitles:nil];
+	[alert show];
+	[alert release];
     
     // Wait for response from server
 
@@ -718,44 +636,41 @@
 
 -(IBAction)shareButtonClicked:(id)sender  {
     
-    NSDictionary * betterEventDictionary = [self tempSolutionWellFormattedDataFromDictionary:self.eventDictionary];
+    [self makeAndShowEmailViewController];
     
-    NSString * emailTitle = [betterEventDictionary valueForKey:@"title"] ? [betterEventDictionary valueForKey:@"title"] : @"Title not available";
+}
+
+- (void) makeAndShowEmailViewController {
+    NSLog(@"Email"); // Email
     
-    NSString * emailLocation = [betterEventDictionary valueForKey:@"venue"] ? [NSString stringWithFormat:@"    Location: %@<br>", [betterEventDictionary valueForKey:@"venue"]] : @"";
+    NSString * EVENT_TITLE_NOT_AVAILABLE = @"Title not available";
+    NSString * EVENT_TIME_NOT_AVAILABLE = @"Time not available";
+    NSString * EVENT_DATE_NOT_AVAILABLE = @"Date not available";
+    NSString * EVENT_COST_NOT_AVAILABLE = @"Price not available";
+    NSString * EVENT_DESCRIPTION_NOT_AVAILABLE = @"Description not available";
     
-    NSString * emailAddressFirst = [betterEventDictionary valueForKey:@"address"] ? [betterEventDictionary valueForKey:@"address"] : @"";
-    NSString * emailAddressSecond = [self.webDataTranslator addressSecondLineStringFromCity:[betterEventDictionary valueForKey:@"city"] state:[betterEventDictionary valueForKey:@"state"] zip:[betterEventDictionary valueForKey:@"zip"]];
-    if ([betterEventDictionary valueForKey:@"address"] && emailAddressSecond) { emailAddressFirst = [emailAddressFirst stringByAppendingString:@", "]; }
+    NSString * emailTitle = self.event.title ? self.event.title : EVENT_TITLE_NOT_AVAILABLE;
+    NSString * emailLocation = self.event.venue ? [NSString stringWithFormat:@"    Location: %@<br>", self.event.venue] : @"";
+    NSString * emailAddressFirst = self.event.address ? self.event.address : @"";
+    NSString * emailAddressSecond = [self.webDataTranslator addressSecondLineStringFromCity:self.event.city state:self.event.state zip:self.event.zip];
+    if (self.event.address && emailAddressSecond) { emailAddressFirst = [emailAddressFirst stringByAppendingString:@", "]; }
     if (!emailAddressSecond) { emailAddressSecond = @""; }
     NSString * emailAddressFull = ([emailAddressFirst isEqualToString:@""] && [emailAddressSecond isEqualToString:@""]) ? @"" : [NSString stringWithFormat:@"    Address: %@%@<br>", emailAddressFirst, emailAddressSecond];
-    
-    NSDate * startTimeDatetime = [[betterEventDictionary valueForKey:@"startTimeValid"] boolValue] ? [betterEventDictionary valueForKey:@"startDatetime"] : nil;
-    NSDate * endTimeDatetime = [[betterEventDictionary valueForKey:@"endTimeValid"] boolValue] ? [betterEventDictionary valueForKey:@"endDatetime"] : nil;
-    NSDate * startDateDatetime = [[betterEventDictionary valueForKey:@"startDateValid"] boolValue] ? [betterEventDictionary valueForKey:@"startDatetime"] : nil;
-    NSDate * endDateDatetime = [[betterEventDictionary valueForKey:@"endDateValid"] boolValue] ? [betterEventDictionary valueForKey:@"endDatetime"] : nil;
-    
-    NSString * emailTime = [self.webDataTranslator timeSpanStringFromStartDatetime:startTimeDatetime endDatetime:endTimeDatetime dataUnavailableString:@""];
-    emailTime = !([emailTime isEqualToString:@""] || [emailTime isEqualToString:@"12:00 AM"]) ? [NSString stringWithFormat:@"    Time: %@<br>", emailTime] : @"";
-    
-    NSString * emailDate = [self.webDataTranslator dateSpanStringFromStartDatetime:startDateDatetime endDatetime:endDateDatetime relativeDates:YES dataUnavailableString:@""];
-    emailDate = ![emailDate isEqualToString:@""] ? [NSString stringWithFormat:@"    Date: %@<br>", emailDate] : @"";
-    
-    NSString * emailPrice = [self.webDataTranslator priceRangeStringFromMinPrice:[betterEventDictionary valueForKey:@"priceMinimum"] maxPrice:[betterEventDictionary valueForKey:@"priceMaximum"] dataUnavailableString:@""];
-    emailPrice = ![emailPrice isEqualToString:@""] ? [NSString stringWithFormat:@"    Price: %@<br>", emailPrice] : @"";
-    
-    NSString * emailDescription = [betterEventDictionary valueForKey:@"details"] ? [betterEventDictionary valueForKey:@"details"] : @"";
-    emailDescription = ![emailDescription isEqualToString:@""] ? [NSString stringWithFormat:@"<br>%@", emailDescription] : @"";
+    NSString * emailTime = [self.webDataTranslator timeSpanStringFromStartDatetime:self.event.startTimeDatetime endDatetime:self.event.endTimeDatetime dataUnavailableString:EVENT_TIME_NOT_AVAILABLE];
+    NSString * emailDate = [self.webDataTranslator dateSpanStringFromStartDatetime:self.event.startDateDatetime endDatetime:self.event.endDateDatetime relativeDates:YES dataUnavailableString:EVENT_DATE_NOT_AVAILABLE];
+    NSString * emailPrice = [self.webDataTranslator priceRangeStringFromMinPrice:self.event.priceMinimum maxPrice:self.event.priceMaximum dataUnavailableString:EVENT_COST_NOT_AVAILABLE];
+    NSString * emailDescription = self.event.details ? self.event.details : EVENT_DESCRIPTION_NOT_AVAILABLE;
+    emailDescription = ![emailDescription isEqualToString:EVENT_DESCRIPTION_NOT_AVAILABLE] ? [NSString stringWithFormat:@"<br><br>%@", emailDescription] : @"";
     
     NSString * emailMap = @"";
-    if ([betterEventDictionary valueForKey:@"latitude"] && [betterEventDictionary valueForKey:@"longitude"]) {
-        NSString * mapSearchQuery = [[[NSString stringWithFormat:@"%@ %@ %@", ([betterEventDictionary valueForKey:@"venue"] ? [betterEventDictionary valueForKey:@"venue"] : @""), emailAddressFirst, emailAddressSecond] stringByReplacingOccurrencesOfString:@" " withString:@"+"] stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
-        NSString * urlString = [NSString stringWithFormat:@"http://maps.google.com/maps?q=%@&ll=%f,%f", mapSearchQuery, [[betterEventDictionary valueForKey:@"latitude"] floatValue], [[betterEventDictionary valueForKey:@"longitude"] floatValue]];
+    if (self.event.latitude && self.event.longitude) {
+        NSString * mapSearchQuery = [[[NSString stringWithFormat:@"%@ %@ %@", (self.event.venue ? self.event.venue : @""), emailAddressFirst, emailAddressSecond] stringByReplacingOccurrencesOfString:@" " withString:@"+"] stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+        NSString * urlString = [NSString stringWithFormat:@"http://maps.google.com/maps?q=%@&ll=%f,%f", mapSearchQuery, [self.event.latitude floatValue], [self.event.longitude floatValue]];
         emailMap = [NSString stringWithFormat:@"    <a href='%@'>Click here for map</a><br>", urlString];
     }
     
     //create message body with event title and description
-    NSString *mailString = [[NSString alloc] initWithFormat:@"Hey! I found this event on Kwiqet. We should go!<br><br>    <b>%@</b><br><br>%@%@%@%@%@%@%@", emailTitle, emailLocation, emailAddressFull, emailMap, emailTime, emailDate, emailPrice, emailDescription];
+    NSString *mailString = [[NSString alloc] initWithFormat:@"Hey! I found this event on Kwiqet. We should go!<br><br>    <b>%@</b><br><br>%@%@%@    Time: %@<br>    Date: %@<br>    Price: %@%@", emailTitle, emailLocation, emailAddressFull, emailMap, emailTime, emailDate, emailPrice, emailDescription];
     
     //call mail app to front as modal window
     MFMailComposeViewController * controller = [[MFMailComposeViewController alloc] init];
@@ -765,7 +680,6 @@
     if (controller) [self presentModalViewController:controller animated:YES];
     [controller release];
     [mailString release];
-    
 }
 
 - (void)mailComposeController:(MFMailComposeViewController*)controller  
@@ -778,40 +692,13 @@
     [self dismissModalViewControllerAnimated:YES];
 }
 
-//add event to calendar
--(IBAction)addCalendar:(id)sender {
-	EKEventStore *eventDB = [[EKEventStore alloc] init];
-	EKEvent *myEvent  = [EKEvent eventWithEventStore:eventDB];
-	
-	myEvent.title     = [self.eventDictionary objectForKey:@"title"];
-	myEvent.startDate = [[NSDate alloc] init]; //eventStartDate; 
-	myEvent.endDate   = [[NSDate alloc] initWithTimeInterval:600 sinceDate:myEvent.startDate];
-
-	//myEvent.allDay = YES;
-	
-	[myEvent setCalendar:[eventDB defaultCalendarForNewEvents]];
-	
-	NSError *err;
-	[eventDB saveEvent:myEvent span:EKSpanThisEvent error:&err];
-	if (err == noErr) {
-		UIAlertView *alert = [[UIAlertView alloc]
-							  initWithTitle:@"Event Created"
-							  message:nil
-							  delegate:nil
-							  cancelButtonTitle:@"Okay"
-							  otherButtonTitles:nil];
-		[alert show];
-		[alert release];
-	}
-	
-	[eventDB release];
-}
 //delete event from core data and revert back to table
 -(IBAction)deleteEvent:(id)sender  {
 
-    [self.webConnector sendLearnedDataAboutEvent:[self.eventDictionary objectForKey:@"resource_uri"] withUserAction:@"X"];
-    
+    [self.webConnector sendLearnedDataAboutEvent:self.event.uri withUserAction:@"X"];
+    [self showWebLoadingViews];
     // Wait for response from server
+    
 }
 
 - (void)webConnector:(WebConnector *)webConnector sendLearnedDataSuccess:(ASIHTTPRequest *)request aboutEvent:(NSString *)eventURI userAction:(NSString *)userAction {
@@ -823,11 +710,13 @@
         //[self.coreDataModel deleteRegularEventForURI:[self.eventDictionary objectForKey:@"resource_uri"]]; // This makes me uneasy deleting it here... But, we're not dealing with this right now.
         
     } else if ([userAction isEqualToString:@"X"]) {
-        NSString * eventURI = [self.eventDictionary objectForKey:@"resource_uri"];
-        [self.coreDataModel deleteRegularEventForURI:eventURI];
-        // We're done here, let our delegate know that we are finished, and that we ended by deleting the event.
-        [self.delegate cardPageViewControllerDidFinish:self withEventDeletion:YES eventURI:eventURI];
+        
+        // We're done here, let our delegate know that we are finished, and that we ended by requesting to delete the event. Leave the actual event object deletion up to the delegate though.
+        [self.delegate cardPageViewControllerDidFinish:self withEventDeletion:YES eventURI:self.event.uri];
+        
     }
+    
+    [self hideWebLoadingViews];
     
 }
 
@@ -835,26 +724,28 @@
     
     // Display an internet connection error message
     if ([userAction isEqualToString:@"G"]) {
-        [self.connectionErrorOnUserActionRequestAlertView show];
+        //[self.connectionErrorOnUserActionRequestAlertView show]; // I'm taking this alert view out for now. We should definitely be saving this lost learning in some sort of cache and sending it up to the server at another time, but even though we are not doing that yet, there is still no reason to display an annoying popup to the user.
     } else if ([userAction isEqualToString:@"X"]) {
         [self.connectionErrorOnUserActionRequestAlertView show];
     }
+    
+    [self hideWebLoadingViews];
     
 }
 
 // make Phone number clickable..
 -(IBAction)phoneCall:(id)sender  {
 	NSLog(@"phone call");
-    [[UIApplication sharedApplication] openURL:[NSURL URLWithString:[NSString stringWithFormat:@"tel:%@", self.phoneString]]];
+    [[UIApplication sharedApplication] openURL:[NSURL URLWithString:[NSString stringWithFormat:@"tel:%@", self.event.phone]]];
 }
 
 -(IBAction)makeMapView:(id)sender  {
     self.mapViewController = [[[MapViewController alloc] initWithNibName:@"MapViewController" bundle:[NSBundle mainBundle]] autorelease];
     self.mapViewController.delegate = self;
-    self.mapViewController.locationLatitude = [[[[[self.eventDictionary valueForKey:@"occurrences"] objectAtIndex:0] valueForKey:@"place"] valueForKey:@"point"] valueForKey:@"latitude"];
-    self.mapViewController.locationLongitude = [[[[[self.eventDictionary valueForKey:@"occurrences"] objectAtIndex:0] valueForKey:@"place"] valueForKey:@"point"] valueForKey:@"longitude"];
-    self.mapViewController.locationName = [[[[self.eventDictionary valueForKey:@"occurrences"]objectAtIndex:0]valueForKey:@"place"]valueForKey:@"title"];
-    self.mapViewController.locationAddress = [[[[[self.eventDictionary valueForKey:@"occurrences"]objectAtIndex:0]valueForKey:@"place"]valueForKey:@"point"]valueForKey:@"address"];
+    self.mapViewController.locationLatitude = self.event.latitude;
+    self.mapViewController.locationLongitude = self.event.longitude;
+    self.mapViewController.locationName = self.event.venue;
+    self.mapViewController.locationAddress = self.event.address;
     [self presentModalViewController:self.mapViewController animated:YES];
 }
 
@@ -872,8 +763,7 @@
 }
 
 - (void) viewControllerIsFinished {
-    NSString * eventURI = [self.eventDictionary objectForKey:@"resource_uri"];
-    [self.delegate cardPageViewControllerDidFinish:self withEventDeletion:deletedEventDueToGoingToEvent eventURI:eventURI];
+    [self.delegate cardPageViewControllerDidFinish:self withEventDeletion:deletedEventDueToGoingToEvent eventURI:self.event.uri];
 }
 
 - (UIAlertView *)connectionErrorOnUserActionRequestAlertView {

@@ -185,6 +185,7 @@
 		32D7FEDD13B0BC43005E8406 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 32D7FEDB13B0BC43005E8406 /* InfoPlist.strings */; };
 		32D7FEE013B0BC5A005E8406 /* MainWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = 32D7FEDE13B0BC5A005E8406 /* MainWindow.xib */; };
 		32D7FF5B13B0D382005E8406 /* Reachability.m in Sources */ = {isa = PBXBuildFile; fileRef = 32D7FF5A13B0D382005E8406 /* Reachability.m */; };
+		32EE74BD13B907D30002E11F /* CategoryBreadcrumb.m in Sources */ = {isa = PBXBuildFile; fileRef = 32EE74BC13B907D30002E11F /* CategoryBreadcrumb.m */; };
 		32FD31F113AFD82C007549B6 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 32FD31F013AFD82C007549B6 /* UIKit.framework */; };
 		32FD31F313AFD82C007549B6 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 32FD31F213AFD82C007549B6 /* Foundation.framework */; };
 		32FD31F513AFD82C007549B6 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 32FD31F413AFD82C007549B6 /* CoreGraphics.framework */; };
@@ -209,7 +210,6 @@
 		32FD388213AFF52F007549B6 /* EventsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 32FD383B13AFF52F007549B6 /* EventsViewController.m */; };
 		32FD388313AFF52F007549B6 /* EventTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 32FD383D13AFF52F007549B6 /* EventTableViewCell.m */; };
 		32FD388413AFF52F007549B6 /* EventViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 32FD383F13AFF52F007549B6 /* EventViewController.m */; };
-		32FD388513AFF52F007549B6 /* FeaturedEventManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 32FD384113AFF52F007549B6 /* FeaturedEventManager.m */; };
 		32FD388613AFF52F007549B6 /* FeaturedEventViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 32FD384313AFF52F007549B6 /* FeaturedEventViewController.m */; };
 		32FD388713AFF52F007549B6 /* LocalImagesManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 32FD384613AFF52F007549B6 /* LocalImagesManager.m */; };
 		32FD388813AFF52F007549B6 /* LoginViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 32FD384813AFF52F007549B6 /* LoginViewController.m */; };
@@ -441,6 +441,9 @@
 		32D7FEDF13B0BC5A005E8406 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/MainWindow.xib; sourceTree = "<group>"; };
 		32D7FF5913B0D382005E8406 /* Reachability.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Reachability.h; sourceTree = "<group>"; };
 		32D7FF5A13B0D382005E8406 /* Reachability.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Reachability.m; sourceTree = "<group>"; };
+		32EE74BA13B902A90002E11F /* kwiqet 003.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "kwiqet 003.xcdatamodel"; sourceTree = "<group>"; };
+		32EE74BB13B907D20002E11F /* CategoryBreadcrumb.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CategoryBreadcrumb.h; path = classes/CategoryBreadcrumb.h; sourceTree = "<group>"; };
+		32EE74BC13B907D30002E11F /* CategoryBreadcrumb.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = CategoryBreadcrumb.m; path = classes/CategoryBreadcrumb.m; sourceTree = "<group>"; };
 		32FD31EC13AFD82C007549B6 /* kwiqet.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = kwiqet.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		32FD31F013AFD82C007549B6 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		32FD31F213AFD82C007549B6 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
@@ -488,8 +491,6 @@
 		32FD383D13AFF52F007549B6 /* EventTableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EventTableViewCell.m; sourceTree = "<group>"; };
 		32FD383E13AFF52F007549B6 /* EventViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EventViewController.h; sourceTree = "<group>"; };
 		32FD383F13AFF52F007549B6 /* EventViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EventViewController.m; sourceTree = "<group>"; };
-		32FD384013AFF52F007549B6 /* FeaturedEventManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FeaturedEventManager.h; sourceTree = "<group>"; };
-		32FD384113AFF52F007549B6 /* FeaturedEventManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FeaturedEventManager.m; sourceTree = "<group>"; };
 		32FD384213AFF52F007549B6 /* FeaturedEventViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FeaturedEventViewController.h; sourceTree = "<group>"; };
 		32FD384313AFF52F007549B6 /* FeaturedEventViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FeaturedEventViewController.m; sourceTree = "<group>"; };
 		32FD384513AFF52F007549B6 /* LocalImagesManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LocalImagesManager.h; sourceTree = "<group>"; };
@@ -839,6 +840,8 @@
 				32FD383113AFF52F007549B6 /* CoreDataModel.m */,
 				32FD382E13AFF52F007549B6 /* Category.h */,
 				32FD382F13AFF52F007549B6 /* Category.m */,
+				32EE74BB13B907D20002E11F /* CategoryBreadcrumb.h */,
+				32EE74BC13B907D30002E11F /* CategoryBreadcrumb.m */,
 				32FD383613AFF52F007549B6 /* Event.h */,
 				32FD383713AFF52F007549B6 /* Event.m */,
 				3211539013B5252600DE5163 /* Contact.h */,
@@ -890,8 +893,6 @@
 				32FD383313AFF52F007549B6 /* DefaultsModel.m */,
 				32FD383813AFF52F007549B6 /* EventLocationAnnotation.h */,
 				32FD383913AFF52F007549B6 /* EventLocationAnnotation.m */,
-				32FD384013AFF52F007549B6 /* FeaturedEventManager.h */,
-				32FD384113AFF52F007549B6 /* FeaturedEventManager.m */,
 				32FD384513AFF52F007549B6 /* LocalImagesManager.h */,
 				32FD384613AFF52F007549B6 /* LocalImagesManager.m */,
 			);
@@ -1227,7 +1228,6 @@
 				32FD388213AFF52F007549B6 /* EventsViewController.m in Sources */,
 				32FD388313AFF52F007549B6 /* EventTableViewCell.m in Sources */,
 				32FD388413AFF52F007549B6 /* EventViewController.m in Sources */,
-				32FD388513AFF52F007549B6 /* FeaturedEventManager.m in Sources */,
 				32FD388613AFF52F007549B6 /* FeaturedEventViewController.m in Sources */,
 				32FD388713AFF52F007549B6 /* LocalImagesManager.m in Sources */,
 				32FD388813AFF52F007549B6 /* LoginViewController.m in Sources */,
@@ -1258,6 +1258,7 @@
 				3260038613B3A2B80054936A /* WebActivityView.m in Sources */,
 				3211538F13B4E56500DE5163 /* FacebookManager.m in Sources */,
 				3211539213B5252700DE5163 /* Contact.m in Sources */,
+				32EE74BD13B907D30002E11F /* CategoryBreadcrumb.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1441,9 +1442,10 @@
 			isa = XCVersionGroup;
 			children = (
 				32B36CD913B27DF1004C2068 /* kwiqet 002.xcdatamodel */,
+				32EE74BA13B902A90002E11F /* kwiqet 003.xcdatamodel */,
 				32FD364E13AFF3B6007549B6 /* kwiqet 001.xcdatamodel */,
 			);
-			currentVersion = 32B36CD913B27DF1004C2068 /* kwiqet 002.xcdatamodel */;
+			currentVersion = 32EE74BA13B902A90002E11F /* kwiqet 003.xcdatamodel */;
 			path = kwiqet.xcdatamodeld;
 			sourceTree = "<group>";
 			versionGroupType = wrapper.xcdatamodel;

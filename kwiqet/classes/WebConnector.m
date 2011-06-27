@@ -14,6 +14,7 @@ BOOL const WEB_CONNECTOR_ALLOW_SIMULTANEOUS_CONNECTIONS_DEFAULT = YES;
 static NSString * const WEB_CONNECTOR_GET_EVENTS_LIST_FILTER_RECOMMENDED = @"recommended";
 static NSString * const WEB_CONNECTOR_GET_EVENTS_LIST_FILTER_FREE = @"free";
 static NSString * const WEB_CONNECTOR_GET_EVENTS_LIST_FILTER_POPULAR = @"popular";
+static NSString * const WEB_CONNECTOR_GET_EVENT_USER_INFO_KEY_EVENT_URI = @"eventURI";
 static NSString * const WEB_CONNECTOR_GET_EVENTS_LIST_USER_INFO_KEY_FILTER = @"filterString";
 static NSString * const WEB_CONNECTOR_GET_EVENTS_LIST_USER_INFO_KEY_CATEGORY = @"categoryURI";
 static NSString * const WEB_CONNECTOR_GET_EVENTS_LIST_USER_INFO_KEY_SEARCH_STRING = @"searchString";
@@ -23,6 +24,8 @@ static NSString * const WEB_CONNECTOR_SEND_LEARNED_DATA_ABOUT_EVENT_USER_INFO_KE
 @interface WebConnector()
 - (void) getCategoryTreeSuccess:(ASIHTTPRequest *)request;
 - (void) getCategoryTreeFailure:(ASIHTTPRequest *)request;
+- (void) getEventSuccess:(ASIHTTPRequest *)request;
+- (void) getEventFailure:(ASIHTTPRequest *)request;
 - (void) getFeaturedEventSuccess:(ASIHTTPRequest *)request;
 - (void) getFeaturedEventFailure:(ASIHTTPRequest *)request;
 - (void) getEventsListSuccess:(ASIHTTPRequest *)request;
@@ -98,9 +101,57 @@ static NSString * const WEB_CONNECTOR_SEND_LEARNED_DATA_ABOUT_EVENT_USER_INFO_KE
     [self.delegate webConnector:self getCategoryTreeFailure:request];    
 }
 
-/////////////////////////
-// FEATURED EVENT TREE //
-/////////////////////////
+////////////
+// EVENTS //
+////////////
+
+- (void) getEventWithURI:(NSString *)eventURI {
+    if (self.availableToMakeWebConnection) {
+        connectionInProgress = YES;
+        NSURL * url = [self.urlBuilder buildCardURLWithID:eventURI];
+        NSLog(@"getEventWithURI - url is %@", url);
+        ASIHTTPRequest * request = [ASIHTTPRequest requestWithURL:url];
+        [request setTimeOutSeconds:self.timeoutLength];
+        [request setDelegate:self];
+        [request setRequestMethod:@"GET"];
+        [request setDidFinishSelector:@selector(getEventSuccess:)];
+        [request setDidFailSelector:@selector(getEventFailure:)];
+        NSDictionary * userInfo = [NSDictionary dictionaryWithObjectsAndKeys:eventURI, WEB_CONNECTOR_GET_EVENT_USER_INFO_KEY_EVENT_URI, nil];
+        request.userInfo = userInfo;
+        [request startAsynchronous];
+    }
+}
+
+- (void)getEventSuccess:(ASIHTTPRequest *)request {
+
+    connectionInProgress = NO;
+    
+    NSDictionary * userInfo = request.userInfo;
+    NSString * eventURI = [userInfo valueForKey:WEB_CONNECTOR_GET_EVENT_USER_INFO_KEY_EVENT_URI];
+    
+    // There is still a possibility that we successfully got a response, but that that response is nil. We should check for this, and switch our assessment to "failure" if necessary.
+    if (request) {
+        [self.delegate webConnector:self getEventSuccess:request forEventURI:eventURI];
+    } else {
+        [self.delegate webConnector:self getEventFailure:request forEventURI:eventURI];
+    }
+
+}
+
+- (void)getEventFailure:(ASIHTTPRequest *)request {
+    
+    connectionInProgress = NO;
+    
+    NSDictionary * userInfo = request.userInfo;
+    NSString * eventURI = [userInfo valueForKey:WEB_CONNECTOR_GET_EVENT_USER_INFO_KEY_EVENT_URI];
+    
+    [self.delegate webConnector:self getEventFailure:request forEventURI:eventURI];
+    
+}
+
+////////////////////
+// FEATURED EVENT //
+////////////////////
 
 - (void) getFeaturedEvent {
     if (self.availableToMakeWebConnection) {

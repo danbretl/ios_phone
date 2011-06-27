@@ -23,6 +23,7 @@ extern float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT;
 	UITableView * myTableView;
     
 	NSMutableArray * events;
+	NSMutableArray * eventsFromSearch;
     
     NSString * filterString;
     NSString * categoryURI;
@@ -63,7 +64,6 @@ extern float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT;
     NSIndexPath * indexPathOfSelectedRow;
     
     BOOL isSearchOn;
-	NSMutableArray * searchResult;
 	UISearchBar * mySearchBar;
     UIButton * searchButton;
     

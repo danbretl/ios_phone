@@ -17,10 +17,13 @@
 #import "MapViewController.h"
 #import "WebDataTranslator.h"
 #import "ElasticUILabel.h"
+#import "WebActivityView.h"
 
 @protocol CardPageViewControllerDelegate;
 
 @interface EventViewController : UIViewController <MFMailComposeViewControllerDelegate, WebConnectorDelegate, MapViewControllerDelegate> {
+    
+    Event * event;
     
     UIView * navigationBar;
     UIButton * backButton;
@@ -35,6 +38,7 @@
     
 	UIScrollView * scrollView;
 	UIImageView * imageView;
+    UIView * breadcrumbsBar;
     UILabel * breadcrumbsLabel;
     
     UIView * eventInfoDividerView;
@@ -53,21 +57,7 @@
     
     UILabel * detailsLabel;
     
-    
-    
-    
-
-    NSString *categoryColor;
-	
-	NSDictionary *eventDictionary;
-	
-	NSDate *eventStartDatetime;
-    NSDate *eventEndDatetime;
-	NSString *phoneString;
-    
-    NSString *eventDetailID;
-    NSString *eventTime;
-    NSString *costString;
+    WebActivityView * webActivityView;
     
     CoreDataModel * coreDataModel;
     
@@ -86,34 +76,23 @@
 }
 
 @property (assign) id<CardPageViewControllerDelegate> delegate;
+@property (nonatomic, retain) Event * event;
 @property (nonatomic, readonly) WebConnector * webConnector;
 @property (nonatomic, readonly) WebDataTranslator * webDataTranslator;
 @property (nonatomic, readonly) UIAlertView * connectionErrorOnUserActionRequestAlertView;
-@property (nonatomic,retain) NSDictionary * eventDictionary;
-@property (nonatomic,retain) NSDate * eventStartDatetime;
-@property (nonatomic,retain) NSDate * eventEndDatetime;
-@property (nonatomic,retain) NSString * phoneString;
-@property (nonatomic,retain) NSString * categoryColor;
-@property (nonatomic,retain) NSString * eventDetailID;
-@property (nonatomic,retain) NSString * eventTime;
-@property (nonatomic,retain) NSString * costString;
 @property (nonatomic, retain) CoreDataModel * coreDataModel;
 @property (retain) MapViewController * mapViewController;
 
-- (void) makeSubViews;
 - (void) viewControllerIsFinished;
-- (void) breadcrumbs;
-
 - (IBAction) bookedButtonClicked:(id)sender;
-
-- (IBAction) addCalendar:(id)sender;
 - (IBAction) shareButtonClicked:(id)sender;
 - (IBAction) deleteEvent:(id)sender;
 - (IBAction) phoneCall:(id)sender;
 - (IBAction) makeMapView:(id)sender;
-
-- (void) eventRequestWithID:(NSString*)eventID;
-- (void) buildArrayFromRequest:(NSString*)string;
+- (void) updateViewsFromData;
+- (void) makeAndShowEmailViewController;
+- (void) showWebLoadingViews;
+- (void) hideWebLoadingViews;
 
 @end
 

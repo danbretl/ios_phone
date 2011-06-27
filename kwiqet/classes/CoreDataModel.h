@@ -10,16 +10,21 @@
 #import "Event.h"
 #import "Category.h"
 #import "Contact.h"
+#import "CategoryBreadcrumb.h"
+#import "WebDataTranslator.h"
 
 @interface CoreDataModel : NSObject {
+    
     NSManagedObjectContext * managedObjectContext;
     NSManagedObjectModel * managedObjectModel;
     NSPersistentStoreCoordinator * persistentStoreCoordinator;
     
     NSDictionary * tempSolutionCategoriesOrderDictionary;
     
+    WebDataTranslator * webDataTranslator;
     NSNumber * coreDataYes;
     NSNumber * coreDataNo;
+    
 }
 
 @property (nonatomic, retain) NSManagedObjectContext *managedObjectContext;
@@ -29,6 +34,7 @@
 @property (nonatomic, readonly) NSDictionary * tempSolutionCategoriesOrderDictionary;
 
 // Util
+@property (nonatomic, readonly) WebDataTranslator * webDataTranslator;
 @property (nonatomic, readonly) NSNumber * coreDataYes;
 @property (nonatomic, readonly) NSNumber * coreDataNo;
 
@@ -44,11 +50,13 @@
 - (NSDictionary *) getAllCategoriesWithColorInDictionaryWithURIKeys;
 
 // Regular Events
-- (void) addEventWithURI:(NSString *)uri title:(NSString *)title venue:(NSString *)venue priceMinimum:(NSNumber *)priceMinimum priceMaximum:(NSNumber *)priceMaximum summaryAddress:(NSString *)summaryAddress summaryStartDateString:(NSString *)summaryStartDateString summaryStartTimeString:(NSString *)summaryStartTimeString concreteParentCategoryURI:(NSString *)concreteParentCategoryURI;
-- (void) deleteRegularEventForURI:(NSString*)eventID;
+- (void) addEventWithURI:(NSString *)uri title:(NSString *)title venue:(NSString *)venue priceMinimum:(NSNumber *)priceMinimum priceMaximum:(NSNumber *)priceMaximum summaryAddress:(NSString *)summaryAddress summaryStartDateString:(NSString *)summaryStartDateString summaryStartTimeString:(NSString *)summaryStartTimeString concreteParentCategoryURI:(NSString *)concreteParentCategoryURI fromSearch:(BOOL)fromSearch;
+- (void) updateEvent:(Event *)event usingEventDictionary:(NSDictionary *)eventDictionary featuredOverride:(NSNumber *)featuredOverride fromSearchOverride:(NSNumber *)fromSearchOverride;
 - (NSArray *) getRegularEvents;
+- (NSArray *) getRegularEventsFromSearch;
 - (void) deleteRegularEvents;
 - (void) deleteRegularEventsFromSearch;
+- (void) deleteRegularEventForURI:(NSString*)eventID;
 
 // Featured Events
 - (Event *) getFeaturedEvent;

@@ -10,6 +10,7 @@
 #import <CoreData/CoreData.h>
 
 @class EventInfo;
+@class CategoryBreadcrumb;
 
 @interface Category : NSManagedObject {
 @private
@@ -19,6 +20,7 @@
 @property (nonatomic, retain) NSString * uri;
 @property (nonatomic, retain) NSString * thumbnail;
 @property (nonatomic, retain) NSNumber * displayOrder;
-@property (nonatomic, retain) NSSet * events;
+@property (nonatomic, retain) NSSet * eventsDeprecated;
+@property (nonatomic, retain) NSSet * eventsNew;
 
 @end

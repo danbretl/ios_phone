@@ -1,0 +1,21 @@
+//
+//  CategoryBreadcrumb.m
+//  kwiqet
+//
+//  Created by Dan Bretl on 6/27/11.
+//  Copyright (c) 2011 __MyCompanyName__. All rights reserved.
+//
+
+#import "CategoryBreadcrumb.h"
+#import "Category.h"
+#import "Event.h"
+
+
+@implementation CategoryBreadcrumb
+@dynamic order;
+@dynamic event;
+@dynamic category;
+
+
+
+@end

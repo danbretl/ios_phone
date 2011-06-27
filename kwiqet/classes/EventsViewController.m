@@ -32,10 +32,13 @@ static NSString * const EVENTS_FILTER_BUTTON_EXTENSION = @".png";
 static NSString * const EVENTS_UPDATED_NOTIFICATION_KEY = @"eventsUpdated";
 static NSString * const EVENTS_UPDATED_USER_INFO_KEY_RESULTS = @"results";
 static NSString * const EVENTS_UPDATED_USER_INFO_KEY_RESULTS_DETAIL = @"resultsDetail";
+static NSString * const EVENTS_UPDATED_USER_INFO_KEY_SOURCE = @"source";
 static NSString * const EVENTS_UPDATED_USER_INFO_RESULTS_POPULATED = @"populated";
 static NSString * const EVENTS_UPDATED_USER_INFO_RESULTS_EMPTY = @"empty";
 static NSString * const EVENTS_UPDATED_USER_INFO_RESULTS_DETAIL_NO_RESULTS = @"noResults";
 static NSString * const EVENTS_UPDATED_USER_INFO_RESULTS_DETAIL_CONNECTION_ERROR = @"connectionError";
+static NSString * const EVENTS_UPDATED_USER_INFO_SOURCE_GENERAL = @"general";
+static NSString * const EVENTS_UPDATED_USER_INFO_SOURCE_FROM_SEARCH = @"fromSearch";
 
 float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 
@@ -102,11 +105,12 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 - (void) toggleSearchMode;
 @property (nonatomic, readonly) WebDataTranslator * webDataTranslator;
 @property (nonatomic, retain) NSMutableArray * events;
-@property (nonatomic, readonly) NSMutableArray * searchResult;
+@property (nonatomic, retain) NSMutableArray * eventsFromSearch;
+@property (nonatomic, readonly) NSMutableArray * eventsForCurrentSource;
 @end
 
 @implementation EventsViewController
-@synthesize myTableView,mySearchBar,searchResult, events,coreDataModel,webActivityView,concreteParentCategoriesDictionary,freeFilterButton,recommendedFilterButton,popularFilterButton,categoriesBackgroundView, selectedFilterView, filtersBackgroundView;
+@synthesize myTableView,mySearchBar,eventsFromSearch, events,coreDataModel,webActivityView,concreteParentCategoriesDictionary,freeFilterButton,recommendedFilterButton,popularFilterButton,categoriesBackgroundView, selectedFilterView, filtersBackgroundView;
 @synthesize refreshHeaderView, concreteParentCategoriesArray;
 @synthesize filterString, categoryURI, filterStringProposed, categoryURIProposed;
 @synthesize isSearchOn;
@@ -126,7 +130,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     [concreteParentCategoriesArray release];
 	[myTableView release];
 	[mySearchBar release];
-	[searchResult release];
+	[eventsFromSearch release];
 	[events release];
     [coreDataModel release];
 	[refreshHeaderView release];
@@ -151,8 +155,6 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 // Implement viewDidLoad to do additional setup after loading the view, typically from a nib.
 - (void)viewDidLoad {
     [super viewDidLoad];
-        
-    //self.events = [[[self.coreDataModel getRegularEvents] mutableCopy] autorelease]; // This was causing a crash, I think because we were accessing faulted data... This seems to make sense I think. We should really only be updating the events array after data is updated anyway.
         
     // Create categories background view under UITableView
     self.categoriesBackgroundView = [[[UIView alloc] initWithFrame:CGRectMake(0, 80, 320, 255)] autorelease];
@@ -348,11 +350,12 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     
     if (self.webConnector.connectionInProgress) {
         [self showWebLoadingViews];
-    } else if (self.isSearchOn && [self.searchResult count] == 0) {
-        // Not going to do anything on this path for now... Just leave the list blank?
-    } else if (!self.isSearchOn && [self.events count] == 0) {
-//        NSLog(@"eventsviewcontroller this path");
-        [self webConnectGetEventsListWithCurrentFilterAndCategory];
+    } else if ([self.eventsForCurrentSource count] == 0) {
+        if (self.isSearchOn) {
+            // Not going to do anything on this path for now... Just leave the list blank?
+        } else {
+            [self webConnectGetEventsListWithCurrentFilterAndCategory];
+        }
     } else {
         // Not worried about this path currently...
     }
@@ -420,6 +423,11 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 
 }
 
+- (NSMutableArray *)eventsForCurrentSource {
+    NSMutableArray * eventsArray = self.isSearchOn ? self.eventsFromSearch : self.events;
+    return eventsArray;
+}
+
 - (NSDictionary *)concreteParentCategoriesDictionary {
     if (concreteParentCategoriesDictionary == nil) {
         concreteParentCategoriesDictionary = [[self.coreDataModel getAllCategoriesWithColorInDictionaryWithURIKeys] retain];
@@ -432,13 +440,6 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
         concreteParentCategoriesArray = [[self.coreDataModel getAllCategoriesWithColor] retain];
     }
     return concreteParentCategoriesArray;
-}
-
-- (NSMutableArray *)searchResult {
-    if (searchResult == nil) {
-        searchResult = [[NSMutableArray alloc] init];
-    }
-    return searchResult;
 }
 
 - (WebConnector *) webConnector {
@@ -514,7 +515,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
             NSNumber * maxPrice = [WebUtil numberOrNil:[eventDictionary valueForKey:@"price_quantity_max"]]; // NSNumber
             NSNumber * minPrice = [WebUtil numberOrNil:[eventDictionary valueForKey:@"price_quantity_min"]]; // NSNumber
             
-            [self.coreDataModel addEventWithURI:uri title:title venue:venue priceMinimum:minPrice priceMaximum:maxPrice summaryAddress:summaryAddress summaryStartDateString:summaryStartDate summaryStartTimeString:summaryStartTime concreteParentCategoryURI:concreteParentCategoryURI];
+            [self.coreDataModel addEventWithURI:uri title:title venue:venue priceMinimum:minPrice priceMaximum:maxPrice summaryAddress:summaryAddress summaryStartDateString:summaryStartDate summaryStartTimeString:summaryStartTime concreteParentCategoryURI:concreteParentCategoryURI fromSearch:NO];
             
         }
         
@@ -537,9 +538,16 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     self.categoryURIProposed = nil;
     
     // Send out a notification that the events in Core Data have been flushed, and there is (maybe) a new set of retrieved events available.
-    NSString * results = haveResults ? EVENTS_UPDATED_USER_INFO_RESULTS_POPULATED : EVENTS_UPDATED_USER_INFO_RESULTS_EMPTY;
-    NSString * resultsDetail = EVENTS_UPDATED_USER_INFO_RESULTS_DETAIL_NO_RESULTS;
-    NSDictionary * eventsUpdatedInfo = [NSDictionary dictionaryWithObjectsAndKeys:results, EVENTS_UPDATED_USER_INFO_KEY_RESULTS, resultsDetail, EVENTS_UPDATED_USER_INFO_KEY_RESULTS_DETAIL, nil];
+    NSMutableDictionary * eventsUpdatedInfo = [NSMutableDictionary dictionary];
+    NSString * results;
+    if (haveResults) {
+        results = EVENTS_UPDATED_USER_INFO_RESULTS_POPULATED;
+    } else {
+        results = EVENTS_UPDATED_USER_INFO_RESULTS_EMPTY;
+        [eventsUpdatedInfo setObject:EVENTS_UPDATED_USER_INFO_RESULTS_DETAIL_NO_RESULTS forKey:EVENTS_UPDATED_USER_INFO_KEY_RESULTS_DETAIL];
+    }
+    [eventsUpdatedInfo setObject:results forKey:EVENTS_UPDATED_USER_INFO_KEY_RESULTS];
+    [eventsUpdatedInfo setObject:EVENTS_UPDATED_USER_INFO_SOURCE_GENERAL forKey:EVENTS_UPDATED_USER_INFO_KEY_SOURCE];
     [[NSNotificationCenter defaultCenter] postNotificationName:EVENTS_UPDATED_NOTIFICATION_KEY object:nil userInfo:eventsUpdatedInfo];
 
 }
@@ -564,68 +572,120 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     // Send out a notification that the events in Core Data have been flushed, and there is (maybe) a new set of retrieved events available.
     NSString * results = EVENTS_UPDATED_USER_INFO_RESULTS_EMPTY;
     NSString * resultsDetail = EVENTS_UPDATED_USER_INFO_RESULTS_DETAIL_CONNECTION_ERROR;
-    NSDictionary * eventsUpdatedInfo = [NSDictionary dictionaryWithObjectsAndKeys:results, EVENTS_UPDATED_USER_INFO_KEY_RESULTS, resultsDetail, EVENTS_UPDATED_USER_INFO_KEY_RESULTS_DETAIL, nil];
+    NSDictionary * eventsUpdatedInfo = [NSDictionary dictionaryWithObjectsAndKeys:results, EVENTS_UPDATED_USER_INFO_KEY_RESULTS, resultsDetail, EVENTS_UPDATED_USER_INFO_KEY_RESULTS_DETAIL, EVENTS_UPDATED_USER_INFO_SOURCE_GENERAL, EVENTS_UPDATED_USER_INFO_KEY_SOURCE, nil];
     [[NSNotificationCenter defaultCenter] postNotificationName:EVENTS_UPDATED_NOTIFICATION_KEY object:nil userInfo:eventsUpdatedInfo];
     
 }
 
 - (void)webConnector:(WebConnector *)webConnector getEventsListSuccess:(ASIHTTPRequest *)request forSearchString:(NSString *)searchString {
     
-	// Use when fetching text data
-	NSString * stringFromRequest = [request responseString];
-    // Parse request into searchResult array
+    NSString * responseString = [request responseString];
+    //    NSLog(@"EventsViewController webConnector:getEventsListSuccess:withFilter:categoryURI: - response is %@", responseString);
     NSError * error = nil;
-    NSDictionary * dictionaryFromJSON = [stringFromRequest yajl_JSONWithOptions:YAJLParserOptionsAllowComments error:&error];
-    NSArray * objectsKey = [dictionaryFromJSON valueForKey:@"objects"];
-    [self.searchResult removeAllObjects];
-    [self.searchResult addObjectsFromArray:objectsKey];
+    NSDictionary * dictionaryFromJSON = [responseString yajl_JSONWithOptions:YAJLParserOptionsAllowComments error:&error];
+    NSArray * eventsDictionaries = [dictionaryFromJSON valueForKey:@"objects"];
     
-    if (![self.searchResult count] > 0) {
-        UIAlertView * alertView = [[UIAlertView alloc] initWithTitle:@"No results" message:@"Sorry, we couldn't find any events matching your search." delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
-        [alertView show];
-        [alertView release];
+    // First, delete all previous events found from search in Core Data
+    [self.coreDataModel deleteRegularEventsFromSearch];
+    
+    BOOL haveResults = eventsDictionaries && [eventsDictionaries count] > 0;
+    
+    if (haveResults) {
+        
+        // Loop through and process all event dictionaries
+        for (NSDictionary * eventDictionary in eventsDictionaries) {
+            
+            // Get the rest of the raw event data
+            NSString * uri = [WebUtil stringOrNil:[eventDictionary valueForKey:@"event"]];
+            NSString * concreteParentCategoryURI = [WebUtil stringOrNil:[eventDictionary valueForKey:@"concrete_parent_category"]];
+            NSString * summaryAddress = [WebUtil stringOrNil:[eventDictionary valueForKey:@"place_address"]];
+            NSString * venue = [WebUtil stringOrNil:[eventDictionary valueForKey:@"place_title"]];
+            NSString * summaryStartDate = [WebUtil stringOrNil:[eventDictionary valueForKey:@"start_date_earliest"]];
+            NSString * summaryStartTime = [WebUtil stringOrNil:[eventDictionary valueForKey:@"start_time_earliest"]];
+            NSString * title = [WebUtil stringOrNil:[eventDictionary valueForKey:@"title"]]; // NSString
+            NSNumber * maxPrice = [WebUtil numberOrNil:[eventDictionary valueForKey:@"price_quantity_max"]]; // NSNumber
+            NSNumber * minPrice = [WebUtil numberOrNil:[eventDictionary valueForKey:@"price_quantity_min"]]; // NSNumber
+            
+            [self.coreDataModel addEventWithURI:uri title:title venue:venue priceMinimum:minPrice priceMaximum:maxPrice summaryAddress:summaryAddress summaryStartDateString:summaryStartDate summaryStartTimeString:summaryStartTime concreteParentCategoryURI:concreteParentCategoryURI fromSearch:YES];
+            
+        }
+        
     }
-    // Reload table
-    [self.myTableView reloadData];
-    [self hideWebLoadingViews];
+    
+    // Save our core data changes
+    [self.coreDataModel coreDataSave];
+    
+    // Send out a notification that the events in Core Data have been flushed, and there is (maybe) a new set of retrieved events available.
+    NSMutableDictionary * eventsUpdatedInfo = [NSMutableDictionary dictionary];
+    NSString * results;
+    if (haveResults) {
+        results = EVENTS_UPDATED_USER_INFO_RESULTS_POPULATED;
+    } else {
+        results = EVENTS_UPDATED_USER_INFO_RESULTS_EMPTY;
+        [eventsUpdatedInfo setObject:EVENTS_UPDATED_USER_INFO_RESULTS_DETAIL_NO_RESULTS forKey:EVENTS_UPDATED_USER_INFO_KEY_RESULTS_DETAIL];
+    }
+    [eventsUpdatedInfo setObject:results forKey:EVENTS_UPDATED_USER_INFO_KEY_RESULTS];
+    [eventsUpdatedInfo setObject:EVENTS_UPDATED_USER_INFO_SOURCE_FROM_SEARCH forKey:EVENTS_UPDATED_USER_INFO_KEY_SOURCE];
+    [[NSNotificationCenter defaultCenter] postNotificationName:EVENTS_UPDATED_NOTIFICATION_KEY object:nil userInfo:eventsUpdatedInfo];
     
 }
 
 - (void)webConnector:(WebConnector *)webConnector getEventsListFailure:(ASIHTTPRequest *)request forSearchString:(NSString *)searchString {
     
-	NSString *statusMessage = [request responseStatusMessage];
+    NSString *statusMessage = [request responseStatusMessage];
 	NSLog(@"%@",statusMessage);
 	NSError *error = [request error];
 	NSLog(@"%@",error);
     
-    [self hideWebLoadingViews];
-    UIAlertView * alertView = [[UIAlertView alloc] initWithTitle:@"Connection Error" message:WEB_CONNECTION_ERROR_MESSAGE_STANDARD delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
-    [alertView show];
-    [alertView release];
+    [self.coreDataModel deleteRegularEventsFromSearch];
+    
+    // Send out a notification that the events in Core Data have been flushed, and there is (maybe) a new set of retrieved events available.
+    NSString * results = EVENTS_UPDATED_USER_INFO_RESULTS_EMPTY;
+    NSString * resultsDetail = EVENTS_UPDATED_USER_INFO_RESULTS_DETAIL_CONNECTION_ERROR;
+    NSDictionary * eventsUpdatedInfo = [NSDictionary dictionaryWithObjectsAndKeys:results, EVENTS_UPDATED_USER_INFO_KEY_RESULTS, resultsDetail, EVENTS_UPDATED_USER_INFO_KEY_RESULTS_DETAIL, EVENTS_UPDATED_USER_INFO_SOURCE_FROM_SEARCH, EVENTS_UPDATED_USER_INFO_KEY_SOURCE, nil];
+    [[NSNotificationCenter defaultCenter] postNotificationName:EVENTS_UPDATED_NOTIFICATION_KEY object:nil userInfo:eventsUpdatedInfo];
     
 }
 
 - (void) dataSourceEventsUpdated:(NSNotification *)notification {
-    
+        
     NSDictionary * userInfo = [notification userInfo];
     
     //NSString * results = [userInfo objectForKey:EVENTS_UPDATED_USER_INFO_KEY_RESULTS]; // Don't need this for now - can just check the number of items in events array.
     NSString * resultsDetail = [userInfo objectForKey:EVENTS_UPDATED_USER_INFO_KEY_RESULTS_DETAIL];
+    BOOL fromSearch = [[userInfo objectForKey:EVENTS_UPDATED_USER_INFO_KEY_SOURCE] isEqualToString:EVENTS_UPDATED_USER_INFO_SOURCE_FROM_SEARCH];
     
-    self.events = [[[self.coreDataModel getRegularEvents] mutableCopy] autorelease];
+    if (!fromSearch) {
+        self.events = [[[self.coreDataModel getRegularEvents] mutableCopy] autorelease];
+    } else {
+        self.eventsFromSearch = [[[self.coreDataModel getRegularEventsFromSearch] mutableCopy] autorelease];
+    }
+    
     [self.myTableView reloadData];
     [self.myTableView scrollRectToVisible:CGRectMake(0, 0, 1, 1) animated:YES];
     
-    if (self.events && [self.events count] > 0) {
-        [self hideProblemViewAnimated:NO];
+    if (self.eventsForCurrentSource && [self.eventsForCurrentSource count] > 0) {
         // Events were retrieved... They will be displayed.
+        [self hideProblemViewAnimated:NO];
     } else {
         // No events were retrieved. Respond accordingly, depending on the reason.
         if ([resultsDetail isEqualToString:EVENTS_UPDATED_USER_INFO_RESULTS_DETAIL_NO_RESULTS]) {
-            Category * category = (Category *)[self.concreteParentCategoriesDictionary objectForKey:self.categoryURI];
-            [self showProblemViewNoEventsForFilter:self.filterString categoryTitle:category.title animated:NO];
+            if (!fromSearch) {
+                Category * category = (Category *)[self.concreteParentCategoriesDictionary objectForKey:self.categoryURI];
+                [self showProblemViewNoEventsForFilter:self.filterString categoryTitle:category.title animated:NO];
+            } else {
+                UIAlertView * alertView = [[UIAlertView alloc] initWithTitle:@"No results" message:@"Sorry, we couldn't find any events matching your search." delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
+                [alertView show];
+                [alertView release];
+            }
         } else if ([resultsDetail isEqualToString:EVENTS_UPDATED_USER_INFO_RESULTS_DETAIL_CONNECTION_ERROR]) {
-            [self showProblemViewBadConnectionAnimated:NO];
+            if (!fromSearch) {
+                [self showProblemViewBadConnectionAnimated:NO];
+            } else {
+                UIAlertView * alertView = [[UIAlertView alloc] initWithTitle:@"Connection Error" message:WEB_CONNECTION_ERROR_MESSAGE_STANDARD delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
+                [alertView show];
+                [alertView release];
+            }
         } else {
             NSLog(@"ERROR in EventsViewController - events array is empty for unknown reason.");
         }
@@ -813,7 +873,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 - (void)scrollViewDidEndDragging:(UIScrollView *)scrollView
 				  willDecelerate:(BOOL)decelerate {
     
-	if (!self.isSearchOn && scrollView.contentOffset.y <= -65.0f/* && !self.reloading*/) {
+	if (!self.isSearchOn && scrollView.contentOffset.y <= -65.0f) {
 
         [self.refreshHeaderView setState:EGOOPullRefreshLoading];
 		[UIView beginAnimations:nil context:NULL];
@@ -827,10 +887,12 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 }
 
 - (void)scrollViewDidScroll:(UIScrollView *)scrollView {
-    if (!self.isSearchOn && scrollView.contentOffset.y <= -65.0f) {
-        [self.refreshHeaderView setState:EGOOPullRefreshPulling];
-    } else {
-        [self.refreshHeaderView setState:EGOOPullRefreshNormal];
+    if (!self.isSearchOn) {
+        if (scrollView.contentOffset.y <= -65.0f) {
+            [self.refreshHeaderView setState:EGOOPullRefreshPulling];
+        } else {
+            [self.refreshHeaderView setState:EGOOPullRefreshNormal];
+        }
     }
 }
 
@@ -908,9 +970,11 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     self.refreshHeaderView.hidden = self.isSearchOn;
     [self forceSearchBarCancelButtonToBeEnabled];
     if (self.isSearchOn) {
-        [self.searchResult removeAllObjects];
-        self.mySearchBar.text = @"";
         // New mode is search on
+        // Clear all previous search results / terms etc
+        [self.coreDataModel deleteRegularEventsFromSearch];
+        [self.eventsFromSearch removeAllObjects];
+        self.mySearchBar.text = @"";
         [UIView animateWithDuration:0.25 animations:^{
             CGRect myTableViewFrame = self.myTableView.frame;
             myTableViewFrame.origin.y -= self.filtersBackgroundView.frame.size.height;
@@ -991,11 +1055,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
-    if (self.isSearchOn)  {
-        return [self.searchResult count];
-    } else {
-        return [self.events count];
-    }
+    return [self.eventsForCurrentSource count];
 }
 
 // Customize the appearance of table view cells.
@@ -1012,46 +1072,23 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     return cell;
 }
 
-// THIS BADLY NEEDS TO BE RE-WRITTEN // ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 - (void) configureCell:(EventTableViewCell *)cell forRowAtIndexPath:(NSIndexPath *)indexPath {
     
-    NSString * title;
-    Category * concreteParentCategory;
-    NSString * colorHex;
-    NSString * location;
-    NSString * address;
-    NSString * summaryStartDateString;
-    NSString * summaryStartTimeString;
-    NSNumber * priceMin;
-    NSNumber * priceMax;
-    NSString * priceRange;
+    Event * event = (Event *)[self.eventsForCurrentSource objectAtIndex:indexPath.row];
     
-    if (self.isSearchOn) {
-        NSDictionary * eventDictionary = [self.searchResult objectAtIndex:indexPath.row];
-        title = [WebUtil stringOrNil:[eventDictionary valueForKey:@"title"]];
-        concreteParentCategory = (Category *)[self.concreteParentCategoriesDictionary objectForKey:[WebUtil stringOrNil:[eventDictionary valueForKey:@"concrete_parent_category"]]];
-        location = [WebUtil stringOrNil:[eventDictionary valueForKey:@"place_title"]];
-        address = [WebUtil stringOrNil:[eventDictionary valueForKey:@"place_address"]];
-        summaryStartDateString = [WebUtil stringOrNil:[eventDictionary valueForKey:@"start_date_earliest"]];
-        summaryStartTimeString = [WebUtil stringOrNil:[eventDictionary valueForKey:@"start_time_earliest"]];
-        priceMin = [WebUtil numberOrNil:[eventDictionary valueForKey:@"price_quantity_min"]];
-        priceMax = [WebUtil numberOrNil:[eventDictionary valueForKey:@"price_quantity_max"]];
-    } else {
-        Event * event = (Event *)[self.events objectAtIndex:indexPath.row];
-        title = event.title;
-        concreteParentCategory = event.concreteParentCategory;
-        location = event.venue;
-        address = event.summaryAddress;
-        summaryStartDateString = event.summaryStartDateString;
-        summaryStartTimeString = event.summaryStartTimeString;
-        priceMin = event.priceMinimum;
-        priceMax = event.priceMaximum;
-    }
+    NSString * title = event.title;
+    Category * concreteParentCategory = event.concreteParentCategory;
+    NSString * location = event.venue;
+    NSString * address = event.summaryAddress;
+    NSString * summaryStartDateString = event.summaryStartDateString;
+    NSString * summaryStartTimeString = event.summaryStartTimeString;
+    NSNumber * priceMin = event.priceMinimum;
+    NSNumber * priceMax = event.priceMaximum;
     
     if (!title) { title = @"Title not available"; }
     cell.titleLabel.text = title;
     
-    colorHex = concreteParentCategory.colorHex;
+    NSString * colorHex = concreteParentCategory.colorHex;
     if (colorHex) {
         cell.categoryColorView.backgroundColor = [WebUtil colorFromHexString:colorHex];
     }
@@ -1073,7 +1110,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     NSString * finalDatetimeString = [NSString stringWithFormat:@"%@%@%@", dateToDisplay, divider, timeToDisplay];
     cell.dateAndTimeLabel.text = finalDatetimeString;
     
-    priceRange = [self.webDataTranslator priceRangeStringFromMinPrice:priceMin maxPrice:priceMax dataUnavailableString:nil];
+    NSString * priceRange = [self.webDataTranslator priceRangeStringFromMinPrice:priceMin maxPrice:priceMax dataUnavailableString:nil];
     cell.priceLabel.text = priceRange;
     
 }
@@ -1087,30 +1124,13 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     self.cardPageViewController.coreDataModel = self.coreDataModel;
     self.cardPageViewController.delegate = self;
     self.cardPageViewController.hidesBottomBarWhenPushed = YES;
-	
-    NSArray * theEventsArray = self.isSearchOn ? self.searchResult : self.events;
-    NSDictionary * eventDictionary = [theEventsArray objectAtIndex:indexPath.row];    
-    NSString * eventURI = nil;
-    NSString * categoryColor = nil;
-
-    if (self.isSearchOn) {
-//        NSLog(@"search is on when select");
-        eventURI = [eventDictionary objectForKey:@"event"];
-        Category * category = [self.concreteParentCategoriesDictionary objectForKey:[eventDictionary valueForKey:@"concrete_parent_category"]];
-        categoryColor = category.colorHex;
-    } else {
-        Event * event = (Event *)[self.events objectAtIndex:indexPath.row];
-        eventURI = event.uri;
-        categoryColor = event.concreteParentCategory.colorHex;
-    }
     
-    self.cardPageViewController.eventDetailID = eventURI;
-    self.cardPageViewController.categoryColor = categoryColor;
+    Event * event = (Event *)[self.eventsForCurrentSource objectAtIndex:indexPath.row];
+    
+    self.cardPageViewController.event = event;
     
     self.indexPathOfSelectedRow = indexPath;
-    [self.webConnector sendLearnedDataAboutEvent:eventURI withUserAction:@"V"];
-    
-    //[self presentModalViewController:cardPageViewController animated:YES]; // Going to wait on this until we know that we have an internet connection. Honestly, there's no point in displaying a blank CardPageViewController, showing an internet error message, and then popping the user back out. So, for now, I am just going to use the response from the learned data web send to know whether we have an internet connection or not. This is sort of a hack. Change / come back to this later.
+    [self.webConnector sendLearnedDataAboutEvent:event.uri withUserAction:@"V"]; // Going to wait on this until we know that we have an internet connection. Honestly, there's no point in displaying a blank CardPageViewController, showing an internet error message, and then popping the user back out. So, for now, I am just going to use the response from the learned data web send to know whether we have an internet connection or not. This is sort of a hack. Change / come back to this later.
     
 }
 
@@ -1127,17 +1147,9 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
         NSIndexPath * indexPath = self.indexPathOfRowAttemptingToDelete;
         self.indexPathOfRowAttemptingToDelete = nil;
         // Delete event from our table display array
-        NSMutableArray * eventsArray = self.isSearchOn ? self.searchResult : self.events;
-        [eventsArray removeObjectAtIndex:indexPath.row];
+        [self.eventsForCurrentSource removeObjectAtIndex:indexPath.row];
         // Animate event deletion from the table
         [self.myTableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:indexPath] withRowAnimation:UITableViewRowAnimationFade];
-        
-        // We have a weird bug (not iPhone, more mid-tier) that is causing an event to pop into the self.events array while we are in search mode. To hide that bug, I am putting in this if statement.
-//        if ([self.events count] > 0) {
-//            [self hideProblemViewAnimated:NO];
-//        } else {
-//            [self showProblemViewNoEventsForFilter:self.filterString categoryTitle:self.categoryURI animated:NO];
-//        }
         
     }
     
@@ -1175,21 +1187,34 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 - (void)cardPageViewControllerDidFinish:(EventViewController *)cardPageViewController withEventDeletion:(BOOL)eventWasDeleted eventURI:(NSString *)eventURI {
 
     if (eventWasDeleted) {
-
-        // Get the appropriate array
-        NSMutableArray * theEventsArray = self.isSearchOn ? self.searchResult : self.events;
         
+        [self.coreDataModel deleteRegularEventForURI:eventURI];
+
         // Delete event from our table display array
-        [theEventsArray removeObjectAtIndex:self.indexPathOfSelectedRow.row];
+        [self.eventsForCurrentSource removeObjectAtIndex:self.indexPathOfSelectedRow.row];
         
         // Animate event deletion from the table
-        [self.myTableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:self.indexPathOfSelectedRow] withRowAnimation:UITableViewRowAnimationFade]; // This animation is a little weird... Going back to the heavyweight reload.
-        //[myTableView reloadData];
+        [self.myTableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:self.indexPathOfSelectedRow] withRowAnimation:UITableViewRowAnimationFade];
         
     }
     
     [self.navigationController popViewControllerAnimated:YES];
     
+}
+
+- (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath {
+    
+	// If row is deleted, remove it from the list.
+	if (editingStyle == UITableViewCellEditingStyleDelete) {
+        
+        Event * event = (Event *)[self.eventsForCurrentSource objectAtIndex:indexPath.row];
+        
+        // Send learned data to server
+        self.indexPathOfRowAttemptingToDelete = indexPath;
+        [self.webConnector sendLearnedDataAboutEvent:event.uri withUserAction:@"X"]; // If we don't connect with the server about deleting an event, we should cache the request and retry later, because we don't want to lose that learned behavior, but for now we're going to leave that out. DEFINITELY COME BACK TO THIS LATER. Issue submitted to GitHub. For now, we will wait to get a server response before doing anything else (such as deleting the item locally, etc). We should also probably lock up the UI while we're waiting.
+        [self showWebLoadingViews];
+        
+	}
 }
 
 - (void)keyboardWillShow:(NSNotification *)notification {
@@ -1227,29 +1252,6 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     }
     [self webConnectGetEventsListWithFilter:EVENTS_FILTER_RECOMMENDED categoryURI:nil];
 }
-
-- (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath {
-    
-	// If row is deleted, remove it from the list.
-	if (editingStyle == UITableViewCellEditingStyleDelete) {
-        
-        // Get the Event ID
-        NSString * eventID = nil;
-        if (self.isSearchOn) {
-            eventID = [[self.searchResult objectAtIndex:indexPath.row] valueForKey:@"event"];
-        } else {
-            Event * event = [self.events objectAtIndex:indexPath.row];
-            eventID = event.uri;
-        }
-        
-        // Send learned data to server
-        self.indexPathOfRowAttemptingToDelete = indexPath;
-        [self.webConnector sendLearnedDataAboutEvent:eventID withUserAction:@"X"]; // If we don't connect with the server about deleting an event, we should cache the request and retry later, because we don't want to lose that learned behavior, but for now we're going to leave that out. DEFINITELY COME BACK TO THIS LATER. Issue submitted to GitHub. For now, we will wait to get a server response before doing anything else (such as deleting the item locally, etc). We should also probably lock up the UI while we're waiting.
-        [self showWebLoadingViews];
-
-	}
-}
-
 
 #pragma mark color
 

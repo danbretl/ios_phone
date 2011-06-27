@@ -91,7 +91,7 @@ CGFloat const FEV_DESCRIPTION_LABEL_PADDING = 5.0;
 @end
 
 @implementation FeaturedEventViewController
-@synthesize featuredEventManager, mostRecentGetNewFeaturedEventSuggestionDate, coreDataModel, facebookManager;
+@synthesize mostRecentGetNewFeaturedEventSuggestionDate, coreDataModel, facebookManager;
 @synthesize mapViewController;
 @synthesize actionBarView, letsGoButton, shareButton, scrollView, imageView, titleBarView, titleLabel, detailsView, shareChoiceActionSheet, webActivityView;
 @synthesize timeLabel, dateLabel, venueNameLabel, addressFirstLineLabel, addressSecondLineLabel, phoneNumberButton, priceLabel, eventDetailsLabel, mapButton, noFeaturedEventView, refreshHeaderView;
@@ -123,7 +123,6 @@ CGFloat const FEV_DESCRIPTION_LABEL_PADDING = 5.0;
     [shareChoiceActionSheet release];
     [webActivityView release];
     
-    [featuredEventManager release];
     [webConnector release];
     [coreDataModel release];
     [facebookManager release];
@@ -387,7 +386,7 @@ CGFloat const FEV_DESCRIPTION_LABEL_PADDING = 5.0;
             [self.webConnector getFeaturedEvent];
 //            [self showWebActivityView];
         } else {
-            [self updateInterfaceFromFeaturedEvent:self.featuredEventManager.featuredEvent];
+            [self updateInterfaceFromFeaturedEvent:[self.coreDataModel getFeaturedEvent]];
         }        
     }
 }
@@ -405,14 +404,20 @@ CGFloat const FEV_DESCRIPTION_LABEL_PADDING = 5.0;
 }
 
 - (void) webConnector:(WebConnector *)webConnector getFeaturedEventSuccess:(ASIHTTPRequest *)request {
+    
     [self disableRefreshHeaderView];
     NSString * responseString = [request responseString];
 	NSError * error = nil;
     NSDictionary * featuredEventJSONDictionary = [[[NSDictionary dictionaryWithDictionary:[responseString yajl_JSONWithOptions:YAJLParserOptionsAllowComments error:&error]] valueForKey:@"objects"] objectAtIndex:0];
-    [self.featuredEventManager processAndAddOrUpdateFeaturedEventCoreDataObjectFromFeaturedEventJSONDictionary:featuredEventJSONDictionary];
+    
+    // Add to/update core data
+    Event * featured = [self.coreDataModel getOrCreateFeaturedEvent];
+    [self.coreDataModel updateEvent:featured usingEventDictionary:featuredEventJSONDictionary featuredOverride:[NSNumber numberWithBool:YES] fromSearchOverride:[NSNumber numberWithBool:NO]];
+    
     [DefaultsModel saveLastFeaturedEventGetDate:[NSDate date]];
-    [self updateInterfaceFromFeaturedEvent:self.featuredEventManager.featuredEvent];
+    [self updateInterfaceFromFeaturedEvent:[self.coreDataModel getFeaturedEvent]];
 //    [self hideWebActivityView];
+    
 }
 
 - (void)webConnector:(WebConnector *)webConnector getFeaturedEventFailure:(ASIHTTPRequest *)request {
@@ -421,7 +426,7 @@ CGFloat const FEV_DESCRIPTION_LABEL_PADDING = 5.0;
 	NSError *error = [request error];
 	NSLog(@"%@",error);
 	//[self serverError];
-    [self updateInterfaceFromFeaturedEvent:self.featuredEventManager.featuredEvent]; // This could be an old featured event, or it could be nothing.
+    [self updateInterfaceFromFeaturedEvent:[self.coreDataModel getFeaturedEvent]]; // This could be an old featured event, or it could be nothing.
 //    [self hideWebActivityView];
 }
 
@@ -464,14 +469,10 @@ CGFloat const FEV_DESCRIPTION_LABEL_PADDING = 5.0;
         NSString * title = featuredEvent.title;
         if (!title) { title = FEATURED_EVENT_TITLE_NOT_AVAILABLE; }
 
-        // Date & Time // --------
+        // Date & Time
         NSString * time = [self.webDataTranslator timeSpanStringFromStartDatetime:featuredEvent.startTimeDatetime endDatetime:featuredEvent.endTimeDatetime dataUnavailableString:FEATURED_EVENT_TIME_NOT_AVAILABLE];
         NSString * date = [self.webDataTranslator dateSpanStringFromStartDatetime:featuredEvent.startDateDatetime endDatetime:featuredEvent.endDateDatetime relativeDates:YES dataUnavailableString:FEATURED_EVENT_DATE_NOT_AVAILABLE];
-        
-        // Description
-        NSString * theDescription = featuredEvent.details;
-        if (!theDescription) { theDescription = FEATURED_EVENT_DESCRIPTION_NOT_AVAILABLE; }
-        
+                
         // Price
         NSString * price = [self.webDataTranslator priceRangeStringFromMinPrice:featuredEvent.priceMinimum maxPrice:featuredEvent.priceMaximum dataUnavailableString:FEATURED_EVENT_COST_NOT_AVAILABLE];
         price = [NSString stringWithFormat:@"Price: %@", price];
@@ -496,6 +497,10 @@ CGFloat const FEV_DESCRIPTION_LABEL_PADDING = 5.0;
         // Phone number
         NSString * phoneNumber = featuredEvent.phone;
         if (!phoneNumber) { phoneNumber = FEATURED_EVENT_PHONE_NUMBER_NOT_AVAILABLE; }
+        
+        // Description
+        NSString * theDescription = featuredEvent.details;
+        if (!theDescription) { theDescription = FEATURED_EVENT_DESCRIPTION_NOT_AVAILABLE; }
         
         // "Category" display color
         UIColor * categoryColor = [UIColor colorWithWhite:25.0/255.0 alpha:1.0];
@@ -562,14 +567,6 @@ CGFloat const FEV_DESCRIPTION_LABEL_PADDING = 5.0;
     }
 }
 
-- (FeaturedEventManager *)featuredEventManager {
-    if (featuredEventManager == nil) {
-        featuredEventManager = [[FeaturedEventManager alloc] init];
-        featuredEventManager.coreDataModel = self.coreDataModel;
-    }
-    return featuredEventManager;
-}
-
 - (void)loadImageWithLocation:(NSString *)imageLocation {
     NSLog(@"FeaturedEventViewController loadImageWithLocation:%@", imageLocation);
     
@@ -626,7 +623,7 @@ CGFloat const FEV_DESCRIPTION_LABEL_PADDING = 5.0;
 
 -(IBAction)phoneCall:(id)sender  {
 	NSLog(@"phone call");
-    [[UIApplication sharedApplication] openURL:[NSURL URLWithString:[NSString stringWithFormat:@"tel:%@", self.featuredEventManager.featuredEvent.phone]]];
+    [[UIApplication sharedApplication] openURL:[NSURL URLWithString:[NSString stringWithFormat:@"tel:%@", [self.coreDataModel getFeaturedEvent].phone]]];
 }
 
 - (void)actionSheet:(UIActionSheet *)actionSheet didDismissWithButtonIndex:(NSInteger)buttonIndex {
@@ -636,7 +633,7 @@ CGFloat const FEV_DESCRIPTION_LABEL_PADDING = 5.0;
         
     } else if (buttonIndex == 1) {
         
-        Event * featuredEvent = self.featuredEventManager.featuredEvent;
+        Event * featuredEvent = [self.coreDataModel getFeaturedEvent];
         
         NSMutableDictionary * parameters = [NSMutableDictionary dictionary];
         
@@ -730,7 +727,7 @@ CGFloat const FEV_DESCRIPTION_LABEL_PADDING = 5.0;
 - (void) makeAndShowEmailViewController {
     NSLog(@"Email"); // Email
     
-    Event * featuredEvent = self.featuredEventManager.featuredEvent;
+    Event * featuredEvent = [self.coreDataModel getFeaturedEvent];
     NSString * emailTitle = featuredEvent.title ? featuredEvent.title : FEATURED_EVENT_TITLE_NOT_AVAILABLE;
     NSString * emailLocation = featuredEvent.venue ? [NSString stringWithFormat:@"    Location: %@<br>", featuredEvent.venue] : @"";
     NSString * emailAddressFirst = featuredEvent.address ? featuredEvent.address : @"";
@@ -801,7 +798,7 @@ CGFloat const FEV_DESCRIPTION_LABEL_PADDING = 5.0;
     EKEventStore * eventStore = [[EKEventStore alloc] init];
     EKEvent * newEvent = [EKEvent eventWithEventStore:eventStore];
     
-    Event * featuredEvent = self.featuredEventManager.featuredEvent;
+    Event * featuredEvent = [self.coreDataModel getFeaturedEvent];
 
     newEvent.title = featuredEvent.title;
     newEvent.startDate = featuredEvent.startDatetime;
@@ -845,6 +842,9 @@ CGFloat const FEV_DESCRIPTION_LABEL_PADDING = 5.0;
 	UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Event added to Calendar!" message:[NSString stringWithFormat:@"The event \"%@\" has been added to your calendar.", featuredEvent.title] delegate:nil cancelButtonTitle:@"Ok" otherButtonTitles:nil];
 	[alert show];
 	[alert release];
+    
+    // Wait for response from server
+    
 }
 
 ///////////////
@@ -854,10 +854,11 @@ CGFloat const FEV_DESCRIPTION_LABEL_PADDING = 5.0;
 -(IBAction)makeMapView:(id)sender  {
     self.mapViewController = [[[MapViewController alloc] initWithNibName:@"MapViewController" bundle:[NSBundle mainBundle]] autorelease];
     self.mapViewController.delegate = self;
-    self.mapViewController.locationLatitude = self.featuredEventManager.featuredEvent.latitude;
-    self.mapViewController.locationLongitude = self.featuredEventManager.featuredEvent.longitude;
-    self.mapViewController.locationAddress = self.featuredEventManager.featuredEvent.address;
-    self.mapViewController.locationName = self.featuredEventManager.featuredEvent.venue;
+    Event * featuredEvent = [self.coreDataModel getFeaturedEvent];
+    self.mapViewController.locationLatitude = featuredEvent.latitude;
+    self.mapViewController.locationLongitude = featuredEvent.longitude;
+    self.mapViewController.locationName = featuredEvent.venue;
+    self.mapViewController.locationAddress = featuredEvent.address;
     [self presentModalViewController:self.mapViewController animated:YES];
 }
 

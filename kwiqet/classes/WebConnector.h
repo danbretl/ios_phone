@@ -23,7 +23,6 @@ extern BOOL const WEB_CONNECTOR_ALLOW_SIMULTANEOUS_CONNECTIONS_DEFAULT;
     id<WebConnectorDelegate> delegate;
     BOOL connectionInProgress;
     BOOL allowSimultaneousConnections;
-    
 }
 
 @property (nonatomic, readonly) URLBuilder * urlBuilder;
@@ -34,6 +33,7 @@ extern BOOL const WEB_CONNECTOR_ALLOW_SIMULTANEOUS_CONNECTIONS_DEFAULT;
 @property (nonatomic, readonly) BOOL availableToMakeWebConnection;
 
 - (void) getCategoryTree;
+- (void) getEventWithURI:(NSString *)eventURI;
 - (void) getFeaturedEvent;
 - (void) getEventsListWithFilter:(NSString *)filterString categoryURI:(NSString *)categoryURI;
 - (void) getEventsListForSearchString:(NSString *)searchString;
@@ -45,10 +45,10 @@ extern BOOL const WEB_CONNECTOR_ALLOW_SIMULTANEOUS_CONNECTIONS_DEFAULT;
 @optional
 - (void) webConnector:(WebConnector *)webConnector getCategoryTreeSuccess:(ASIHTTPRequest *)request;
 - (void) webConnector:(WebConnector *)webConnector getCategoryTreeFailure:(ASIHTTPRequest *)request;
+- (void) webConnector:(WebConnector *)webConnector getEventSuccess:(ASIHTTPRequest *)request forEventURI:(NSString *)eventURI;
+- (void) webConnector:(WebConnector *)webConnector getEventFailure:(ASIHTTPRequest *)request forEventURI:(NSString *)eventURI;
 - (void) webConnector:(WebConnector *)webConnector getFeaturedEventSuccess:(ASIHTTPRequest *)request;
 - (void) webConnector:(WebConnector *)webConnector getFeaturedEventFailure:(ASIHTTPRequest *)request;
-//- (void) webConnector:(WebConnector *)webConnector getEventsListRecommendedSuccess:(ASIHTTPRequest *)request;
-//- (void) webConnector:(WebConnector *)webConnector getEventsListRecommendedFailure:(ASIHTTPRequest *)request;
 - (void) webConnector:(WebConnector *)webConnector getEventsListSuccess:(ASIHTTPRequest *)request withFilter:(NSString *)filterString categoryURI:(NSString *)categoryURI;
 - (void) webConnector:(WebConnector *)webConnector getEventsListFailure:(ASIHTTPRequest *)request withFilter:(NSString *)filterString categoryURI:(NSString *)categoryURI;
 - (void) webConnector:(WebConnector *)webConnector getEventsListSuccess:(ASIHTTPRequest *)request forSearchString:(NSString *)searchString;

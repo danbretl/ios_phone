@@ -10,6 +10,7 @@
 #import <CoreData/CoreData.h>
 
 @class Category;
+@class CategoryBreadcrumb;
 
 @interface Event : NSManagedObject {
 @private
@@ -38,6 +39,7 @@
 @property (nonatomic, retain) NSNumber * fromSearch;
 @property (nonatomic, retain) NSString * concreteParentCategoryURI;
 @property (nonatomic, retain) Category * concreteParentCategory;
+@property (nonatomic, retain) NSSet * concreteCategoryBreadcrumbs;
 
 @property (nonatomic, retain) NSString * summaryAddress;
 @property (nonatomic, retain) NSString * summaryStartDateString;

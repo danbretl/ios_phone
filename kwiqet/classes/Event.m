@@ -39,6 +39,36 @@
 @dynamic summaryStartDateString;
 @dynamic summaryStartTimeString;
 
+@dynamic concreteCategoryBreadcrumbs;
+
+- (void)addConcreteCategoryBreadcrumbsObject:(CategoryBreadcrumb *)value {    
+    NSSet *changedObjects = [[NSSet alloc] initWithObjects:&value count:1];
+    [self willChangeValueForKey:@"concreteCategoryBreadcrumbs" withSetMutation:NSKeyValueUnionSetMutation usingObjects:changedObjects];
+    [[self primitiveValueForKey:@"concreteCategoryBreadcrumbs"] addObject:value];
+    [self didChangeValueForKey:@"concreteCategoryBreadcrumbs" withSetMutation:NSKeyValueUnionSetMutation usingObjects:changedObjects];
+    [changedObjects release];
+}
+
+- (void)removeConcreteCategoryBreadcrumbsObject:(CategoryBreadcrumb *)value {
+    NSSet *changedObjects = [[NSSet alloc] initWithObjects:&value count:1];
+    [self willChangeValueForKey:@"concreteCategoryBreadcrumbs" withSetMutation:NSKeyValueMinusSetMutation usingObjects:changedObjects];
+    [[self primitiveValueForKey:@"concreteCategoryBreadcrumbs"] removeObject:value];
+    [self didChangeValueForKey:@"concreteCategoryBreadcrumbs" withSetMutation:NSKeyValueMinusSetMutation usingObjects:changedObjects];
+    [changedObjects release];
+}
+
+- (void)addConcreteCategoryBreadcrumbs:(NSSet *)value {    
+    [self willChangeValueForKey:@"concreteCategoryBreadcrumbs" withSetMutation:NSKeyValueUnionSetMutation usingObjects:value];
+    [[self primitiveValueForKey:@"concreteCategoryBreadcrumbs"] unionSet:value];
+    [self didChangeValueForKey:@"concreteCategoryBreadcrumbs" withSetMutation:NSKeyValueUnionSetMutation usingObjects:value];
+}
+
+- (void)removeConcreteCategoryBreadcrumbs:(NSSet *)value {
+    [self willChangeValueForKey:@"concreteCategoryBreadcrumbs" withSetMutation:NSKeyValueMinusSetMutation usingObjects:value];
+    [[self primitiveValueForKey:@"concreteCategoryBreadcrumbs"] minusSet:value];
+    [self didChangeValueForKey:@"concreteCategoryBreadcrumbs" withSetMutation:NSKeyValueMinusSetMutation usingObjects:value];
+}
+
 - (NSDate *)startTimeDatetime {
     return ([self.startTimeValid boolValue] ? self.startDatetime : nil);
 }

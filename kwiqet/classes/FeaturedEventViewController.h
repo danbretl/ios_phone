@@ -14,7 +14,6 @@
 #import "ASIFormDataRequest.h"
 #import "EGORefreshTableHeaderView.h"
 
-#import "FeaturedEventManager.h"
 #import "WebConnector.h"
 #import "WebDataTranslator.h"
 #import "CoreDataModel.h"
@@ -28,7 +27,6 @@ extern CGFloat const FEATURED_EVENT_BACKGROUND_COLOR_ALPHA;
 @interface FeaturedEventViewController : UIViewController <MFMailComposeViewControllerDelegate, WebConnectorDelegate, MapViewControllerDelegate, UIActionSheetDelegate, FBRequestDelegate>{
 
     // Model, web, etc
-    FeaturedEventManager * featuredEventManager;
     WebConnector * webConnector;
     WebDataTranslator * webDataTranslator;
     CoreDataModel * coreDataModel;
@@ -64,7 +62,6 @@ extern CGFloat const FEATURED_EVENT_BACKGROUND_COLOR_ALPHA;
 
 }
 
-@property (nonatomic, readonly) FeaturedEventManager * featuredEventManager;
 @property (nonatomic, readonly) WebConnector * webConnector;
 @property (nonatomic, readonly) WebDataTranslator * webDataTranslator;
 @property(nonatomic, retain) CoreDataModel * coreDataModel;

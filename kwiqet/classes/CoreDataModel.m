@@ -7,9 +7,11 @@
 //
 
 #import "CoreDataModel.h"
+#import "WebUtil.h"
 
 @interface CoreDataModel()
 - (Event *) getFeaturedEventCreateIfDoesNotExist:(BOOL)createIfDoesNotExist;
+- (NSArray *) getEventsForPredicate:(NSPredicate *)predicate;
 - (void) deleteEventsForPredicate:(NSPredicate *)predicate;
 @end
 
@@ -30,6 +32,13 @@
 //////////
 // Util //
 //////////
+
+- (WebDataTranslator *)webDataTranslator {
+    if (webDataTranslator == nil) {
+        webDataTranslator = [[WebDataTranslator alloc] init];
+    }
+    return webDataTranslator;
+}
 
 - (NSNumber *)coreDataYes {
     if (coreDataYes == nil) {
@@ -169,6 +178,17 @@
 // EVENTS - GENERAL //
 //////////////////////
 
+- (NSArray *) getEventsForPredicate:(NSPredicate *)predicate {
+    NSFetchRequest * fetchRequest = [[NSFetchRequest alloc] init];
+	NSEntityDescription * entity = [NSEntityDescription entityForName:@"Event" inManagedObjectContext:self.managedObjectContext];
+	[fetchRequest setEntity:entity];
+    [fetchRequest setPredicate:predicate];
+	NSError * error;
+	NSArray * fetchedObjects = [self.managedObjectContext executeFetchRequest:fetchRequest error:&error];
+    [fetchRequest release];
+    return fetchedObjects;
+}
+
 - (void) deleteEventsForPredicate:(NSPredicate *)predicate {
     
     NSFetchRequest * fetchRequest = [[NSFetchRequest alloc] init];
@@ -194,7 +214,7 @@
 // REGULAR EVENTS //
 ////////////////////
 
-- (void) addEventWithURI:(NSString *)uri title:(NSString *)title venue:(NSString *)venue priceMinimum:(NSNumber *)priceMinimum priceMaximum:(NSNumber *)priceMaximum summaryAddress:(NSString *)summaryAddress summaryStartDateString:(NSString *)summaryStartDateString summaryStartTimeString:(NSString *)summaryStartTimeString concreteParentCategoryURI:(NSString *)concreteParentCategoryURI {
+- (void) addEventWithURI:(NSString *)uri title:(NSString *)title venue:(NSString *)venue priceMinimum:(NSNumber *)priceMinimum priceMaximum:(NSNumber *)priceMaximum summaryAddress:(NSString *)summaryAddress summaryStartDateString:(NSString *)summaryStartDateString summaryStartTimeString:(NSString *)summaryStartTimeString concreteParentCategoryURI:(NSString *)concreteParentCategoryURI fromSearch:(BOOL)fromSearch {
     
     Event * event = [NSEntityDescription insertNewObjectForEntityForName:@"Event" inManagedObjectContext:self.managedObjectContext];
     
@@ -211,29 +231,132 @@
     Category * concreteParentCategory = [self getCategoryWithURI:concreteParentCategoryURI];
     event.concreteParentCategory = concreteParentCategory;
     
+    event.fromSearch = [NSNumber numberWithBool:fromSearch];
+    
+}
+
+- (void)updateEvent:(Event *)event usingEventDictionary:(NSDictionary *)eventDictionary featuredOverride:(NSNumber *)featuredOverride fromSearchOverride:(NSNumber *)fromSearchOverride {
+    
+    // Setup
+    NSDictionary * firstOccurrenceDictionary = [[eventDictionary valueForKey:@"occurrences"] objectAtIndex:0];
+    
+    // Basic
+    NSString * uri = [WebUtil stringOrNil:[eventDictionary objectForKey:@"resource_uri"]];
+    NSString * titleText = [WebUtil stringOrNil:[eventDictionary objectForKey:@"title"]];
+    NSString * descriptionText = [WebUtil stringOrNil:[eventDictionary objectForKey:@"description"]];
+    
+    // Date and time
+    NSString * startDate = [WebUtil stringOrNil:[firstOccurrenceDictionary objectForKey:@"start_date"]];
+    NSLog(@"startDate:%@", startDate);
+    NSString * endDate = [WebUtil stringOrNil:[firstOccurrenceDictionary objectForKey:@"end_date"]];
+    NSLog(@"endDate:%@", endDate);
+    NSString * startTime = [WebUtil stringOrNil:[firstOccurrenceDictionary objectForKey:@"start_time"]];
+    NSLog(@"startTime:%@", startTime);
+    NSString * endTime = [WebUtil stringOrNil:[firstOccurrenceDictionary objectForKey:@"end_time"]];
+    NSLog(@"endTime:%@", endTime);
+    // Date and time (continued)
+    NSDictionary * startAndEndDatetimesDictionary = [self.webDataTranslator datetimesSummaryFromStartTime:startTime endTime:endTime startDate:startDate endDate:endDate];
+    NSLog(@"%@", startAndEndDatetimesDictionary);
+    NSDate * startDatetime = (NSDate *)[startAndEndDatetimesDictionary objectForKey:WDT_START_DATETIME_KEY];
+    NSDate * endDatetime = (NSDate *)[startAndEndDatetimesDictionary objectForKey:WDT_END_DATETIME_KEY];
+    NSNumber * startDateValid = [startAndEndDatetimesDictionary valueForKey:WDT_START_DATE_VALID_KEY];
+    NSNumber * startTimeValid = [startAndEndDatetimesDictionary valueForKey:WDT_START_TIME_VALID_KEY];
+    NSNumber * endDateValid = [startAndEndDatetimesDictionary valueForKey:WDT_END_DATE_VALID_KEY];
+    NSNumber * endTimeValid = [startAndEndDatetimesDictionary valueForKey:WDT_END_TIME_VALID_KEY];
+    
+    // Price
+    NSArray * priceArray = [firstOccurrenceDictionary objectForKey:@"prices"];
+    NSDictionary * pricesMinMaxDictionary = [self.webDataTranslator pricesSummaryFromPriceArray:priceArray];
+    NSNumber * priceMinimum = [pricesMinMaxDictionary objectForKey:@"minimum"];
+    NSNumber * priceMaximum = [pricesMinMaxDictionary objectForKey:@"maximum"];
+    
+    // Address first line
+    NSString * addressLineFirst = [WebUtil stringOrNil:[[[firstOccurrenceDictionary valueForKey:@"place"] valueForKey:@"point"] valueForKey:@"address"]];
+    
+    // Address second line
+    NSString * cityString = [WebUtil stringOrNil:[[[[firstOccurrenceDictionary valueForKey:@"place"] valueForKey:@"point"] valueForKey:@"city"] valueForKey:@"city"]];
+    NSString * stateString = [WebUtil stringOrNil:[[[[firstOccurrenceDictionary valueForKey:@"place"]valueForKey:@"point"] valueForKey:@"city"] valueForKey:@"state"]];
+    NSString * zipCodeString = [WebUtil stringOrNil:[[[firstOccurrenceDictionary valueForKey:@"place"] valueForKey:@"point"] valueForKey:@"zip"]];
+    
+    // Latitude & Longitude
+    NSNumber * latitudeValue  = [WebUtil numberOrNil:[[[[[eventDictionary valueForKey:@"occurrences"] objectAtIndex:0]valueForKey:@"place"] valueForKey:@"point"] valueForKey:@"latitude"]];
+    NSNumber * longitudeValue = [WebUtil numberOrNil:[[[[[eventDictionary valueForKey:@"occurrences"] objectAtIndex:0] valueForKey:@"place"] valueForKey:@"point"] valueForKey:@"longitude"]];
+    
+    // Phone Number
+    NSString * eventPhoneString = [WebUtil stringOrNil:[[firstOccurrenceDictionary valueForKey:@"place"] valueForKey:@"phone"]];
+    
+    // Venue
+    NSString * venueString = [WebUtil stringOrNil:[[firstOccurrenceDictionary valueForKey:@"place"]valueForKey:@"title"]];
+    
+    // Image location
+    NSString * imageLocation = [WebUtil stringOrNil:[eventDictionary valueForKey:@"image"]];
+    if (!imageLocation) {
+        imageLocation = [WebUtil stringOrNil:[eventDictionary valueForKey:@"thumbnail_detail"]];
+    }
+    
+    // Concrete parent category
+    NSString * concreteParentCategoryURI = [WebUtil stringOrNil:[eventDictionary objectForKey:@"concrete_parent_category"]];
+    
+    // Concrete category breadcrumbs
+    NSArray * breadcrumbsArray = [eventDictionary valueForKey:@"concrete_category_breadcrumbs"];
+    int order = 0;
+    for (NSString * categoryURI in breadcrumbsArray) {
+        CategoryBreadcrumb * breadcrumb = (CategoryBreadcrumb *)[NSEntityDescription insertNewObjectForEntityForName:@"CategoryBreadcrumb" inManagedObjectContext:self.managedObjectContext];
+        breadcrumb.category = [self getCategoryWithURI:categoryURI];
+        breadcrumb.event = event;
+        breadcrumb.order = [NSNumber numberWithInt:order];
+        order++;
+    }
+    
+    event.uri = uri;
+    event.concreteParentCategoryURI = concreteParentCategoryURI;
+    Category * concreteParentCategory = [self getCategoryWithURI:concreteParentCategoryURI];
+    event.concreteParentCategory = concreteParentCategory;
+    NSLog(@"category uri is %@", concreteParentCategoryURI);
+    NSLog(@"category is %@", concreteParentCategory);
+    event.title = titleText;
+    event.startDatetime = startDatetime;
+    event.endDatetime = endDatetime;
+    event.startDateValid = startDateValid;
+    event.startTimeValid = startTimeValid;
+    event.endDateValid = endDateValid;
+    event.endTimeValid = endTimeValid;
+    event.venue = venueString;
+    event.address = addressLineFirst;
+    event.city = cityString;
+    event.state = stateString;
+    event.zip = zipCodeString;
+    event.latitude = latitudeValue;
+    event.longitude = longitudeValue;
+    event.priceMinimum = priceMinimum;
+    event.priceMaximum = priceMaximum;
+    event.phone = eventPhoneString;
+    event.details = descriptionText;
+    event.imageLocation = imageLocation;
+    if (featuredOverride)   { event.featured = featuredOverride; }
+    if (fromSearchOverride) { event.fromSearch = fromSearchOverride; }
+    
+    [self coreDataSave];
+    
 }
 
 - (NSArray *) getRegularEvents {
-    NSFetchRequest * fetchRequest = [[NSFetchRequest alloc] init];
-	NSEntityDescription * entity = [NSEntityDescription entityForName:@"Event" inManagedObjectContext:self.managedObjectContext];
-	[fetchRequest setEntity:entity];
-    [fetchRequest setPredicate:[NSPredicate predicateWithFormat:@"featured == %@", [NSNumber numberWithBool:NO]]];
-	NSError * error;
-	NSArray * fetchedObjects = [self.managedObjectContext executeFetchRequest:fetchRequest error:&error];
-    [fetchRequest release];
-    return fetchedObjects;
+    
+    NSPredicate * predicate = [NSPredicate predicateWithFormat:@"featured == %@ && fromSearch == %@", self.coreDataNo, self.coreDataNo];
+    return [self getEventsForPredicate:predicate];
+    
 }
 
-- (void)deleteRegularEventForURI:(NSString *)eventID {
+- (NSArray *) getRegularEventsFromSearch {
     
-    NSPredicate * predicate = [NSPredicate predicateWithFormat:@"uri == %@ && featured == %@", eventID, self.coreDataNo];
-    [self deleteEventsForPredicate:predicate];
+    NSPredicate * predicate = [NSPredicate predicateWithFormat:@"featured == %@ && fromSearch == %@", self.coreDataNo, self.coreDataYes];
+    return [self getEventsForPredicate:predicate];
     
 }
 
 - (void) deleteRegularEvents {
     
-    NSPredicate * predicate = [NSPredicate predicateWithFormat:@"featured == %@", self.coreDataNo];
+    NSPredicate * predicate = [NSPredicate predicateWithFormat:@"featured == %@ && fromSearch == %@", self.coreDataNo, self.coreDataNo];
     [self deleteEventsForPredicate:predicate];
     
 }
@@ -241,6 +364,13 @@
 - (void) deleteRegularEventsFromSearch {
     
     NSPredicate * predicate = [NSPredicate predicateWithFormat:@"featured == %@ && fromSearch == %@", self.coreDataNo, self.coreDataYes];
+    [self deleteEventsForPredicate:predicate];
+    
+}
+
+- (void)deleteRegularEventForURI:(NSString *)eventID {
+    
+    NSPredicate * predicate = [NSPredicate predicateWithFormat:@"uri == %@ && featured == %@", eventID, self.coreDataNo];
     [self deleteEventsForPredicate:predicate];
     
 }
