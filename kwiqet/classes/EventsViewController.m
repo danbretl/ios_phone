@@ -107,6 +107,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 @property (nonatomic, retain) NSMutableArray * events;
 @property (nonatomic, retain) NSMutableArray * eventsFromSearch;
 @property (nonatomic, readonly) NSMutableArray * eventsForCurrentSource;
+@property (retain) UIView * tableFooterView;
 @end
 
 @implementation EventsViewController
@@ -117,7 +118,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 @synthesize problemView, problemLabel;
 @synthesize cardPageViewController;
 @synthesize indexPathOfRowAttemptingToDelete, indexPathOfSelectedRow, searchButton;
-@synthesize logoButton;
+@synthesize logoButton, tableFooterView;
 
 - (void)dealloc {
     [filtersBackgroundView release];
@@ -149,6 +150,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     [indexPathOfRowAttemptingToDelete release];
     [indexPathOfSelectedRow release];
     [logoButton release];
+    [tableFooterView release];
     [super dealloc];
 }
 
@@ -246,6 +248,20 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 	self.myTableView.delegate = self;
     self.myTableView.backgroundColor = [UIColor colorWithWhite:EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT alpha:1.0];
     self.myTableView.showsVerticalScrollIndicator = YES;
+    
+//    // UITableView Footer View
+//    tableFooterView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, self.myTableView.bounds.size.width, self.filtersBackgroundView.bounds.size.height)];
+//    UIButton * reloadButton = [UIButton buttonWithType:UIButtonTypeCustom];
+//    reloadButton.frame = self.tableFooterView.bounds;
+//    [reloadButton setTitle:@"Load new list of events" forState:UIControlStateNormal];
+//    [reloadButton setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
+//    [reloadButton setTitleColor:[UIColor blackColor] forState:UIControlStateHighlighted];
+//    reloadButton.titleLabel.font = [UIFont fontWithName:@"HelveticaNeueLTStd-MdCn" size:20];
+//    reloadButton.backgroundColor = [UIColor clearColor];
+//    [reloadButton addTarget:self action:@selector(webConnectGetEventsListWithCurrentFilterAndCategory) forControlEvents:UIControlEventTouchUpInside];
+//    [self.tableFooterView addSubview:reloadButton];
+//    self.myTableView.tableFooterView = self.tableFooterView;
+////    self.myTableView.tableFooterView.hidden = YES;
     	
 	//nav bar with buttons
 	UIImageView * navBar = [[UIImageView alloc]initWithImage:[UIImage imageNamed:@"navbar_blank.png"]];

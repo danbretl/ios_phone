@@ -14,16 +14,26 @@
 #import "Contact.h"
 
 @interface SettingsViewController()
-@property (nonatomic, retain) IBOutlet UIButton * attemptLoginButton;
-@property (nonatomic, retain) IBOutlet UIButton * resetMachineLearningButton;
+@property (nonatomic, retain) IBOutlet UIButton * loginButton;
+@property (nonatomic, retain) IBOutlet UIButton * resetLearningButton;
 @property (nonatomic, retain) IBOutlet FBLoginButton * linkFacebookButton;
+@property (retain) UITableView * tableView;
+
+//@property (retain) NSArray * sections;
+//@property (retain) NSDictionary * accountSection;
+//@property (retain) NSDictionary * sharingSection;
+//@property (retain) NSDictionary * learningSection;
+
 @end
 
 @implementation SettingsViewController
 
 @synthesize coreDataModel;
 @synthesize facebookManager;
-@synthesize attemptLoginButton,resetMachineLearningButton, linkFacebookButton;
+@synthesize loginButton,resetLearningButton, linkFacebookButton;
+@synthesize tableView;
+//@synthesize sections, accountSection, sharingSection, learningSection;
+
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
@@ -36,11 +46,16 @@
 
 - (void)dealloc
 {
-    [attemptLoginButton release];
-    [resetMachineLearningButton release];
+    [loginButton release];
+    [resetLearningButton release];
     [linkFacebookButton release];
     [facebookManager release];
     [coreDataModel release];
+    [tableView release];
+//    [sections release];
+//    [accountSection release];
+//    [sharingSection release];
+//    [learningSection release];
     [super dealloc];
 }
 
@@ -58,6 +73,17 @@
 {
     [super viewDidLoad];
     
+//    self.accountSection = [NSMutableDictionary dictionaryWithObjectsAndKeys:
+//                           @"Account", @"headerTitle", 
+//                           nil];
+//    self.sharingSection = [NSMutableDictionary dictionaryWithObjectsAndKeys:
+//                           @"Sharing", @"headerTitle", 
+//                           nil];
+//    self.learningSection = [NSMutableDictionary dictionaryWithObjectsAndKeys:
+//                            @"Learning", @"headerTitle", 
+//                            nil];
+//    self.sections = [NSArray arrayWithObjects:self.accountSection, self.sharingSection, self.learningSection, nil];
+    
     self.view.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     
     // Do any additional setup after loading the view from its nib.
@@ -65,11 +91,11 @@
     NSString * apiKey = [DefaultsModel retrieveAPIFromUserDefaults];
     
     if (apiKey) {
-        [attemptLoginButton setTitle:@"Logout" forState: UIControlStateNormal];
-        attemptLoginButton.tag = 1;
+        [loginButton setTitle:@"Logout" forState: UIControlStateNormal];
+        loginButton.tag = 1;
     } else {
-        [attemptLoginButton setTitle:@"Log In" forState: UIControlStateNormal];
-        attemptLoginButton.tag = 2;
+        [loginButton setTitle:@"Log In" forState: UIControlStateNormal];
+        loginButton.tag = 2;
     }
         
     //setup fonts for uilabels
@@ -120,11 +146,11 @@
     NSString * apiKey = [DefaultsModel retrieveAPIFromUserDefaults];
     
     if (apiKey) {
-        [attemptLoginButton setTitle:@"Logout" forState: UIControlStateNormal];
-        attemptLoginButton.tag = 1;
+        [loginButton setTitle:@"Logout" forState: UIControlStateNormal];
+        loginButton.tag = 1;
     } else {
-        [attemptLoginButton setTitle:@"Log In" forState: UIControlStateNormal];
-        attemptLoginButton.tag = 2;
+        [loginButton setTitle:@"Log In" forState: UIControlStateNormal];
+        loginButton.tag = 2;
     }
     
     [self updateFacebookButtonIsLoggedIn:[self.facebookManager.fb isSessionValid]];
@@ -153,8 +179,8 @@
         NSDictionary * infoDictionary = [NSDictionary dictionaryWithObjectsAndKeys:@"logout", @"action", nil];
         [[NSNotificationCenter defaultCenter] postNotificationName:@"loginActivity" object:self userInfo:infoDictionary];
         
-        [attemptLoginButton setTitle:@"Log In" forState: UIControlStateNormal];
-        attemptLoginButton.tag = 2;
+        [loginButton setTitle:@"Log In" forState: UIControlStateNormal];
+        loginButton.tag = 2;
         
         //show logout message
         UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Logged Out!" 
@@ -243,7 +269,7 @@
 	if ([alertView.title isEqualToString:@"Warning:"]) {
 		if (buttonIndex == 0) {
             [self startResetingBehavior];
-            resetMachineLearningButton.userInteractionEnabled = NO;
+            resetLearningButton.userInteractionEnabled = NO;
 		}
 		if (buttonIndex == 1) {	
             //do nothing
@@ -294,7 +320,7 @@
                           otherButtonTitles:nil];
     [alert show];
     [alert release];
-    resetMachineLearningButton.userInteractionEnabled = YES;
+    resetLearningButton.userInteractionEnabled = YES;
     [[NSNotificationCenter defaultCenter] postNotificationName:@"learningBehaviorWasReset" object:nil];
 }
 
@@ -311,7 +337,19 @@
                           otherButtonTitles:nil];
     [alert show];
     [alert release];
-    resetMachineLearningButton.userInteractionEnabled = YES;
+    resetLearningButton.userInteractionEnabled = YES;
 }
+
+//- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
+//    return [self.sections count];
+//}
+//
+//- (NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section {
+//    return [[self.sections objectAtIndex:section] valueForKey:@"sectionTitle"];
+//}
+//
+//- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
+//    return 0;
+//}
 
 @end

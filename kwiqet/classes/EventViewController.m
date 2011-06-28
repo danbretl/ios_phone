@@ -17,6 +17,7 @@
 #define CGFLOAT_MAX_TEXT_SIZE 10000
 
 @interface EventViewController()
+@property (retain) UIView * backgroundColorView;
 @property (retain) UIView * navigationBar;
 @property (retain) UIButton * backButton;
 @property (retain) UIButton * logoButton;
@@ -40,16 +41,29 @@
 @property (retain) UILabel * cityStateZipLabel;
 @property (retain) UIButton * phoneNumberButton;
 @property (retain) UIButton * mapButton;
+@property (retain) UIView * detailsContainer;
+@property (retain) UIView * detailsBackgroundColorView;
 @property (retain) UILabel * detailsLabel;
 @property (nonatomic, retain) WebActivityView * webActivityView;
 
-- (void) backButtonPushed;
-- (void) logoButtonPushed;
+@property (retain) MapViewController * mapViewController;
+@property (nonatomic, readonly) WebConnector * webConnector;
+@property (nonatomic, readonly) WebDataTranslator * webDataTranslator;
+@property (nonatomic, readonly) UIAlertView * connectionErrorOnUserActionRequestAlertView;
+
+- (void) backButtonTouched;
+- (void) logoButtonTouched;
+- (void) letsGoButtonTouched;
+- (void) shareButtonTouched;
+- (void) deleteButtonTouched;
+- (void) phoneButtonTouched;
+- (void) mapButtonTouched;
 
 @end
 
 @implementation EventViewController
 @synthesize event;
+@synthesize backgroundColorView;
 @synthesize navigationBar, backButton, logoButton;
 @synthesize actionBar, letsGoButton, shareButton, deleteButton;
 @synthesize titleBar;
@@ -59,7 +73,7 @@
 @synthesize monthLabel, dayNumberLabel, dayNameLabel;
 @synthesize priceLabel, timeLabel;
 @synthesize venueLabel, addressLabel, cityStateZipLabel, phoneNumberButton, mapButton;
-@synthesize detailsLabel;
+@synthesize detailsContainer, detailsBackgroundColorView, detailsLabel;
 @synthesize webActivityView;
 @synthesize delegate;
 @synthesize coreDataModel;
@@ -67,6 +81,7 @@
 
 - (void)dealloc {
     [event release];
+    [backgroundColorView release];
     [navigationBar release];
     [backButton release];
     [logoButton release];
@@ -90,6 +105,8 @@
     [cityStateZipLabel release];
     [phoneNumberButton release];
     [mapButton release];
+    [detailsContainer release];
+    [detailsBackgroundColorView release];
     [detailsLabel release];
     [webActivityView release];
     [connectionErrorOnUserActionRequestAlertView release];
@@ -104,6 +121,14 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     
+    // Background
+    self.view.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"cardbg.png"]];
+    backgroundColorView = [[UIView alloc] initWithFrame:self.view.bounds];
+    self.backgroundColorView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+    self.backgroundColorView.backgroundColor = [UIColor clearColor];
+    [self.view addSubview:self.backgroundColorView];
+    [self.view sendSubviewToBack:self.backgroundColorView];
+    
     // Navigation bar
     navigationBar = [[UIView alloc] initWithFrame:CGRectMake(0, 0, self.view.bounds.size.width, 44)];
     self.navigationBar.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"navbar_blank.png"]];
@@ -113,14 +138,14 @@
         self.backButton = [UIButton buttonWithType:UIButtonTypeCustom];
         self.backButton.frame = CGRectMake(10, 6, 74, 32);
         [self.backButton setBackgroundImage:[UIImage imageNamed:@"btn_back.png"] forState: UIControlStateNormal];
-        [self.backButton addTarget:self action:@selector(backButtonPushed) forControlEvents:UIControlEventTouchUpInside];
+        [self.backButton addTarget:self action:@selector(backButtonTouched) forControlEvents:UIControlEventTouchUpInside];
         [self.navigationBar addSubview:self.backButton];
         
         // Logo button
         self.logoButton = [UIButton buttonWithType:UIButtonTypeCustom];
         self.logoButton.frame = CGRectMake(135, 3, 53, 38);
         [self.logoButton setBackgroundImage:[UIImage imageNamed:@"btn_logo.png"] forState: UIControlStateNormal];
-        [self.logoButton addTarget:self action:@selector(logoButtonPushed) forControlEvents:UIControlEventTouchUpInside];
+        [self.logoButton addTarget:self action:@selector(logoButtonTouched) forControlEvents:UIControlEventTouchUpInside];
         [self.navigationBar addSubview:self.logoButton];
     }
     
@@ -138,21 +163,21 @@
         self.letsGoButton = [UIButton buttonWithType:UIButtonTypeCustom];
         self.letsGoButton.frame = actionButtonFrameBlock(5);
         [self.letsGoButton setBackgroundImage:[UIImage imageNamed:@"btn_letsgo.png"] forState: UIControlStateNormal];
-        [self.letsGoButton addTarget:self action:@selector(bookedButtonClicked:) forControlEvents:UIControlEventTouchUpInside];
+        [self.letsGoButton addTarget:self action:@selector(bookedButtonTouched) forControlEvents:UIControlEventTouchUpInside];
         [self.actionBar addSubview:self.letsGoButton];
         
         // Share button
         self.shareButton = [UIButton buttonWithType:UIButtonTypeCustom];
         self.shareButton.frame = actionButtonFrameBlock(110);
         [self.shareButton setBackgroundImage:[UIImage imageNamed:@"btn_share.png"] forState: UIControlStateNormal];
-        [self.shareButton addTarget:self action:@selector(shareButtonClicked:) forControlEvents:UIControlEventTouchUpInside];
+        [self.shareButton addTarget:self action:@selector(shareButtonTouched) forControlEvents:UIControlEventTouchUpInside];
         [self.actionBar addSubview:self.shareButton];
         
         // Delete button
         self.deleteButton = [UIButton buttonWithType:UIButtonTypeCustom];
         self.deleteButton.frame = actionButtonFrameBlock(215);
         [self.deleteButton setBackgroundImage:[UIImage imageNamed:@"btn_delete.png"] forState: UIControlStateNormal];
-        [self.deleteButton addTarget:self action:@selector(deleteEvent:) forControlEvents:UIControlEventTouchUpInside];
+        [self.deleteButton addTarget:self action:@selector(deleteButtonTouched) forControlEvents:UIControlEventTouchUpInside];
         [self.actionBar addSubview:self.deleteButton];
     }
     
@@ -160,6 +185,12 @@
     titleBar = [[ElasticUILabel alloc] initWithFrame:CGRectMake(0, CGRectGetMaxY(self.actionBar.frame), self.view.bounds.size.width, 32)];
     [self.view addSubview:self.titleBar];
     [self.view bringSubviewToFront:self.titleBar];
+    self.titleBar.layer.shadowColor = [[UIColor blackColor] CGColor];
+    self.titleBar.layer.shadowOffset = CGSizeMake(0, 3);
+    self.titleBar.layer.shadowOpacity = 0.35;
+//    UIView * shadow = [[UIView alloc] initWithFrame:CGRectMake(0, CGRectGetMaxY(self.titleBar.frame), self.titleBar.bounds.size.width, 10)];
+//    shadow.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"cardshadow-top.png"]];
+//    [self.view addSubview:shadow];
     
     // Scroll view
     CGFloat scrollViewOriginY = CGRectGetMaxY(self.titleBar.frame);
@@ -176,6 +207,15 @@
         [self.imageView addGestureRecognizer:swipeToGoBack];
         self.imageView.userInteractionEnabled = YES;
         [swipeToGoBack release];
+        
+        UIView * shadowCheatView = [[UIView alloc] initWithFrame:self.imageView.frame];
+        shadowCheatView.layer.shadowColor = [[UIColor blackColor] CGColor];
+        shadowCheatView.layer.shadowOffset = CGSizeMake(0, -3);
+        shadowCheatView.layer.shadowOpacity = 0.35;
+        shadowCheatView.backgroundColor = [UIColor blackColor];
+        [self.scrollView addSubview:shadowCheatView];
+        [self.scrollView sendSubviewToBack:shadowCheatView];
+        [shadowCheatView release];
         
         // Breadcrumbs bar
         CGFloat breadcrumbsBarHeight = 32.0;
@@ -263,7 +303,7 @@
                 self.phoneNumberButton = [UIButton buttonWithType:UIButtonTypeCustom];
                 self.phoneNumberButton.frame = CGRectMake(10, 130, 150, 20);
                 [self.phoneNumberButton setTitleColor:[UIColor colorWithRed:0.2549 green:0.41568 blue:0.70196 alpha:1.0] forState:UIControlStateNormal];
-                [self.phoneNumberButton addTarget:self action:@selector(phoneCall:) forControlEvents:UIControlEventTouchUpInside];
+                [self.phoneNumberButton addTarget:self action:@selector(phoneButtonTouched) forControlEvents:UIControlEventTouchUpInside];
                 self.phoneNumberButton.backgroundColor = [UIColor clearColor];
                 self.phoneNumberButton.titleLabel.font = [UIFont fontWithName:@"HelveticaNeueLTStd-BdCn" size:12];
                 self.phoneNumberButton.contentHorizontalAlignment = UIControlContentHorizontalAlignmentLeft;
@@ -273,18 +313,34 @@
                 self.mapButton = [UIButton buttonWithType:UIButtonTypeCustom];
                 self.mapButton.frame = CGRectMake(240,105,64,20);
                 [self.mapButton setBackgroundImage:[UIImage imageNamed:@"btn_map.png"] forState: UIControlStateNormal];
-                [self.mapButton addTarget:self action:@selector(makeMapView:) forControlEvents:UIControlEventTouchUpInside];
+                [self.mapButton addTarget:self action:@selector(mapButtonTouched) forControlEvents:UIControlEventTouchUpInside];
                 [self.eventInfoDividerView addSubview:self.mapButton];
                 self.mapButton.enabled = NO;
             }
             
+            // Details container
+            detailsContainer = [[UIView alloc] initWithFrame:CGRectMake(0, CGRectGetMaxY(self.eventInfoDividerView.frame), self.scrollView.bounds.size.width, 0.0)];
+            self.detailsContainer.backgroundColor = [UIColor whiteColor];
+            [self.scrollView addSubview:self.detailsContainer];
+            self.detailsContainer.layer.shadowColor = [[UIColor blackColor] CGColor];
+            self.detailsContainer.layer.shadowOffset = CGSizeMake(0, 3);
+            self.detailsContainer.layer.shadowOpacity = 0.35;
+            // Details background color view
+            detailsBackgroundColorView = [[UIView alloc] initWithFrame:self.detailsContainer.bounds];
+            self.detailsBackgroundColorView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+            self.detailsBackgroundColorView.backgroundColor = [UIColor whiteColor];
+            self.detailsBackgroundColorView.opaque = YES;
+            [self.detailsContainer addSubview:self.detailsBackgroundColorView];
             // Details text view
-            CGFloat detailsLabelHorizontalPadding = 5;
-            detailsLabel = [[UILabel alloc] initWithFrame:CGRectMake(detailsLabelHorizontalPadding, CGRectGetMaxY(self.eventInfoDividerView.frame), self.scrollView.bounds.size.width - 2 * detailsLabelHorizontalPadding, 0.0)];
-            self.detailsLabel.font = [UIFont fontWithName:@"HelveticaNeue" size:16];
+            CGFloat detailsLabelHorizontalPadding = 10;
+            CGFloat detailsLabelVerticalPadding = 10;
+            detailsLabel = [[UILabel alloc] initWithFrame:CGRectMake(detailsLabelHorizontalPadding, detailsLabelVerticalPadding, self.detailsContainer.bounds.size.width - 2 * detailsLabelHorizontalPadding, 0)];
+            //self.detailsLabel.font = [UIFont fontWithName:@"HelveticaNeue" size:16];
+            self.detailsLabel.font = [UIFont fontWithName:@"HelveticaNeueLTStd-MdCn" size:16];
             self.detailsLabel.backgroundColor = [UIColor clearColor];
             self.detailsLabel.numberOfLines = 0;
-            [self.scrollView addSubview:self.detailsLabel];
+            [self.detailsContainer addSubview:self.detailsLabel];
+            [self.detailsContainer bringSubviewToFront:self.detailsLabel];
         }
         
     }
@@ -358,7 +414,12 @@
     UIColor * concreteParentCategoryColor = self.event.concreteParentCategory.colorHex ? [WebUtil colorFromHexString:self.event.concreteParentCategory.colorHex] : [UIColor blackColor];
     
     // Background
-    self.view.backgroundColor = [concreteParentCategoryColor colorWithAlphaComponent:0.15];
+//    self.view.backgroundColor = [concreteParentCategoryColor colorWithAlphaComponent:0.15];
+    self.backgroundColorView.backgroundColor = [concreteParentCategoryColor colorWithAlphaComponent:0.05];
+//    self.detailsBackgroundColorView.backgroundColor = [concreteParentCategoryColor colorWithAlphaComponent:0.10];
+    self.detailsBackgroundColorView.backgroundColor = [concreteParentCategoryColor colorWithAlphaComponent:0.15];
+//    self.detailsLabel.backgroundColor = concreteParentCategoryColor;
+//    self.detailsLabel.textColor = [UIColor whiteColor];
     
     // Title
     self.titleBar.text = self.event.title;
@@ -420,7 +481,12 @@
     CGRect detailsLabelFrame = self.detailsLabel.frame;
     detailsLabelFrame.size.height = detailsLabelSize.height;
     self.detailsLabel.frame = detailsLabelFrame;
-    [self.scrollView setContentSize:CGSizeMake(self.scrollView.bounds.size.width, CGRectGetMaxY(self.detailsLabel.frame))];
+    NSLog(@"%@", NSStringFromCGRect(self.detailsLabel.frame));
+    CGRect detailsContainerFrame = self.detailsContainer.frame;
+    detailsContainerFrame.size.height = CGRectGetMaxY(self.detailsLabel.frame) + self.detailsLabel.frame.origin.y - 4; // TEMPORARY HACK, INFERRING THAT THE ORIGIN Y OF THE DETAILS LABEL IS EQUAL TO THE VERTICAL PADDING WE SHOULD GIVE UNDER THAT LABEL. // EVEN WORSE TEMPORARY HACK, HARDCODING AN OFFSET BECAUSE PUTTING EQUAL PADDING AFTER AS BEFORE DOES NOT LOOK EVEN.
+    self.detailsContainer.frame = detailsContainerFrame;
+    [self.scrollView setContentSize:CGSizeMake(self.scrollView.bounds.size.width, CGRectGetMaxY(self.detailsContainer.frame))];
+    NSLog(@"%@", NSStringFromCGSize(self.scrollView.contentSize));
     
     // Breadcrumbs
     NSMutableString * breadcrumbsString = [self.event.concreteParentCategory.title mutableCopy];
@@ -577,7 +643,7 @@
 }
 
 ///send learned data to ML with tag G
-- (IBAction)bookedButtonClicked:(id)sender  {
+- (void)letsGoButtonTouched {
     
     [self showWebLoadingViews];
     
@@ -634,7 +700,7 @@
 
 }
 
--(IBAction)shareButtonClicked:(id)sender  {
+-(void)shareButtonTouched {
     
     [self makeAndShowEmailViewController];
     
@@ -693,7 +759,7 @@
 }
 
 //delete event from core data and revert back to table
--(IBAction)deleteEvent:(id)sender  {
+-(void)deleteButtonTouched {
 
     [self.webConnector sendLearnedDataAboutEvent:self.event.uri withUserAction:@"X"];
     [self showWebLoadingViews];
@@ -734,12 +800,12 @@
 }
 
 // make Phone number clickable..
--(IBAction)phoneCall:(id)sender  {
+-(void)phoneButtonTouched {
 	NSLog(@"phone call");
     [[UIApplication sharedApplication] openURL:[NSURL URLWithString:[NSString stringWithFormat:@"tel:%@", self.event.phone]]];
 }
 
--(IBAction)makeMapView:(id)sender  {
+-(void)mapButtonTouched {
     self.mapViewController = [[[MapViewController alloc] initWithNibName:@"MapViewController" bundle:[NSBundle mainBundle]] autorelease];
     self.mapViewController.delegate = self;
     self.mapViewController.locationLatitude = self.event.latitude;
@@ -754,11 +820,11 @@
     self.mapViewController = nil;
 }
 
-- (void) backButtonPushed  {
+- (void) backButtonTouched  {
     [self viewControllerIsFinished];
 }
 
-- (void) logoButtonPushed {
+- (void) logoButtonTouched {
     [self viewControllerIsFinished];
 }
 

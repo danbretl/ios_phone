@@ -23,8 +23,7 @@
 
 @interface EventViewController : UIViewController <MFMailComposeViewControllerDelegate, WebConnectorDelegate, MapViewControllerDelegate> {
     
-    Event * event;
-    
+    UIView * backgroundColorView;
     UIView * navigationBar;
     UIButton * backButton;
     UIButton * logoButton;
@@ -55,40 +54,28 @@
     UIButton * phoneNumberButton;
     UIButton * mapButton;
     
+    UIView * detailsContainer;
+    UIView * detailsBackgroundColorView;
     UILabel * detailsLabel;
     
     WebActivityView * webActivityView;
     
-    CoreDataModel * coreDataModel;
-    
+    Event * event;
     id<CardPageViewControllerDelegate> delegate;
-    
+    CoreDataModel * coreDataModel;
+    MapViewController * mapViewController;    
+    WebDataTranslator * webDataTranslator;
     WebConnector * webConnector;
     UIAlertView * connectionErrorOnUserActionRequestAlertView;
-    
     BOOL deletedEventDueToGoingToEvent;
-    
-    // Map stuff
-    MapViewController * mapViewController;
-    
-    WebDataTranslator * webDataTranslator;
 
 }
 
-@property (assign) id<CardPageViewControllerDelegate> delegate;
 @property (nonatomic, retain) Event * event;
-@property (nonatomic, readonly) WebConnector * webConnector;
-@property (nonatomic, readonly) WebDataTranslator * webDataTranslator;
-@property (nonatomic, readonly) UIAlertView * connectionErrorOnUserActionRequestAlertView;
+@property (assign) id<CardPageViewControllerDelegate> delegate;
 @property (nonatomic, retain) CoreDataModel * coreDataModel;
-@property (retain) MapViewController * mapViewController;
 
 - (void) viewControllerIsFinished;
-- (IBAction) bookedButtonClicked:(id)sender;
-- (IBAction) shareButtonClicked:(id)sender;
-- (IBAction) deleteEvent:(id)sender;
-- (IBAction) phoneCall:(id)sender;
-- (IBAction) makeMapView:(id)sender;
 - (void) updateViewsFromData;
 - (void) makeAndShowEmailViewController;
 - (void) showWebLoadingViews;

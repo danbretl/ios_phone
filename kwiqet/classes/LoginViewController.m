@@ -178,8 +178,7 @@
     [urlBuilder release];
 }
 
-- (void)passwordRequestFinished:(ASIHTTPRequest *)request
-{
+- (void)passwordRequestFinished:(ASIHTTPRequest *)request {
     NSLog(@"LoginViewController passwordRequestFinished:");
     
 	NSString *responseString = [[NSString alloc]initWithString:[request responseString]];

@@ -11,13 +11,21 @@
 #import "FBLoginButton.h"
 #import "CoreDataModel.h"
 
-@interface SettingsViewController : UIViewController <FBSessionDelegate, FBRequestDelegate> {
+@interface SettingsViewController : UIViewController <FBSessionDelegate, FBRequestDelegate/*, UITableViewDelegate, UITableViewDataSource*/> {
 
-    IBOutlet UIButton * attemptLoginButton;
-    IBOutlet UIButton * resetMachineLearningButton;
-    FBLoginButton * linkFacebookButton;
+    IBOutlet UIButton * loginButton;
+    IBOutlet UIButton * resetLearningButton;
+    IBOutlet UIButton * connectFacebookButton;
+
     FacebookManager * facebookManager;
     CoreDataModel * coreDataModel;
+    
+    IBOutlet UITableView * tableView;
+    
+//    NSArray * sections;
+//    NSDictionary * accountSection;
+//    NSDictionary * sharingSection;
+//    NSDictionary * learningSection;
     
 }
 

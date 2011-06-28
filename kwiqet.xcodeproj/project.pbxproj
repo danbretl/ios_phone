@@ -182,6 +182,16 @@
 		32733E2E13B0FCBA0053C44A /* SBJsonBase.m in Sources */ = {isa = PBXBuildFile; fileRef = 32733E2613B0FCBA0053C44A /* SBJsonBase.m */; };
 		32733E2F13B0FCBA0053C44A /* SBJsonParser.m in Sources */ = {isa = PBXBuildFile; fileRef = 32733E2813B0FCBA0053C44A /* SBJsonParser.m */; };
 		32733E3013B0FCBA0053C44A /* SBJsonWriter.m in Sources */ = {isa = PBXBuildFile; fileRef = 32733E2A13B0FCBA0053C44A /* SBJsonWriter.m */; };
+		32BEE72F13BA4720009D583E /* cardbg.png in Resources */ = {isa = PBXBuildFile; fileRef = 32BEE72913BA4720009D583E /* cardbg.png */; };
+		32BEE73013BA4720009D583E /* cardbg@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 32BEE72A13BA4720009D583E /* cardbg@2x.png */; };
+		32BEE73113BA4720009D583E /* cardshadow-bot.png in Resources */ = {isa = PBXBuildFile; fileRef = 32BEE72B13BA4720009D583E /* cardshadow-bot.png */; };
+		32BEE73213BA4720009D583E /* cardshadow-bot@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 32BEE72C13BA4720009D583E /* cardshadow-bot@2x.png */; };
+		32BEE73313BA4720009D583E /* cardshadow-top.png in Resources */ = {isa = PBXBuildFile; fileRef = 32BEE72D13BA4720009D583E /* cardshadow-top.png */; };
+		32BEE73413BA4720009D583E /* cardshadow-top@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 32BEE72E13BA4720009D583E /* cardshadow-top@2x.png */; };
+		32BEE73A13BA52F5009D583E /* fbConnect.png in Resources */ = {isa = PBXBuildFile; fileRef = 32BEE73613BA52F5009D583E /* fbConnect.png */; };
+		32BEE73B13BA52F5009D583E /* fbConnect@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 32BEE73713BA52F5009D583E /* fbConnect@2x.png */; };
+		32BEE73C13BA52F5009D583E /* fbConnected.png in Resources */ = {isa = PBXBuildFile; fileRef = 32BEE73813BA52F5009D583E /* fbConnected.png */; };
+		32BEE73D13BA52F5009D583E /* fbConnected@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 32BEE73913BA52F5009D583E /* fbConnected@2x.png */; };
 		32D7FEDD13B0BC43005E8406 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 32D7FEDB13B0BC43005E8406 /* InfoPlist.strings */; };
 		32D7FEE013B0BC5A005E8406 /* MainWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = 32D7FEDE13B0BC5A005E8406 /* MainWindow.xib */; };
 		32D7FF5B13B0D382005E8406 /* Reachability.m in Sources */ = {isa = PBXBuildFile; fileRef = 32D7FF5A13B0D382005E8406 /* Reachability.m */; };
@@ -437,6 +447,16 @@
 		32733E2913B0FCBA0053C44A /* SBJsonWriter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SBJsonWriter.h; path = kwiqet/classes/SBJsonWriter.h; sourceTree = SOURCE_ROOT; };
 		32733E2A13B0FCBA0053C44A /* SBJsonWriter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SBJsonWriter.m; path = kwiqet/classes/SBJsonWriter.m; sourceTree = SOURCE_ROOT; };
 		32B36CD913B27DF1004C2068 /* kwiqet 002.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "kwiqet 002.xcdatamodel"; sourceTree = "<group>"; };
+		32BEE72913BA4720009D583E /* cardbg.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = cardbg.png; sourceTree = "<group>"; };
+		32BEE72A13BA4720009D583E /* cardbg@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "cardbg@2x.png"; sourceTree = "<group>"; };
+		32BEE72B13BA4720009D583E /* cardshadow-bot.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "cardshadow-bot.png"; sourceTree = "<group>"; };
+		32BEE72C13BA4720009D583E /* cardshadow-bot@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "cardshadow-bot@2x.png"; sourceTree = "<group>"; };
+		32BEE72D13BA4720009D583E /* cardshadow-top.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "cardshadow-top.png"; sourceTree = "<group>"; };
+		32BEE72E13BA4720009D583E /* cardshadow-top@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "cardshadow-top@2x.png"; sourceTree = "<group>"; };
+		32BEE73613BA52F5009D583E /* fbConnect.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = fbConnect.png; sourceTree = "<group>"; };
+		32BEE73713BA52F5009D583E /* fbConnect@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "fbConnect@2x.png"; sourceTree = "<group>"; };
+		32BEE73813BA52F5009D583E /* fbConnected.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = fbConnected.png; sourceTree = "<group>"; };
+		32BEE73913BA52F5009D583E /* fbConnected@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "fbConnected@2x.png"; sourceTree = "<group>"; };
 		32D7FEDC13B0BC43005E8406 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		32D7FEDF13B0BC5A005E8406 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/MainWindow.xib; sourceTree = "<group>"; };
 		32D7FF5913B0D382005E8406 /* Reachability.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Reachability.h; sourceTree = "<group>"; };
@@ -576,6 +596,16 @@
 		32041A3613AFFC700072F95C /* images */ = {
 			isa = PBXGroup;
 			children = (
+				32BEE73613BA52F5009D583E /* fbConnect.png */,
+				32BEE73713BA52F5009D583E /* fbConnect@2x.png */,
+				32BEE73813BA52F5009D583E /* fbConnected.png */,
+				32BEE73913BA52F5009D583E /* fbConnected@2x.png */,
+				32BEE72913BA4720009D583E /* cardbg.png */,
+				32BEE72A13BA4720009D583E /* cardbg@2x.png */,
+				32BEE72B13BA4720009D583E /* cardshadow-bot.png */,
+				32BEE72C13BA4720009D583E /* cardshadow-bot@2x.png */,
+				32BEE72D13BA4720009D583E /* cardshadow-top.png */,
+				32BEE72E13BA4720009D583E /* cardshadow-top@2x.png */,
 				32041A3713AFFC700072F95C /* AccountLogInButton.png */,
 				32041A3813AFFC700072F95C /* AccountLogInButton@2x.png */,
 				32041A3913AFFC700072F95C /* AccountResetButton.png */,
@@ -1199,6 +1229,16 @@
 				32D7FEE013B0BC5A005E8406 /* MainWindow.xib in Resources */,
 				32733E1113B0FBBA0053C44A /* FBConnect.bundle in Resources */,
 				32733E1213B0FBBA0053C44A /* FBDialog.bundle in Resources */,
+				32BEE72F13BA4720009D583E /* cardbg.png in Resources */,
+				32BEE73013BA4720009D583E /* cardbg@2x.png in Resources */,
+				32BEE73113BA4720009D583E /* cardshadow-bot.png in Resources */,
+				32BEE73213BA4720009D583E /* cardshadow-bot@2x.png in Resources */,
+				32BEE73313BA4720009D583E /* cardshadow-top.png in Resources */,
+				32BEE73413BA4720009D583E /* cardshadow-top@2x.png in Resources */,
+				32BEE73A13BA52F5009D583E /* fbConnect.png in Resources */,
+				32BEE73B13BA52F5009D583E /* fbConnect@2x.png in Resources */,
+				32BEE73C13BA52F5009D583E /* fbConnected.png in Resources */,
+				32BEE73D13BA52F5009D583E /* fbConnected@2x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

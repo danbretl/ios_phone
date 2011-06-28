@@ -21,6 +21,7 @@ extern float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT;
 @interface EventsViewController : UIViewController <UITableViewDelegate, UITableViewDataSource, UISearchBarDelegate, UIAlertViewDelegate, CardPageViewControllerDelegate, WebConnectorDelegate> {
     
 	UITableView * myTableView;
+    UIView * tableFooterView;
     
 	NSMutableArray * events;
 	NSMutableArray * eventsFromSearch;
