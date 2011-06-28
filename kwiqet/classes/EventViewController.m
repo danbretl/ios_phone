@@ -185,12 +185,22 @@
     titleBar = [[ElasticUILabel alloc] initWithFrame:CGRectMake(0, CGRectGetMaxY(self.actionBar.frame), self.view.bounds.size.width, 32)];
     [self.view addSubview:self.titleBar];
     [self.view bringSubviewToFront:self.titleBar];
-    self.titleBar.layer.shadowColor = [[UIColor blackColor] CGColor];
-    self.titleBar.layer.shadowOffset = CGSizeMake(0, 3);
-    self.titleBar.layer.shadowOpacity = 0.35;
+//    self.titleBar.layer.shadowColor = [[UIColor blackColor] CGColor];
+//    self.titleBar.layer.shadowOffset = CGSizeMake(0, 3);
+//    self.titleBar.layer.shadowOpacity = 0.35;
+//    self.titleBar.layer.shouldRasterize = YES;
 //    UIView * shadow = [[UIView alloc] initWithFrame:CGRectMake(0, CGRectGetMaxY(self.titleBar.frame), self.titleBar.bounds.size.width, 10)];
 //    shadow.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"cardshadow-top.png"]];
 //    [self.view addSubview:shadow];
+    UIView * shadowCheatViewOne = [[UIView alloc] initWithFrame:self.titleBar.frame];
+    shadowCheatViewOne.layer.shadowColor = [[UIColor blackColor] CGColor];
+    shadowCheatViewOne.layer.shadowOffset = CGSizeMake(0, 3);
+    shadowCheatViewOne.layer.shadowOpacity = 0.35;
+    shadowCheatViewOne.layer.shouldRasterize = YES;
+    shadowCheatViewOne.backgroundColor = [UIColor blackColor];
+    [self.view addSubview:shadowCheatViewOne];
+    [self.view sendSubviewToBack:shadowCheatViewOne];
+    [shadowCheatViewOne release];
     
     // Scroll view
     CGFloat scrollViewOriginY = CGRectGetMaxY(self.titleBar.frame);
@@ -208,14 +218,15 @@
         self.imageView.userInteractionEnabled = YES;
         [swipeToGoBack release];
         
-        UIView * shadowCheatView = [[UIView alloc] initWithFrame:self.imageView.frame];
-        shadowCheatView.layer.shadowColor = [[UIColor blackColor] CGColor];
-        shadowCheatView.layer.shadowOffset = CGSizeMake(0, -3);
-        shadowCheatView.layer.shadowOpacity = 0.35;
-        shadowCheatView.backgroundColor = [UIColor blackColor];
-        [self.scrollView addSubview:shadowCheatView];
-        [self.scrollView sendSubviewToBack:shadowCheatView];
-        [shadowCheatView release];
+        UIView * shadowCheatViewTwo = [[UIView alloc] initWithFrame:self.imageView.frame];
+        shadowCheatViewTwo.layer.shadowColor = [[UIColor blackColor] CGColor];
+        shadowCheatViewTwo.layer.shadowOffset = CGSizeMake(0, -3);
+        shadowCheatViewTwo.layer.shadowOpacity = 0.35;
+        shadowCheatViewTwo.layer.shouldRasterize = YES;
+        shadowCheatViewTwo.backgroundColor = [UIColor blackColor];
+        [self.scrollView addSubview:shadowCheatViewTwo];
+        [self.scrollView sendSubviewToBack:shadowCheatViewTwo];
+        [shadowCheatViewTwo release];
         
         // Breadcrumbs bar
         CGFloat breadcrumbsBarHeight = 32.0;
@@ -322,9 +333,20 @@
             detailsContainer = [[UIView alloc] initWithFrame:CGRectMake(0, CGRectGetMaxY(self.eventInfoDividerView.frame), self.scrollView.bounds.size.width, 0.0)];
             self.detailsContainer.backgroundColor = [UIColor whiteColor];
             [self.scrollView addSubview:self.detailsContainer];
-            self.detailsContainer.layer.shadowColor = [[UIColor blackColor] CGColor];
-            self.detailsContainer.layer.shadowOffset = CGSizeMake(0, 3);
-            self.detailsContainer.layer.shadowOpacity = 0.35;
+//            self.detailsContainer.layer.shadowColor = [[UIColor blackColor] CGColor];
+//            self.detailsContainer.layer.shadowOffset = CGSizeMake(0, 3);
+//            self.detailsContainer.layer.shadowOpacity = 0.35;
+//            self.detailsContainer.layer.shouldRasterize = YES;
+            UIView * shadowCheatViewThree = [[UIView alloc] initWithFrame:self.detailsContainer.bounds];
+            shadowCheatViewThree.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+            shadowCheatViewThree.layer.shadowColor = [[UIColor blackColor] CGColor];
+            shadowCheatViewThree.layer.shadowOffset = CGSizeMake(0, 3);
+            shadowCheatViewThree.layer.shadowOpacity = 0.35;
+            shadowCheatViewThree.layer.shouldRasterize = YES;
+            shadowCheatViewThree.backgroundColor = [UIColor whiteColor];
+            [self.detailsContainer addSubview:shadowCheatViewThree];
+            [self.detailsContainer sendSubviewToBack:shadowCheatViewThree];
+            [shadowCheatViewThree release];
             // Details background color view
             detailsBackgroundColorView = [[UIView alloc] initWithFrame:self.detailsContainer.bounds];
             self.detailsBackgroundColorView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
