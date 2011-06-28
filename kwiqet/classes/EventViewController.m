@@ -265,7 +265,7 @@
             
             // Price label
             CGFloat priceLabelOriginX = 80;
-            priceLabel = [[UILabel alloc] initWithFrame:CGRectMake(priceLabelOriginX, 5, self.eventInfoDividerView.bounds.size.width - priceLabelOriginX, 15)];
+            priceLabel = [[UILabel alloc] initWithFrame:CGRectMake(priceLabelOriginX, 6, self.eventInfoDividerView.bounds.size.width - priceLabelOriginX, 15)];
             self.priceLabel.backgroundColor = [UIColor clearColor];
             self.priceLabel.font= [UIFont fontWithName:@"HelveticaNeue" size:14];
             [self.eventInfoDividerView addSubview:self.priceLabel];
@@ -282,26 +282,26 @@
             {
                                 
                 // Venue label
-                venueLabel = [[UILabel alloc] initWithFrame:CGRectMake(10,75,317,30)];
+                venueLabel = [[UILabel alloc] initWithFrame:CGRectMake(10,80,317,30)];
                 self.venueLabel.backgroundColor = [UIColor clearColor];
                 self.venueLabel.font= [UIFont fontWithName:@"HelveticaNeueLTStd-MdCn" size:22];
                 [self.eventInfoDividerView addSubview:self.venueLabel];
                 
                 // Address label
-                addressLabel = [[UILabel alloc] initWithFrame:CGRectMake(10,91,200,25)];
+                addressLabel = [[UILabel alloc] initWithFrame:CGRectMake(10,96,200,25)];
                 self.addressLabel.backgroundColor = [UIColor clearColor];
                 self.addressLabel.font= [UIFont fontWithName:@"HelveticaNeue" size:14];
                 [self.eventInfoDividerView addSubview:self.addressLabel];
                 
                 // City State Zip label
-                cityStateZipLabel = [[UILabel alloc] initWithFrame:CGRectMake(10,106,200,25)];
+                cityStateZipLabel = [[UILabel alloc] initWithFrame:CGRectMake(10,111,200,25)];
                 self.cityStateZipLabel.backgroundColor = [UIColor clearColor];
                 self.cityStateZipLabel.font= [UIFont fontWithName:@"HelveticaNeue" size:14];
                 [self.eventInfoDividerView addSubview:self.cityStateZipLabel];
                 
                 // Phone number button
                 self.phoneNumberButton = [UIButton buttonWithType:UIButtonTypeCustom];
-                self.phoneNumberButton.frame = CGRectMake(10, 130, 150, 20);
+                self.phoneNumberButton.frame = CGRectMake(10, 135, 150, 20);
                 [self.phoneNumberButton setTitleColor:[UIColor colorWithRed:0.2549 green:0.41568 blue:0.70196 alpha:1.0] forState:UIControlStateNormal];
                 [self.phoneNumberButton addTarget:self action:@selector(phoneButtonTouched) forControlEvents:UIControlEventTouchUpInside];
                 self.phoneNumberButton.backgroundColor = [UIColor clearColor];
@@ -311,7 +311,7 @@
                 
                 // Map button
                 self.mapButton = [UIButton buttonWithType:UIButtonTypeCustom];
-                self.mapButton.frame = CGRectMake(240,105,64,20);
+                self.mapButton.frame = CGRectMake(240,110,64,20);
                 [self.mapButton setBackgroundImage:[UIImage imageNamed:@"btn_map.png"] forState: UIControlStateNormal];
                 [self.mapButton addTarget:self action:@selector(mapButtonTouched) forControlEvents:UIControlEventTouchUpInside];
                 [self.eventInfoDividerView addSubview:self.mapButton];
@@ -336,7 +336,7 @@
             CGFloat detailsLabelVerticalPadding = 10;
             detailsLabel = [[UILabel alloc] initWithFrame:CGRectMake(detailsLabelHorizontalPadding, detailsLabelVerticalPadding, self.detailsContainer.bounds.size.width - 2 * detailsLabelHorizontalPadding, 0)];
             //self.detailsLabel.font = [UIFont fontWithName:@"HelveticaNeue" size:16];
-            self.detailsLabel.font = [UIFont fontWithName:@"HelveticaNeueLTStd-MdCn" size:16];
+            self.detailsLabel.font = [UIFont fontWithName:@"HelveticaNeueLTStd-MdCn" size:18];
             self.detailsLabel.backgroundColor = [UIColor clearColor];
             self.detailsLabel.numberOfLines = 0;
             [self.detailsContainer addSubview:self.detailsLabel];
@@ -483,7 +483,7 @@
     self.detailsLabel.frame = detailsLabelFrame;
     NSLog(@"%@", NSStringFromCGRect(self.detailsLabel.frame));
     CGRect detailsContainerFrame = self.detailsContainer.frame;
-    detailsContainerFrame.size.height = CGRectGetMaxY(self.detailsLabel.frame) + self.detailsLabel.frame.origin.y - 4; // TEMPORARY HACK, INFERRING THAT THE ORIGIN Y OF THE DETAILS LABEL IS EQUAL TO THE VERTICAL PADDING WE SHOULD GIVE UNDER THAT LABEL. // EVEN WORSE TEMPORARY HACK, HARDCODING AN OFFSET BECAUSE PUTTING EQUAL PADDING AFTER AS BEFORE DOES NOT LOOK EVEN.
+    detailsContainerFrame.size.height = CGRectGetMaxY(self.detailsLabel.frame) + self.detailsLabel.frame.origin.y - 6; // TEMPORARY HACK, INFERRING THAT THE ORIGIN Y OF THE DETAILS LABEL IS EQUAL TO THE VERTICAL PADDING WE SHOULD GIVE UNDER THAT LABEL. // EVEN WORSE TEMPORARY HACK, HARDCODING AN OFFSET BECAUSE PUTTING EQUAL PADDING AFTER AS BEFORE DOES NOT LOOK EVEN.
     self.detailsContainer.frame = detailsContainerFrame;
     [self.scrollView setContentSize:CGSizeMake(self.scrollView.bounds.size.width, CGRectGetMaxY(self.detailsContainer.frame))];
     NSLog(@"%@", NSStringFromCGSize(self.scrollView.contentSize));
