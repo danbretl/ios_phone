@@ -52,6 +52,7 @@ extern CGFloat const FEATURED_EVENT_BACKGROUND_COLOR_ALPHA;
     UILabel * addressSecondLineLabel;
     UIButton * phoneNumberButton;
     UILabel * priceLabel;
+    UIView * eventDetailsContainer;
     UILabel * eventDetailsLabel;
     UIButton * mapButton;
     UIView * noFeaturedEventView;

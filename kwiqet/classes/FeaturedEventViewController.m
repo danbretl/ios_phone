@@ -62,7 +62,8 @@ CGFloat const FEV_PRICE_LABEL_HEIGHT = 25.0;
 CGFloat const FEV_PHONE_BUTTON_PADDING_RIGHT = 10.0;
 CGFloat const FEV_PHONE_BUTTON_ORIGIN_Y = 141.0;
 CGFloat const FEV_PHONE_BUTTON_HEIGHT = 20.0;
-CGFloat const FEV_DESCRIPTION_LABEL_PADDING = 5.0;
+CGFloat const FEV_DESCRIPTION_LABEL_PADDING_VERTICAL = 10.0;
+CGFloat const FEV_DESCRIPTION_LABEL_PADDING_HORIZONTAL = 20.0;
 
 @interface FeaturedEventViewController()
 // Views
@@ -85,6 +86,7 @@ CGFloat const FEV_DESCRIPTION_LABEL_PADDING = 5.0;
 @property (retain) UILabel * addressSecondLineLabel;
 @property (retain) UIButton * phoneNumberButton;
 @property (retain) UILabel * priceLabel;
+@property (retain) UIView * eventDetailsContainer;
 @property (retain) UILabel * eventDetailsLabel;
 @property (retain) UIButton * mapButton;
 @property (retain) UIView * noFeaturedEventView;
@@ -94,7 +96,7 @@ CGFloat const FEV_DESCRIPTION_LABEL_PADDING = 5.0;
 @synthesize mostRecentGetNewFeaturedEventSuggestionDate, coreDataModel, facebookManager;
 @synthesize mapViewController;
 @synthesize actionBarView, letsGoButton, shareButton, scrollView, imageView, titleBarView, titleLabel, detailsView, shareChoiceActionSheet, webActivityView;
-@synthesize timeLabel, dateLabel, venueNameLabel, addressFirstLineLabel, addressSecondLineLabel, phoneNumberButton, priceLabel, eventDetailsLabel, mapButton, noFeaturedEventView, refreshHeaderView;
+@synthesize timeLabel, dateLabel, venueNameLabel, addressFirstLineLabel, addressSecondLineLabel, phoneNumberButton, priceLabel, eventDetailsContainer, eventDetailsLabel, mapButton, noFeaturedEventView, refreshHeaderView;
 
 #pragma mark -
 #pragma mark Initialization
@@ -136,6 +138,7 @@ CGFloat const FEV_DESCRIPTION_LABEL_PADDING = 5.0;
     [addressSecondLineLabel release];
     [phoneNumberButton release];
     [priceLabel release];
+    [eventDetailsContainer release];
     [eventDetailsLabel release];
     [mapButton release];
     [noFeaturedEventView release];
@@ -287,17 +290,17 @@ CGFloat const FEV_DESCRIPTION_LABEL_PADDING = 5.0;
             
         }
         
-        // Event description label
-        CGFloat dummyHeight = 22.0;
-        self.eventDetailsLabel = [[[UILabel alloc] initWithFrame:CGRectMake(FEV_DESCRIPTION_LABEL_PADDING, CGRectGetMaxY(self.detailsView.frame), self.scrollView.bounds.size.width - FEV_DESCRIPTION_LABEL_PADDING * 2.0, dummyHeight)] autorelease];
+        // Event details container
+        eventDetailsContainer = [[UIView alloc] initWithFrame:CGRectMake(0, CGRectGetMaxY(self.detailsView.frame), self.scrollView.bounds.size.width, 0.0)];
+        [self.scrollView addSubview:self.eventDetailsContainer];
+        // Event details label
+        eventDetailsLabel = [[UILabel alloc] initWithFrame:CGRectMake(FEV_DESCRIPTION_LABEL_PADDING_HORIZONTAL, FEV_DESCRIPTION_LABEL_PADDING_VERTICAL, self.eventDetailsContainer.bounds.size.width - FEV_DESCRIPTION_LABEL_PADDING_HORIZONTAL * 2.0, 0)];
         self.eventDetailsLabel.adjustsFontSizeToFitWidth = NO;
         self.eventDetailsLabel.font = [UIFont fontWithName:@"HelveticaNeueLTStd-Cn" size:16];
         self.eventDetailsLabel.textColor = [UIColor blackColor];
         self.eventDetailsLabel.backgroundColor = [UIColor clearColor];
-        self.eventDetailsLabel.textAlignment = UITextAlignmentLeft;
         self.eventDetailsLabel.numberOfLines = 0;
-        [self.scrollView addSubview:self.eventDetailsLabel];
-        [self.eventDetailsLabel release];
+        [self.eventDetailsContainer addSubview:self.eventDetailsLabel];
         
     }
     
@@ -548,13 +551,17 @@ CGFloat const FEV_DESCRIPTION_LABEL_PADDING = 5.0;
 //        [self.phoneNumberButton setTitle:self.eventPhoneString forState:UIControlStateNormal];
         // Description
         self.eventDetailsLabel.text = theDescription;
-        CGSize eventDetailsSize = [self.eventDetailsLabel.text sizeWithFont:self.eventDetailsLabel.font constrainedToSize:CGSizeMake(260.0, 4600.0)];
-        CGRect newFrame = self.eventDetailsLabel.frame;
-        newFrame.size.height = eventDetailsSize.height;
-        self.eventDetailsLabel.frame = newFrame;
+        CGSize eventDetailsLabelSize = [self.eventDetailsLabel.text sizeWithFont:self.eventDetailsLabel.font constrainedToSize:CGSizeMake(self.eventDetailsLabel.bounds.size.width, 4600.0)];
+        CGRect eventDetailsLabelFrame = self.eventDetailsLabel.frame;
+        eventDetailsLabelFrame.size.height = eventDetailsLabelSize.height;
+        self.eventDetailsLabel.frame = eventDetailsLabelFrame;
+        CGRect eventDetailsContainerFrame = self.eventDetailsContainer.frame;
+        eventDetailsContainerFrame.size.height = CGRectGetMaxY(self.eventDetailsLabel.frame) + FEV_DESCRIPTION_LABEL_PADDING_VERTICAL;
+        self.eventDetailsContainer.frame = eventDetailsContainerFrame;
+        NSLog(@"%@ %@", NSStringFromCGRect(self.eventDetailsLabel.frame), NSStringFromCGRect(self.eventDetailsContainer.frame));
         
         // Set contentSize for scroll view
-        CGFloat endOfInfoY = CGRectGetMaxY(self.eventDetailsLabel.frame);
+        CGFloat endOfInfoY = CGRectGetMaxY(self.eventDetailsContainer.frame);
         [self.scrollView setContentSize:CGSizeMake(self.scrollView.bounds.size.width, endOfInfoY)];
         
         // Invoke the NSOperation

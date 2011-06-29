@@ -21,7 +21,7 @@
 
 @protocol CardPageViewControllerDelegate;
 
-@interface EventViewController : UIViewController <MFMailComposeViewControllerDelegate, WebConnectorDelegate, MapViewControllerDelegate> {
+@interface EventViewController : UIViewController <MFMailComposeViewControllerDelegate, WebConnectorDelegate, MapViewControllerDelegate, UIScrollViewDelegate> {
     
     UIView * backgroundColorView;
     UIView * navigationBar;
@@ -34,6 +34,7 @@
     UIButton * deleteButton;
     
     ElasticUILabel * titleBar;
+    UIView * titleBarBorderCheatView;
     
 	UIScrollView * scrollView;
 	UIImageView * imageView;
