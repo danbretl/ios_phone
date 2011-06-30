@@ -12,28 +12,21 @@
 #import "ASIHTTPRequest.h"
 #import "URLBuilder.h"
 #import "Contact.h"
+#import <QuartzCore/QuartzCore.h>
 
 @interface SettingsViewController()
-@property (nonatomic, retain) IBOutlet UIButton * loginButton;
-@property (nonatomic, retain) IBOutlet UIButton * resetLearningButton;
-@property (nonatomic, retain) IBOutlet FBLoginButton * linkFacebookButton;
 @property (retain) UITableView * tableView;
-
-//@property (retain) NSArray * sections;
-//@property (retain) NSDictionary * accountSection;
-//@property (retain) NSDictionary * sharingSection;
-//@property (retain) NSDictionary * learningSection;
-
+@property (retain) NSArray * settingsModel;
+@property (copy) NSString * loggedInKwiqetDisplayIdentifier;
 @end
 
 @implementation SettingsViewController
 
 @synthesize coreDataModel;
 @synthesize facebookManager;
-@synthesize loginButton,resetLearningButton, linkFacebookButton;
-@synthesize tableView;
-//@synthesize sections, accountSection, sharingSection, learningSection;
-
+@synthesize tableView = _tableView;
+@synthesize settingsModel;
+@synthesize loggedInKwiqetDisplayIdentifier;
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
@@ -46,16 +39,11 @@
 
 - (void)dealloc
 {
-    [loginButton release];
-    [resetLearningButton release];
-    [linkFacebookButton release];
     [facebookManager release];
     [coreDataModel release];
-    [tableView release];
-//    [sections release];
-//    [accountSection release];
-//    [sharingSection release];
-//    [learningSection release];
+    [_tableView release];
+    [settingsModel release];
+    [loggedInKwiqetDisplayIdentifier release];
     [super dealloc];
 }
 
@@ -63,7 +51,6 @@
 {
     // Releases the view if it doesn't have a superview.
     [super didReceiveMemoryWarning];
-    
     // Release any cached data, images, etc that aren't in use.
 }
 
@@ -73,88 +60,87 @@
 {
     [super viewDidLoad];
     
-//    self.accountSection = [NSMutableDictionary dictionaryWithObjectsAndKeys:
-//                           @"Account", @"headerTitle", 
-//                           nil];
-//    self.sharingSection = [NSMutableDictionary dictionaryWithObjectsAndKeys:
-//                           @"Sharing", @"headerTitle", 
-//                           nil];
-//    self.learningSection = [NSMutableDictionary dictionaryWithObjectsAndKeys:
-//                            @"Learning", @"headerTitle", 
-//                            nil];
-//    self.sections = [NSArray arrayWithObjects:self.accountSection, self.sharingSection, self.learningSection, nil];
-    
     self.view.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     
     // Do any additional setup after loading the view from its nib.
-    //check if api key is present in user default. if so, show logout message.
-    NSString * apiKey = [DefaultsModel retrieveAPIFromUserDefaults];
+    // Check if api key is present in user default. if so, show logout message.
+//    NSString * apiKey = [DefaultsModel retrieveAPIFromUserDefaults];
     
-    if (apiKey) {
-        [loginButton setTitle:@"Logout" forState: UIControlStateNormal];
-        loginButton.tag = 1;
-    } else {
-        [loginButton setTitle:@"Log In" forState: UIControlStateNormal];
-        loginButton.tag = 2;
-    }
+//    if (apiKey) {
+//        [loginButton setTitle:@"Logout" forState: UIControlStateNormal];
+//        loginButton.tag = 1;
+//    } else {
+//        [loginButton setTitle:@"Log In" forState: UIControlStateNormal];
+//        loginButton.tag = 2;
+//    }
         
     //setup fonts for uilabels
-    UILabel *accountLabel = [[UILabel alloc]initWithFrame:CGRectMake(10, 80, 200, 40)];
-    accountLabel.backgroundColor = [UIColor clearColor];
-    accountLabel.font = [UIFont fontWithName:@"HelveticaNeueLTStd-BdCn" size: 20];
-    accountLabel.text = @"User Account";
-    [self.view addSubview:accountLabel];
+//    UILabel *accountLabel = [[UILabel alloc]initWithFrame:CGRectMake(10, 80, 200, 40)];
+//    accountLabel.backgroundColor = [UIColor clearColor];
+//    accountLabel.font = [UIFont fontWithName:@"HelveticaNeueLTStd-BdCn" size: 20];
+//    accountLabel.text = @"User Account";
+//    [self.view addSubview:accountLabel];
+//    
+//    UILabel *loginMessageLabel = [[UILabel alloc]initWithFrame:CGRectMake(25, 115, 280, 120)];
+//    loginMessageLabel.backgroundColor = [UIColor clearColor];
+//    loginMessageLabel.font = [UIFont fontWithName:@"HelveticaNeueLTStd-Cn" size: 16];
+//    loginMessageLabel.text = @"Creating a Kwiqet account enables you to use extended features such as sending invites and making your event feed much more personal. Accounts are completely free.";
+//    loginMessageLabel.numberOfLines = 5;
+//    [self.view addSubview:loginMessageLabel];
+//    
+//    UILabel *behaviorLabel = [[UILabel alloc]initWithFrame:CGRectMake(10, 250, 200, 40)];
+//    behaviorLabel.backgroundColor = [UIColor clearColor];
+//    behaviorLabel.font = [UIFont fontWithName:@"HelveticaNeueLTStd-BdCn" size: 20];
+//    behaviorLabel.text = @"Reset Behavior";
+//    [self.view addSubview:behaviorLabel];
+//    
+//    UILabel *resetMessageLabel = [[UILabel alloc]initWithFrame:CGRectMake(25, 300, 280, 45)];
+//    resetMessageLabel.backgroundColor = [UIColor clearColor];
+//    resetMessageLabel.font = [UIFont fontWithName:@"HelveticaNeueLTStd-Cn" size: 16];
+//    resetMessageLabel.text = @"Erase all history and user preferences. Resetting data is not reversible.";
+//    resetMessageLabel.numberOfLines = 2;
+//    [self.view addSubview:resetMessageLabel];
+//    
+//    [accountLabel release];
+//    [behaviorLabel release];
+//    [loginMessageLabel release];
+//    [resetMessageLabel release];
     
-    UILabel *loginMessageLabel = [[UILabel alloc]initWithFrame:CGRectMake(25, 115, 280, 120)];
-    loginMessageLabel.backgroundColor = [UIColor clearColor];
-    loginMessageLabel.font = [UIFont fontWithName:@"HelveticaNeueLTStd-Cn" size: 16];
-    loginMessageLabel.text = @"Creating a Kwiqet account enables you to use extended features such as sending invites and making your event feed much more personal. Accounts are completely free.";
-    loginMessageLabel.numberOfLines = 5;
-    [self.view addSubview:loginMessageLabel];
-    
-    UILabel *behaviorLabel = [[UILabel alloc]initWithFrame:CGRectMake(10, 250, 200, 40)];
-    behaviorLabel.backgroundColor = [UIColor clearColor];
-    behaviorLabel.font = [UIFont fontWithName:@"HelveticaNeueLTStd-BdCn" size: 20];
-    behaviorLabel.text = @"Reset Behavior";
-    [self.view addSubview:behaviorLabel];
-    
-    UILabel *resetMessageLabel = [[UILabel alloc]initWithFrame:CGRectMake(25, 300, 280, 45)];
-    resetMessageLabel.backgroundColor = [UIColor clearColor];
-    resetMessageLabel.font = [UIFont fontWithName:@"HelveticaNeueLTStd-Cn" size: 16];
-    resetMessageLabel.text = @"Erase all history and user preferences. Resetting data is not reversible.";
-    resetMessageLabel.numberOfLines = 2;
-    [self.view addSubview:resetMessageLabel];
-    
-    [accountLabel release];
-    [behaviorLabel release];
-    [loginMessageLabel release];
-    [resetMessageLabel release];
-    
-    self.linkFacebookButton = [[[FBLoginButton alloc] initWithFrame:CGRectZero] autorelease];
-    self.linkFacebookButton.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleTopMargin;
-    [self.linkFacebookButton addTarget:self action:@selector(linkFacebookButtonTouched) forControlEvents:UIControlEventTouchUpInside];
-    self.linkFacebookButton.isLoggedIn = NO; // This changes the image of the button appropriately, and also sets the size of the button accordingly.
-    self.linkFacebookButton.frame = CGRectMake(self.view.bounds.size.width - self.linkFacebookButton.bounds.size.width - 7, self.view.bounds.size.height - self.linkFacebookButton.bounds.size.height - 20, self.linkFacebookButton.frame.size.width, self.linkFacebookButton.frame.size.height);
-    [self.view addSubview:self.linkFacebookButton];
-    [self.view bringSubviewToFront:self.linkFacebookButton];
-    self.linkFacebookButton.hidden = YES;
+    self.settingsModel = [NSArray arrayWithObjects:
+                          [NSDictionary dictionaryWithObjectsAndKeys:
+                           @"Reset Machine Learning", @"textLabel", 
+                           @"apple_settings_30.png", @"imageName",
+                           [NSValue valueWithPointer:@selector(resetMachineLearningButtonTouched)], @"selector",
+                           [NSNumber numberWithBool:NO], @"showAccessoryArrow",
+                           nil],
+                          [NSDictionary dictionaryWithObjectsAndKeys:
+                           @"Facebook", @"textLabel", 
+                           @"f_logo_30.png", @"imageName",
+                           [NSValue valueWithPointer:@selector(facebookConnectButtonTouched)], @"selector",
+                           [NSNumber numberWithBool:NO], @"showAccessoryArrow",
+                           @"Connected", @"detailTextLabelWhenBooleanYes",
+                           nil],
+                          nil];
     
     [self.facebookManager pullAuthenticationInfoFromDefaults];
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(loginActivity:) name:@"loginActivity" object:nil];
 
 }
 
 -(void)viewDidAppear:(BOOL)animated {
-    NSString * apiKey = [DefaultsModel retrieveAPIFromUserDefaults];
+    [self.tableView reloadData];
+//    NSString * apiKey = [DefaultsModel retrieveAPIFromUserDefaults];
     
-    if (apiKey) {
-        [loginButton setTitle:@"Logout" forState: UIControlStateNormal];
-        loginButton.tag = 1;
-    } else {
-        [loginButton setTitle:@"Log In" forState: UIControlStateNormal];
-        loginButton.tag = 2;
-    }
+//    if (apiKey) {
+//        [loginButton setTitle:@"Logout" forState: UIControlStateNormal];
+//        loginButton.tag = 1;
+//    } else {
+//        [loginButton setTitle:@"Log In" forState: UIControlStateNormal];
+//        loginButton.tag = 2;
+//    }
     
-    [self updateFacebookButtonIsLoggedIn:[self.facebookManager.fb isSessionValid]];
+//    [self updateFacebookButtonIsLoggedIn:[self.facebookManager.fb isSessionValid]];
     
 }
 
@@ -171,54 +157,54 @@
     return (interfaceOrientation == UIInterfaceOrientationPortrait);
 }
 
+- (void)loginActivity:(NSNotification *)notification {
+    
+}
+
 - (IBAction) attemptLoginButtonTouched:(id)sender  {
-    NSLog(@"SettingsViewController attemptLoginButtonTouched");
-    if ([sender tag] == 1) {
+    
+    BOOL loggedInWithKwiqet = [DefaultsModel retrieveAPIFromUserDefaults] != nil;
+    
+    if (loggedInWithKwiqet) {
         
         [DefaultsModel deleteAPIKey];
-                
+        
         NSDictionary * infoDictionary = [NSDictionary dictionaryWithObjectsAndKeys:@"logout", @"action", nil];
         [[NSNotificationCenter defaultCenter] postNotificationName:@"loginActivity" object:self userInfo:infoDictionary];
-        
-        [loginButton setTitle:@"Log In" forState: UIControlStateNormal];
-        loginButton.tag = 2;
-        
+                
         //show logout message
         UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Logged Out!" 
                                                         message:@"Log back in later to retrieve your personalized recommendations." delegate:self 
                                               cancelButtonTitle:@"Ok" otherButtonTitles:nil]; 
         [alert show];
         [alert release];
+        
+    } else {
+        
+        LoginViewController * loginViewController = [[LoginViewController alloc] init];
+        [self presentModalViewController:loginViewController animated:YES];
+        [loginViewController release];
+
     }
-    else if ([sender tag] == 2) {
-        LoginViewController *lViewController = [[LoginViewController alloc]init];
-        [self presentModalViewController:lViewController animated:YES];
-        [lViewController release]; 
-    }
+    
 }
 
 
-- (IBAction) resetMachineLearningButtonTouched:(id)sender  {
-    UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Warning:" 
-                                                    message:@"Reseting behavior will erase all history, thus losing your personalized recommendations. Are you sure you want to proceed?" delegate:self 
-                                          cancelButtonTitle:@"Yes" otherButtonTitles:@"No",nil]; 
+- (IBAction) resetMachineLearningButtonTouched {
+    UIAlertView * alert = [[UIAlertView alloc] initWithTitle:@"Warning:" 
+                                                     message:@"Resetting machine learning will erase your entire history, thus losing your personalized recommendations. Are you sure you want to proceed?" 
+                                                    delegate:self 
+                                           cancelButtonTitle:@"Yes" 
+                                           otherButtonTitles:@"No",nil];
     [alert show]; 
     [alert release];
 }
 
-- (void) linkFacebookButtonTouched {
-    NSLog(@"linkFacebookButtonTouched");
-    if (!self.linkFacebookButton.isLoggedIn) {
-        NSLog(@"not logged in, logging in");
-        [self.facebookManager pullAuthenticationInfoFromDefaults];
-        if (![self.facebookManager.fb isSessionValid]) {
-            NSLog(@"session is not valid, authorizing");
-            [self.facebookManager authorizeWithStandardPermissionsAndDelegate:self];
-        } else {
-            [self updateFacebookButtonIsLoggedIn:YES];
-        }
+- (void) facebookConnectButtonTouched {
+    [self.facebookManager pullAuthenticationInfoFromDefaults];
+    if (![self.facebookManager.fb isSessionValid]) {
+        [self.facebookManager authorizeWithStandardPermissionsAndDelegate:self];
     } else {
-        NSLog(@"logged in, logging out");
         [self.facebookManager.fb logout:self];
     }
 }
@@ -259,23 +245,23 @@
 }
 
 - (void) updateFacebookButtonIsLoggedIn:(BOOL)isLoggedIn {
-    self.linkFacebookButton.isLoggedIn = isLoggedIn;
-    self.linkFacebookButton.frame = CGRectMake(self.view.bounds.size.width - self.linkFacebookButton.bounds.size.width - 7, self.view.bounds.size.height - self.linkFacebookButton.bounds.size.height - 20, self.linkFacebookButton.frame.size.width, self.linkFacebookButton.frame.size.height);
+//    self.linkFacebookButton.isLoggedIn = isLoggedIn;
+//    self.linkFacebookButton.frame = CGRectMake(self.view.bounds.size.width - self.linkFacebookButton.bounds.size.width - 7, self.view.bounds.size.height - self.linkFacebookButton.bounds.size.height - 20, self.linkFacebookButton.frame.size.width, self.linkFacebookButton.frame.size.height);
 }
 
 -(void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex 
 {
 	//disable button
     
-	if ([alertView.title isEqualToString:@"Warning:"]) {
-		if (buttonIndex == 0) {
-            [self startResetingBehavior];
-            resetLearningButton.userInteractionEnabled = NO;
-		}
-		if (buttonIndex == 1) {	
-            //do nothing
-        }
-	}
+//	if ([alertView.title isEqualToString:@"Warning:"]) {
+//		if (buttonIndex == 0) {
+//            [self startResetingBehavior];
+//            resetLearningButton.userInteractionEnabled = NO;
+//		}
+//		if (buttonIndex == 1) {	
+//            //do nothing
+//        }
+//	}
 }
 
 -(void)startResetingBehavior  {
@@ -321,7 +307,7 @@
                           otherButtonTitles:nil];
     [alert show];
     [alert release];
-    resetLearningButton.userInteractionEnabled = YES;
+//    resetLearningButton.userInteractionEnabled = YES;
     [[NSNotificationCenter defaultCenter] postNotificationName:@"learningBehaviorWasReset" object:nil];
 }
 
@@ -338,19 +324,77 @@
                           otherButtonTitles:nil];
     [alert show];
     [alert release];
-    resetLearningButton.userInteractionEnabled = YES;
+//    resetLearningButton.userInteractionEnabled = YES;
 }
 
-//- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
-//    return [self.sections count];
-//}
-//
-//- (NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section {
-//    return [[self.sections objectAtIndex:section] valueForKey:@"sectionTitle"];
-//}
-//
-//- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
-//    return 0;
-//}
+- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
+    return 2;
+}
+
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
+    return (section == 0) ? 1 : [self.settingsModel count];
+}
+
+- (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
+    return (indexPath.section == 0) ? 64 : 44;
+}
+
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
+    
+    UITableViewCell * cell = nil;
+    
+    if (tableView == self.tableView) {
+        
+        NSString * cellIdentifier;
+        UITableViewCellStyle cellStyle;
+        if (indexPath.section == 0) {
+            cellIdentifier = @"AccountCell";
+            cellStyle = UITableViewCellStyleSubtitle;
+        } else {
+            cellIdentifier = @"SettingsCell";
+            cellStyle = UITableViewCellStyleValue1;
+        }
+        
+        cell = [tableView dequeueReusableCellWithIdentifier:cellIdentifier];
+        if (cell == nil) {
+            cell = [[UITableViewCell alloc] initWithStyle:cellStyle reuseIdentifier:cellIdentifier];
+        }
+        [self configureCell:cell forRowAtIndexPath:indexPath];
+        
+    }
+    
+    return cell;
+        
+}
+
+- (void) configureCell:(UITableViewCell *)cell forRowAtIndexPath:(NSIndexPath *)indexPath {
+
+    cell.imageView.contentMode = UIViewContentModeCenter;
+    cell.imageView.layer.cornerRadius = 6.0;
+    cell.imageView.layer.masksToBounds = YES;
+    cell.imageView.layer.borderWidth = 1.0;
+    cell.imageView.layer.borderColor = [[UIColor colorWithWhite:0.75 alpha:0.5] CGColor];
+    
+    NSString * textLabelText = nil;
+    NSString * detailTextLabelText = nil;
+    NSString * imageName = nil;
+    UITableViewCellAccessoryType accessoryType;
+    if (indexPath.section == 0) {
+        textLabelText = @"Dan Bretl";
+        detailTextLabelText = @"Touch to log out";
+        imageName = @"kwiqet_colors_50.png";
+        accessoryType = UITableViewCellAccessoryDisclosureIndicator;
+    } else {
+        textLabelText = [[self.settingsModel objectAtIndex:indexPath.row] valueForKey:@"textLabel"];
+        imageName = [[self.settingsModel objectAtIndex:indexPath.row] valueForKey:@"imageName"];
+        accessoryType = [[[self.settingsModel objectAtIndex:indexPath.row] valueForKey:@"showAccessoryArrow"] boolValue] ? UITableViewCellAccessoryDisclosureIndicator : UITableViewCellAccessoryNone;
+    }
+    
+    cell.textLabel.text = textLabelText;
+    cell.detailTextLabel.text = detailTextLabelText;
+    cell.imageView.image = [UIImage imageNamed:imageName];
+    cell.accessoryType = accessoryType;
+    
+}
 
 @end

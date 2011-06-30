@@ -11,21 +11,18 @@
 #import "FBLoginButton.h"
 #import "CoreDataModel.h"
 
-@interface SettingsViewController : UIViewController <FBSessionDelegate, FBRequestDelegate/*, UITableViewDelegate, UITableViewDataSource*/> {
-
-    IBOutlet UIButton * loginButton;
-    IBOutlet UIButton * resetLearningButton;
-    IBOutlet UIButton * connectFacebookButton;
+@interface SettingsViewController : UIViewController <FBSessionDelegate, FBRequestDelegate, UITableViewDelegate, UITableViewDataSource> {
 
     FacebookManager * facebookManager;
     CoreDataModel * coreDataModel;
     
-    IBOutlet UITableView * tableView;
+    IBOutlet UITableView * _tableView;
     
-//    NSArray * sections;
-//    NSDictionary * accountSection;
-//    NSDictionary * sharingSection;
-//    NSDictionary * learningSection;
+    NSArray * settingsModel;
+    
+    NSString * loggedInKwiqetDisplayIdentifier;
+    
+    BOOL facebookLoggedIn;
     
 }
 
@@ -33,11 +30,15 @@
 
 - (IBAction) attemptLoginButtonTouched:(id)sender;
 
-- (IBAction) resetMachineLearningButtonTouched:(id)sender;
-- (void) startResetingBehavior;
+- (IBAction) resetMachineLearningButtonTouched;
+- (void) facebookConnectButtonTouched;
 
-- (void) linkFacebookButtonTouched;
+- (void) startResetingBehavior;
 @property (nonatomic, retain) FacebookManager * facebookManager;
 - (void) updateFacebookButtonIsLoggedIn:(BOOL)isLoggedIn;
+
+- (void) loginActivity:(NSNotification *)notification;
+
+- (void) configureCell:(UITableViewCell *)cell forRowAtIndexPath:(NSIndexPath *)indexPath;
 
 @end
