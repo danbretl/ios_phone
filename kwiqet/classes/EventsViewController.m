@@ -1082,6 +1082,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     NSString * summaryStartTimeEarliestString = event.summaryStartTimeEarliestString;
     NSString * summaryStartTimeLatestString = event.summaryStartTimeLatestString;
     NSNumber * summaryStartTimeDistinctCount = event.summaryStartTimeDistinctCount;
+    NSNumber * summaryPlaceDistinctCount = event.summaryPlaceDistinctCount;
     NSNumber * priceMin = event.priceMinimum;
     NSNumber * priceMax = event.priceMaximum;
     
@@ -1094,7 +1095,14 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     }
     
     if (location || address) {
-        cell.locationLabel.text = location ? location : address;   
+        if (location) {
+            cell.locationLabel.text = location;
+            if ([summaryPlaceDistinctCount intValue] > 1) {
+                cell.locationLabel.text = [cell.locationLabel.text stringByAppendingFormat:@" & %d more locations", [summaryPlaceDistinctCount intValue] - 1];
+            }
+        } else {
+            cell.locationLabel.text = address;
+        }
     } else {
         cell.locationLabel.text = @"Location not available";
     }

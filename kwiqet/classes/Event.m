@@ -42,6 +42,7 @@
 @dynamic summaryStartDateLatestString;
 @dynamic summaryStartTimeDistinctCount;
 @dynamic summaryStartTimeLatestString;
+@dynamic summaryPlaceDistinctCount;
 
 @dynamic concreteCategoryBreadcrumbs;
 

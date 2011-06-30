@@ -48,6 +48,7 @@
 @property (nonatomic, retain) NSString * summaryStartDateLatestString;
 @property (nonatomic, retain) NSNumber * summaryStartTimeDistinctCount;
 @property (nonatomic, retain) NSString * summaryStartTimeLatestString;
+@property (nonatomic, retain) NSNumber * summaryPlaceDistinctCount;
 
 @property (nonatomic, readonly) NSDate * startTimeDatetime;
 @property (nonatomic, readonly) NSDate * endTimeDatetime;
