@@ -318,6 +318,11 @@
     NSString * concreteParentCategoryURI = [WebUtil stringOrNil:[eventDictionary objectForKey:@"concrete_parent_category"]];
     
     // Concrete category breadcrumbs
+    // Using brute force currently - flush any old breadcrumbs, and create all new ones
+    event.concreteCategoryBreadcrumbs = nil;
+    for (CategoryBreadcrumb * breadcrumb in event.concreteCategoryBreadcrumbs) {
+        [self.managedObjectContext deleteObject:breadcrumb];
+    }
     NSArray * breadcrumbsArray = [eventDictionary valueForKey:@"concrete_category_breadcrumbs"];
     int order = 0;
     for (NSString * categoryURI in breadcrumbsArray) {
