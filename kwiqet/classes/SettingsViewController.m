@@ -137,6 +137,7 @@
     self.linkFacebookButton.frame = CGRectMake(self.view.bounds.size.width - self.linkFacebookButton.bounds.size.width - 7, self.view.bounds.size.height - self.linkFacebookButton.bounds.size.height - 20, self.linkFacebookButton.frame.size.width, self.linkFacebookButton.frame.size.height);
     [self.view addSubview:self.linkFacebookButton];
     [self.view bringSubviewToFront:self.linkFacebookButton];
+    self.linkFacebookButton.hidden = YES;
     
     [self.facebookManager pullAuthenticationInfoFromDefaults];
 
