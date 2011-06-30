@@ -36,8 +36,12 @@
 @dynamic fromSearch;
 
 @dynamic summaryAddress;
-@dynamic summaryStartDateString;
-@dynamic summaryStartTimeString;
+@dynamic summaryStartDateEarliestString;
+@dynamic summaryStartTimeEarliestString;
+@dynamic summaryStartDateDistinctCount;
+@dynamic summaryStartDateLatestString;
+@dynamic summaryStartTimeDistinctCount;
+@dynamic summaryStartTimeLatestString;
 
 @dynamic concreteCategoryBreadcrumbs;
 

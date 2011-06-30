@@ -51,7 +51,9 @@ static NSString * const WDT_PRICE_MAXIMUM_KEY = @"maximum";
 // DISPLAYING events list data //
 /////////////////////////////////
 
-- (NSString *) eventsListDateStringFromEventDateString:(NSString *)eventDateString relativeDates:(BOOL)relativeDates dataUnavailableString:(NSString *)dataUnavailableString;
-- (NSString *) eventsListTimeStringFromEventTimeString:(NSString *)eventTimeString dataUnavailableString:(NSString *)dataUnavailableString;
+- (NSString *) eventsListDateRangeStringFromEventDateEarliest:(NSString *)eventDateEarliestString eventDateLatest:(NSString *)eventDateLatestString eventDateDistinctCount:(NSNumber *)eventDateDistinctCount relativeDates:(BOOL)relativeDates dataUnavailableString:(NSString *)dataUnavailableString;
+- (NSString *) eventsListTimeRangeStringFromEventTimeEarliest:(NSString *)eventTimeEarliestString eventTimeLatest:(NSString *)eventTimeLatestString eventTimeDistinctCount:(NSNumber *)eventTimeDistinctCount dataUnavailableString:(NSString *)dataUnavailableString;
+- (NSString *) eventsListDateStringFromSQLDateString:(NSString *)sqlDateString relativeDates:(BOOL)relativeDates;
+- (NSString *) eventsListTimeStringFromSQLTimeString:(NSString *)sqlTimeString;
 
 @end

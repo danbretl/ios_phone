@@ -214,24 +214,39 @@
 // REGULAR EVENTS //
 ////////////////////
 
-- (void) addEventWithURI:(NSString *)uri title:(NSString *)title venue:(NSString *)venue priceMinimum:(NSNumber *)priceMinimum priceMaximum:(NSNumber *)priceMaximum summaryAddress:(NSString *)summaryAddress summaryStartDateString:(NSString *)summaryStartDateString summaryStartTimeString:(NSString *)summaryStartTimeString concreteParentCategoryURI:(NSString *)concreteParentCategoryURI fromSearch:(BOOL)fromSearch {
+- (void) updateEvent:(Event *)event usingEventSummaryDictionary:(NSDictionary *)eventSummaryDictionary featuredOverride:(NSNumber *)featuredOverride fromSearchOverride:(NSNumber *)fromSearchOverride {
     
-    Event * event = [NSEntityDescription insertNewObjectForEntityForName:@"Event" inManagedObjectContext:self.managedObjectContext];
+    // Get the rest of the raw event data
+    event.uri = [WebUtil stringOrNil:[eventSummaryDictionary valueForKey:@"event"]];
+    event.title = [WebUtil stringOrNil:[eventSummaryDictionary valueForKey:@"title"]]; // NSString
+    event.venue = [WebUtil stringOrNil:[eventSummaryDictionary valueForKey:@"place_title"]];
+    event.summaryAddress = [WebUtil stringOrNil:[eventSummaryDictionary valueForKey:@"place_address"]];
+    event.priceMinimum = [WebUtil numberOrNil:[eventSummaryDictionary valueForKey:@"price_quantity_min"]]; // NSNumber
+    event.priceMaximum = [WebUtil numberOrNil:[eventSummaryDictionary valueForKey:@"price_quantity_max"]]; // NSNumber
+    event.summaryStartDateEarliestString = [WebUtil stringOrNil:[eventSummaryDictionary valueForKey:@"start_date_earliest"]];
+    event.summaryStartTimeEarliestString = [WebUtil stringOrNil:[eventSummaryDictionary valueForKey:@"start_time_earliest"]];
+    // THE FOLLOWING IS A TEMPORARY HACK COVERING UP THE FACT THAT OUR SCRAPES ARE NOT DEALING WITH THE FACT THAT VILLAGE VOICE INPUTS A TIME OF 00:00:00 WHEN THEY DON'T HAVE A VALID TIME. THUS, WE ARE CURRENTLY HACKISHLY ASSUMING THAT ANY TIME OF 00:00:00 MEANS AN INVALID UNKNOWN TIME.
+    if ([event.summaryStartTimeEarliestString isEqualToString:@"00:00:00"]) {
+        event.summaryStartTimeEarliestString = nil;
+    }
+    event.summaryStartDateLatestString = [WebUtil stringOrNil:[eventSummaryDictionary valueForKey:@"start_date_latest"]];
+    event.summaryStartTimeLatestString = [WebUtil stringOrNil:[eventSummaryDictionary valueForKey:@"start_time_latest"]];
+    // THE FOLLOWING IS A TEMPORARY HACK COVERING UP THE FACT THAT OUR SCRAPES ARE NOT DEALING WITH THE FACT THAT VILLAGE VOICE INPUTS A TIME OF 00:00:00 WHEN THEY DON'T HAVE A VALID TIME. THUS, WE ARE CURRENTLY HACKISHLY ASSUMING THAT ANY TIME OF 00:00:00 MEANS AN INVALID UNKNOWN TIME.
+    if ([event.summaryStartTimeLatestString isEqualToString:@"00:00:00"]) {
+        event.summaryStartTimeLatestString = nil;
+    }
+    event.summaryStartDateDistinctCount = [WebUtil numberOrNil:[eventSummaryDictionary valueForKey:@"start_date_distinct_count"]]; // NSNumber
+    event.summaryStartTimeDistinctCount = [WebUtil numberOrNil:[eventSummaryDictionary valueForKey:@"start_time_distinct_count"]]; // NSNumber
     
-    event.uri = uri;
-    event.title = title;
-    event.venue = venue;
-    event.priceMinimum = priceMinimum;
-    event.priceMaximum = priceMaximum;
-    event.summaryAddress = summaryAddress;
-    event.summaryStartDateString = summaryStartDateString;
-    event.summaryStartTimeString = summaryStartTimeString;
-    
-    event.concreteParentCategoryURI = concreteParentCategoryURI;
-    Category * concreteParentCategory = [self getCategoryWithURI:concreteParentCategoryURI];
-    event.concreteParentCategory = concreteParentCategory;
-    
-    event.fromSearch = [NSNumber numberWithBool:fromSearch];
+    NSString * concreteParentCategoryURI = [WebUtil stringOrNil:[eventSummaryDictionary valueForKey:@"concrete_parent_category"]];
+    if (concreteParentCategoryURI) {
+        event.concreteParentCategoryURI = concreteParentCategoryURI;
+        Category * concreteParentCategory = [self getCategoryWithURI:concreteParentCategoryURI];
+        event.concreteParentCategory = concreteParentCategory;        
+    }
+
+    if (featuredOverride)   { event.featured = featuredOverride; }
+    if (fromSearchOverride) { event.fromSearch = fromSearchOverride; }
     
 }
 

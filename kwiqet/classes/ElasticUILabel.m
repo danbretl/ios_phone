@@ -42,7 +42,7 @@ CGFloat const ELASTICUILABEL_GRADIENT_VIEW_WIDTH = 45.0;
         self.scrollView.delegate = self;
         [self addSubview:self.scrollView];
 
-        self.label = [[UILabel alloc] initWithFrame:CGRectMake(5, 5, frame.size.width - 5, frame.size.height)];
+        self.label = [[UILabel alloc] initWithFrame:CGRectMake(5, 6, frame.size.width - 5, frame.size.height)];
         //self.label.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
         self.label.font = [UIFont fontWithName:@"HelveticaNeueLTStd-BdCn" size:25];
         self.label.backgroundColor = [UIColor clearColor];

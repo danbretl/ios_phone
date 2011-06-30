@@ -43,6 +43,7 @@
 @property (retain) UIButton * phoneNumberButton;
 @property (retain) UIButton * mapButton;
 @property (retain) UIView * detailsContainer;
+@property (retain) UIView * detailsContainerShadowCheat;
 @property (retain) UIView * detailsBackgroundColorView;
 @property (retain) UILabel * detailsLabel;
 @property (nonatomic, retain) WebActivityView * webActivityView;
@@ -51,6 +52,7 @@
 @property (nonatomic, readonly) WebConnector * webConnector;
 @property (nonatomic, readonly) WebDataTranslator * webDataTranslator;
 @property (nonatomic, readonly) UIAlertView * connectionErrorOnUserActionRequestAlertView;
+- (void)displayImage:(UIImage *)image;
 
 - (void) backButtonTouched;
 - (void) logoButtonTouched;
@@ -74,7 +76,7 @@
 @synthesize monthLabel, dayNumberLabel, dayNameLabel;
 @synthesize priceLabel, timeLabel;
 @synthesize venueLabel, addressLabel, cityStateZipLabel, phoneNumberButton, mapButton;
-@synthesize detailsContainer, detailsBackgroundColorView, detailsLabel;
+@synthesize detailsContainer, detailsContainerShadowCheat, detailsBackgroundColorView, detailsLabel;
 @synthesize webActivityView;
 @synthesize delegate;
 @synthesize coreDataModel;
@@ -108,6 +110,7 @@
     [phoneNumberButton release];
     [mapButton release];
     [detailsContainer release];
+    [detailsContainerShadowCheat release];
     [detailsBackgroundColorView release];
     [detailsLabel release];
     [webActivityView release];
@@ -182,36 +185,54 @@
         [self.deleteButton addTarget:self action:@selector(deleteButtonTouched) forControlEvents:UIControlEventTouchUpInside];
         [self.actionBar addSubview:self.deleteButton];
     }
+    UIView * shadowCheatViewTwo = [[UIView alloc] initWithFrame:self.actionBar.frame];
+    CGRect fooFrame = shadowCheatViewTwo.frame;
+    fooFrame.size.height -= 1;
+    shadowCheatViewTwo.frame = fooFrame;
+    shadowCheatViewTwo.layer.shadowColor = [[UIColor blackColor] CGColor];
+    shadowCheatViewTwo.layer.shadowOffset = CGSizeMake(0, 0);
+    shadowCheatViewTwo.layer.shadowOpacity = .55;
+    shadowCheatViewTwo.layer.shouldRasterize = YES;
+    shadowCheatViewTwo.backgroundColor = [UIColor blackColor];
+    [self.view addSubview:shadowCheatViewTwo];
+    [self.view sendSubviewToBack:shadowCheatViewTwo];
+    [shadowCheatViewTwo release];
     
-    // Title bar
-    titleBar = [[ElasticUILabel alloc] initWithFrame:CGRectMake(0, CGRectGetMaxY(self.actionBar.frame), self.view.bounds.size.width, 32)];
-    [self.view addSubview:self.titleBar];
-    [self.view bringSubviewToFront:self.titleBar];
-    // Title bar shadow
-    UIView * shadowCheatViewOne = [[UIView alloc] initWithFrame:self.titleBar.frame];
-    shadowCheatViewOne.layer.shadowColor = [[UIColor blackColor] CGColor];
-    shadowCheatViewOne.layer.shadowOffset = CGSizeMake(0, 0);
-    shadowCheatViewOne.layer.shadowOpacity = 0.55;
-    shadowCheatViewOne.layer.shouldRasterize = YES;
-    shadowCheatViewOne.backgroundColor = [UIColor blackColor];
-    [self.view addSubview:shadowCheatViewOne];
-    [self.view sendSubviewToBack:shadowCheatViewOne];
-    [shadowCheatViewOne release];
-    // Title bar bottom border
-    titleBarBorderCheatView = [[UIView alloc] initWithFrame:self.titleBar.frame];
-    self.titleBarBorderCheatView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-    self.titleBarBorderCheatView.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"HR.png"]];
-    self.titleBarBorderCheatView.opaque = NO;
-    [self.view addSubview:self.titleBarBorderCheatView];
-    [self.view bringSubviewToFront:self.titleBarBorderCheatView];
     // Scroll view
-    CGFloat scrollViewOriginY = CGRectGetMaxY(self.titleBar.frame);
+    CGFloat scrollViewOriginY = CGRectGetMaxY(self.actionBar.frame);
 	scrollView = [[UIScrollView alloc]initWithFrame:CGRectMake(0, scrollViewOriginY, self.view.bounds.size.width, self.view.bounds.size.height - scrollViewOriginY)];
     self.scrollView.delegate = self;
     [self.view addSubview:self.scrollView];
     {
+        // Title bar
+        titleBar = [[ElasticUILabel alloc] initWithFrame:CGRectMake(0, 0, self.view.bounds.size.width, 32)];
+        [self.scrollView addSubview:self.titleBar];
+        [self.scrollView bringSubviewToFront:self.titleBar];
+        // Title bar shadow
+        UIView * shadowCheatViewOne = [[UIView alloc] initWithFrame:self.titleBar.frame];
+        CGRect fooFrame = shadowCheatViewOne.frame;
+        fooFrame.origin.y += 1;
+        shadowCheatViewOne.frame = fooFrame;
+        shadowCheatViewOne.layer.shadowColor = [[UIColor blackColor] CGColor];
+        shadowCheatViewOne.layer.shadowOffset = CGSizeMake(0, 0);
+        shadowCheatViewOne.layer.shadowOpacity = 0.55;
+        shadowCheatViewOne.layer.shouldRasterize = YES;
+        shadowCheatViewOne.backgroundColor = [UIColor blackColor];
+        [self.scrollView addSubview:shadowCheatViewOne];
+        [self.scrollView sendSubviewToBack:shadowCheatViewOne];
+        [shadowCheatViewOne release];
+        // Title bar bottom border
+        titleBarBorderCheatView = [[UIView alloc] initWithFrame:self.titleBar.frame];
+        self.titleBarBorderCheatView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+        self.titleBarBorderCheatView.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"HR.png"]];
+        self.titleBarBorderCheatView.opaque = NO;
+        self.titleBarBorderCheatView.userInteractionEnabled = NO;
+        [self.scrollView addSubview:self.titleBarBorderCheatView];
+        [self.scrollView bringSubviewToFront:self.titleBarBorderCheatView];
+        
         // Image view
-        imageView = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, self.scrollView.bounds.size.width, 180)];
+        imageView = [[UIImageView alloc] initWithFrame:CGRectMake(0, CGRectGetMaxY(self.titleBar.frame), self.scrollView.bounds.size.width, 180)];
+        self.imageView.backgroundColor = [UIColor whiteColor];
         self.imageView.contentMode = UIViewContentModeScaleAspectFill;
         self.imageView.clipsToBounds = YES;
         [self.scrollView addSubview:self.imageView];
@@ -220,16 +241,6 @@
         [self.imageView addGestureRecognizer:swipeToGoBack];
         self.imageView.userInteractionEnabled = YES;
         [swipeToGoBack release];
-        // Image view shadow
-        UIView * shadowCheatViewTwo = [[UIView alloc] initWithFrame:self.imageView.frame];
-        shadowCheatViewTwo.layer.shadowColor = [[UIColor blackColor] CGColor];
-        shadowCheatViewTwo.layer.shadowOffset = CGSizeMake(0, 0);
-        shadowCheatViewTwo.layer.shadowOpacity = .55;
-        shadowCheatViewTwo.layer.shouldRasterize = YES;
-        shadowCheatViewTwo.backgroundColor = [UIColor blackColor];
-        [self.scrollView addSubview:shadowCheatViewTwo];
-        [self.scrollView sendSubviewToBack:shadowCheatViewTwo];
-        [shadowCheatViewTwo release];
         
         // Breadcrumbs bar
         CGFloat breadcrumbsBarHeight = 32.0;
@@ -339,16 +350,14 @@
             [self.scrollView addSubview:self.detailsContainer];
             [self.scrollView sendSubviewToBack:self.detailsContainer];
             // Details shadow
-            UIView * shadowCheatViewThree = [[UIView alloc] initWithFrame:self.detailsContainer.bounds];
-            shadowCheatViewThree.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-            shadowCheatViewThree.layer.shadowColor = [[UIColor blackColor] CGColor];
-            shadowCheatViewThree.layer.shadowOffset = CGSizeMake(0, 0);
-            shadowCheatViewThree.layer.shadowOpacity = .55;
-            shadowCheatViewThree.layer.shouldRasterize = YES;
-            shadowCheatViewThree.backgroundColor = [UIColor whiteColor];
-            [self.detailsContainer addSubview:shadowCheatViewThree];
-            [self.detailsContainer sendSubviewToBack:shadowCheatViewThree];
-            [shadowCheatViewThree release];
+            detailsContainerShadowCheat = [[UIView alloc] initWithFrame:self.detailsContainer.frame];
+            self.detailsContainerShadowCheat.layer.shadowColor = [[UIColor blackColor] CGColor];
+            self.detailsContainerShadowCheat.layer.shadowOffset = CGSizeMake(0, 0);
+            self.detailsContainerShadowCheat.layer.shadowOpacity = .55;
+            self.detailsContainerShadowCheat.layer.shouldRasterize = YES;
+            self.detailsContainerShadowCheat.backgroundColor = [UIColor whiteColor];
+            [self.scrollView addSubview:self.detailsContainerShadowCheat];
+            [self.scrollView sendSubviewToBack:self.detailsContainerShadowCheat];
             // Details background color view
             detailsBackgroundColorView = [[UIView alloc] initWithFrame:self.detailsContainer.bounds];
             self.detailsBackgroundColorView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
@@ -509,6 +518,7 @@
     CGRect detailsContainerFrame = self.detailsContainer.frame;
     detailsContainerFrame.size.height = CGRectGetMaxY(self.detailsLabel.frame) + self.detailsLabel.frame.origin.y - 6; // TEMPORARY HACK, INFERRING THAT THE ORIGIN Y OF THE DETAILS LABEL IS EQUAL TO THE VERTICAL PADDING WE SHOULD GIVE UNDER THAT LABEL. // EVEN WORSE TEMPORARY HACK, HARDCODING AN OFFSET BECAUSE PUTTING EQUAL PADDING AFTER AS BEFORE DOES NOT LOOK EVEN.
     self.detailsContainer.frame = detailsContainerFrame;
+    self.detailsContainerShadowCheat.frame = self.detailsContainer.frame;
     [self.scrollView setContentSize:CGSizeMake(self.scrollView.bounds.size.width, CGRectGetMaxY(self.detailsContainer.frame))];
     NSLog(@"%@", NSStringFromCGSize(self.scrollView.contentSize));
     
@@ -520,8 +530,13 @@
     }
     self.breadcrumbsLabel.text = breadcrumbsString;
     
-	// If the image view is not already set, then attempt to load an image for this event.
-    if (self.imageView.image == nil) {
+    
+//    if (!self.imageView.image) {
+//        [self displayImage:[UIImage imageNamed:@"event_img_placeholder.png"]];
+//    }
+	// If an image has not already been successfully loaded and set, then attempt to load and set an image for this event.
+//    if (!loadedImage) {
+    if(!self.imageView.image) {
         NSOperationQueue *queue = [[NSOperationQueue alloc]init];
         NSInvocationOperation *operation = [[NSInvocationOperation alloc] 
                                             initWithTarget:self
@@ -658,12 +673,15 @@
     NSString * imageURL = [url stringByAppendingString:imageLocation];
 	NSData * imageData = [NSData dataWithContentsOfURL:[NSURL URLWithString:imageURL]];
     UIImage * image = [UIImage imageWithData:imageData];
+//    loadedImage = YES;
 	[self performSelectorOnMainThread:@selector(displayImage:) withObject:image waitUntilDone:NO];
 }
 
 - (void)displayImage:(UIImage *)image {
     //NSLog(@"image is %f by %f", image.size.width, image.size.height);
 	[self.imageView setImage:image];
+    [self.scrollView bringSubviewToFront:self.titleBar];
+    [self.scrollView bringSubviewToFront:self.titleBarBorderCheatView];
 }
 
 ///send learned data to ML with tag G
@@ -863,11 +881,22 @@
     return connectionErrorOnUserActionRequestAlertView;
 }
 
-// Such a crazy heavyweight solution for just one pixel... Oh well!
+//// Such a crazy heavyweight solution for just one pixel... Oh well!
+//- (void)scrollViewDidScroll:(UIScrollView *)theScrollView {
+//    if (theScrollView == self.scrollView) {
+//        self.titleBarBorderCheatView.hidden = !(self.scrollView.contentOffset.y >= 0);
+//    }
+//}
+
 - (void)scrollViewDidScroll:(UIScrollView *)theScrollView {
+
     if (theScrollView == self.scrollView) {
-        self.titleBarBorderCheatView.hidden = !(self.scrollView.contentOffset.y >= 0);
+        CGRect titleBarFrame = self.titleBar.frame;
+        titleBarFrame.origin.y = MAX(0, self.scrollView.contentOffset.y);
+        self.titleBar.frame = titleBarFrame;
+        self.titleBarBorderCheatView.frame = self.titleBar.frame;
     }
+    
 }
 
 #pragma mark memory

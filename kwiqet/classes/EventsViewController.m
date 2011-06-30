@@ -518,20 +518,10 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     if (haveResults) {
         
         // Loop through and process all event dictionaries
-        for (NSDictionary * eventDictionary in eventsDictionaries) {
+        for (NSDictionary * eventSummaryDictionary in eventsDictionaries) {
             
-            // Get the rest of the raw event data
-            NSString * uri = [WebUtil stringOrNil:[eventDictionary valueForKey:@"event"]];
-            NSString * concreteParentCategoryURI = [WebUtil stringOrNil:[eventDictionary valueForKey:@"concrete_parent_category"]];
-            NSString * summaryAddress = [WebUtil stringOrNil:[eventDictionary valueForKey:@"place_address"]];
-            NSString * venue = [WebUtil stringOrNil:[eventDictionary valueForKey:@"place_title"]];
-            NSString * summaryStartDate = [WebUtil stringOrNil:[eventDictionary valueForKey:@"start_date_earliest"]];
-            NSString * summaryStartTime = [WebUtil stringOrNil:[eventDictionary valueForKey:@"start_time_earliest"]];
-            NSString * title = [WebUtil stringOrNil:[eventDictionary valueForKey:@"title"]]; // NSString
-            NSNumber * maxPrice = [WebUtil numberOrNil:[eventDictionary valueForKey:@"price_quantity_max"]]; // NSNumber
-            NSNumber * minPrice = [WebUtil numberOrNil:[eventDictionary valueForKey:@"price_quantity_min"]]; // NSNumber
-            
-            [self.coreDataModel addEventWithURI:uri title:title venue:venue priceMinimum:minPrice priceMaximum:maxPrice summaryAddress:summaryAddress summaryStartDateString:summaryStartDate summaryStartTimeString:summaryStartTime concreteParentCategoryURI:concreteParentCategoryURI fromSearch:NO];
+            Event * newEvent = (Event *)[NSEntityDescription insertNewObjectForEntityForName:@"Event" inManagedObjectContext:self.coreDataModel.managedObjectContext];
+            [self.coreDataModel updateEvent:newEvent usingEventSummaryDictionary:eventSummaryDictionary featuredOverride:nil fromSearchOverride:nil];
             
         }
         
@@ -609,20 +599,10 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     if (haveResults) {
         
         // Loop through and process all event dictionaries
-        for (NSDictionary * eventDictionary in eventsDictionaries) {
+        for (NSDictionary * eventSummaryDictionary in eventsDictionaries) {
             
-            // Get the rest of the raw event data
-            NSString * uri = [WebUtil stringOrNil:[eventDictionary valueForKey:@"event"]];
-            NSString * concreteParentCategoryURI = [WebUtil stringOrNil:[eventDictionary valueForKey:@"concrete_parent_category"]];
-            NSString * summaryAddress = [WebUtil stringOrNil:[eventDictionary valueForKey:@"place_address"]];
-            NSString * venue = [WebUtil stringOrNil:[eventDictionary valueForKey:@"place_title"]];
-            NSString * summaryStartDate = [WebUtil stringOrNil:[eventDictionary valueForKey:@"start_date_earliest"]];
-            NSString * summaryStartTime = [WebUtil stringOrNil:[eventDictionary valueForKey:@"start_time_earliest"]];
-            NSString * title = [WebUtil stringOrNil:[eventDictionary valueForKey:@"title"]]; // NSString
-            NSNumber * maxPrice = [WebUtil numberOrNil:[eventDictionary valueForKey:@"price_quantity_max"]]; // NSNumber
-            NSNumber * minPrice = [WebUtil numberOrNil:[eventDictionary valueForKey:@"price_quantity_min"]]; // NSNumber
-            
-            [self.coreDataModel addEventWithURI:uri title:title venue:venue priceMinimum:minPrice priceMaximum:maxPrice summaryAddress:summaryAddress summaryStartDateString:summaryStartDate summaryStartTimeString:summaryStartTime concreteParentCategoryURI:concreteParentCategoryURI fromSearch:YES];
+            Event * newEvent = (Event *)[NSEntityDescription insertNewObjectForEntityForName:@"Event" inManagedObjectContext:self.coreDataModel.managedObjectContext];
+            [self.coreDataModel updateEvent:newEvent usingEventSummaryDictionary:eventSummaryDictionary featuredOverride:nil fromSearchOverride:[NSNumber numberWithBool:YES]];
             
         }
         
@@ -1096,8 +1076,12 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     Category * concreteParentCategory = event.concreteParentCategory;
     NSString * location = event.venue;
     NSString * address = event.summaryAddress;
-    NSString * summaryStartDateString = event.summaryStartDateString;
-    NSString * summaryStartTimeString = event.summaryStartTimeString;
+    NSString * summaryStartDateEarliestString = event.summaryStartDateEarliestString;
+    NSString * summaryStartDateLatestString = event.summaryStartDateLatestString;
+    NSNumber * summaryStartDateDistinctCount = event.summaryStartDateDistinctCount;
+    NSString * summaryStartTimeEarliestString = event.summaryStartTimeEarliestString;
+    NSString * summaryStartTimeLatestString = event.summaryStartTimeLatestString;
+    NSNumber * summaryStartTimeDistinctCount = event.summaryStartTimeDistinctCount;
     NSNumber * priceMin = event.priceMinimum;
     NSNumber * priceMax = event.priceMaximum;
     
@@ -1114,16 +1098,12 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     } else {
         cell.locationLabel.text = @"Location not available";
     }
-    
-    // THE FOLLOWING IS A TEMPORARY HACK COVERING UP THE FACT THAT OUR SCRAPES ARE NOT DEALING WITH THE FACT THAT VILLAGE VOICE INPUTS A TIME OF 00:00:00 WHEN THEY DON'T HAVE A VALID TIME. THUS, WE ARE CURRENTLY HACKISHLY ASSUMING THAT ANY TIME OF 00:00:00 MEANS AN INVALID UNKNOWN TIME.
-    if ([summaryStartTimeString isEqualToString:@"00:00:00"]) {
-        summaryStartTimeString = nil;
-    }
 
-    NSString * dateToDisplay = [self.webDataTranslator eventsListDateStringFromEventDateString:summaryStartDateString relativeDates:YES dataUnavailableString:nil];
-    NSString * timeToDisplay = [self.webDataTranslator eventsListTimeStringFromEventTimeString:summaryStartTimeString dataUnavailableString:nil];
     
-    NSString * divider = summaryStartDateString && summaryStartTimeString ? @" | " : @"";
+    NSString * dateToDisplay = [self.webDataTranslator eventsListDateRangeStringFromEventDateEarliest:summaryStartDateEarliestString eventDateLatest:summaryStartDateLatestString eventDateDistinctCount:summaryStartDateDistinctCount relativeDates:YES dataUnavailableString:nil];
+    NSString * timeToDisplay = [self.webDataTranslator eventsListTimeRangeStringFromEventTimeEarliest:summaryStartTimeEarliestString eventTimeLatest:summaryStartTimeLatestString eventTimeDistinctCount:summaryStartTimeDistinctCount dataUnavailableString:nil];
+    
+    NSString * divider = summaryStartDateEarliestString && summaryStartTimeEarliestString ? @" | " : @"";
     NSString * finalDatetimeString = [NSString stringWithFormat:@"%@%@%@", dateToDisplay, divider, timeToDisplay];
     cell.dateAndTimeLabel.text = finalDatetimeString;
     

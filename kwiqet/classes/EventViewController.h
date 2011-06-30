@@ -56,6 +56,7 @@
     UIButton * mapButton;
     
     UIView * detailsContainer;
+    UIView * detailsContainerShadowCheat;
     UIView * detailsBackgroundColorView;
     UILabel * detailsLabel;
     
@@ -69,6 +70,7 @@
     WebConnector * webConnector;
     UIAlertView * connectionErrorOnUserActionRequestAlertView;
     BOOL deletedEventDueToGoingToEvent;
+//    BOOL loadedImage;
 
 }
 

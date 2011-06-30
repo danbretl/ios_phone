@@ -170,6 +170,8 @@
 		324759AB13BB8C56002A9199 /* HR@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 324759A913BB8C56002A9199 /* HR@2x.png */; };
 		324759AF13BBB2B1002A9199 /* event_card.png in Resources */ = {isa = PBXBuildFile; fileRef = 324759AD13BBB2B1002A9199 /* event_card.png */; };
 		324759B013BBB2B1002A9199 /* event_card@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 324759AE13BBB2B1002A9199 /* event_card@2x.png */; };
+		324759B413BBF780002A9199 /* event_img_placeholder.png in Resources */ = {isa = PBXBuildFile; fileRef = 324759B213BBF77F002A9199 /* event_img_placeholder.png */; };
+		324759B513BBF780002A9199 /* event_img_placeholder@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 324759B313BBF77F002A9199 /* event_img_placeholder@2x.png */; };
 		3260038613B3A2B80054936A /* WebActivityView.m in Sources */ = {isa = PBXBuildFile; fileRef = 3260038513B3A2B80054936A /* WebActivityView.m */; };
 		32733E1013B0FBBA0053C44A /* Facebook.m in Sources */ = {isa = PBXBuildFile; fileRef = 32733DF613B0FBBA0053C44A /* Facebook.m */; };
 		32733E1113B0FBBA0053C44A /* FBConnect.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 32733DF713B0FBBA0053C44A /* FBConnect.bundle */; };
@@ -421,6 +423,9 @@
 		324759A913BB8C56002A9199 /* HR@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "HR@2x.png"; sourceTree = "<group>"; };
 		324759AD13BBB2B1002A9199 /* event_card.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = event_card.png; sourceTree = "<group>"; };
 		324759AE13BBB2B1002A9199 /* event_card@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "event_card@2x.png"; sourceTree = "<group>"; };
+		324759B113BBD54A002A9199 /* kwiqet 004.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "kwiqet 004.xcdatamodel"; sourceTree = "<group>"; };
+		324759B213BBF77F002A9199 /* event_img_placeholder.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = event_img_placeholder.png; sourceTree = "<group>"; };
+		324759B313BBF77F002A9199 /* event_img_placeholder@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "event_img_placeholder@2x.png"; sourceTree = "<group>"; };
 		3260038413B3A2B80054936A /* WebActivityView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WebActivityView.h; sourceTree = "<group>"; };
 		3260038513B3A2B80054936A /* WebActivityView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = WebActivityView.m; sourceTree = "<group>"; };
 		32733DF413B0FBBA0053C44A /* facebook_ios_sdk_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = facebook_ios_sdk_Prefix.pch; path = kwiqet/classes/facebook_ios_sdk_Prefix.pch; sourceTree = SOURCE_ROOT; };
@@ -600,6 +605,8 @@
 		32041A3613AFFC700072F95C /* images */ = {
 			isa = PBXGroup;
 			children = (
+				324759B213BBF77F002A9199 /* event_img_placeholder.png */,
+				324759B313BBF77F002A9199 /* event_img_placeholder@2x.png */,
 				324759A813BB8C56002A9199 /* HR.png */,
 				324759A913BB8C56002A9199 /* HR@2x.png */,
 				32BEE73613BA52F5009D583E /* fbConnect.png */,
@@ -1247,6 +1254,8 @@
 				324759AB13BB8C56002A9199 /* HR@2x.png in Resources */,
 				324759AF13BBB2B1002A9199 /* event_card.png in Resources */,
 				324759B013BBB2B1002A9199 /* event_card@2x.png in Resources */,
+				324759B413BBF780002A9199 /* event_img_placeholder.png in Resources */,
+				324759B513BBF780002A9199 /* event_img_placeholder@2x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1491,9 +1500,10 @@
 			children = (
 				32B36CD913B27DF1004C2068 /* kwiqet 002.xcdatamodel */,
 				32EE74BA13B902A90002E11F /* kwiqet 003.xcdatamodel */,
+				324759B113BBD54A002A9199 /* kwiqet 004.xcdatamodel */,
 				32FD364E13AFF3B6007549B6 /* kwiqet 001.xcdatamodel */,
 			);
-			currentVersion = 32EE74BA13B902A90002E11F /* kwiqet 003.xcdatamodel */;
+			currentVersion = 324759B113BBD54A002A9199 /* kwiqet 004.xcdatamodel */;
 			path = kwiqet.xcdatamodeld;
 			sourceTree = "<group>";
 			versionGroupType = wrapper.xcdatamodel;

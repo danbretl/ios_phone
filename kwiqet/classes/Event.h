@@ -42,8 +42,12 @@
 @property (nonatomic, retain) NSSet * concreteCategoryBreadcrumbs;
 
 @property (nonatomic, retain) NSString * summaryAddress;
-@property (nonatomic, retain) NSString * summaryStartDateString;
-@property (nonatomic, retain) NSString * summaryStartTimeString;
+@property (nonatomic, retain) NSString * summaryStartDateEarliestString;
+@property (nonatomic, retain) NSString * summaryStartTimeEarliestString;
+@property (nonatomic, retain) NSNumber * summaryStartDateDistinctCount;
+@property (nonatomic, retain) NSString * summaryStartDateLatestString;
+@property (nonatomic, retain) NSNumber * summaryStartTimeDistinctCount;
+@property (nonatomic, retain) NSString * summaryStartTimeLatestString;
 
 @property (nonatomic, readonly) NSDate * startTimeDatetime;
 @property (nonatomic, readonly) NSDate * endTimeDatetime;
