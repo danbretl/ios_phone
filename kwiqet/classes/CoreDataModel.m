@@ -217,33 +217,48 @@
 - (void) updateEvent:(Event *)event usingEventSummaryDictionary:(NSDictionary *)eventSummaryDictionary featuredOverride:(NSNumber *)featuredOverride fromSearchOverride:(NSNumber *)fromSearchOverride {
     
     // Get the rest of the raw event data
-    event.uri = [WebUtil stringOrNil:[eventSummaryDictionary valueForKey:@"event"]];
-    event.title = [WebUtil stringOrNil:[eventSummaryDictionary valueForKey:@"title"]]; // NSString
-    event.venue = [WebUtil stringOrNil:[eventSummaryDictionary valueForKey:@"place_title"]];
-    event.summaryAddress = [WebUtil stringOrNil:[eventSummaryDictionary valueForKey:@"place_address"]];
-    event.priceMinimum = [WebUtil numberOrNil:[eventSummaryDictionary valueForKey:@"price_quantity_min"]]; // NSNumber
-    event.priceMaximum = [WebUtil numberOrNil:[eventSummaryDictionary valueForKey:@"price_quantity_max"]]; // NSNumber
-    event.summaryStartDateEarliestString = [WebUtil stringOrNil:[eventSummaryDictionary valueForKey:@"start_date_earliest"]];
-    event.summaryStartTimeEarliestString = [WebUtil stringOrNil:[eventSummaryDictionary valueForKey:@"start_time_earliest"]];
+    NSString * uri = [WebUtil stringOrNil:[eventSummaryDictionary valueForKey:@"event"]];
+    NSString * title = [WebUtil stringOrNil:[eventSummaryDictionary valueForKey:@"title"]];
+    NSString * venue = [WebUtil stringOrNil:[eventSummaryDictionary valueForKey:@"place_title"]];
+    NSString * summaryAddress = [WebUtil stringOrNil:[eventSummaryDictionary valueForKey:@"place_address"]];
+    NSNumber * priceMinimum = [WebUtil numberOrNil:[eventSummaryDictionary valueForKey:@"price_quantity_min"]];
+    NSNumber * priceMaximum = [WebUtil numberOrNil:[eventSummaryDictionary valueForKey:@"price_quantity_max"]];
+    NSString * summaryStartDateEarliestString = [WebUtil stringOrNil:[eventSummaryDictionary valueForKey:@"start_date_earliest"]];
+    NSString * summaryStartTimeEarliestString = [WebUtil stringOrNil:[eventSummaryDictionary valueForKey:@"start_time_earliest"]];
     // THE FOLLOWING IS A TEMPORARY HACK COVERING UP THE FACT THAT OUR SCRAPES ARE NOT DEALING WITH THE FACT THAT VILLAGE VOICE INPUTS A TIME OF 00:00:00 WHEN THEY DON'T HAVE A VALID TIME. THUS, WE ARE CURRENTLY HACKISHLY ASSUMING THAT ANY TIME OF 00:00:00 MEANS AN INVALID UNKNOWN TIME.
-    if ([event.summaryStartTimeEarliestString isEqualToString:@"00:00:00"]) {
-        event.summaryStartTimeEarliestString = nil;
+    if ([summaryStartTimeEarliestString isEqualToString:@"00:00:00"]) {
+        summaryStartTimeEarliestString = nil;
     }
-    event.summaryStartDateLatestString = [WebUtil stringOrNil:[eventSummaryDictionary valueForKey:@"start_date_latest"]];
-    event.summaryStartTimeLatestString = [WebUtil stringOrNil:[eventSummaryDictionary valueForKey:@"start_time_latest"]];
+    NSString * summaryStartDateLatestString = [WebUtil stringOrNil:[eventSummaryDictionary valueForKey:@"start_date_latest"]];
+    NSString * summaryStartTimeLatestString = [WebUtil stringOrNil:[eventSummaryDictionary valueForKey:@"start_time_latest"]];
     // THE FOLLOWING IS A TEMPORARY HACK COVERING UP THE FACT THAT OUR SCRAPES ARE NOT DEALING WITH THE FACT THAT VILLAGE VOICE INPUTS A TIME OF 00:00:00 WHEN THEY DON'T HAVE A VALID TIME. THUS, WE ARE CURRENTLY HACKISHLY ASSUMING THAT ANY TIME OF 00:00:00 MEANS AN INVALID UNKNOWN TIME.
-    if ([event.summaryStartTimeLatestString isEqualToString:@"00:00:00"]) {
-        event.summaryStartTimeLatestString = nil;
+    if ([summaryStartTimeLatestString isEqualToString:@"00:00:00"]) {
+        summaryStartTimeLatestString = nil;
     }
-    event.summaryStartDateDistinctCount = [WebUtil numberOrNil:[eventSummaryDictionary valueForKey:@"start_date_distinct_count"]]; // NSNumber
-    event.summaryStartTimeDistinctCount = [WebUtil numberOrNil:[eventSummaryDictionary valueForKey:@"start_time_distinct_count"]]; // NSNumber
-    event.summaryPlaceDistinctCount = [WebUtil numberOrNil:[eventSummaryDictionary valueForKey:@"place_distinct_count"]]; // NSNumber
-    
+    NSNumber * summaryStartDateDistinctCount = [WebUtil numberOrNil:[eventSummaryDictionary valueForKey:@"start_date_distinct_count"]];
+    NSNumber * summaryStartTimeDistinctCount = [WebUtil numberOrNil:[eventSummaryDictionary valueForKey:@"start_time_distinct_count"]];
+    NSNumber * summaryPlaceDistinctCount = [WebUtil numberOrNil:[eventSummaryDictionary valueForKey:@"place_distinct_count"]];
     NSString * concreteParentCategoryURI = [WebUtil stringOrNil:[eventSummaryDictionary valueForKey:@"concrete_parent_category"]];
+    
+    event.uri = uri ? uri : event.uri;
+    event.title = title ? title : event.title;
+    event.venue = venue ? venue : event.venue;
+    event.summaryAddress = summaryAddress ? summaryAddress : event.summaryAddress;
+    event.priceMinimum = title ? priceMinimum : event.priceMinimum;
+    event.priceMaximum = title ? priceMaximum : event.priceMaximum;
+    event.summaryStartDateEarliestString = summaryStartDateEarliestString ? summaryStartDateEarliestString : event.summaryStartDateEarliestString;
+    event.summaryStartTimeEarliestString = summaryStartTimeEarliestString ? summaryStartTimeEarliestString : event.summaryStartTimeEarliestString;
+    event.summaryStartDateLatestString = summaryStartDateLatestString ? summaryStartDateLatestString : event.summaryStartDateLatestString;
+    event.summaryStartTimeLatestString = summaryStartTimeLatestString ? summaryStartTimeLatestString : event.summaryStartTimeLatestString;
+    
+    event.summaryStartDateDistinctCount = summaryStartDateDistinctCount ? summaryStartDateDistinctCount : event.summaryStartDateDistinctCount;
+    event.summaryStartTimeDistinctCount = summaryStartTimeDistinctCount ? summaryStartTimeDistinctCount : event.summaryStartTimeDistinctCount;
+    event.summaryPlaceDistinctCount = summaryPlaceDistinctCount ? summaryPlaceDistinctCount : event.summaryPlaceDistinctCount;
+    
     if (concreteParentCategoryURI) {
         event.concreteParentCategoryURI = concreteParentCategoryURI;
         Category * concreteParentCategory = [self getCategoryWithURI:concreteParentCategoryURI];
-        event.concreteParentCategory = concreteParentCategory;        
+        event.concreteParentCategory = concreteParentCategory;
     }
 
     if (featuredOverride)   { event.featured = featuredOverride; }
@@ -318,46 +333,48 @@
     NSString * concreteParentCategoryURI = [WebUtil stringOrNil:[eventDictionary objectForKey:@"concrete_parent_category"]];
     
     // Concrete category breadcrumbs
-    // Using brute force currently - flush any old breadcrumbs, and create all new ones
-    event.concreteCategoryBreadcrumbs = nil;
-    for (CategoryBreadcrumb * breadcrumb in event.concreteCategoryBreadcrumbs) {
-        [self.managedObjectContext deleteObject:breadcrumb];
-    }
     NSArray * breadcrumbsArray = [eventDictionary valueForKey:@"concrete_category_breadcrumbs"];
-    int order = 0;
-    for (NSString * categoryURI in breadcrumbsArray) {
-        CategoryBreadcrumb * breadcrumb = (CategoryBreadcrumb *)[NSEntityDescription insertNewObjectForEntityForName:@"CategoryBreadcrumb" inManagedObjectContext:self.managedObjectContext];
-        breadcrumb.category = [self getCategoryWithURI:categoryURI];
-        breadcrumb.event = event;
-        breadcrumb.order = [NSNumber numberWithInt:order];
-        order++;
+    if (breadcrumbsArray && [breadcrumbsArray count] > 0) {
+        // Using brute force currently - flush any old breadcrumbs, and create all new ones
+        event.concreteCategoryBreadcrumbs = nil;
+        for (CategoryBreadcrumb * breadcrumb in event.concreteCategoryBreadcrumbs) {
+            [self.managedObjectContext deleteObject:breadcrumb];
+        }
+        int order = 0;
+        for (NSString * categoryURI in breadcrumbsArray) {
+            CategoryBreadcrumb * breadcrumb = (CategoryBreadcrumb *)[NSEntityDescription insertNewObjectForEntityForName:@"CategoryBreadcrumb" inManagedObjectContext:self.managedObjectContext];
+            breadcrumb.category = [self getCategoryWithURI:categoryURI];
+            breadcrumb.event = event;
+            breadcrumb.order = [NSNumber numberWithInt:order];
+            order++;
+        }
     }
     
-    event.uri = uri;
-    event.concreteParentCategoryURI = concreteParentCategoryURI;
-    Category * concreteParentCategory = [self getCategoryWithURI:concreteParentCategoryURI];
-    event.concreteParentCategory = concreteParentCategory;
-    NSLog(@"category uri is %@", concreteParentCategoryURI);
-    NSLog(@"category is %@", concreteParentCategory);
-    event.title = titleText;
-    event.startDatetime = startDatetime;
-    event.endDatetime = endDatetime;
-    event.startDateValid = startDateValid;
-    event.startTimeValid = startTimeValid;
-    event.endDateValid = endDateValid;
-    event.endTimeValid = endTimeValid;
-    event.venue = venueString;
-    event.address = addressLineFirst;
-    event.city = cityString;
-    event.state = stateString;
-    event.zip = zipCodeString;
-    event.latitude = latitudeValue;
-    event.longitude = longitudeValue;
-    event.priceMinimum = priceMinimum;
-    event.priceMaximum = priceMaximum;
-    event.phone = eventPhoneString;
-    event.details = descriptionText;
-    event.imageLocation = imageLocation;
+    event.uri = uri ? uri : event.uri;
+    if (concreteParentCategoryURI) {
+        event.concreteParentCategoryURI = concreteParentCategoryURI;
+        Category * concreteParentCategory = [self getCategoryWithURI:concreteParentCategoryURI];
+        event.concreteParentCategory = concreteParentCategory;
+    }
+    event.title = titleText ? titleText : event.title;
+    event.startDatetime = startDatetime ? startDatetime : event.startDatetime;
+    event.endDatetime = endDatetime ? endDatetime : event.endDatetime;
+    event.startDateValid = startDateValid ? startDateValid : event.startDateValid;
+    event.startTimeValid = startTimeValid ? startTimeValid : event.startTimeValid;
+    event.endDateValid = endDateValid ? endDateValid : event.endDateValid;
+    event.endTimeValid = endTimeValid ? endTimeValid : event.endTimeValid;
+    event.venue = venueString ? venueString : event.venue;
+    event.address = addressLineFirst ? addressLineFirst : event.address;
+    event.city = cityString ? cityString : event.city;
+    event.state = stateString ? stateString : event.state;
+    event.zip = zipCodeString ? zipCodeString : event.zip;
+    event.latitude = latitudeValue ? latitudeValue : event.latitude;
+    event.longitude = longitudeValue ? longitudeValue : event.longitude;
+    event.priceMinimum = priceMinimum ? priceMinimum : event.priceMinimum;
+    event.priceMaximum = priceMaximum ? priceMaximum : event.priceMaximum;
+    event.phone = eventPhoneString ? eventPhoneString : event.phone;
+    event.details = descriptionText ? descriptionText : event.details;
+    event.imageLocation = imageLocation ? imageLocation : event.imageLocation;
     if (featuredOverride)   { event.featured = featuredOverride; }
     if (fromSearchOverride) { event.fromSearch = fromSearchOverride; }
     
