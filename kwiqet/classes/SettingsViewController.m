@@ -7,7 +7,6 @@
 //
 
 #import "SettingsViewController.h"
-#import "LoginViewController.h"
 #import "DefaultsModel.h"
 #import "ASIHTTPRequest.h"
 #import "URLBuilder.h"
@@ -18,6 +17,7 @@
 @property (retain) UITableView * tableView;
 @property (retain) NSArray * settingsModel;
 @property (copy) NSString * loggedInKwiqetDisplayIdentifier;
+@property (readonly) UIAlertView * resetMachineLearningWarningAlertView;
 @end
 
 @implementation SettingsViewController
@@ -44,6 +44,7 @@
     [_tableView release];
     [settingsModel release];
     [loggedInKwiqetDisplayIdentifier release];
+    [resetMachineLearningWarningAlertView release];
     [super dealloc];
 }
 
@@ -129,7 +130,7 @@
 }
 
 -(void)viewDidAppear:(BOOL)animated {
-    [self.tableView reloadData];
+    [self.tableView reloadData]; // Heavyweight
 //    NSString * apiKey = [DefaultsModel retrieveAPIFromUserDefaults];
     
 //    if (apiKey) {
@@ -158,10 +159,16 @@
 }
 
 - (void)loginActivity:(NSNotification *)notification {
-    
+    NSDictionary * userInfo = [notification userInfo];
+    NSString * action = [userInfo valueForKey:@"action"];
+    if ([action isEqualToString:@"logout"]) {
+        [self.facebookManager.fb logout:self]; // If user signs out of Kwiqet, then their potential Facebook connection should also be undone.
+    }
+//    [self.tableView reloadSections:[NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0, 2)] withRowAnimation:UITableViewRowAnimationFade];
+    [self.tableView reloadData]; // Heavyweight
 }
 
-- (IBAction) attemptLoginButtonTouched:(id)sender  {
+- (void) accountButtonTouched {
     
     BOOL loggedInWithKwiqet = [DefaultsModel retrieveAPIFromUserDefaults] != nil;
     
@@ -182,6 +189,7 @@
     } else {
         
         LoginViewController * loginViewController = [[LoginViewController alloc] init];
+        loginViewController.delegate = self;
         [self presentModalViewController:loginViewController animated:YES];
         [loginViewController release];
 
@@ -190,14 +198,8 @@
 }
 
 
-- (IBAction) resetMachineLearningButtonTouched {
-    UIAlertView * alert = [[UIAlertView alloc] initWithTitle:@"Warning:" 
-                                                     message:@"Resetting machine learning will erase your entire history, thus losing your personalized recommendations. Are you sure you want to proceed?" 
-                                                    delegate:self 
-                                           cancelButtonTitle:@"Yes" 
-                                           otherButtonTitles:@"No",nil];
-    [alert show]; 
-    [alert release];
+- (void) resetMachineLearningButtonTouched {
+    [self.resetMachineLearningWarningAlertView show];
 }
 
 - (void) facebookConnectButtonTouched {
@@ -212,7 +214,7 @@
 - (void)fbDidLogin {
     NSLog(@"fbDidLogin");
     [self.facebookManager pushAuthenticationInfoToDefaults];
-    [self updateFacebookButtonIsLoggedIn:YES];
+    [self.tableView reloadData]; // Heavyweight
     [self.facebookManager.fb requestWithGraphPath:@"me/friends" andDelegate:self];
 }
 
@@ -232,36 +234,34 @@
 }
 
 - (void)fbDidNotLogin:(BOOL)cancelled {
-    [self updateFacebookButtonIsLoggedIn:NO];
+    //[self.tableView reloadData]; // Heavyweight
 }
 
 - (void) fbDidLogout {
-    [self updateFacebookButtonIsLoggedIn:NO];
-    NSLog(@"fbDidLogin");
+    [self.tableView reloadData]; // Heavyweight
+    NSLog(@"fbDidLogout");
     // We don't really NEED to do the following, but I think it provides a "more trustworthy" user experience. If we didn't do the following, then the user could touch to disconnect facebook, then touch to connect facebook again, and they might automatically be connected without any sort of dialog or anything (because the access token was still valid for the given expiration date). That is convenient, but a user would rarely be trying to do this, and I would argue that it would be more likely that logout and login would be touched in a way that would expect a dialog. (Bad sentence, but hopefully you get my point.)
     NSUserDefaults * defaults = [NSUserDefaults standardUserDefaults];
     [defaults removeObjectForKey:@"FBAccessTokenKey"];
     [defaults removeObjectForKey:@"FBExpirationDateKey"];
 }
 
-- (void) updateFacebookButtonIsLoggedIn:(BOOL)isLoggedIn {
-//    self.linkFacebookButton.isLoggedIn = isLoggedIn;
-//    self.linkFacebookButton.frame = CGRectMake(self.view.bounds.size.width - self.linkFacebookButton.bounds.size.width - 7, self.view.bounds.size.height - self.linkFacebookButton.bounds.size.height - 20, self.linkFacebookButton.frame.size.width, self.linkFacebookButton.frame.size.height);
-}
-
--(void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex 
-{
-	//disable button
+-(void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex {
     
-//	if ([alertView.title isEqualToString:@"Warning:"]) {
-//		if (buttonIndex == 0) {
-//            [self startResetingBehavior];
-//            resetLearningButton.userInteractionEnabled = NO;
-//		}
-//		if (buttonIndex == 1) {	
-//            //do nothing
-//        }
-//	}
+    if (alertView == self.resetMachineLearningWarningAlertView) {
+        if (buttonIndex == 0) {
+            [self startResetingBehavior];
+            self.view.userInteractionEnabled = NO;
+        } else if (buttonIndex == 1) {
+            // Do nothing
+            [self.tableView deselectRowAtIndexPath:[self.tableView indexPathForSelectedRow] animated:YES];
+        } else {
+            NSLog(@"ERROR in SettingsViewController - unrecognized alert view button index %d", buttonIndex);
+        }
+    } else {
+        NSLog(@"ERROR in SettingsViewController - unrecognized alert view %@", alertView);
+    }
+    
 }
 
 -(void)startResetingBehavior  {
@@ -309,6 +309,8 @@
     [alert release];
 //    resetLearningButton.userInteractionEnabled = YES;
     [[NSNotificationCenter defaultCenter] postNotificationName:@"learningBehaviorWasReset" object:nil];
+    self.view.userInteractionEnabled = YES;
+    [self.tableView deselectRowAtIndexPath:[self.tableView indexPathForSelectedRow] animated:YES];
 }
 
 - (void)resetAggregateOrActionFailure:(ASIHTTPRequest *)request  {
@@ -325,6 +327,24 @@
     [alert show];
     [alert release];
 //    resetLearningButton.userInteractionEnabled = YES;
+    self.view.userInteractionEnabled = YES;
+    [self.tableView deselectRowAtIndexPath:[self.tableView indexPathForSelectedRow] animated:YES];
+}
+
+- (UIAlertView *)resetMachineLearningWarningAlertView {
+    if (resetMachineLearningWarningAlertView == nil) {
+        resetMachineLearningWarningAlertView = 
+        [[UIAlertView alloc] initWithTitle:@"Warning" 
+                                   message:@"Resetting machine learning will erase your entire history, thus losing your personalized recommendations. Are you sure you want to proceed?" 
+                                  delegate:self 
+                         cancelButtonTitle:@"Yes" 
+                         otherButtonTitles:@"No",nil];
+    }
+    return resetMachineLearningWarningAlertView;
+}
+
+- (void)loginViewController:(LoginViewController *)loginViewController didFinishWithLogin:(BOOL)didLogin {
+    [self dismissModalViewControllerAnimated:YES];
 }
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
@@ -369,25 +389,50 @@
 
 - (void) configureCell:(UITableViewCell *)cell forRowAtIndexPath:(NSIndexPath *)indexPath {
 
+    cell.userInteractionEnabled = YES;
     cell.imageView.contentMode = UIViewContentModeCenter;
     cell.imageView.layer.cornerRadius = 6.0;
     cell.imageView.layer.masksToBounds = YES;
     cell.imageView.layer.borderWidth = 1.0;
     cell.imageView.layer.borderColor = [[UIColor colorWithWhite:0.75 alpha:0.5] CGColor];
+    cell.imageView.alpha = 1.0;
+    cell.textLabel.enabled = YES;
+    cell.detailTextLabel.enabled = YES;
     
     NSString * textLabelText = nil;
     NSString * detailTextLabelText = nil;
     NSString * imageName = nil;
     UITableViewCellAccessoryType accessoryType;
     if (indexPath.section == 0) {
-        textLabelText = @"Dan Bretl";
-        detailTextLabelText = @"Touch to log out";
+        NSString * apiKey = [DefaultsModel retrieveAPIFromUserDefaults];
+        if (apiKey) {
+            NSString * identifier = [DefaultsModel retrieveKwiqetUserIdentifierFromUserDefaults];
+            textLabelText = identifier ? identifier : @"Logged In";
+            detailTextLabelText = @"Touch to log out";
+        } else {
+            textLabelText = @"Kwiqet Account";
+            detailTextLabelText = @"Touch to log in / sign up";
+        }
         imageName = @"kwiqet_colors_50.png";
-        accessoryType = UITableViewCellAccessoryDisclosureIndicator;
+        accessoryType = UITableViewCellAccessoryNone;
     } else {
         textLabelText = [[self.settingsModel objectAtIndex:indexPath.row] valueForKey:@"textLabel"];
         imageName = [[self.settingsModel objectAtIndex:indexPath.row] valueForKey:@"imageName"];
         accessoryType = [[[self.settingsModel objectAtIndex:indexPath.row] valueForKey:@"showAccessoryArrow"] boolValue] ? UITableViewCellAccessoryDisclosureIndicator : UITableViewCellAccessoryNone;
+        if ([textLabelText isEqualToString:@"Facebook"]) {
+            [self.facebookManager pullAuthenticationInfoFromDefaults];
+            if ([self.facebookManager.fb isSessionValid]) {
+                detailTextLabelText = [[self.settingsModel objectAtIndex:indexPath.row] valueForKey:@"detailTextLabelWhenBooleanYes"];
+            } else {
+                if ([DefaultsModel retrieveAPIFromUserDefaults]) {
+                    detailTextLabelText = @"Touch to connect";
+                } else {
+                    cell.imageView.alpha = 0.5;
+                    cell.textLabel.enabled = NO;
+                    cell.userInteractionEnabled = NO;
+                }
+            }
+        }
     }
     
     cell.textLabel.text = textLabelText;
@@ -396,5 +441,53 @@
     cell.accessoryType = accessoryType;
     
 }
+
+- (void) tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
+    if (indexPath.section == 0) {
+        [self accountButtonTouched];
+    } else {
+        SEL selector = [[[self.settingsModel objectAtIndex:indexPath.row] valueForKey:@"selector"] pointerValue];
+        [self performSelector:selector];
+    }
+}
+
+- (UIView *)tableView:(UITableView *)tableView viewForFooterInSection:(NSInteger)section {
+    UIView * footerView = nil;
+    if (section == 0) {
+        if ([DefaultsModel retrieveAPIFromUserDefaults] == nil) {
+            footerView = [[[UIView alloc] initWithFrame:CGRectMake(0, 0, self.tableView.bounds.size.width, [self tableView:tableView heightForFooterInSection:section])] autorelease]; // HACK, hardcoded duplicate value from heightForFooterInSection... Not sure what the proper way to do this is yet.
+            UILabel * theLabel = [[UILabel alloc] initWithFrame:CGRectMake(20, 10, footerView.frame.size.width - 40, footerView.frame.size.height - 20)];
+            theLabel.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+            theLabel.numberOfLines = 0;
+            theLabel.text = @"Creating a Kwiqet account enables you to use extended features such as sending invites and making your event feed much more personal. Best of all, accounts are completely free!";
+            theLabel.font = [UIFont fontWithName:@"HelveticaNeueLTStd-Cn" size:16.0];
+            theLabel.backgroundColor = tableView.backgroundColor;
+            [footerView addSubview:theLabel];
+            [theLabel release];
+        }
+    }
+    return footerView;
+}
+
+- (CGFloat)tableView:(UITableView *)tableView heightForFooterInSection:(NSInteger)section {
+    CGFloat height = 0;
+    if (section == 0) {
+        if ([DefaultsModel retrieveAPIFromUserDefaults] == nil) {
+            height = 110;
+        }
+    }
+    return height;
+}
+
+//- (NSString *)tableView:(UITableView *)tableView titleForFooterInSection:(NSInteger)section {
+//    //@"Erase all history and user preferences. Resetting data is not reversible."
+//    NSString * title = nil;
+//    if (section == 0) {
+//        title = @"Creating a Kwiqet account enables you to use extended features such as sending invites and making your event feed much more personal. Accounts are completely free.";
+//    } else {
+//        title = @"Foo";
+//    }
+//    return title;
+//}
 
 @end

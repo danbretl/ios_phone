@@ -181,6 +181,7 @@
     else {
         //save the api key in nsuserdefaults
         [DefaultsModel saveAPIToUserDefaults:responseString];
+        [DefaultsModel saveKwiqetUserIdentifierToUserDefaults:self.usernameField.text]; // TEMPORARY HACK - IN FUTURE, WE WILL GET THE USER IDENTIFIER FROM OUR WEB CALL RESPONSE, JUST THE SAME AS HOW WE'RE GETTING THE API KEY
         NSDictionary * infoDictionary = [NSDictionary dictionaryWithObjectsAndKeys:@"login", @"action", nil];
         [[NSNotificationCenter defaultCenter] postNotificationName:@"loginActivity" object:self userInfo:infoDictionary];
         

@@ -18,7 +18,6 @@
     if (standardUserDefaults) {
         [standardUserDefaults setObject:loginString forKey:@"API"];
     }
-    
 }
 
 + (NSString*)retrieveAPIFromUserDefaults {
@@ -40,6 +39,16 @@
     
     [[NSUserDefaults standardUserDefaults] removeObjectForKey:@"API"];
     
+}
+
++ (void) saveKwiqetUserIdentifierToUserDefaults:(NSString *)identifier {
+    [[NSUserDefaults standardUserDefaults] setObject:identifier forKey:@"kwiqetUserIdentifier"];
+}
++ (NSString *) retrieveKwiqetUserIdentifierFromUserDefaults {
+    return [[NSUserDefaults standardUserDefaults] objectForKey:@"kwiqetUserIdentifier"];
+}
++ (void) deleteKwiqetUserIdentifier {
+    [[NSUserDefaults standardUserDefaults] removeObjectForKey:@"kwiqetUserIdentifier"];
 }
 
 + (void)saveBackgroundDate:(NSString*)date  {

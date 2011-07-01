@@ -13,9 +13,13 @@
     
 }
 
-+ (void)saveAPIToUserDefaults:(NSString*)loginString;
-+ (NSString*)retrieveAPIFromUserDefaults;
-+ (void)deleteAPIKey;
++ (void) saveAPIToUserDefaults:(NSString*)loginString;
++ (NSString*) retrieveAPIFromUserDefaults;
++ (void) deleteAPIKey;
+
++ (void) saveKwiqetUserIdentifierToUserDefaults:(NSString *)identifier;
++ (NSString *) retrieveKwiqetUserIdentifierFromUserDefaults;
++ (void) deleteKwiqetUserIdentifier;
 
 + (void)saveBackgroundDate:(NSString*)date;
 + (NSString*)retrieveBackgroundDate;

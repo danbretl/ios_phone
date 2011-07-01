@@ -10,8 +10,9 @@
 #import "FacebookManager.h"
 #import "FBLoginButton.h"
 #import "CoreDataModel.h"
+#import "LoginViewController.h"
 
-@interface SettingsViewController : UIViewController <FBSessionDelegate, FBRequestDelegate, UITableViewDelegate, UITableViewDataSource> {
+@interface SettingsViewController : UIViewController <FBSessionDelegate, FBRequestDelegate, UITableViewDelegate, UITableViewDataSource, LoginViewControllerDelegate> {
 
     FacebookManager * facebookManager;
     CoreDataModel * coreDataModel;
@@ -24,18 +25,18 @@
     
     BOOL facebookLoggedIn;
     
+    UIAlertView * resetMachineLearningWarningAlertView;
+    
 }
 
 @property (nonatomic, retain) CoreDataModel * coreDataModel;
 
-- (IBAction) attemptLoginButtonTouched:(id)sender;
-
-- (IBAction) resetMachineLearningButtonTouched;
+- (void) accountButtonTouched;
+- (void) resetMachineLearningButtonTouched;
 - (void) facebookConnectButtonTouched;
 
 - (void) startResetingBehavior;
 @property (nonatomic, retain) FacebookManager * facebookManager;
-- (void) updateFacebookButtonIsLoggedIn:(BOOL)isLoggedIn;
 
 - (void) loginActivity:(NSNotification *)notification;
 

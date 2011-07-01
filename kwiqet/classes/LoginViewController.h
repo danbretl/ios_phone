@@ -8,6 +8,7 @@
 
 #import <UIKit/UIKit.h>
 
+@protocol LoginViewControllerDelegate;
 
 @interface LoginViewController : UIViewController <UITextFieldDelegate> {
     IBOutlet UIScrollView * scrollViewContainer;
@@ -15,8 +16,10 @@
     IBOutlet UITextField *passwordField;
     UILabel * messageLabel;
     UILabel * infoLabel;
+    id<LoginViewControllerDelegate> delegate;
 }
 
+@property (assign) id<LoginViewControllerDelegate> delegate;
 @property (nonatomic,retain) IBOutlet UITextField *usernameField;
 @property (nonatomic,retain) IBOutlet UITextField *passwordField;
 
@@ -26,4 +29,8 @@
 -(IBAction)forgotPasswordButtonTouched:(id)sender;
 -(void)makeLoginRequest;
 
+@end
+
+@protocol LoginViewControllerDelegate <NSObject>
+- (void) loginViewController:(LoginViewController *)loginViewController didFinishWithLogin:(BOOL)didLogin;
 @end

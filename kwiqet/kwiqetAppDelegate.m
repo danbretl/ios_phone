@@ -16,7 +16,7 @@
 @synthesize window;
 @synthesize splashView, splashScreenViewController;
 @synthesize tabBarController;
-@synthesize featuredEventViewController, eventsNavController, eventsViewController, settingsViewController;
+@synthesize featuredEventViewController, eventsNavController, eventsViewController, settingsNavController, settingsViewController;
 
 #pragma mark -
 #pragma mark Application lifecycle
@@ -67,9 +67,12 @@
     self.settingsViewController.tabBarItem = settingsTabBarItem;
     self.settingsViewController.facebookManager = self.facebookManager;
     self.settingsViewController.coreDataModel = self.coreDataModel;
+    // Settings Navigation Controller
+    settingsNavController = [[UINavigationController alloc] initWithRootViewController:self.settingsViewController];
+    self.settingsNavController.navigationBarHidden = YES;
     
     // Setting it all up
-    self.tabBarController.viewControllers = [NSArray arrayWithObjects:self.featuredEventViewController, self.eventsNavController /*eventsViewController*/, self.settingsViewController, nil];
+    self.tabBarController.viewControllers = [NSArray arrayWithObjects:self.featuredEventViewController, self.eventsNavController, self.settingsNavController, nil];
     [self.window addSubview:tabBarController.view];
     [self.window bringSubviewToFront:self.splashScreenViewController.view]; // Make sure the splash screen stays in front
     
@@ -410,6 +413,7 @@
     [featuredEventViewController release];
     [eventsNavController release];
     [eventsViewController release];
+    [settingsNavController release];
     [settingsViewController release];
     
     [webConnector release];

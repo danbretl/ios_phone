@@ -29,6 +29,7 @@
 @synthesize scrollViewContainer;
 @synthesize usernameField, passwordField;
 @synthesize messageLabel, infoLabel;
+@synthesize delegate;
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
@@ -130,7 +131,7 @@
         [usernameField resignFirstResponder];
         [passwordField resignFirstResponder];
     } else {
-        [self dismissModalViewControllerAnimated:YES];
+        [self.delegate loginViewController:self didFinishWithLogin:NO];
     }
 }
 
@@ -249,13 +250,14 @@
     NSLog(@"LoginViewController loginRequestFinished:%@", request);
     
     NSLog(@"code: %i",[request responseStatusCode]);
-	NSString *responseString = [[NSString alloc]initWithString:[request responseString]];
+	NSString * responseString = [request responseString];
     NSLog(@"response: %@",responseString);
     NSError *error = nil;
 	NSDictionary *dictionaryFromJSON = [responseString yajl_JSONWithOptions:YAJLParserOptionsAllowComments error:&error];
     NSString * apiKey = [[[dictionaryFromJSON valueForKey:@"objects"] objectAtIndex:0] valueForKey:@"key"];
     
     [DefaultsModel saveAPIToUserDefaults:apiKey];
+    [DefaultsModel saveKwiqetUserIdentifierToUserDefaults:self.usernameField.text]; // TEMPORARY HACK - IN FUTURE, WE WILL GET THE USER IDENTIFIER FROM OUR WEB CALL RESPONSE, JUST THE SAME AS HOW WE'RE GETTING THE API KEY
     NSDictionary * infoDictionary = [NSDictionary dictionaryWithObjectsAndKeys:@"login", @"action", nil];
     [[NSNotificationCenter defaultCenter] postNotificationName:@"loginActivity" object:self userInfo:infoDictionary];
     
@@ -266,14 +268,11 @@
     [alert show]; 
     [alert release];
     
-    //clear text from textfields
-    usernameField.text = nil;
-    passwordField.text = nil;
+//    NSDictionary * userInfo = [NSDictionary dictionaryWithObjectsAndKeys:self.usernameField.text, @"email", nil];
     
     //go back to settings page
-    [self.parentViewController dismissModalViewControllerAnimated:YES];
-    
-    [responseString release];
+    [self.delegate loginViewController:self didFinishWithLogin:YES];
+     
 }
 
 - (void)loginRequestFailed:(ASIHTTPRequest *)request {

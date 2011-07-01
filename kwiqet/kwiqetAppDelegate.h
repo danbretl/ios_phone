@@ -23,6 +23,7 @@
     FeaturedEventViewController * featuredEventViewController;
     UINavigationController * eventsNavController;
     EventsViewController * eventsViewController;
+    UINavigationController * settingsNavController;
     SettingsViewController * settingsViewController;
     
     UIImageView *splashView;
@@ -45,6 +46,7 @@
 @property (retain) FeaturedEventViewController * featuredEventViewController;
 @property (retain) UINavigationController * eventsNavController;
 @property (retain) EventsViewController * eventsViewController;
+@property (retain) UINavigationController * settingsNavController;
 @property (retain) SettingsViewController * settingsViewController;
 @property (nonatomic, retain) UIImageView *splashView;
 @property (retain) SplashScreenViewController * splashScreenViewController;
