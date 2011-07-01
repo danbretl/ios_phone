@@ -20,7 +20,7 @@
 @property (nonatomic, retain) NSString * uri;
 @property (nonatomic, retain) NSString * thumbnail;
 @property (nonatomic, retain) NSNumber * displayOrder;
-@property (nonatomic, retain) NSSet * eventsDeprecated;
-@property (nonatomic, retain) NSSet * eventsNew;
+@property (nonatomic, retain) NSSet* breadcrumbs;
+@property (nonatomic, retain) NSSet* events;
 
 @end
