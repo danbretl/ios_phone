@@ -16,34 +16,27 @@
 @interface SettingsViewController()
 @property (retain) UITableView * tableView;
 @property (retain) NSArray * settingsModel;
-@property (copy) NSString * loggedInKwiqetDisplayIdentifier;
 @property (readonly) UIAlertView * resetMachineLearningWarningAlertView;
+- (void) accountButtonTouched;
+- (void) resetMachineLearningButtonTouched;
+- (void) facebookConnectButtonTouched;
+- (void) startResetingBehavior;
+- (void) loginActivity:(NSNotification *)notification;
+- (void) configureCell:(UITableViewCell *)cell forRowAtIndexPath:(NSIndexPath *)indexPath;
 @end
 
 @implementation SettingsViewController
 
-@synthesize coreDataModel;
-@synthesize facebookManager;
 @synthesize tableView = _tableView;
 @synthesize settingsModel;
-@synthesize loggedInKwiqetDisplayIdentifier;
-
-- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
-{
-    self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
-    if (self) {
-        // Custom initialization
-    }
-    return self;
-}
+@synthesize coreDataModel, facebookManager;
 
 - (void)dealloc
 {
-    [facebookManager release];
-    [coreDataModel release];
     [_tableView release];
     [settingsModel release];
-    [loggedInKwiqetDisplayIdentifier release];
+    [facebookManager release];
+    [coreDataModel release];
     [resetMachineLearningWarningAlertView release];
     [super dealloc];
 }
@@ -63,50 +56,6 @@
     
     self.view.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     
-    // Do any additional setup after loading the view from its nib.
-    // Check if api key is present in user default. if so, show logout message.
-//    NSString * apiKey = [DefaultsModel retrieveAPIFromUserDefaults];
-    
-//    if (apiKey) {
-//        [loginButton setTitle:@"Logout" forState: UIControlStateNormal];
-//        loginButton.tag = 1;
-//    } else {
-//        [loginButton setTitle:@"Log In" forState: UIControlStateNormal];
-//        loginButton.tag = 2;
-//    }
-        
-    //setup fonts for uilabels
-//    UILabel *accountLabel = [[UILabel alloc]initWithFrame:CGRectMake(10, 80, 200, 40)];
-//    accountLabel.backgroundColor = [UIColor clearColor];
-//    accountLabel.font = [UIFont fontWithName:@"HelveticaNeueLTStd-BdCn" size: 20];
-//    accountLabel.text = @"User Account";
-//    [self.view addSubview:accountLabel];
-//    
-//    UILabel *loginMessageLabel = [[UILabel alloc]initWithFrame:CGRectMake(25, 115, 280, 120)];
-//    loginMessageLabel.backgroundColor = [UIColor clearColor];
-//    loginMessageLabel.font = [UIFont fontWithName:@"HelveticaNeueLTStd-Cn" size: 16];
-//    loginMessageLabel.text = @"Creating a Kwiqet account enables you to use extended features such as sending invites and making your event feed much more personal. Accounts are completely free.";
-//    loginMessageLabel.numberOfLines = 5;
-//    [self.view addSubview:loginMessageLabel];
-//    
-//    UILabel *behaviorLabel = [[UILabel alloc]initWithFrame:CGRectMake(10, 250, 200, 40)];
-//    behaviorLabel.backgroundColor = [UIColor clearColor];
-//    behaviorLabel.font = [UIFont fontWithName:@"HelveticaNeueLTStd-BdCn" size: 20];
-//    behaviorLabel.text = @"Reset Behavior";
-//    [self.view addSubview:behaviorLabel];
-//    
-//    UILabel *resetMessageLabel = [[UILabel alloc]initWithFrame:CGRectMake(25, 300, 280, 45)];
-//    resetMessageLabel.backgroundColor = [UIColor clearColor];
-//    resetMessageLabel.font = [UIFont fontWithName:@"HelveticaNeueLTStd-Cn" size: 16];
-//    resetMessageLabel.text = @"Erase all history and user preferences. Resetting data is not reversible.";
-//    resetMessageLabel.numberOfLines = 2;
-//    [self.view addSubview:resetMessageLabel];
-//    
-//    [accountLabel release];
-//    [behaviorLabel release];
-//    [loginMessageLabel release];
-//    [resetMessageLabel release];
-    
     self.settingsModel = [NSArray arrayWithObjects:
                           [NSDictionary dictionaryWithObjectsAndKeys:
                            @"Reset Machine Learning", @"textLabel", 
@@ -123,26 +72,12 @@
                            nil],
                           nil];
     
-    [self.facebookManager pullAuthenticationInfoFromDefaults];
-    
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(loginActivity:) name:@"loginActivity" object:nil];
 
 }
 
 -(void)viewDidAppear:(BOOL)animated {
     [self.tableView reloadData]; // Heavyweight
-//    NSString * apiKey = [DefaultsModel retrieveAPIFromUserDefaults];
-    
-//    if (apiKey) {
-//        [loginButton setTitle:@"Logout" forState: UIControlStateNormal];
-//        loginButton.tag = 1;
-//    } else {
-//        [loginButton setTitle:@"Log In" forState: UIControlStateNormal];
-//        loginButton.tag = 2;
-//    }
-    
-//    [self updateFacebookButtonIsLoggedIn:[self.facebookManager.fb isSessionValid]];
-    
 }
 
 - (void)viewDidUnload
@@ -164,7 +99,6 @@
     if ([action isEqualToString:@"logout"]) {
         [self.facebookManager.fb logout:self]; // If user signs out of Kwiqet, then their potential Facebook connection should also be undone.
     }
-//    [self.tableView reloadSections:[NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0, 2)] withRowAnimation:UITableViewRowAnimationFade];
     [self.tableView reloadData]; // Heavyweight
 }
 

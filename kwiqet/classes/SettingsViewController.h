@@ -13,33 +13,21 @@
 #import "LoginViewController.h"
 
 @interface SettingsViewController : UIViewController <FBSessionDelegate, FBRequestDelegate, UITableViewDelegate, UITableViewDataSource, LoginViewControllerDelegate> {
-
-    FacebookManager * facebookManager;
-    CoreDataModel * coreDataModel;
     
+    // Views
     IBOutlet UITableView * _tableView;
+    UIAlertView * resetMachineLearningWarningAlertView;
     
+    // View models
     NSArray * settingsModel;
     
-    NSString * loggedInKwiqetDisplayIdentifier;
-    
-    BOOL facebookLoggedIn;
-    
-    UIAlertView * resetMachineLearningWarningAlertView;
+    // Models
+    FacebookManager * facebookManager;
+    CoreDataModel * coreDataModel;
     
 }
 
 @property (nonatomic, retain) CoreDataModel * coreDataModel;
-
-- (void) accountButtonTouched;
-- (void) resetMachineLearningButtonTouched;
-- (void) facebookConnectButtonTouched;
-
-- (void) startResetingBehavior;
 @property (nonatomic, retain) FacebookManager * facebookManager;
-
-- (void) loginActivity:(NSNotification *)notification;
-
-- (void) configureCell:(UITableViewCell *)cell forRowAtIndexPath:(NSIndexPath *)indexPath;
 
 @end
