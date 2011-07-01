@@ -12,6 +12,8 @@
 	<string>http://testsv.abextratech.com:8000/tapi/v1/user/?</string>
 	<key>base_url</key>
 	<string>http://testsv.abextratech.com</string>
+	<key>base_url_local</key>
+	<string>http://localhost:8000</string>
 	<key>consumer_key</key>
 	<string>rngQ5ZSe3FmzYJ3cgL</string>
 	<key>consumer_secret</key>

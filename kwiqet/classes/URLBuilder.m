@@ -9,11 +9,30 @@
 #import "URLBuilder.h"
 #import "DefaultsModel.h"
 
+#if !(TARGET_IPHONE_SIMULATOR)
+#define COMPILING_FOR_SIMULATOR 0
+#else
+#define COMPILING_FOR_SIMULATOR 1
+#endif
+
 static NSString * const URL_BUILDER_GET_EVENTS_LIST_FILTER_RECOMMENDED = @"recommended";
 static NSString * const URL_BUILDER_GET_EVENTS_LIST_FILTER_FREE = @"free";
 static NSString * const URL_BUILDER_GET_EVENTS_LIST_FILTER_POPULAR = @"popular";
 
 @implementation URLBuilder
+
+////////////
+// GENERAL
+
+- (NSString *)baseURLKey {
+    NSString * baseURLKey = nil;
+    if (COMPILING_FOR_SIMULATOR == 1) {
+        baseURLKey = @"base_url_local";
+    } else {
+        baseURLKey = @"base_url";
+    }
+    return baseURLKey;
+}
 
 /////////////
 // SECURITY
@@ -46,7 +65,7 @@ static NSString * const URL_BUILDER_GET_EVENTS_LIST_FILTER_POPULAR = @"popular";
                           pathForResource:@"urls" ofType:@"plist"];
     NSDictionary *urlDictionary = [[NSDictionary alloc] initWithContentsOfFile:urlplist];
     
-    NSString *baseURL = [[NSString alloc]initWithString:[urlDictionary valueForKey:@"base_url"]];
+    NSString *baseURL = [[NSString alloc]initWithString:[urlDictionary valueForKey:self.baseURLKey]];
     NSString *URI = [[NSString alloc]initWithString:[urlDictionary valueForKey:@"login_uri"]];
     NSString *credentials = [[NSString alloc]initWithString:[self buildCredentialString]];
     NSString *urlString = [NSString stringWithFormat:@"%@%@%@",baseURL,URI,credentials];
@@ -65,7 +84,7 @@ static NSString * const URL_BUILDER_GET_EVENTS_LIST_FILTER_POPULAR = @"popular";
                           pathForResource:@"urls" ofType:@"plist"];
     NSDictionary *urlDictionary = [[NSDictionary alloc] initWithContentsOfFile:urlplist];
     
-    NSString *baseURL = [[NSString alloc]initWithString:[urlDictionary valueForKey:@"base_url"]];
+    NSString *baseURL = [[NSString alloc]initWithString:[urlDictionary valueForKey:self.baseURLKey]];
     NSString *URI = [[NSString alloc]initWithString:[urlDictionary valueForKey:@"registration_uri"]];
     NSString *credentials = [[NSString alloc]initWithString:[self buildCredentialString]];
     NSString *urlString = [NSString stringWithFormat:@"%@%@%@",baseURL,URI,credentials];
@@ -84,7 +103,7 @@ static NSString * const URL_BUILDER_GET_EVENTS_LIST_FILTER_POPULAR = @"popular";
                           pathForResource:@"urls" ofType:@"plist"];
     NSDictionary *urlDictionary = [[NSDictionary alloc] initWithContentsOfFile:urlplist];
     
-    NSString *baseURL = [[NSString alloc]initWithString:[urlDictionary valueForKey:@"base_url"]];
+    NSString *baseURL = [[NSString alloc]initWithString:[urlDictionary valueForKey:self.baseURLKey]];
     NSString *URI = [[NSString alloc]initWithString:[urlDictionary valueForKey:@"forgot_password_uri"]];
     NSString *credentials = [[NSString alloc]initWithString:[self buildCredentialString]];
     NSString *urlString = [NSString stringWithFormat:@"%@%@%@",baseURL,URI,credentials];
@@ -107,7 +126,7 @@ static NSString * const URL_BUILDER_GET_EVENTS_LIST_FILTER_POPULAR = @"popular";
                           pathForResource:@"urls" ofType:@"plist"];
     NSDictionary *urlDictionary = [[NSDictionary alloc] initWithContentsOfFile:urlplist];
     
-    NSString *baseURL = [[NSString alloc]initWithString:[urlDictionary valueForKey:@"base_url"]];
+    NSString *baseURL = [[NSString alloc]initWithString:[urlDictionary valueForKey:self.baseURLKey]];
     NSString *URI = [[NSString alloc]initWithString:[urlDictionary valueForKey:@"teaching_uri"]];
     NSString *credentials = [[NSString alloc]initWithString:[self buildCredentialString]];
     NSString *urlString = [NSString stringWithFormat:@"%@%@%@",baseURL,URI,credentials];
@@ -129,7 +148,7 @@ static NSString * const URL_BUILDER_GET_EVENTS_LIST_FILTER_POPULAR = @"popular";
                           pathForResource:@"urls" ofType:@"plist"];
     NSDictionary *urlDictionary = [[NSDictionary alloc] initWithContentsOfFile:urlplist];
     
-    NSString *baseURL = [[NSString alloc]initWithString:[urlDictionary valueForKey:@"base_url"]];
+    NSString *baseURL = [[NSString alloc]initWithString:[urlDictionary valueForKey:self.baseURLKey]];
     NSString *URI = [[NSString alloc]initWithString:[urlDictionary valueForKey:@"aggregate_uri"]];
     NSString *credentials = [[NSString alloc]initWithString:[self buildCredentialString]];
     NSString *urlString = [NSString stringWithFormat:@"%@%@%@",baseURL,URI,credentials];
@@ -148,7 +167,7 @@ static NSString * const URL_BUILDER_GET_EVENTS_LIST_FILTER_POPULAR = @"popular";
                           pathForResource:@"urls" ofType:@"plist"];
     NSDictionary *urlDictionary = [[NSDictionary alloc] initWithContentsOfFile:urlplist];
     
-    NSString *baseURL = [[NSString alloc]initWithString:[urlDictionary valueForKey:@"base_url"]];
+    NSString *baseURL = [[NSString alloc]initWithString:[urlDictionary valueForKey:self.baseURLKey]];
     NSString *URI = [[NSString alloc]initWithString:[urlDictionary valueForKey:@"action_uri"]];
     NSString *credentials = [[NSString alloc]initWithString:[self buildCredentialString]];
     NSString *urlString = [NSString stringWithFormat:@"%@%@%@",baseURL,URI,credentials];
@@ -171,7 +190,7 @@ static NSString * const URL_BUILDER_GET_EVENTS_LIST_FILTER_POPULAR = @"popular";
                           pathForResource:@"urls" ofType:@"plist"];
     NSDictionary *urlDictionary = [[NSDictionary alloc] initWithContentsOfFile:urlplist];
     
-    NSString *baseURL = [[NSString alloc]initWithString:[urlDictionary valueForKey:@"base_url"]];
+    NSString *baseURL = [[NSString alloc]initWithString:[urlDictionary valueForKey:self.baseURLKey]];
     NSString *URI = [[NSString alloc]initWithString:[urlDictionary valueForKey:@"base_category_uri"]];
     NSString *credentials = [[NSString alloc]initWithString:[self buildCredentialString]];
     
@@ -196,7 +215,7 @@ static NSString * const URL_BUILDER_GET_EVENTS_LIST_FILTER_POPULAR = @"popular";
     NSString * urlPList = [[NSBundle mainBundle] pathForResource:@"urls" ofType:@"plist"];
     NSDictionary * urlDictionary = [NSDictionary dictionaryWithContentsOfFile:urlPList];
     
-    NSString * baseURL = [urlDictionary valueForKey:@"base_url"];
+    NSString * baseURL = [urlDictionary valueForKey:self.baseURLKey];
     NSString * listURI = [urlDictionary valueForKey:@"list_uri"];
     NSString * credentials = [self buildCredentialString];
     
@@ -216,8 +235,7 @@ static NSString * const URL_BUILDER_GET_EVENTS_LIST_FILTER_POPULAR = @"popular";
     
     NSURL * url = [NSURL URLWithString:[NSString stringWithFormat:@"%@%@%@%@%@", baseURL, listURI, credentials, filterVariableForURL, categoryVariableForURL]];
     
-//    NSLog(@"URLBuilder buildGetEventsListURLWithFilter - url is %@", url);
-    
+    NSLog(@"URLBuilder buildGetEventsListURLWithFilter - url is %@", url);
     return url;
     
 }
@@ -243,7 +261,7 @@ static NSString * const URL_BUILDER_GET_EVENTS_LIST_FILTER_POPULAR = @"popular";
     NSString * searchParameterSafe = [searchString stringByReplacingOccurrencesOfString:@" " withString:@"+"]; // NOTE - THIS DOES NOT SEEM EVEN REMOTELY ROBUST ENOUGH TO HANDLE STRANGE INPUT FROM USERS. THIS WILL ALMOST UNQUESTIONABLY NEED TO BE GREATLY IMPROVEN UPON IN THE FUTURE.
     NSString * searchVariableForURL = [NSString stringWithFormat:@"&q=%@", searchParameterSafe];
     
-    NSString * baseURL = [urlDictionary valueForKey:@"base_url"];
+    NSString * baseURL = [urlDictionary valueForKey:self.baseURLKey];
     NSString * searchURI = [urlDictionary valueForKey:@"event_summary_uri"];
     NSString * credentials = [self buildCredentialString];
     
@@ -261,7 +279,7 @@ static NSString * const URL_BUILDER_GET_EVENTS_LIST_FILTER_POPULAR = @"popular";
                           pathForResource:@"urls" ofType:@"plist"];
     NSDictionary *urlDictionary = [[NSDictionary alloc] initWithContentsOfFile:urlplist];
     
-    NSString *baseURL = [[NSString alloc]initWithString:[urlDictionary valueForKey:@"base_url"]];
+    NSString *baseURL = [[NSString alloc]initWithString:[urlDictionary valueForKey:self.baseURLKey]];
     NSString *eventURI = [[NSString alloc]initWithString:eventID];
     NSString *credentials = [[NSString alloc]initWithString:[self buildCredentialString]];
     
@@ -283,7 +301,7 @@ static NSString * const URL_BUILDER_GET_EVENTS_LIST_FILTER_POPULAR = @"popular";
 						  pathForResource:@"urls" ofType:@"plist"];
 	NSDictionary *urlDictionary = [[NSDictionary alloc] initWithContentsOfFile:urlplist];
     
-    NSString *baseURL = [[NSString alloc]initWithString:[urlDictionary valueForKey:@"base_url"]];
+    NSString *baseURL = [[NSString alloc]initWithString:[urlDictionary valueForKey:self.baseURLKey]];
     NSString *featuredURI = [[NSString alloc]initWithString:[urlDictionary valueForKey:@"featured_uri"]];
     NSString *credentials = [[NSString alloc]initWithString:[self buildCredentialString]];
     
