@@ -667,13 +667,24 @@
     NSDictionary * urlDictionary = [NSDictionary dictionaryWithContentsOfFile:urlplist];
     NSString * url = [urlDictionary valueForKey:@"base_url"];
     NSString * imageLocation = self.event.imageLocation;
+    UIImage * image = nil;
+    // Check if image location is nil - if it is, default to the concrete parent category image
+    NSLog(@"%@", self.event.concreteParentCategory);
     if (imageLocation == nil) {
+        NSLog(@"Using concrete parent category thumbnail");
         imageLocation = self.event.concreteParentCategory.thumbnail;
     }
-    NSString * imageURL = [url stringByAppendingString:imageLocation];
-	NSData * imageData = [NSData dataWithContentsOfURL:[NSURL URLWithString:imageURL]];
-    UIImage * image = [UIImage imageWithData:imageData];
-//    loadedImage = YES;
+    // If there is no image, then use a placeholder image.
+    if (imageLocation == nil) {
+        NSLog(@"ERROR in EventViewController loadImage - can't find image location. Event is %@ (imageLoc = %@), Category is %@ (imageLoc = %@)", self.event.title, self.event.imageLocation, self.event.concreteParentCategory.title, self.event.concreteParentCategory.thumbnail);
+        image = [UIImage imageNamed:@"event_img_placeholder.png"];
+    } else {
+        NSString * imageURL = [url stringByAppendingString:imageLocation];
+        NSData * imageData = [NSData dataWithContentsOfURL:[NSURL URLWithString:imageURL]];
+        image = [UIImage imageWithData:imageData];
+        //    loadedImage = YES;
+    }
+    NSLog(@"EventViewController loadImage with imageLocation=%@", imageLocation); // -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 	[self performSelectorOnMainThread:@selector(displayImage:) withObject:image waitUntilDone:NO];
 }
 
