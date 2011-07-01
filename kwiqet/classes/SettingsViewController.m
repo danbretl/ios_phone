@@ -180,9 +180,11 @@
         [[NSNotificationCenter defaultCenter] postNotificationName:@"loginActivity" object:self userInfo:infoDictionary];
                 
         //show logout message
-        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Logged Out!" 
-                                                        message:@"Log back in later to retrieve your personalized recommendations." delegate:self 
-                                              cancelButtonTitle:@"Ok" otherButtonTitles:nil]; 
+        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Logged Out" 
+                                                        message:@"Log back in later to retrieve your personalized recommendations."
+                                                       delegate:self 
+                                              cancelButtonTitle:@"Ok" 
+                                              otherButtonTitles:nil];
         [alert show];
         [alert release];
         
