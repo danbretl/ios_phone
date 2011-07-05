@@ -42,7 +42,7 @@ extern CGFloat const FEATURED_EVENT_BACKGROUND_COLOR_ALPHA;
     UIView * titleBarView;
     UILabel * titleLabel;
     UIView * detailsView;
-    UIActionSheet * shareChoiceActionSheet;
+    UIActionSheet * letsGoChoiceActionSheet;
     WebActivityView * webActivityView;
     
     UILabel * timeLabel;

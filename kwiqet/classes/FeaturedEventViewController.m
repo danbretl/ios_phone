@@ -14,6 +14,7 @@
 #import "LocalImagesManager.h"
 #import "WebUtil.h"
 #import "ActionsManagement.h"
+#import "ContactsSelectViewController.h"
 
 // "Data not available" strings
 static NSString * const FEATURED_EVENT_TITLE_NOT_AVAILABLE = @"Event";
@@ -76,7 +77,7 @@ CGFloat const FEV_DESCRIPTION_LABEL_PADDING_HORIZONTAL = 20.0;
 @property (retain) UIView * titleBarView;
 @property (retain) UILabel * titleLabel;
 @property (retain) UIView * detailsView;
-@property (retain) UIActionSheet * shareChoiceActionSheet;
+@property (retain) UIActionSheet * letsGoChoiceActionSheet;
 @property (retain) WebActivityView * webActivityView;
 
 @property (retain) NSDate * mostRecentGetNewFeaturedEventSuggestionDate;
@@ -101,7 +102,7 @@ CGFloat const FEV_DESCRIPTION_LABEL_PADDING_HORIZONTAL = 20.0;
 @implementation FeaturedEventViewController
 @synthesize mostRecentGetNewFeaturedEventSuggestionDate, coreDataModel, facebookManager;
 @synthesize mapViewController;
-@synthesize actionBarView, letsGoButton, shareButton, scrollView, imageView, titleBarView, titleLabel, detailsView, shareChoiceActionSheet, webActivityView;
+@synthesize actionBarView, letsGoButton, shareButton, scrollView, imageView, titleBarView, titleLabel, detailsView, letsGoChoiceActionSheet, webActivityView;
 @synthesize timeLabel, dateLabel, venueNameLabel, addressFirstLineLabel, addressSecondLineLabel, phoneNumberButton, priceLabel, eventDetailsContainer, eventDetailsLabel, mapButton, noFeaturedEventView, refreshHeaderView;
 
 #pragma mark -
@@ -128,7 +129,7 @@ CGFloat const FEV_DESCRIPTION_LABEL_PADDING_HORIZONTAL = 20.0;
     [titleBarView release];
     [titleLabel release];
     [detailsView release];
-    [shareChoiceActionSheet release];
+    [letsGoChoiceActionSheet release];
     [webActivityView release];
     
     [webConnector release];
@@ -640,78 +641,93 @@ CGFloat const FEV_DESCRIPTION_LABEL_PADDING_HORIZONTAL = 20.0;
 }
 
 - (void)actionSheet:(UIActionSheet *)actionSheet didDismissWithButtonIndex:(NSInteger)buttonIndex {
-    if (buttonIndex == 0) {
-        
-        MFMailComposeViewController * emailViewController = [ActionsManagement makeEmailViewControllerForEvent:[self.coreDataModel getFeaturedEvent] withMailComposeDelegate:self usingWebDataTranslator:self.webDataTranslator];
-        [self presentModalViewController:emailViewController animated:YES];
-        
-    } else if (buttonIndex == 1) {
+    
+    if (actionSheet == self.letsGoChoiceActionSheet) {
         
         Event * featuredEvent = [self.coreDataModel getFeaturedEvent];
         
-        NSMutableDictionary * parameters = [NSMutableDictionary dictionary];
-        
-        NSString * title = featuredEvent.title;
-        [parameters setObject:title forKey:@"name"];
-        
-        NSDate * startDate = featuredEvent.startDatetime;
-        NSDate * endDate = [startDate dateByAddingTimeInterval:3600];
-        if ([featuredEvent.endTimeValid boolValue]) {
-            endDate = featuredEvent.endDatetime;
+        if (buttonIndex == 0) {
+            
+            ContactsSelectViewController * contactsSelectViewController = [[ContactsSelectViewController alloc] initWithNibName:@"ContactsSelectViewController" bundle:[NSBundle mainBundle]];
+            NSArray * allContacts = [self.coreDataModel getAllContacts];
+            contactsSelectViewController.contacts = allContacts;
+            [self presentModalViewController:contactsSelectViewController animated:YES];
+            [contactsSelectViewController release];
+            
+//            NSMutableDictionary * parameters = [NSMutableDictionary dictionary];
+//            
+//            NSString * title = featuredEvent.title;
+//            [parameters setObject:title forKey:@"name"];
+//            
+//            NSDate * startDate = featuredEvent.startDatetime;
+//            NSDate * endDate = [startDate dateByAddingTimeInterval:3600];
+//            if ([featuredEvent.endTimeValid boolValue]) {
+//                endDate = featuredEvent.endDatetime;
+//            }
+//            NSTimeInterval startDateTimeInterval = [startDate timeIntervalSince1970];
+//            NSTimeInterval endDateTimeInterval = [endDate timeIntervalSince1970];
+//            // TEMPORARY HACK FIX FOR FACEBOOK TIMEZONE PROBLEM
+//            {
+//                NSTimeZone * pacificTimeZone = [NSTimeZone timeZoneWithName:@"US/Pacific"];
+//                NSTimeZone * easternTimeZone = [NSTimeZone timeZoneWithName:@"US/Eastern"]; // THIS SHOULD NOT BE HARDCODED AS THE EASTERN TIME ZONE - IT SHOULD BE THE TIME ZONE OF WHEREVER THE EVENT IS TAKING PLACE.
+//                NSTimeInterval pacificInterval = [pacificTimeZone secondsFromGMT];
+//                NSTimeInterval easternInterval = [easternTimeZone secondsFromGMT];
+//                NSLog(@"%f %f", pacificInterval, easternInterval);
+//                startDateTimeInterval += (easternInterval - pacificInterval);
+//                endDateTimeInterval += (easternInterval - pacificInterval);
+//            }
+//            [parameters setObject:[NSString stringWithFormat:@"%.0f", startDateTimeInterval] forKey:@"start_time"];
+//            [parameters setObject:[NSString stringWithFormat:@"%.0f", endDateTimeInterval] forKey:@"end_time"];
+//            
+//            NSString * locationName = featuredEvent.venue;
+//            if (locationName) {
+//                [parameters setObject:locationName forKey:@"location"];
+//            }
+//            
+//            if (featuredEvent.address) { 
+//                [parameters setObject:featuredEvent.address forKey:@"street"];
+//            }
+//            if (featuredEvent.city) { 
+//                [parameters setObject:featuredEvent.city forKey:@"city"];
+//            }
+//            if (featuredEvent.state) { 
+//                [parameters setObject:featuredEvent.state forKey:@"state"];
+//            }
+//            if (featuredEvent.zip) { 
+//                [parameters setObject:featuredEvent.zip forKey:@"zip"];
+//            }
+//            [parameters setValue:@"USA" forKey:@"country"];
+//            if (featuredEvent.latitude) {
+//                [parameters setObject:[NSString stringWithFormat:@"%@", featuredEvent.latitude] forKey:@"latitude"];
+//            }
+//            if (featuredEvent.longitude) {
+//                [parameters setObject:[NSString stringWithFormat:@"%@", featuredEvent.longitude] forKey:@"longitude"];
+//            }
+//            if (featuredEvent.details) {
+//                [parameters setObject:featuredEvent.details forKey:@"description"];
+//            }
+//            if (self.imageView.image) {
+//                [parameters setObject:self.imageView.image forKey:@"picture"];
+//            }
+//            
+//            NSLog(@"facebook event parameters: %@", parameters);
+//            
+//            [self.facebookManager.fb requestWithGraphPath:@"me/events"
+//                                                andParams:parameters  
+//                                            andHttpMethod:@"POST" 
+//                                              andDelegate:self];
+            
+        } else if (buttonIndex == 1) {
+            
+            // Add to calendar
+            [ActionsManagement addEventToCalendar:featuredEvent usingWebDataTranslator:self.webDataTranslator];
+            // Show confirmation alert
+            UIAlertView * alert = [[UIAlertView alloc] initWithTitle:@"Event added to Calendar!" message:[NSString stringWithFormat:@"The event \"%@\" has been added to your calendar.", featuredEvent.title] delegate:nil cancelButtonTitle:@"Ok" otherButtonTitles:nil];
+            [alert show];
+            [alert release];
+                        
         }
-        NSTimeInterval startDateTimeInterval = [startDate timeIntervalSince1970];
-        NSTimeInterval endDateTimeInterval = [endDate timeIntervalSince1970];
-        // TEMPORARY HACK FIX FOR FACEBOOK TIMEZONE PROBLEM
-        {
-            NSTimeZone * pacificTimeZone = [NSTimeZone timeZoneWithName:@"US/Pacific"];
-            NSTimeZone * easternTimeZone = [NSTimeZone timeZoneWithName:@"US/Eastern"]; // THIS SHOULD NOT BE HARDCODED AS THE EASTERN TIME ZONE - IT SHOULD BE THE TIME ZONE OF WHEREVER THE EVENT IS TAKING PLACE.
-            NSTimeInterval pacificInterval = [pacificTimeZone secondsFromGMT];
-            NSTimeInterval easternInterval = [easternTimeZone secondsFromGMT];
-            NSLog(@"%f %f", pacificInterval, easternInterval);
-            startDateTimeInterval += (easternInterval - pacificInterval);
-            endDateTimeInterval += (easternInterval - pacificInterval);
-        }
-        [parameters setObject:[NSString stringWithFormat:@"%.0f", startDateTimeInterval] forKey:@"start_time"];
-        [parameters setObject:[NSString stringWithFormat:@"%.0f", endDateTimeInterval] forKey:@"end_time"];
-        
-        NSString * locationName = featuredEvent.venue;
-        if (locationName) {
-            [parameters setObject:locationName forKey:@"location"];
-        }
-        
-        if (featuredEvent.address) { 
-            [parameters setObject:featuredEvent.address forKey:@"street"];
-        }
-        if (featuredEvent.city) { 
-            [parameters setObject:featuredEvent.city forKey:@"city"];
-        }
-        if (featuredEvent.state) { 
-            [parameters setObject:featuredEvent.state forKey:@"state"];
-        }
-        if (featuredEvent.zip) { 
-            [parameters setObject:featuredEvent.zip forKey:@"zip"];
-        }
-        [parameters setValue:@"USA" forKey:@"country"];
-        if (featuredEvent.latitude) {
-            [parameters setObject:[NSString stringWithFormat:@"%@", featuredEvent.latitude] forKey:@"latitude"];
-        }
-        if (featuredEvent.longitude) {
-            [parameters setObject:[NSString stringWithFormat:@"%@", featuredEvent.longitude] forKey:@"longitude"];
-        }
-        if (featuredEvent.details) {
-            [parameters setObject:featuredEvent.details forKey:@"description"];
-        }
-        if (self.imageView.image) {
-            [parameters setObject:self.imageView.image forKey:@"picture"];
-        }
-        
-        NSLog(@"facebook event parameters: %@", parameters);
-        
-        [self.facebookManager.fb requestWithGraphPath:@"me/events"
-                                            andParams:parameters  
-                                        andHttpMethod:@"POST" 
-                                          andDelegate:self];
-        
+
     }
     
 }
@@ -757,21 +773,31 @@ CGFloat const FEV_DESCRIPTION_LABEL_PADDING_HORIZONTAL = 20.0;
 
 - (void) letsGoButtonTouched {
     
+    // Grab our event
     Event * featuredEvent = [self.coreDataModel getFeaturedEvent];
     
     // Send learned data to the web
     [self.webConnector sendLearnedDataAboutEvent:featuredEvent.uri withUserAction:@"G"];
     
-    [ActionsManagement addEventToCalendar:featuredEvent usingWebDataTranslator:self.webDataTranslator];
+    // Logging
+    NSLog(@"FeaturedEventViewController letsGoButtonTouched - Facebook session is valid? = %d", [self.facebookManager.fb isSessionValid]);
     
-	// Show alert
-	UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Event added to Calendar!" message:[NSString stringWithFormat:@"The event \"%@\" has been added to your calendar.", featuredEvent.title] delegate:nil cancelButtonTitle:@"Ok" otherButtonTitles:nil];
-	[alert show];
-	[alert release];
+    if ([self.facebookManager.fb isSessionValid]) {
+        // Give choice of Facebook event or adding to calendar
+        self.letsGoChoiceActionSheet = [[[UIActionSheet alloc] initWithTitle:@"What would you like to do with this event?" delegate:self cancelButtonTitle:@"Cancel" destructiveButtonTitle:nil otherButtonTitles:@"Create Facebook event", @"Add to Calendar", nil] autorelease];
+        [self.letsGoChoiceActionSheet showFromRect:self.letsGoButton.frame inView:self.letsGoButton animated:YES];
+    } else {
+        // Add to calendar
+        [ActionsManagement addEventToCalendar:featuredEvent usingWebDataTranslator:self.webDataTranslator];
+        // Show confirmation alert
+        UIAlertView * alert = [[UIAlertView alloc] initWithTitle:@"Event added to Calendar!" message:[NSString stringWithFormat:@"The event \"%@\" has been added to your calendar.", featuredEvent.title] delegate:nil cancelButtonTitle:@"Ok" otherButtonTitles:nil];
+        [alert show];
+        [alert release];
+    }
     
-    // Can't really do this simple/horrible of a solution for the featured event page... BAD BAD BAD BAD. COME BACK TO THIS.
-    [self.letsGoButton setBackgroundImage:[UIImage imageNamed:@"btn_going.png"] forState: UIControlStateNormal];
-    self.letsGoButton.enabled = NO;
+//    // Can't really do this simple/horrible of a solution for the featured event page... BAD BAD BAD BAD. COME BACK TO THIS.
+//    [self.letsGoButton setBackgroundImage:[UIImage imageNamed:@"btn_going.png"] forState: UIControlStateNormal];
+//    self.letsGoButton.enabled = NO;
     
 }
 
@@ -816,4 +842,3 @@ CGFloat const FEV_DESCRIPTION_LABEL_PADDING_HORIZONTAL = 20.0;
 }
 
 @end
-

@@ -215,6 +215,8 @@
 		32D7FEE013B0BC5A005E8406 /* MainWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = 32D7FEDE13B0BC5A005E8406 /* MainWindow.xib */; };
 		32D7FF5B13B0D382005E8406 /* Reachability.m in Sources */ = {isa = PBXBuildFile; fileRef = 32D7FF5A13B0D382005E8406 /* Reachability.m */; };
 		32EE74BD13B907D30002E11F /* CategoryBreadcrumb.m in Sources */ = {isa = PBXBuildFile; fileRef = 32EE74BC13B907D30002E11F /* CategoryBreadcrumb.m */; };
+		32F3092513C3BB16003930F2 /* ContactsSelectViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 32F3092313C3BB16003930F2 /* ContactsSelectViewController.m */; };
+		32F3092613C3BB16003930F2 /* ContactsSelectViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 32F3092413C3BB16003930F2 /* ContactsSelectViewController.xib */; };
 		32FD31F113AFD82C007549B6 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 32FD31F013AFD82C007549B6 /* UIKit.framework */; };
 		32FD31F313AFD82C007549B6 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 32FD31F213AFD82C007549B6 /* Foundation.framework */; };
 		32FD31F513AFD82C007549B6 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 32FD31F413AFD82C007549B6 /* CoreGraphics.framework */; };
@@ -506,6 +508,9 @@
 		32EE74BA13B902A90002E11F /* kwiqet 003.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "kwiqet 003.xcdatamodel"; sourceTree = "<group>"; };
 		32EE74BB13B907D20002E11F /* CategoryBreadcrumb.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CategoryBreadcrumb.h; path = classes/CategoryBreadcrumb.h; sourceTree = "<group>"; };
 		32EE74BC13B907D30002E11F /* CategoryBreadcrumb.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = CategoryBreadcrumb.m; path = classes/CategoryBreadcrumb.m; sourceTree = "<group>"; };
+		32F3092213C3BB16003930F2 /* ContactsSelectViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ContactsSelectViewController.h; sourceTree = "<group>"; };
+		32F3092313C3BB16003930F2 /* ContactsSelectViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ContactsSelectViewController.m; sourceTree = "<group>"; };
+		32F3092413C3BB16003930F2 /* ContactsSelectViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = ContactsSelectViewController.xib; sourceTree = "<group>"; };
 		32FD31EC13AFD82C007549B6 /* kwiqet.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = kwiqet.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		32FD31F013AFD82C007549B6 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		32FD31F213AFD82C007549B6 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
@@ -919,6 +924,9 @@
 				32253F4113C36884004FBDD6 /* FacebookViewController.h */,
 				32253F4213C36884004FBDD6 /* FacebookViewController.m */,
 				32253F4313C36884004FBDD6 /* FacebookViewController.xib */,
+				32F3092213C3BB16003930F2 /* ContactsSelectViewController.h */,
+				32F3092313C3BB16003930F2 /* ContactsSelectViewController.m */,
+				32F3092413C3BB16003930F2 /* ContactsSelectViewController.xib */,
 			);
 			name = "view controllers";
 			sourceTree = "<group>";
@@ -1319,6 +1327,7 @@
 				325FE13713BD0F4B005BEF4B /* apple_settings_30.png in Resources */,
 				325FE13813BD0F4B005BEF4B /* apple_settings_30@2x.png in Resources */,
 				32253F4513C36884004FBDD6 /* FacebookViewController.xib in Resources */,
+				32F3092613C3BB16003930F2 /* ContactsSelectViewController.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1381,6 +1390,7 @@
 				32EE74BD13B907D30002E11F /* CategoryBreadcrumb.m in Sources */,
 				32253F4413C36884004FBDD6 /* FacebookViewController.m in Sources */,
 				32253F4913C39EF1004FBDD6 /* ActionsManagement.m in Sources */,
+				32F3092513C3BB16003930F2 /* ContactsSelectViewController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

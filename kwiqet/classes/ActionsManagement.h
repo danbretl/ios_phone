@@ -18,6 +18,6 @@
 
 + (MFMailComposeViewController *) makeEmailViewControllerForEvent:(Event *)event withMailComposeDelegate:(id<MFMailComposeViewControllerDelegate>)mailComposeDelegate usingWebDataTranslator:(WebDataTranslator *)webDataTranslator;
 
-+ (void)addEventToCalendar:(Event *)event usingWebDataTranslator:(WebDataTranslator *)webDataTranslator;
++ (void) addEventToCalendar:(Event *)event usingWebDataTranslator:(WebDataTranslator *)webDataTranslator;
 
 @end
