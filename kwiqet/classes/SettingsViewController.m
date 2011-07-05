@@ -12,16 +12,19 @@
 #import "URLBuilder.h"
 #import "Contact.h"
 #import <QuartzCore/QuartzCore.h>
+#import "FacebookViewController.h"
 
 @interface SettingsViewController()
 @property (retain) UITableView * tableView;
 @property (retain) NSArray * settingsModel;
+@property (readonly) UIAlertView * accountLogoutWarningAlertView;
 @property (readonly) UIAlertView * resetMachineLearningWarningAlertView;
 - (void) accountButtonTouched;
 - (void) resetMachineLearningButtonTouched;
 - (void) facebookConnectButtonTouched;
 - (void) startResetingBehavior;
 - (void) loginActivity:(NSNotification *)notification;
+- (void) facebookAccountActivity:(NSNotification *)notification;
 - (void) configureCell:(UITableViewCell *)cell forRowAtIndexPath:(NSIndexPath *)indexPath;
 @end
 
@@ -37,6 +40,7 @@
     [settingsModel release];
     [facebookManager release];
     [coreDataModel release];
+    [accountLogoutWarningAlertView release];
     [resetMachineLearningWarningAlertView release];
     [super dealloc];
 }
@@ -68,15 +72,23 @@
                            @"f_logo_30.png", @"imageName",
                            [NSValue valueWithPointer:@selector(facebookConnectButtonTouched)], @"selector",
                            [NSNumber numberWithBool:NO], @"showAccessoryArrow",
+                           [NSNumber numberWithBool:YES], @"showAccessoryArrowWhenBooleanYes",
                            @"Connected", @"detailTextLabelWhenBooleanYes",
                            nil],
                           nil];
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(loginActivity:) name:@"loginActivity" object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(facebookAccountActivity:) name:FBM_ACCOUNT_ACTIVITY_KEY object:nil];
 
 }
 
+- (void) viewWillAppear:(BOOL)animated {
+    [super viewWillAppear:animated];
+    [self.tableView deselectRowAtIndexPath:[self.tableView indexPathForSelectedRow] animated:YES];
+}
+
 -(void)viewDidAppear:(BOOL)animated {
+    [super viewDidAppear:animated];
     [self.tableView reloadData]; // Heavyweight
 }
 
@@ -97,9 +109,18 @@
     NSDictionary * userInfo = [notification userInfo];
     NSString * action = [userInfo valueForKey:@"action"];
     if ([action isEqualToString:@"logout"]) {
-        [self.facebookManager.fb logout:self]; // If user signs out of Kwiqet, then their potential Facebook connection should also be undone.
+        [self.facebookManager logout]; // If user signs out of Kwiqet, then their potential Facebook connection should also be undone.
     }
     [self.tableView reloadData]; // Heavyweight
+}
+
+- (void)facebookAccountActivity:(NSNotification *)notification {
+    NSLog(@"SettingsViewController facebookAccountActivity");
+    if ([[[notification userInfo] valueForKey:FBM_ACCOUNT_ACTIVITY_ACTION_KEY] isEqualToString:FBM_ACCOUNT_ACTIVITY_ACTION_LOGOUT]) {
+        [self.tableView reloadData]; // Heavyweight
+    } else if ([[[notification userInfo] valueForKey:FBM_ACCOUNT_ACTIVITY_ACTION_KEY] isEqualToString:FBM_ACCOUNT_ACTIVITY_ACTION_LOGIN]) {
+        [self.tableView reloadData]; // Heavyweight        
+    }
 }
 
 - (void) accountButtonTouched {
@@ -108,19 +129,7 @@
     
     if (loggedInWithKwiqet) {
         
-        [DefaultsModel deleteAPIKey];
-        
-        NSDictionary * infoDictionary = [NSDictionary dictionaryWithObjectsAndKeys:@"logout", @"action", nil];
-        [[NSNotificationCenter defaultCenter] postNotificationName:@"loginActivity" object:self userInfo:infoDictionary];
-                
-        //show logout message
-        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Logged Out" 
-                                                        message:@"Log back in later to retrieve your personalized recommendations."
-                                                       delegate:self 
-                                              cancelButtonTitle:@"Ok" 
-                                              otherButtonTitles:nil];
-        [alert show];
-        [alert release];
+        [self.accountLogoutWarningAlertView show];
         
     } else {
         
@@ -133,58 +142,10 @@
     
 }
 
-
-- (void) resetMachineLearningButtonTouched {
-    [self.resetMachineLearningWarningAlertView show];
-}
-
-- (void) facebookConnectButtonTouched {
-    [self.facebookManager pullAuthenticationInfoFromDefaults];
-    if (![self.facebookManager.fb isSessionValid]) {
-        [self.facebookManager authorizeWithStandardPermissionsAndDelegate:self];
-    } else {
-        [self.facebookManager.fb logout:self];
-    }
-}
-
-- (void)fbDidLogin {
-    NSLog(@"fbDidLogin");
-    [self.facebookManager pushAuthenticationInfoToDefaults];
-    [self.tableView reloadData]; // Heavyweight
-    [self.facebookManager.fb requestWithGraphPath:@"me/friends" andDelegate:self];
-}
-
-- (void)requestLoading:(FBRequest *)request {
-    NSLog(@"FB request loading...");
-}
-
-- (void) request:(FBRequest *)request didLoad:(id)result {
-    NSLog(@"FB request success %@ - %@", request, result);
-    [self.coreDataModel addOrUpdateContactsFromFacebook:[result objectForKey:@"data"]];
-    [self.coreDataModel coreDataSave];
-    NSLog(@"%@", [self.coreDataModel getAllContacts]);
-}
-
-- (void)request:(FBRequest *)request didFailWithError:(NSError *)error {
-    NSLog(@"FB request failed - %@", error);
-}
-
-- (void)fbDidNotLogin:(BOOL)cancelled {
-    //[self.tableView reloadData]; // Heavyweight
-}
-
-- (void) fbDidLogout {
-    [self.tableView reloadData]; // Heavyweight
-    NSLog(@"fbDidLogout");
-    // We don't really NEED to do the following, but I think it provides a "more trustworthy" user experience. If we didn't do the following, then the user could touch to disconnect facebook, then touch to connect facebook again, and they might automatically be connected without any sort of dialog or anything (because the access token was still valid for the given expiration date). That is convenient, but a user would rarely be trying to do this, and I would argue that it would be more likely that logout and login would be touched in a way that would expect a dialog. (Bad sentence, but hopefully you get my point.)
-    NSUserDefaults * defaults = [NSUserDefaults standardUserDefaults];
-    [defaults removeObjectForKey:@"FBAccessTokenKey"];
-    [defaults removeObjectForKey:@"FBExpirationDateKey"];
-}
-
 -(void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex {
     
     if (alertView == self.resetMachineLearningWarningAlertView) {
+        
         if (buttonIndex == 0) {
             [self startResetingBehavior];
             self.view.userInteractionEnabled = NO;
@@ -194,10 +155,47 @@
         } else {
             NSLog(@"ERROR in SettingsViewController - unrecognized alert view button index %d", buttonIndex);
         }
+        
+    } else if (alertView == self.accountLogoutWarningAlertView) {
+        
+        if (buttonIndex == 0) {
+            [DefaultsModel deleteAPIKey];
+            NSDictionary * infoDictionary = [NSDictionary dictionaryWithObjectsAndKeys:@"logout", @"action", nil];
+            [[NSNotificationCenter defaultCenter] postNotificationName:@"loginActivity" object:self userInfo:infoDictionary];
+            UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Logged Out" 
+                                                            message:@"Log back in later to retrieve your personalized recommendations."
+                                                           delegate:self 
+                                                  cancelButtonTitle:@"Ok" 
+                                                  otherButtonTitles:nil];
+            [alert show];
+            [alert release];
+        } else if (buttonIndex == 1) {
+            // Do nothing
+            [self.tableView deselectRowAtIndexPath:[self.tableView indexPathForSelectedRow] animated:YES];
+        } else {
+            NSLog(@"ERROR in SettingsViewController - unrecognized alert view button index %d", buttonIndex);
+        }
+        
     } else {
-        NSLog(@"ERROR in SettingsViewController - unrecognized alert view %@", alertView);
+        NSLog(@"Anonymous alert view in SettingsViewController - %@", alertView);
     }
     
+}
+
+- (void) resetMachineLearningButtonTouched {
+    [self.resetMachineLearningWarningAlertView show];
+}
+
+- (void) facebookConnectButtonTouched {
+    [self.facebookManager pullAuthenticationInfoFromDefaults];
+    if (![self.facebookManager.fb isSessionValid]) {
+        [self.facebookManager login];
+    } else {
+        FacebookViewController * fvc = [[FacebookViewController alloc] initWithNibName:@"FacebookViewController" bundle:[NSBundle mainBundle]];
+        fvc.facebookManager = self.facebookManager;
+        [self.navigationController pushViewController:fvc animated:YES];
+        [fvc release];
+    }
 }
 
 -(void)startResetingBehavior  {
@@ -277,6 +275,18 @@
                          otherButtonTitles:@"No",nil];
     }
     return resetMachineLearningWarningAlertView;
+}
+
+- (UIAlertView *) accountLogoutWarningAlertView {
+    if (accountLogoutWarningAlertView == nil) {
+        accountLogoutWarningAlertView = 
+        [[UIAlertView alloc] initWithTitle:@"Log out?" 
+                                   message:@"Are you sure you want to log out of your Kwiqet account?" 
+                                  delegate:self 
+                         cancelButtonTitle:@"Yes" 
+                         otherButtonTitles:@"No",nil];
+    }
+    return accountLogoutWarningAlertView;
 }
 
 - (void)loginViewController:(LoginViewController *)loginViewController didFinishWithLogin:(BOOL)didLogin {
@@ -359,6 +369,7 @@
             [self.facebookManager pullAuthenticationInfoFromDefaults];
             if ([self.facebookManager.fb isSessionValid]) {
                 detailTextLabelText = [[self.settingsModel objectAtIndex:indexPath.row] valueForKey:@"detailTextLabelWhenBooleanYes"];
+                accessoryType = [[self.settingsModel objectAtIndex:indexPath.row] valueForKey:@"showAccessoryArrowWhenBooleanYes"] ? UITableViewCellAccessoryDisclosureIndicator : accessoryType;
             } else {
                 if ([DefaultsModel retrieveAPIFromUserDefaults]) {
                     detailTextLabelText = @"Touch to connect";
@@ -398,6 +409,8 @@
             theLabel.text = @"Creating a Kwiqet account enables you to use extended features such as sending invites and making your event feed much more personal. Best of all, accounts are completely free!";
             theLabel.font = [UIFont fontWithName:@"HelveticaNeueLTStd-Cn" size:16.0];
             theLabel.backgroundColor = tableView.backgroundColor;
+//            theLabel.lineBreakMode = UILineBreakModeClip;
+//            theLabel.clipsToBounds = NO;
             [footerView addSubview:theLabel];
             [theLabel release];
         }

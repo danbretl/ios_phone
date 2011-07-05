@@ -12,10 +12,11 @@
 #import "CoreDataModel.h"
 #import "LoginViewController.h"
 
-@interface SettingsViewController : UIViewController <FBSessionDelegate, FBRequestDelegate, UITableViewDelegate, UITableViewDataSource, LoginViewControllerDelegate> {
+@interface SettingsViewController : UIViewController <FBSessionDelegate, FBRequestDelegate, UITableViewDelegate, UITableViewDataSource, LoginViewControllerDelegate, UIAlertViewDelegate> {
     
     // Views
     IBOutlet UITableView * _tableView;
+    UIAlertView * accountLogoutWarningAlertView;
     UIAlertView * resetMachineLearningWarningAlertView;
     
     // View models

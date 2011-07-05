@@ -166,6 +166,8 @@
 		3211539213B5252700DE5163 /* Contact.m in Sources */ = {isa = PBXBuildFile; fileRef = 3211539113B5252600DE5163 /* Contact.m */; };
 		3220DFB113B233470032C205 /* ElasticUILabel.m in Sources */ = {isa = PBXBuildFile; fileRef = 3220DFB013B233470032C205 /* ElasticUILabel.m */; };
 		3220DFB513B23B390032C205 /* GradientView.m in Sources */ = {isa = PBXBuildFile; fileRef = 3220DFB413B23B390032C205 /* GradientView.m */; };
+		32253F4413C36884004FBDD6 /* FacebookViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 32253F4213C36884004FBDD6 /* FacebookViewController.m */; };
+		32253F4513C36884004FBDD6 /* FacebookViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 32253F4313C36884004FBDD6 /* FacebookViewController.xib */; };
 		324759AA13BB8C56002A9199 /* HR.png in Resources */ = {isa = PBXBuildFile; fileRef = 324759A813BB8C56002A9199 /* HR.png */; };
 		324759AB13BB8C56002A9199 /* HR@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 324759A913BB8C56002A9199 /* HR@2x.png */; };
 		324759AF13BBB2B1002A9199 /* event_card.png in Resources */ = {isa = PBXBuildFile; fileRef = 324759AD13BBB2B1002A9199 /* event_card.png */; };
@@ -431,6 +433,9 @@
 		3220DFB013B233470032C205 /* ElasticUILabel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ElasticUILabel.m; sourceTree = "<group>"; };
 		3220DFB313B23B390032C205 /* GradientView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GradientView.h; sourceTree = "<group>"; };
 		3220DFB413B23B390032C205 /* GradientView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GradientView.m; sourceTree = "<group>"; };
+		32253F4113C36884004FBDD6 /* FacebookViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FacebookViewController.h; sourceTree = "<group>"; };
+		32253F4213C36884004FBDD6 /* FacebookViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FacebookViewController.m; sourceTree = "<group>"; };
+		32253F4313C36884004FBDD6 /* FacebookViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = FacebookViewController.xib; sourceTree = "<group>"; };
 		324759A813BB8C56002A9199 /* HR.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = HR.png; sourceTree = "<group>"; };
 		324759A913BB8C56002A9199 /* HR@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "HR@2x.png"; sourceTree = "<group>"; };
 		324759AD13BBB2B1002A9199 /* event_card.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = event_card.png; sourceTree = "<group>"; };
@@ -908,6 +913,9 @@
 				32FD386713AFF52F007549B6 /* SplashScreenViewController.h */,
 				32FD386813AFF52F007549B6 /* SplashScreenViewController.m */,
 				32FD386913AFF52F007549B6 /* SplashScreenViewController.xib */,
+				32253F4113C36884004FBDD6 /* FacebookViewController.h */,
+				32253F4213C36884004FBDD6 /* FacebookViewController.m */,
+				32253F4313C36884004FBDD6 /* FacebookViewController.xib */,
 			);
 			name = "view controllers";
 			sourceTree = "<group>";
@@ -1305,6 +1313,7 @@
 				325FE13413BD0668005BEF4B /* kwiqet_colors_50@2x.png in Resources */,
 				325FE13713BD0F4B005BEF4B /* apple_settings_30.png in Resources */,
 				325FE13813BD0F4B005BEF4B /* apple_settings_30@2x.png in Resources */,
+				32253F4513C36884004FBDD6 /* FacebookViewController.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1365,6 +1374,7 @@
 				3211538F13B4E56500DE5163 /* FacebookManager.m in Sources */,
 				3211539213B5252700DE5163 /* Contact.m in Sources */,
 				32EE74BD13B907D30002E11F /* CategoryBreadcrumb.m in Sources */,
+				32253F4413C36884004FBDD6 /* FacebookViewController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

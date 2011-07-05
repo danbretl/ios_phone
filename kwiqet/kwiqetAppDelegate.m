@@ -98,6 +98,7 @@
 - (FacebookManager *)facebookManager {
     if (facebookManager == nil) {
         facebookManager = [[FacebookManager alloc] init];
+        facebookManager.coreDataModel = self.coreDataModel;
     }
     return facebookManager;
 }
