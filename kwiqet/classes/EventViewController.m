@@ -13,6 +13,7 @@
 #import "URLBuilder.h"
 #import "WebUtil.h"
 #import <QuartzCore/QuartzCore.h>
+#import "ActionsManagement.h"
 
 #define CGFLOAT_MAX_TEXT_SIZE 10000
 
@@ -700,105 +701,27 @@
     
     [self showWebLoadingViews];
     
-    // Add event to the device's iCal
-    EKEventStore * eventStore = [[EKEventStore alloc] init];
-    EKEvent * newEvent = [EKEvent eventWithEventStore:eventStore];
-    
-    newEvent.title = self.event.title;
-    newEvent.startDate = self.event.startDatetime;
-    NSLog(@"%@", newEvent.startDate);
-    newEvent.allDay = ![self.event.startTimeValid boolValue];
-    if ([self.event.endDateValid boolValue]) {
-        newEvent.endDate = self.event.endDatetime;
-    } else {
-        newEvent.endDate = [NSDate dateWithTimeInterval:3600 sinceDate:newEvent.startDate];
-    }
-    newEvent.location = self.event.venue;
-    NSMutableString * iCalEventNotes = [NSMutableString string];
-    NSString * addressLineFirst = self.event.address;
-    NSString * addressLineSecond = [self.webDataTranslator addressSecondLineStringFromCity:self.event.city state:self.event.state zip:self.event.zip];
-    if (addressLineFirst) { 
-        [iCalEventNotes appendFormat:@"%@\n", addressLineFirst]; 
-    }
-    if (addressLineSecond) {
-        [iCalEventNotes appendFormat:@"%@\n", addressLineSecond];
-    }
-    if (addressLineFirst || addressLineSecond) {
-        [iCalEventNotes appendString:@"\n"];
-    }
-    if (self.event.details) {
-        [iCalEventNotes appendString:self.event.details];
-    }
-    newEvent.notes = iCalEventNotes;
-    
-    [newEvent setCalendar:[eventStore defaultCalendarForNewEvents]];
-    NSError * err;
-    [eventStore saveEvent:newEvent span:EKSpanThisEvent error:&err];
-    if (err != nil) { NSLog(@"error"); }
-    [eventStore release];
-    
     // Send learned data to the web
     [self.webConnector sendLearnedDataAboutEvent:self.event.uri withUserAction:@"G"];
     
-    // Change appearance of "Let's Go" button
-    [self.letsGoButton setBackgroundImage:[UIImage imageNamed:@"btn_going.png"] forState: UIControlStateNormal];
-    self.letsGoButton.enabled = NO;
+    [ActionsManagement addEventToCalendar:self.event usingWebDataTranslator:self.webDataTranslator];
     
 	// Show alert
 	UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Event added to Calendar!" message:[NSString stringWithFormat:@"The event \"%@\" has been added to your calendar.", self.event.title] delegate:nil cancelButtonTitle:@"Ok" otherButtonTitles:nil];
 	[alert show];
 	[alert release];
     
-    // Wait for response from server
+    // Change appearance of "Let's Go" button
+    [self.letsGoButton setBackgroundImage:[UIImage imageNamed:@"btn_going.png"] forState: UIControlStateNormal];
+    self.letsGoButton.enabled = NO;
 
 }
 
 -(void)shareButtonTouched {
     
-    [self makeAndShowEmailViewController];
+    MFMailComposeViewController * emailViewController = [ActionsManagement makeEmailViewControllerForEvent:self.event withMailComposeDelegate:self usingWebDataTranslator:self.webDataTranslator];
+    [self presentModalViewController:emailViewController animated:YES];
     
-}
-
-- (void) makeAndShowEmailViewController {
-    NSLog(@"Email"); // Email
-    
-    NSString * EVENT_TITLE_NOT_AVAILABLE = @"Title not available";
-    NSString * EVENT_TIME_NOT_AVAILABLE = @"Time not available";
-    NSString * EVENT_DATE_NOT_AVAILABLE = @"Date not available";
-    NSString * EVENT_COST_NOT_AVAILABLE = @"Price not available";
-    NSString * EVENT_DESCRIPTION_NOT_AVAILABLE = @"Description not available";
-    
-    NSString * emailTitle = self.event.title ? self.event.title : EVENT_TITLE_NOT_AVAILABLE;
-    NSString * emailLocation = self.event.venue ? [NSString stringWithFormat:@"    Location: %@<br>", self.event.venue] : @"";
-    NSString * emailAddressFirst = self.event.address ? self.event.address : @"";
-    NSString * emailAddressSecond = [self.webDataTranslator addressSecondLineStringFromCity:self.event.city state:self.event.state zip:self.event.zip];
-    if (self.event.address && emailAddressSecond) { emailAddressFirst = [emailAddressFirst stringByAppendingString:@", "]; }
-    if (!emailAddressSecond) { emailAddressSecond = @""; }
-    NSString * emailAddressFull = ([emailAddressFirst isEqualToString:@""] && [emailAddressSecond isEqualToString:@""]) ? @"" : [NSString stringWithFormat:@"    Address: %@%@<br>", emailAddressFirst, emailAddressSecond];
-    NSString * emailTime = [self.webDataTranslator timeSpanStringFromStartDatetime:self.event.startTimeDatetime endDatetime:self.event.endTimeDatetime dataUnavailableString:EVENT_TIME_NOT_AVAILABLE];
-    NSString * emailDate = [self.webDataTranslator dateSpanStringFromStartDatetime:self.event.startDateDatetime endDatetime:self.event.endDateDatetime relativeDates:YES dataUnavailableString:EVENT_DATE_NOT_AVAILABLE];
-    NSString * emailPrice = [self.webDataTranslator priceRangeStringFromMinPrice:self.event.priceMinimum maxPrice:self.event.priceMaximum dataUnavailableString:EVENT_COST_NOT_AVAILABLE];
-    NSString * emailDescription = self.event.details ? self.event.details : EVENT_DESCRIPTION_NOT_AVAILABLE;
-    emailDescription = ![emailDescription isEqualToString:EVENT_DESCRIPTION_NOT_AVAILABLE] ? [NSString stringWithFormat:@"<br><br>%@", emailDescription] : @"";
-    
-    NSString * emailMap = @"";
-    if (self.event.latitude && self.event.longitude) {
-        NSString * mapSearchQuery = [[[NSString stringWithFormat:@"%@ %@ %@", (self.event.venue ? self.event.venue : @""), emailAddressFirst, emailAddressSecond] stringByReplacingOccurrencesOfString:@" " withString:@"+"] stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
-        NSString * urlString = [NSString stringWithFormat:@"http://maps.google.com/maps?q=%@&ll=%f,%f", mapSearchQuery, [self.event.latitude floatValue], [self.event.longitude floatValue]];
-        emailMap = [NSString stringWithFormat:@"    <a href='%@'>Click here for map</a><br>", urlString];
-    }
-    
-    //create message body with event title and description
-    NSString *mailString = [[NSString alloc] initWithFormat:@"Hey! I found this event on Kwiqet. We should go!<br><br>    <b>%@</b><br><br>%@%@%@    Time: %@<br>    Date: %@<br>    Price: %@%@", emailTitle, emailLocation, emailAddressFull, emailMap, emailTime, emailDate, emailPrice, emailDescription];
-    
-    //call mail app to front as modal window
-    MFMailComposeViewController * controller = [[MFMailComposeViewController alloc] init];
-    controller.mailComposeDelegate = self;
-    [controller setSubject:@"You're Invited via Kwiqet"];
-    [controller setMessageBody:mailString isHTML:YES];
-    if (controller) [self presentModalViewController:controller animated:YES];
-    [controller release];
-    [mailString release];
 }
 
 - (void)mailComposeController:(MFMailComposeViewController*)controller  

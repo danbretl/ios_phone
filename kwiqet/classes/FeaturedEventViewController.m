@@ -13,6 +13,7 @@
 #import <QuartzCore/QuartzCore.h>
 #import "LocalImagesManager.h"
 #import "WebUtil.h"
+#import "ActionsManagement.h"
 
 // "Data not available" strings
 static NSString * const FEATURED_EVENT_TITLE_NOT_AVAILABLE = @"Event";
@@ -90,6 +91,11 @@ CGFloat const FEV_DESCRIPTION_LABEL_PADDING_HORIZONTAL = 20.0;
 @property (retain) UILabel * eventDetailsLabel;
 @property (retain) UIButton * mapButton;
 @property (retain) UIView * noFeaturedEventView;
+
+- (void) mapButtonTouched;
+- (void) shareButtonTouched;
+- (void) letsGoButtonTouched;
+
 @end
 
 @implementation FeaturedEventViewController
@@ -164,13 +170,13 @@ CGFloat const FEV_DESCRIPTION_LABEL_PADDING_HORIZONTAL = 20.0;
         // Let's go button
         self.letsGoButton = [[[UIButton alloc] initWithFrame:CGRectMake(FEV_ACTION_BAR_PADDING, FEV_ACTION_BAR_PADDING, FEV_ACTION_BUTTON_WIDTH, FEV_ACTION_BUTTON_HEIGHT)] autorelease];
         [self.letsGoButton setBackgroundImage:[UIImage imageNamed:@"btn_letsgo.png"] forState: UIControlStateNormal];
-        [self.letsGoButton addTarget:self action:@selector(bookedButtonClicked:) forControlEvents:UIControlEventTouchUpInside];
+        [self.letsGoButton addTarget:self action:@selector(letsGoButtonTouched) forControlEvents:UIControlEventTouchUpInside];
         [self.actionBarView addSubview:self.letsGoButton];
         
         // Share button
         self.shareButton = [[[UIButton alloc]initWithFrame:CGRectMake(self.actionBarView.bounds.size.width - FEV_ACTION_BUTTON_WIDTH - FEV_ACTION_BAR_PADDING, FEV_ACTION_BAR_PADDING, FEV_ACTION_BUTTON_WIDTH, FEV_ACTION_BUTTON_HEIGHT)] autorelease];
         [self.shareButton setBackgroundImage:[UIImage imageNamed:@"btn_share.png"] forState: UIControlStateNormal];
-        [self.shareButton addTarget:self action:@selector(shareButtonClicked:) forControlEvents:UIControlEventTouchUpInside];
+        [self.shareButton addTarget:self action:@selector(shareButtonTouched) forControlEvents:UIControlEventTouchUpInside];
         [self.actionBarView addSubview:self.shareButton];
     }
     
@@ -256,7 +262,7 @@ CGFloat const FEV_DESCRIPTION_LABEL_PADDING_HORIZONTAL = 20.0;
             CGFloat midpointYOfAddressLabels = (CGRectGetMinY(self.addressFirstLineLabel.frame) + CGRectGetMaxY(self.addressSecondLineLabel.frame)) / 2.0;
             self.mapButton = [[[UIButton alloc]initWithFrame:CGRectMake(self.detailsView.bounds.size.width - FEV_MAP_BUTTON_WIDTH - FEV_MAP_BUTTON_PADDING, midpointYOfAddressLabels - FEV_MAP_BUTTON_HEIGHT / 2.0 + FEV_MAP_BUTTON_ORIGIN_Y_CALC_OFFSET, FEV_MAP_BUTTON_WIDTH,FEV_MAP_BUTTON_HEIGHT)] autorelease];
             [mapButton setBackgroundImage:[UIImage imageNamed:@"btn_map.png"] forState: UIControlStateNormal];
-            [mapButton addTarget:self action:@selector(makeMapView:) forControlEvents:UIControlEventTouchUpInside];
+            [mapButton addTarget:self action:@selector(mapButtonTouched) forControlEvents:UIControlEventTouchUpInside];
             mapButton.alpha = FEATURED_EVENT_MAP_BUTTON_INACTIVE_ALPHA;
             [self.detailsView addSubview:mapButton];
             [mapButton release];
@@ -635,8 +641,9 @@ CGFloat const FEV_DESCRIPTION_LABEL_PADDING_HORIZONTAL = 20.0;
 
 - (void)actionSheet:(UIActionSheet *)actionSheet didDismissWithButtonIndex:(NSInteger)buttonIndex {
     if (buttonIndex == 0) {
-
-        [self makeAndShowEmailViewController];
+        
+        MFMailComposeViewController * emailViewController = [ActionsManagement makeEmailViewControllerForEvent:[self.coreDataModel getFeaturedEvent] withMailComposeDelegate:self usingWebDataTranslator:self.webDataTranslator];
+        [self presentModalViewController:emailViewController animated:YES];
         
     } else if (buttonIndex == 1) {
         
@@ -731,53 +738,10 @@ CGFloat const FEV_DESCRIPTION_LABEL_PADDING_HORIZONTAL = 20.0;
     [self hideWebActivityView];
 }
 
-- (void) makeAndShowEmailViewController {
-    NSLog(@"Email"); // Email
+- (void) shareButtonTouched {
     
-    Event * featuredEvent = [self.coreDataModel getFeaturedEvent];
-    NSString * emailTitle = featuredEvent.title ? featuredEvent.title : FEATURED_EVENT_TITLE_NOT_AVAILABLE;
-    NSString * emailLocation = featuredEvent.venue ? [NSString stringWithFormat:@"    Location: %@<br>", featuredEvent.venue] : @"";
-    NSString * emailAddressFirst = featuredEvent.address ? featuredEvent.address : @"";
-    NSString * emailAddressSecond = [self.webDataTranslator addressSecondLineStringFromCity:featuredEvent.city state:featuredEvent.state zip:featuredEvent.zip];
-    if (featuredEvent.address && emailAddressSecond) { emailAddressFirst = [emailAddressFirst stringByAppendingString:@", "]; }
-    if (!emailAddressSecond) { emailAddressSecond = @""; }
-    NSString * emailAddressFull = ([emailAddressFirst isEqualToString:@""] && [emailAddressSecond isEqualToString:@""]) ? @"" : [NSString stringWithFormat:@"    Address: %@%@<br>", emailAddressFirst, emailAddressSecond];
-    NSString * emailTime = [self.webDataTranslator timeSpanStringFromStartDatetime:featuredEvent.startTimeDatetime endDatetime:featuredEvent.endTimeDatetime dataUnavailableString:FEATURED_EVENT_TIME_NOT_AVAILABLE];
-    NSString * emailDate = [self.webDataTranslator dateSpanStringFromStartDatetime:featuredEvent.startDateDatetime endDatetime:featuredEvent.endDateDatetime relativeDates:YES dataUnavailableString:FEATURED_EVENT_DATE_NOT_AVAILABLE];
-    NSString * emailPrice = [self.webDataTranslator priceRangeStringFromMinPrice:featuredEvent.priceMinimum maxPrice:featuredEvent.priceMaximum dataUnavailableString:FEATURED_EVENT_COST_NOT_AVAILABLE];
-    NSString * emailDescription = featuredEvent.details ? featuredEvent.details : FEATURED_EVENT_DESCRIPTION_NOT_AVAILABLE;
-    emailDescription = ![emailDescription isEqualToString:FEATURED_EVENT_DESCRIPTION_NOT_AVAILABLE] ? [NSString stringWithFormat:@"<br><br>%@", emailDescription] : @"";
-    
-    NSString * emailMap = @"";
-    if (featuredEvent.latitude && featuredEvent.longitude) {
-        NSString * mapSearchQuery = [[[NSString stringWithFormat:@"%@ %@ %@", (featuredEvent.venue ? featuredEvent.venue : @""), emailAddressFirst, emailAddressSecond] stringByReplacingOccurrencesOfString:@" " withString:@"+"] stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
-        NSString * urlString = [NSString stringWithFormat:@"http://maps.google.com/maps?q=%@&ll=%f,%f", mapSearchQuery, [featuredEvent.latitude floatValue], [featuredEvent.longitude floatValue]];
-        emailMap = [NSString stringWithFormat:@"    <a href='%@'>Click here for map</a><br>", urlString];
-    }
-    
-    //create message body with event title and description
-    NSString *mailString = [[NSString alloc] initWithFormat:@"Hey! I found this event on Kwiqet. We should go!<br><br>    <b>%@</b><br><br>%@%@%@    Time: %@<br>    Date: %@<br>    Price: %@%@", emailTitle, emailLocation, emailAddressFull, emailMap, emailTime, emailDate, emailPrice, emailDescription];
-    
-    //call mail app to front as modal window
-    MFMailComposeViewController * controller = [[MFMailComposeViewController alloc] init];
-    controller.mailComposeDelegate = self;
-    [controller setSubject:@"You're Invited via Kwiqet"];
-    [controller setMessageBody:mailString isHTML:YES];
-    if (controller) [self presentModalViewController:controller animated:YES];
-    [controller release];
-    [mailString release];
-}
-
--(IBAction)shareButtonClicked:(id)sender  {
-    
-    NSLog(@"%d", [self.facebookManager.fb isSessionValid]);
-    
-    if ([self.facebookManager.fb isSessionValid]) {
-        self.shareChoiceActionSheet = [[[UIActionSheet alloc] initWithTitle:@"Share event using..." delegate:self cancelButtonTitle:@"Cancel" destructiveButtonTitle:nil otherButtonTitles:@"Send an email", @"Create Facebook event", nil] autorelease];
-        [self.shareChoiceActionSheet showFromRect:self.shareButton.frame inView:self.shareButton animated:YES];
-    } else {
-        [self makeAndShowEmailViewController];
-    }
+    MFMailComposeViewController * emailViewController = [ActionsManagement makeEmailViewControllerForEvent:[self.coreDataModel getFeaturedEvent] withMailComposeDelegate:self usingWebDataTranslator:self.webDataTranslator];
+    [self presentModalViewController:emailViewController animated:YES];
 
 }
 
@@ -791,6 +755,26 @@ CGFloat const FEV_DESCRIPTION_LABEL_PADDING_HORIZONTAL = 20.0;
     [self dismissModalViewControllerAnimated:YES];
 }
 
+- (void) letsGoButtonTouched {
+    
+    Event * featuredEvent = [self.coreDataModel getFeaturedEvent];
+    
+    // Send learned data to the web
+    [self.webConnector sendLearnedDataAboutEvent:featuredEvent.uri withUserAction:@"G"];
+    
+    [ActionsManagement addEventToCalendar:featuredEvent usingWebDataTranslator:self.webDataTranslator];
+    
+	// Show alert
+	UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Event added to Calendar!" message:[NSString stringWithFormat:@"The event \"%@\" has been added to your calendar.", featuredEvent.title] delegate:nil cancelButtonTitle:@"Ok" otherButtonTitles:nil];
+	[alert show];
+	[alert release];
+    
+    // Can't really do this simple/horrible of a solution for the featured event page... BAD BAD BAD BAD. COME BACK TO THIS.
+    [self.letsGoButton setBackgroundImage:[UIImage imageNamed:@"btn_going.png"] forState: UIControlStateNormal];
+    self.letsGoButton.enabled = NO;
+    
+}
+
 - (void)webConnector:(WebConnector *)webConnector sendLearnedDataSuccess:(ASIHTTPRequest *)request aboutEvent:(NSString *)eventURI userAction:(NSString *)userAction {
     
 }
@@ -799,66 +783,11 @@ CGFloat const FEV_DESCRIPTION_LABEL_PADDING_HORIZONTAL = 20.0;
     
 }
 
-- (IBAction)bookedButtonClicked:(id)sender  {    
-    
-    // Add event to the device's iCal
-    EKEventStore * eventStore = [[EKEventStore alloc] init];
-    EKEvent * newEvent = [EKEvent eventWithEventStore:eventStore];
-    
-    Event * featuredEvent = [self.coreDataModel getFeaturedEvent];
-
-    newEvent.title = featuredEvent.title;
-    newEvent.startDate = featuredEvent.startDatetime;
-    NSLog(@"%@", newEvent.startDate);
-    newEvent.allDay = ![featuredEvent.startTimeValid boolValue];
-    if ([featuredEvent.endDateValid boolValue]) {
-        newEvent.endDate = featuredEvent.endDatetime;
-    } else {
-        newEvent.endDate = [NSDate dateWithTimeInterval:3600 sinceDate:newEvent.startDate];
-    }
-    newEvent.location = featuredEvent.venue;
-    NSMutableString * iCalEventNotes = [NSMutableString string];
-    NSString * addressLineFirst = featuredEvent.address;
-    NSString * addressLineSecond = [self.webDataTranslator addressSecondLineStringFromCity:featuredEvent.city state:featuredEvent.state zip:featuredEvent.zip];
-    if (addressLineFirst) { 
-        [iCalEventNotes appendFormat:@"%@\n", addressLineFirst]; 
-    }
-    if (addressLineSecond) {
-        [iCalEventNotes appendFormat:@"%@\n", addressLineSecond];
-    }
-    if (addressLineFirst || addressLineSecond) {
-        [iCalEventNotes appendString:@"\n"];
-    }
-    [iCalEventNotes appendString:featuredEvent.details];
-    newEvent.notes = iCalEventNotes;
-    
-    [newEvent setCalendar:[eventStore defaultCalendarForNewEvents]];
-    NSError * err;
-    [eventStore saveEvent:newEvent span:EKSpanThisEvent error:&err];
-    if (err != nil) { NSLog(@"error"); }
-    [eventStore release];
-    
-    // Send learned data to the web
-    [self.webConnector sendLearnedDataAboutEvent:featuredEvent.uri withUserAction:@"G"];
-    
-    // Can't really do this simple/horrible of a solution for the featured event page... BAD BAD BAD BAD. COME BACK TO THIS.
-    [self.letsGoButton setBackgroundImage:[UIImage imageNamed:@"btn_going.png"] forState: UIControlStateNormal];
-    self.letsGoButton.enabled = NO;
-    
-	// Show alert
-	UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Event added to Calendar!" message:[NSString stringWithFormat:@"The event \"%@\" has been added to your calendar.", featuredEvent.title] delegate:nil cancelButtonTitle:@"Ok" otherButtonTitles:nil];
-	[alert show];
-	[alert release];
-    
-    // Wait for response from server
-    
-}
-
 ///////////////
 // MAP STUFF //
 ///////////////
 
--(IBAction)makeMapView:(id)sender  {
+- (void) mapButtonTouched {
     self.mapViewController = [[[MapViewController alloc] initWithNibName:@"MapViewController" bundle:[NSBundle mainBundle]] autorelease];
     self.mapViewController.delegate = self;
     Event * featuredEvent = [self.coreDataModel getFeaturedEvent];

@@ -80,7 +80,6 @@
 
 - (void) viewControllerIsFinished;
 - (void) updateViewsFromData;
-- (void) makeAndShowEmailViewController;
 - (void) showWebLoadingViews;
 - (void) hideWebLoadingViews;
 
