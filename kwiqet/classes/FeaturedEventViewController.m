@@ -14,7 +14,6 @@
 #import "LocalImagesManager.h"
 #import "WebUtil.h"
 #import "ActionsManagement.h"
-#import "ContactsSelectViewController.h"
 
 // "Data not available" strings
 static NSString * const FEATURED_EVENT_TITLE_NOT_AVAILABLE = @"Event";
@@ -93,6 +92,8 @@ CGFloat const FEV_DESCRIPTION_LABEL_PADDING_HORIZONTAL = 20.0;
 @property (retain) UIButton * mapButton;
 @property (retain) UIView * noFeaturedEventView;
 
+@property (retain) NSArray * contactsToInvite;
+
 - (void) mapButtonTouched;
 - (void) shareButtonTouched;
 - (void) letsGoButtonTouched;
@@ -104,6 +105,7 @@ CGFloat const FEV_DESCRIPTION_LABEL_PADDING_HORIZONTAL = 20.0;
 @synthesize mapViewController;
 @synthesize actionBarView, letsGoButton, shareButton, scrollView, imageView, titleBarView, titleLabel, detailsView, letsGoChoiceActionSheet, webActivityView;
 @synthesize timeLabel, dateLabel, venueNameLabel, addressFirstLineLabel, addressSecondLineLabel, phoneNumberButton, priceLabel, eventDetailsContainer, eventDetailsLabel, mapButton, noFeaturedEventView, refreshHeaderView;
+@synthesize contactsToInvite;
 
 #pragma mark -
 #pragma mark Initialization
@@ -150,6 +152,9 @@ CGFloat const FEV_DESCRIPTION_LABEL_PADDING_HORIZONTAL = 20.0;
     [mapButton release];
     [noFeaturedEventView release];
     [refreshHeaderView release];
+    
+    [contactsToInvite release];
+    
     [super dealloc];
 }
 
@@ -649,73 +654,10 @@ CGFloat const FEV_DESCRIPTION_LABEL_PADDING_HORIZONTAL = 20.0;
         if (buttonIndex == 0) {
             
             ContactsSelectViewController * contactsSelectViewController = [[ContactsSelectViewController alloc] initWithNibName:@"ContactsSelectViewController" bundle:[NSBundle mainBundle]];
-            NSArray * allContacts = [self.coreDataModel getAllContacts];
-            contactsSelectViewController.contacts = allContacts;
+            contactsSelectViewController.contacts = [self.coreDataModel getAllFacebookContacts];
+            contactsSelectViewController.delegate = self;
             [self presentModalViewController:contactsSelectViewController animated:YES];
             [contactsSelectViewController release];
-            
-//            NSMutableDictionary * parameters = [NSMutableDictionary dictionary];
-//            
-//            NSString * title = featuredEvent.title;
-//            [parameters setObject:title forKey:@"name"];
-//            
-//            NSDate * startDate = featuredEvent.startDatetime;
-//            NSDate * endDate = [startDate dateByAddingTimeInterval:3600];
-//            if ([featuredEvent.endTimeValid boolValue]) {
-//                endDate = featuredEvent.endDatetime;
-//            }
-//            NSTimeInterval startDateTimeInterval = [startDate timeIntervalSince1970];
-//            NSTimeInterval endDateTimeInterval = [endDate timeIntervalSince1970];
-//            // TEMPORARY HACK FIX FOR FACEBOOK TIMEZONE PROBLEM
-//            {
-//                NSTimeZone * pacificTimeZone = [NSTimeZone timeZoneWithName:@"US/Pacific"];
-//                NSTimeZone * easternTimeZone = [NSTimeZone timeZoneWithName:@"US/Eastern"]; // THIS SHOULD NOT BE HARDCODED AS THE EASTERN TIME ZONE - IT SHOULD BE THE TIME ZONE OF WHEREVER THE EVENT IS TAKING PLACE.
-//                NSTimeInterval pacificInterval = [pacificTimeZone secondsFromGMT];
-//                NSTimeInterval easternInterval = [easternTimeZone secondsFromGMT];
-//                NSLog(@"%f %f", pacificInterval, easternInterval);
-//                startDateTimeInterval += (easternInterval - pacificInterval);
-//                endDateTimeInterval += (easternInterval - pacificInterval);
-//            }
-//            [parameters setObject:[NSString stringWithFormat:@"%.0f", startDateTimeInterval] forKey:@"start_time"];
-//            [parameters setObject:[NSString stringWithFormat:@"%.0f", endDateTimeInterval] forKey:@"end_time"];
-//            
-//            NSString * locationName = featuredEvent.venue;
-//            if (locationName) {
-//                [parameters setObject:locationName forKey:@"location"];
-//            }
-//            
-//            if (featuredEvent.address) { 
-//                [parameters setObject:featuredEvent.address forKey:@"street"];
-//            }
-//            if (featuredEvent.city) { 
-//                [parameters setObject:featuredEvent.city forKey:@"city"];
-//            }
-//            if (featuredEvent.state) { 
-//                [parameters setObject:featuredEvent.state forKey:@"state"];
-//            }
-//            if (featuredEvent.zip) { 
-//                [parameters setObject:featuredEvent.zip forKey:@"zip"];
-//            }
-//            [parameters setValue:@"USA" forKey:@"country"];
-//            if (featuredEvent.latitude) {
-//                [parameters setObject:[NSString stringWithFormat:@"%@", featuredEvent.latitude] forKey:@"latitude"];
-//            }
-//            if (featuredEvent.longitude) {
-//                [parameters setObject:[NSString stringWithFormat:@"%@", featuredEvent.longitude] forKey:@"longitude"];
-//            }
-//            if (featuredEvent.details) {
-//                [parameters setObject:featuredEvent.details forKey:@"description"];
-//            }
-//            if (self.imageView.image) {
-//                [parameters setObject:self.imageView.image forKey:@"picture"];
-//            }
-//            
-//            NSLog(@"facebook event parameters: %@", parameters);
-//            
-//            [self.facebookManager.fb requestWithGraphPath:@"me/events"
-//                                                andParams:parameters  
-//                                            andHttpMethod:@"POST" 
-//                                              andDelegate:self];
             
         } else if (buttonIndex == 1) {
             
@@ -732,6 +674,79 @@ CGFloat const FEV_DESCRIPTION_LABEL_PADDING_HORIZONTAL = 20.0;
     
 }
 
+- (void)contactsSelectViewController:(ContactsSelectViewController *)contactsSelectViewController didFinishWithCancel:(BOOL)didCancel selectedContacts:(NSArray *)selectedContacts {
+    if (!didCancel) {
+        
+        self.contactsToInvite = selectedContacts;
+        
+        Event * featuredEvent = [self.coreDataModel getFeaturedEvent];
+        NSMutableDictionary * parameters = [NSMutableDictionary dictionary];
+
+        NSString * title = featuredEvent.title;
+        [parameters setObject:title forKey:@"name"];
+
+        NSDate * startDate = featuredEvent.startDatetime;
+        NSDate * endDate = [startDate dateByAddingTimeInterval:3600];
+        if ([featuredEvent.endTimeValid boolValue]) {
+            endDate = featuredEvent.endDatetime;
+        }
+        NSTimeInterval startDateTimeInterval = [startDate timeIntervalSince1970];
+        NSTimeInterval endDateTimeInterval = [endDate timeIntervalSince1970];
+        // TEMPORARY HACK FIX FOR FACEBOOK TIMEZONE PROBLEM
+        {
+            NSTimeZone * pacificTimeZone = [NSTimeZone timeZoneWithName:@"US/Pacific"];
+            NSTimeZone * easternTimeZone = [NSTimeZone timeZoneWithName:@"US/Eastern"]; // THIS SHOULD NOT BE HARDCODED AS THE EASTERN TIME ZONE - IT SHOULD BE THE TIME ZONE OF WHEREVER THE EVENT IS TAKING PLACE.
+            NSTimeInterval pacificInterval = [pacificTimeZone secondsFromGMT];
+            NSTimeInterval easternInterval = [easternTimeZone secondsFromGMT];
+            NSLog(@"%f %f", pacificInterval, easternInterval);
+            startDateTimeInterval += (easternInterval - pacificInterval);
+            endDateTimeInterval += (easternInterval - pacificInterval);
+        }
+        [parameters setObject:[NSString stringWithFormat:@"%.0f", startDateTimeInterval] forKey:@"start_time"];
+        [parameters setObject:[NSString stringWithFormat:@"%.0f", endDateTimeInterval] forKey:@"end_time"];
+
+        NSString * locationName = featuredEvent.venue;
+        if (locationName) {
+            [parameters setObject:locationName forKey:@"location"];
+        }
+
+        if (featuredEvent.address) { 
+            [parameters setObject:featuredEvent.address forKey:@"street"];
+        }
+        if (featuredEvent.city) { 
+            [parameters setObject:featuredEvent.city forKey:@"city"];
+        }
+        if (featuredEvent.state) { 
+            [parameters setObject:featuredEvent.state forKey:@"state"];
+        }
+        if (featuredEvent.zip) { 
+            [parameters setObject:featuredEvent.zip forKey:@"zip"];
+        }
+        [parameters setValue:@"USA" forKey:@"country"];
+        if (featuredEvent.latitude) {
+            [parameters setObject:[NSString stringWithFormat:@"%@", featuredEvent.latitude] forKey:@"latitude"];
+        }
+        if (featuredEvent.longitude) {
+            [parameters setObject:[NSString stringWithFormat:@"%@", featuredEvent.longitude] forKey:@"longitude"];
+        }
+        if (featuredEvent.details) {
+            [parameters setObject:featuredEvent.details forKey:@"description"];
+        }
+        if (self.imageView.image) {
+            [parameters setObject:self.imageView.image forKey:@"picture"];
+        }
+
+        NSLog(@"facebook event parameters: %@", parameters);
+
+        [self.facebookManager.fb requestWithGraphPath:@"me/events"
+                                            andParams:parameters  
+                                        andHttpMethod:@"POST" 
+                                          andDelegate:self];
+    }
+    [self dismissModalViewControllerAnimated:YES];
+    [self showWebActivityView];
+}
+
 - (void)requestLoading:(FBRequest *)request {
     NSLog(@"Facebook request loading...");
     [self showWebActivityView];
@@ -743,7 +758,16 @@ CGFloat const FEV_DESCRIPTION_LABEL_PADDING_HORIZONTAL = 20.0;
     if ([result objectForKey:@"id"]) {
         NSString * eventID = [result objectForKey:@"id"];
         //https://api.facebook.com/method/events.invite?eid=108920282534107&uids=28600139%2C615865238&personal_message=Test+invitation+-+just+ignore+this%21&access_token=210861478950952|2.AQCNMPA1uXDbeFfK.3600.1308855600.0-28600345|bqcrhIy1XJXkxRn4hL1x2TU2WrM&format=json
-        NSString * friendIDs = @"28600139,615865238"; // catie, pasha
+        NSMutableString * friendIDs = [NSMutableString stringWithString:@""];
+        if (self.contactsToInvite && [self.contactsToInvite count] > 0) {
+            for (int i=0; i<[self.contactsToInvite count]; i++) {
+                if (i != 0) {
+                    [friendIDs appendString:@","];
+                }
+                Contact * friend = (Contact *)[self.contactsToInvite objectAtIndex:i];
+                [friendIDs appendString:friend.fbID];
+            }
+        }
         NSString * message = @"Test - just ignore!";
         [self.facebookManager.fb requestWithMethodName:@"events.invite" andParams:[NSMutableDictionary dictionaryWithObjectsAndKeys:eventID, @"eid", friendIDs, @"uids", message, @"personal_message", nil] andHttpMethod:@"POST" andDelegate:self];
     }

@@ -21,10 +21,12 @@
 #import "FacebookManager.h"
 #import "WebActivityView.h"
 
+#import "ContactsSelectViewController.h"
+
 extern CGFloat const FEATURED_EVENT_MAP_BUTTON_INACTIVE_ALPHA;
 extern CGFloat const FEATURED_EVENT_BACKGROUND_COLOR_ALPHA;
 
-@interface FeaturedEventViewController : UIViewController <MFMailComposeViewControllerDelegate, WebConnectorDelegate, MapViewControllerDelegate, UIActionSheetDelegate, FBRequestDelegate>{
+@interface FeaturedEventViewController : UIViewController <MFMailComposeViewControllerDelegate, WebConnectorDelegate, MapViewControllerDelegate, UIActionSheetDelegate, FBRequestDelegate, ContactsSelectViewControllerDelegate>{
 
     // Model, web, etc
     WebConnector * webConnector;
@@ -60,6 +62,9 @@ extern CGFloat const FEATURED_EVENT_BACKGROUND_COLOR_ALPHA;
     
     // Map stuff
     MapViewController * mapViewController;
+    
+    // Facebook
+    NSArray * contactsToInvite;
 
 }
 
