@@ -290,20 +290,20 @@
                 [self.eventInfoDividerView addSubview:self.dayNameLabel];
             }
             
-            // Price label
-            CGFloat priceLabelOriginX = 80;
-            priceLabel = [[UILabel alloc] initWithFrame:CGRectMake(priceLabelOriginX, 6, self.eventInfoDividerView.bounds.size.width - priceLabelOriginX, 15)];
-            self.priceLabel.backgroundColor = [UIColor clearColor];
-            self.priceLabel.font= [UIFont fontWithName:@"HelveticaNeue" size:14];
-            [self.eventInfoDividerView addSubview:self.priceLabel];
-            
             // Time label
-            CGFloat timeLabelOriginX = priceLabelOriginX;
-            timeLabel = [[UILabel alloc] initWithFrame:CGRectMake(timeLabelOriginX, 37, self.eventInfoDividerView.bounds.size.width - timeLabelOriginX, 20)];
+            CGFloat timeLabelOriginX = 80;
+            timeLabel = [[UILabel alloc] initWithFrame:CGRectMake(timeLabelOriginX, 9, self.eventInfoDividerView.bounds.size.width - timeLabelOriginX, 20)];
             self.timeLabel.backgroundColor = [UIColor clearColor];
             self.timeLabel.font= [UIFont fontWithName:@"HelveticaNeue" size:16];
             [self.eventInfoDividerView addSubview:self.timeLabel];
             
+            // Price label
+            CGFloat priceLabelOriginX = timeLabelOriginX;
+            priceLabel = [[UILabel alloc] initWithFrame:CGRectMake(priceLabelOriginX, 43, self.eventInfoDividerView.bounds.size.width - priceLabelOriginX, 15)];
+            self.priceLabel.backgroundColor = [UIColor clearColor];
+            self.priceLabel.font= [UIFont fontWithName:@"HelveticaNeue" size:14];
+            [self.eventInfoDividerView addSubview:self.priceLabel];
+                        
             // Location box
             //CGSize locationBoxSize = CGSizeMake(self.eventInfoDividerView.bounds.size.width, self.eventInfoDividerView.bounds.size.height - dateBoxSize.height);
             {
