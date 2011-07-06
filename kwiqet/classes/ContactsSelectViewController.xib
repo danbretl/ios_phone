@@ -17,8 +17,8 @@
 			<string>IBUIBarButtonItem</string>
 			<string>IBUISearchBar</string>
 			<string>IBUINavigationBar</string>
-			<string>IBUITableView</string>
 			<string>IBUINavigationItem</string>
+			<string>IBUITableView</string>
 			<string>IBUIView</string>
 		</object>
 		<object class="NSArray" key="IBDocument.PluginDependencies">
@@ -67,10 +67,10 @@
 									<int key="IBUISystemItemIdentifier">1</int>
 								</object>
 								<object class="IBUIBarButtonItem" key="IBUIRightBarButtonItem" id="271561842">
-									<string key="IBUITitle">Send</string>
 									<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
 									<int key="IBUIStyle">2</int>
 									<reference key="IBUINavigationItem" ref="786211533"/>
+									<int key="IBUISystemItemIdentifier">0</int>
 								</object>
 								<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
 							</object>
@@ -90,9 +90,12 @@
 								<reference key="NSNextKeyView"/>
 								<int key="IBUIContentMode">3</int>
 								<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
+								<string key="IBText"/>
+								<string key="IBPlaceholder">Filter &amp; Search</string>
 								<object class="IBUITextInputTraits" key="IBTextInputTraits">
 									<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
 								</object>
+								<reference key="IBScopeButtonTitles" ref="0"/>
 							</object>
 						</object>
 						<string key="NSFrame">{{0, 44}, {320, 416}}</string>
@@ -297,11 +300,6 @@
 						<reference key="parent" ref="191373211"/>
 					</object>
 					<object class="IBObjectRecord">
-						<int key="objectID">16</int>
-						<reference key="object" ref="914387811"/>
-						<reference key="parent" ref="677581085"/>
-					</object>
-					<object class="IBObjectRecord">
 						<int key="objectID">17</int>
 						<reference key="object" ref="392102165"/>
 						<reference key="parent" ref="0"/>
@@ -334,6 +332,11 @@
 						<int key="objectID">35</int>
 						<reference key="object" ref="198526660"/>
 						<reference key="parent" ref="786211533"/>
+					</object>
+					<object class="IBObjectRecord">
+						<int key="objectID">16</int>
+						<reference key="object" ref="914387811"/>
+						<reference key="parent" ref="677581085"/>
 					</object>
 				</object>
 			</object>
@@ -378,7 +381,7 @@
 				<reference key="dict.values" ref="0"/>
 			</object>
 			<nil key="sourceID"/>
-			<int key="maxID">40</int>
+			<int key="maxID">41</int>
 		</object>
 		<object class="IBClassDescriber" key="IBDocument.Classes">
 			<object class="NSMutableArray" key="referencedPartialClassDescriptions">
@@ -392,7 +395,6 @@
 							<bool key="EncodedWithXMLCoder">YES</bool>
 							<string>_tableView</string>
 							<string>cancelButton</string>
-							<string>doneButton</string>
 							<string>doneSelectingButton</string>
 							<string>searchBar</string>
 							<string>searchDisplayController</string>
@@ -401,7 +403,6 @@
 							<bool key="EncodedWithXMLCoder">YES</bool>
 							<string>UITableView</string>
 							<string>UIBarButtonItem</string>
-							<string>UIButton</string>
 							<string>UIBarButtonItem</string>
 							<string>UISearchBar</string>
 							<string>UISearchDisplayController</string>
@@ -413,7 +414,6 @@
 							<bool key="EncodedWithXMLCoder">YES</bool>
 							<string>_tableView</string>
 							<string>cancelButton</string>
-							<string>doneButton</string>
 							<string>doneSelectingButton</string>
 							<string>searchBar</string>
 							<string>searchDisplayController</string>
@@ -427,10 +427,6 @@
 							<object class="IBToOneOutletInfo">
 								<string key="name">cancelButton</string>
 								<string key="candidateClassName">UIBarButtonItem</string>
-							</object>
-							<object class="IBToOneOutletInfo">
-								<string key="name">doneButton</string>
-								<string key="candidateClassName">UIButton</string>
 							</object>
 							<object class="IBToOneOutletInfo">
 								<string key="name">doneSelectingButton</string>

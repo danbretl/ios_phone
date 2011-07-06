@@ -19,6 +19,7 @@
 - (void) tableView:(UITableView *)tableView setCellAccessoryType:(UITableViewCellAccessoryType)accessoryType forCellWithIndexPath:(NSIndexPath *)indexPath;
 - (IBAction) cancelButtonPushed;
 - (IBAction) doneSelectingButtonPushed;
+//- (void) forceSearchBarCancelButtonTitle;
 @end
 
 @implementation ContactsSelectViewController
@@ -64,6 +65,7 @@
     [super viewDidLoad];
     [self.tableView reloadData];
     // Do any additional setup after loading the view from its nib.
+//    [self forceSearchBarCancelButtonTitle];
 }
 
 - (void)viewDidUnload
@@ -271,5 +273,16 @@
 - (void)doneSelectingButtonPushed {
     [self.delegate contactsSelectViewController:self didFinishWithCancel:NO selectedContacts:self.contactsSelected];
 }
+
+//- (void) forceSearchBarCancelButtonTitle {
+//	for (UIView * possibleButton in self.searchBar.subviews) {
+//		if ([possibleButton isKindOfClass:[UIButton class]]) {
+//			UIButton * theCancelButton = (UIButton *)possibleButton;
+//            [theCancelButton setTitle:@"View All" forState:UIControlStateNormal];
+//            [theCancelButton setTitle:@"View All" forState:UIControlStateHighlighted];
+//            break;
+//		}
+//	}
+//}
 
 @end

@@ -742,9 +742,9 @@ CGFloat const FEV_DESCRIPTION_LABEL_PADDING_HORIZONTAL = 20.0;
                                             andParams:parameters  
                                         andHttpMethod:@"POST" 
                                           andDelegate:self];
+        [self showWebActivityView];
     }
     [self dismissModalViewControllerAnimated:YES];
-    [self showWebActivityView];
 }
 
 - (void)requestLoading:(FBRequest *)request {
