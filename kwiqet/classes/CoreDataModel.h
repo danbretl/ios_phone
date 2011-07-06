@@ -40,7 +40,8 @@
 
 // General
 - (void) coreDataSave;
-- (void) deleteAllObjectsForEntityName:(NSString*)entityNameGiven;
+- (void) deleteAllObjectsForEntityName:(NSString *)entityNameGiven;
+- (NSArray *) getAllObjectsForEntityName:(NSString *)entityName predicate:(NSPredicate *)predicate sortDescriptors:(NSArray *)sortDescriptors;
 
 // Categories
 - (void) coreDataAddCategoryWithURI:(NSString *)uri title:(NSString *)titleString color:(NSString *)colorString thumb:(NSString *)thumbnailString; // This should be updated to allow for/enable updating the category tree after initial category-tree-get.
@@ -66,5 +67,6 @@
 - (void) addContactWithFacebookID:(NSString *)fbID facebookName:(NSString *)fbName;
 - (void) addOrUpdateContactsFromFacebook:(NSArray *)fbContacts;
 - (NSArray *) getAllContacts;
+- (NSArray *) getAllFacebookContacts;
 
 @end

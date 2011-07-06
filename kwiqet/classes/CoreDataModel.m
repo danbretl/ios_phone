@@ -89,6 +89,18 @@
 	
 }
 
+- (NSArray *) getAllObjectsForEntityName:(NSString *)entityName predicate:(NSPredicate *)predicate sortDescriptors:(NSArray *)sortDescriptors {
+    NSFetchRequest * fetchRequest = [[NSFetchRequest alloc] init];
+	NSEntityDescription * entity = [NSEntityDescription entityForName:entityName inManagedObjectContext:self.managedObjectContext];
+	[fetchRequest setEntity:entity];
+    if (predicate) { [fetchRequest setPredicate:predicate]; }
+    if (sortDescriptors) { [fetchRequest setSortDescriptors:sortDescriptors]; }
+	NSError * error;
+	NSArray * fetchedObjects = [self.managedObjectContext executeFetchRequest:fetchRequest error:&error];
+    [fetchRequest release];
+    return fetchedObjects;
+}
+
 ////////////////
 // Categories //
 ////////////////
@@ -122,47 +134,24 @@
 }
 
 - (Category *)getCategoryWithURI:(NSString *)uri {
-    NSFetchRequest * fetchRequest = [[NSFetchRequest alloc] init];
-	NSEntityDescription * entity = [NSEntityDescription entityForName:@"Category" 
-											  inManagedObjectContext:self.managedObjectContext];
-	[fetchRequest setEntity:entity];
-    [fetchRequest setPredicate:[NSPredicate predicateWithFormat:@"uri == %@", uri]];
-    NSError * error;
-    NSArray * fetchedObjects = [self.managedObjectContext executeFetchRequest:fetchRequest error:&error];
-    [fetchRequest release];
-    
+    NSPredicate * predicate = [NSPredicate predicateWithFormat:@"uri == %@", uri];
+    NSArray * categories = [self getAllObjectsForEntityName:@"Category" predicate:predicate sortDescriptors:nil];
     Category * category = nil;
-    if ([fetchedObjects count] > 0) {
-        category = (Category *)[fetchedObjects objectAtIndex:0];
+    if (categories && [categories count] > 0) {
+        category = (Category *)[categories objectAtIndex:0];
     }
-    
     return category;
 }
 
 - (NSArray *) getAllCategories {
-    NSFetchRequest * fetchRequest = [[NSFetchRequest alloc] init];
-	NSEntityDescription * entity = [NSEntityDescription entityForName:@"Category" inManagedObjectContext:self.managedObjectContext];
-	[fetchRequest setEntity:entity];
-	NSError * error;
-	NSArray * fetchedObjects = [self.managedObjectContext executeFetchRequest:fetchRequest error:&error];
-    [fetchRequest release];
-    return fetchedObjects;
+    return [self getAllObjectsForEntityName:@"Category" predicate:nil sortDescriptors:nil];
 }
 
 - (NSArray *) getAllCategoriesWithColor {
-    NSFetchRequest * fetchRequest = [[NSFetchRequest alloc] init];
-	NSEntityDescription * entity = [NSEntityDescription entityForName:@"Category" inManagedObjectContext:self.managedObjectContext];
-	[fetchRequest setEntity:entity];
-    [fetchRequest setPredicate:[NSPredicate predicateWithFormat:@"colorHex != nil"]];
-    
-	NSSortDescriptor * sortDescriptor = [NSSortDescriptor sortDescriptorWithKey:@"displayOrder" ascending:YES];
-	NSArray * sortDescriptors = [NSArray arrayWithObject:sortDescriptor];
-    [fetchRequest setSortDescriptors:sortDescriptors];
-    
-	NSError * error;
-	NSArray * fetchedObjects = [self.managedObjectContext executeFetchRequest:fetchRequest error:&error];
-    [fetchRequest release];
-    return fetchedObjects;
+    NSPredicate * predicate = [NSPredicate predicateWithFormat:@"colorHex != nil"];
+    NSArray * sortDescriptors = [NSArray arrayWithObject:
+                                 [NSSortDescriptor sortDescriptorWithKey:@"displayOrder" ascending:YES]];
+    return [self getAllObjectsForEntityName:@"Category" predicate:predicate sortDescriptors:sortDescriptors];
 }
 
 - (NSDictionary *) getAllCategoriesWithColorInDictionaryWithURIKeys {
@@ -179,14 +168,7 @@
 //////////////////////
 
 - (NSArray *) getEventsForPredicate:(NSPredicate *)predicate {
-    NSFetchRequest * fetchRequest = [[NSFetchRequest alloc] init];
-	NSEntityDescription * entity = [NSEntityDescription entityForName:@"Event" inManagedObjectContext:self.managedObjectContext];
-	[fetchRequest setEntity:entity];
-    [fetchRequest setPredicate:predicate];
-	NSError * error;
-	NSArray * fetchedObjects = [self.managedObjectContext executeFetchRequest:fetchRequest error:&error];
-    [fetchRequest release];
-    return fetchedObjects;
+    return [self getAllObjectsForEntityName:@"Event" predicate:predicate sortDescriptors:nil];
 }
 
 - (void) deleteEventsForPredicate:(NSPredicate *)predicate {
@@ -529,14 +511,15 @@
     newContact.fbName = fbName;
 }
 
-- (NSArray *)getAllContacts {
-    NSFetchRequest * fetchRequest = [[NSFetchRequest alloc] init];
-	NSEntityDescription * entity = [NSEntityDescription entityForName:@"Contact" inManagedObjectContext:self.managedObjectContext];
-	[fetchRequest setEntity:entity];
-	NSError * error;
-	NSArray * fetchedObjects = [self.managedObjectContext executeFetchRequest:fetchRequest error:&error];
-    [fetchRequest release];
-    return fetchedObjects;
+- (NSArray *) getAllContacts {
+    return [self getAllObjectsForEntityName:@"Contact" predicate:nil sortDescriptors:nil];
+}
+
+- (NSArray *) getAllFacebookContacts {
+    NSPredicate * predicate = [NSPredicate predicateWithFormat:@"fbID != nil"];
+    NSArray * sortDescriptors = [NSArray arrayWithObject:
+                                 [NSSortDescriptor sortDescriptorWithKey:@"fbName" ascending:YES]];
+    return [self getAllObjectsForEntityName:@"Contact" predicate:predicate sortDescriptors:sortDescriptors];
 }
 
 @end
