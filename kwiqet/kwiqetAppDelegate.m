@@ -11,6 +11,7 @@
 #import "URLBuilder.h"
 #import "DefaultsModel.h"
 #import "WebUtil.h"
+#import "ContactsSelectViewController.h"
 
 @implementation kwiqetAppDelegate
 @synthesize window;
@@ -41,49 +42,71 @@
     
     // THE PROBLEM currently with waiting to create the tab bar controller and its assorted view controllers is that the web request for content for featuredEventViewController isn't made until featuredEventViewController exists. (So, there is potentially a slight delay between the time when the splash screen fades away once all of that business is done, and when the featuredEventViewController displays its content underneath.)
     
-    // Tab Bar Controller
-    self.tabBarController = [[[UITabBarController alloc] init] autorelease];
-    self.tabBarController.delegate = self;
+    BOOL facebookTesting = NO;
     
-    // Featured Event View Controller
-    self.featuredEventViewController = [[[FeaturedEventViewController alloc] init] autorelease];
-    self.featuredEventViewController.coreDataModel = self.coreDataModel;
-    UITabBarItem * featuredEventTabBarItem = [[[UITabBarItem alloc] initWithTabBarSystemItem:UITabBarSystemItemFeatured tag:0] autorelease];
-    self.featuredEventViewController.tabBarItem = featuredEventTabBarItem;
-    self.featuredEventViewController.facebookManager = self.facebookManager;
-    
-    // Events List View Controller
-    self.eventsViewController = [[[EventsViewController alloc] init] autorelease];
-    self.eventsViewController.coreDataModel = self.coreDataModel;
-    UITabBarItem * eventsTabBarItem = [[[UITabBarItem alloc] initWithTitle:@"Events" image:[UIImage imageNamed:@"tab_home.png"] tag:1] autorelease];
-    self.eventsViewController.tabBarItem = eventsTabBarItem;
-    // Events List Navigation Controller
-    self.eventsNavController = [[[UINavigationController alloc] initWithRootViewController:self.eventsViewController] autorelease];
-    self.eventsNavController.navigationBarHidden = YES;
-    
-    // Settings View Controller
-    self.settingsViewController = [[[SettingsViewController alloc] initWithNibName:@"SettingsViewController" bundle:[NSBundle mainBundle]] autorelease];
-    UITabBarItem * settingsTabBarItem = [[[UITabBarItem alloc] initWithTitle:@"Settings" image:[UIImage imageNamed:@"tab_settings.png"] tag:2] autorelease];
-    self.settingsViewController.tabBarItem = settingsTabBarItem;
-    self.settingsViewController.facebookManager = self.facebookManager;
-    self.settingsViewController.coreDataModel = self.coreDataModel;
-    // Settings Navigation Controller
-    settingsNavController = [[UINavigationController alloc] initWithRootViewController:self.settingsViewController];
-    self.settingsNavController.navigationBarHidden = YES;
-    
-    // Setting it all up
-    self.tabBarController.viewControllers = [NSArray arrayWithObjects:self.featuredEventViewController, self.eventsNavController, self.settingsNavController, nil];
-    [self.window addSubview:tabBarController.view];
-    [self.window bringSubviewToFront:self.splashScreenViewController.view]; // Make sure the splash screen stays in front
-    
-    // Taking care of assorted things...
-    application.applicationSupportsShakeToEdit = YES; // This is the default iOS behavior. Any reason for setting it explicitly?
-    
-    [self.facebookManager pullAuthenticationInfoFromDefaults];
+    if (!facebookTesting) {
+        
+        // Tab Bar Controller
+        self.tabBarController = [[[UITabBarController alloc] init] autorelease];
+        self.tabBarController.delegate = self;
+        
+        // Featured Event View Controller
+        self.featuredEventViewController = [[[FeaturedEventViewController alloc] init] autorelease];
+        self.featuredEventViewController.coreDataModel = self.coreDataModel;
+        UITabBarItem * featuredEventTabBarItem = [[[UITabBarItem alloc] initWithTabBarSystemItem:UITabBarSystemItemFeatured tag:0] autorelease];
+        self.featuredEventViewController.tabBarItem = featuredEventTabBarItem;
+        self.featuredEventViewController.facebookManager = self.facebookManager;
+        
+        // Events List View Controller
+        self.eventsViewController = [[[EventsViewController alloc] init] autorelease];
+        self.eventsViewController.coreDataModel = self.coreDataModel;
+        UITabBarItem * eventsTabBarItem = [[[UITabBarItem alloc] initWithTitle:@"Events" image:[UIImage imageNamed:@"tab_home.png"] tag:1] autorelease];
+        self.eventsViewController.tabBarItem = eventsTabBarItem;
+        self.eventsViewController.facebookManager = self.facebookManager;
+        // Events List Navigation Controller
+        self.eventsNavController = [[[UINavigationController alloc] initWithRootViewController:self.eventsViewController] autorelease];
+        self.eventsNavController.navigationBarHidden = YES;
+        
+        // Settings View Controller
+        self.settingsViewController = [[[SettingsViewController alloc] initWithNibName:@"SettingsViewController" bundle:[NSBundle mainBundle]] autorelease];
+        UITabBarItem * settingsTabBarItem = [[[UITabBarItem alloc] initWithTitle:@"Settings" image:[UIImage imageNamed:@"tab_settings.png"] tag:2] autorelease];
+        self.settingsViewController.tabBarItem = settingsTabBarItem;
+        self.settingsViewController.facebookManager = self.facebookManager;
+        self.settingsViewController.coreDataModel = self.coreDataModel;
+        // Settings Navigation Controller
+        settingsNavController = [[UINavigationController alloc] initWithRootViewController:self.settingsViewController];
+        self.settingsNavController.navigationBarHidden = YES;
+        
+        // Setting it all up
+        self.tabBarController.viewControllers = [NSArray arrayWithObjects:self.featuredEventViewController, self.eventsNavController, self.settingsNavController, nil];
+        [self.window addSubview:tabBarController.view];
+        [self.window bringSubviewToFront:self.splashScreenViewController.view]; // Make sure the splash screen stays in front
+        
+        // Taking care of assorted things...
+        application.applicationSupportsShakeToEdit = YES; // This is the default iOS behavior. Any reason for setting it explicitly?
+        
+        [self.facebookManager pullAuthenticationInfoFromDefaults];
+        
+    } else {
+        
+//        ContactsSelectViewController * csvc = [[ContactsSelectViewController alloc] initWithNibName:@"ContactsSelectViewController" bundle:[NSBundle mainBundle]];
+//        csvc.contactsAll = [self.coreDataModel getAllFacebookContacts];
+//        csvc.delegate = self;
+//        [UIApplication sharedApplication].statusBarHidden = YES;
+//        [self.window addSubview:csvc.view];
+//        //[csvc release];
+        
+    }
     
     [self.window makeKeyAndVisible];
     //[self animateSplashScreen];
     return YES;
+}
+
+- (void)contactsSelectViewController:(ContactsSelectViewController *)contactsSelectViewController didFinishWithCancel:(BOOL)didCancel selectedContacts:(NSArray *)selectedContacts {
+    NSLog(@"contactsSelectViewController didFinish");
+    NSLog(@"Did cancel? %d", didCancel);
+    NSLog(@"selectedContacts: %@", selectedContacts);
 }
 
 // FOR NOW, the only reason we'd have to handle an open url is to handle Facebook's login response. If that ever changes, then the logic of this method will obviously have to get more complicated.

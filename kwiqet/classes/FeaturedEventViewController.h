@@ -63,9 +63,6 @@ extern CGFloat const FEATURED_EVENT_BACKGROUND_COLOR_ALPHA;
     // Map stuff
     MapViewController * mapViewController;
     
-    // Facebook
-    NSArray * contactsToInvite;
-
 }
 
 @property (nonatomic, readonly) WebConnector * webConnector;

@@ -9,25 +9,37 @@
 #import "ContactsSelectViewController.h"
 
 @interface ContactsSelectViewController()
-@property (retain) UIBarButtonItem * cancelButton;
-@property (retain) UIBarButtonItem * doneSelectingButton;
-@property (retain) UITableView * tableView;
+@property (retain) UIView * navBar;
+@property (retain) UIButton * cancelButton;
+@property (retain) UIButton * doneSelectingButton;
+@property (retain) UIButton * logoButton;
+@property (retain) UIView * tabsBar;
+@property (retain) UIButton * friendsTabButton;
+@property (retain) UIButton * selectedTabButton;
+@property (retain) UIView * searchContainerView;
 @property (retain) UISearchBar * searchBar;
-@property (retain) UISearchDisplayController * searchDisplayController;
+@property (retain) UINavigationBar * searchNavBarBack;
+@property (retain) UIBarButtonItem * searchCancelButton;
+@property (retain) UITableView * friendsTableView;
+@property (retain) UITableView * selectedTableView;
+@property BOOL isSearchOn;
 - (void) tableView:(UITableView *)tableView configureCell:(UITableViewCell *)cell withIndexPath:(NSIndexPath *)indexPath usingContact:(Contact *)contact;
-- (void) tableView:(UITableView *)tableView configureCellWithIndexPath:(NSIndexPath *)indexPath usingContact:(Contact *)contact;
 - (void) tableView:(UITableView *)tableView setCellAccessoryType:(UITableViewCellAccessoryType)accessoryType forCellWithIndexPath:(NSIndexPath *)indexPath;
 - (IBAction) cancelButtonPushed;
 - (IBAction) doneSelectingButtonPushed;
+- (IBAction) tabButtonPushed:(UIButton *)tabButton;
 //- (void) forceSearchBarCancelButtonTitle;
+- (void) updateSelectedCountViewWithCount:(int)count;
 @end
 
 @implementation ContactsSelectViewController
 @synthesize delegate;
-@synthesize cancelButton, doneSelectingButton;
-@synthesize tableView = _tableView;
-@synthesize searchBar, searchDisplayController;
-@synthesize contacts, contactsFiltered, contactsSelected;
+@synthesize navBar, cancelButton, doneSelectingButton, logoButton;
+@synthesize tabsBar, friendsTabButton, selectedTabButton;
+@synthesize searchContainerView, searchBar, searchNavBarBack, searchCancelButton;
+@synthesize friendsTableView = _friendsTableView, selectedTableView = _selectedTableView;
+@synthesize contactsAll, contactsFiltered, contactsSelected, contactsGrouped;
+@synthesize isSearchOn=_isSearchOn;
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil {
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
@@ -39,14 +51,23 @@
 
 - (void)dealloc
 {
+    [navBar release];
     [cancelButton release];
     [doneSelectingButton release];
-    [_tableView release];
+    [logoButton release];
+    [tabsBar release];
+    [friendsTabButton release];
+    [selectedTabButton release];
+    [searchContainerView release];
     [searchBar release];
-    [searchDisplayController release];
-    [contacts release];
-    [contactsFiltered release]; 
+    [searchNavBarBack release];
+    [searchCancelButton release];
+    [_friendsTableView release];
+    [_selectedTableView release];
+    [contactsAll release];
+    [contactsFiltered release];
     [contactsSelected release];
+    [contactsGrouped release];
     [super dealloc];
 }
 
@@ -63,7 +84,13 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-    [self.tableView reloadData];
+    [self.friendsTableView reloadData];
+    self.navBar.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"navbar_blank.png"]];
+    self.friendsTableView.tableHeaderView = self.searchContainerView;
+    if ([self.friendsTableView numberOfRowsInSection:0]) {
+        [self.friendsTableView scrollToRowAtIndexPath:[NSIndexPath indexPathForRow:0 inSection:0] atScrollPosition:UITableViewScrollPositionTop animated:NO];
+    }
+    [self updateSelectedCountViewWithCount:0];
     // Do any additional setup after loading the view from its nib.
 //    [self forceSearchBarCancelButtonTitle];
 }
@@ -81,65 +108,112 @@
     return (interfaceOrientation == UIInterfaceOrientationPortrait);
 }
 
-- (void)setContacts:(NSArray *)theContacts {
+- (void)setContactsAll:(NSArray *)theContacts {
     NSLog(@"ContactsSelectViewController setContacts");
-    if (contacts != theContacts) {
-        [contacts release];
-        contacts = [theContacts retain];
-        self.contactsFiltered = [NSMutableArray arrayWithCapacity:[contacts count]];
-        self.contactsSelected = [NSMutableArray arrayWithCapacity:[contacts count]];
+    if (contactsAll != theContacts) {
+        [contactsAll release];
+        contactsAll = [theContacts retain];
+        self.contactsFiltered = [NSMutableArray arrayWithCapacity:[contactsAll count]];
+        self.contactsSelected = [NSMutableArray arrayWithCapacity:[contactsAll count]];
+        for (Contact * contact in contactsAll) {
+            NSString * firstLetterUppercase = [[contact.fbName substringToIndex:1] uppercaseString];
+            NSMutableArray * group = [self.contactsGrouped objectForKey:firstLetterUppercase];
+            if (!group) {
+                group = [self.contactsGrouped objectForKey:@"#"];
+            }
+            [group addObject:contact];
+        }
     }
     NSLog(@"ContactsSelectViewController setContacts finished");
 }
 
+- (NSMutableDictionary *) contactsGrouped {
+    if (contactsGrouped == nil) {
+        NSArray * theAlphabetArray = self.alphabetArray;
+        contactsGrouped = [[NSMutableDictionary dictionaryWithCapacity:[theAlphabetArray count]] retain];
+        for (int alphabetIndex = 0; alphabetIndex < [theAlphabetArray count]; alphabetIndex++) {
+            [contactsGrouped setObject:[NSMutableArray array] forKey:[theAlphabetArray objectAtIndex:alphabetIndex]];
+        }
+    }
+    return contactsGrouped;
+}
+
+- (NSArray *)alphabetArray {
+    return [NSArray arrayWithObjects:
+            @"A", @"B", @"C", @"D", @"E", @"F", @"G", @"H", @"I", @"J", 
+            @"K", @"L", @"M", @"N", @"O", @"P", @"Q", @"R", @"S", @"T", 
+            @"U", @"V", @"W", @"X", @"Y", @"Z", @"#",
+            nil];
+}
+
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
-    return 2;
+    NSInteger numberOfSections = 1;
+    if (tableView == self.friendsTableView && !self.isSearchOn) {
+        numberOfSections = [self.alphabetArray count];
+    }
+    return numberOfSections;
+}
+
+- (NSArray *)sectionIndexTitlesForTableView:(UITableView *)tableView {
+    NSMutableArray * sectionIndexTitlesArray = nil;
+    if (tableView == self.friendsTableView && !self.isSearchOn) {
+        sectionIndexTitlesArray = [NSMutableArray arrayWithArray:self.alphabetArray];
+        [sectionIndexTitlesArray insertObject:UITableViewIndexSearch atIndex:0];
+    }
+    return sectionIndexTitlesArray;
+}
+
+- (NSInteger)tableView:(UITableView *)tableView sectionForSectionIndexTitle:(NSString *)title atIndex:(NSInteger)index {
+    NSInteger returnIndex = index - 1;
+    if (index == 0) {
+        [tableView scrollRectToVisible:[[tableView tableHeaderView] bounds] animated:NO];
+        returnIndex = -1;
+    }
+    return returnIndex;
 }
 
 - (NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section {
-    NSString * title = nil;
-    if (section == 0) {
-        NSString * selectedCountString = @"";
-//        NSString * selectedCountString = [self.contactsSelected count] ? [NSString stringWithFormat:@" (%d)", [self.contactsSelected count]] : @"";
-        title = [NSString stringWithFormat:@"Selected%@", selectedCountString];
-    } else {
-        title = @"Contacts";
+    NSString * titleForHeader = nil;
+    if (tableView == self.friendsTableView && !self.isSearchOn) {
+        titleForHeader = [self.alphabetArray objectAtIndex:section];
     }
-    return title;
+    return titleForHeader;
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
     
-    NSArray * contactsArray = nil;
-    if (section == 0) {
-        contactsArray = self.contactsSelected;
+    NSInteger numberOfRows = 0;
+    
+    if (tableView == self.friendsTableView) {
+        if (self.isSearchOn) {
+            numberOfRows = [self.contactsFiltered count];
+        } else {
+            NSString * c = [self.alphabetArray objectAtIndex:section];
+            NSArray * group = [self.contactsGrouped objectForKey:c];
+            numberOfRows = [group count];
+        }
     } else {
-        /* If the requesting table view is the search display controller's table view, return the count of the filtered list, otherwise return the count of the main list. */
-        contactsArray = (tableView == self.searchDisplayController.searchResultsTableView) ? self.contactsFiltered : self.contacts;
+        numberOfRows = [self.contactsSelected count];
     }
     
-    return [contactsArray count];
+    return numberOfRows;
     
-}
-
-- (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
-    CGFloat height = 44.0;
-    if (indexPath.section == 0) {
-        height = 30.0;
-    }
-    return height;
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
     
     NSArray * contactsArray = nil;
-    if (indexPath.section == 0) {
-        contactsArray = self.contactsSelected;
+    if (tableView == self.friendsTableView) {
+        if (self.isSearchOn) {
+            contactsArray = self.contactsFiltered;
+        } else {
+            NSString * c = [self.alphabetArray objectAtIndex:indexPath.section];
+            contactsArray = [self.contactsGrouped objectForKey:c];
+        }
     } else {
-        /* If the requesting table view is the search display controller's table view, return the count of the filtered list, otherwise return the count of the main list. */
-        contactsArray = (tableView == self.searchDisplayController.searchResultsTableView) ? self.contactsFiltered : self.contacts;
+        contactsArray = self.contactsSelected;
     }
-    
+        
     static NSString * cellID = @"ContactCell";
     
     UITableViewCell * cell = [tableView dequeueReusableCellWithIdentifier:cellID];
@@ -157,113 +231,110 @@
 - (void) tableView:(UITableView *)tableView configureCell:(UITableViewCell *)cell withIndexPath:(NSIndexPath *)indexPath usingContact:(Contact *)contact {
     
     cell.textLabel.text = contact.fbName;
-    if (indexPath.section == 0 ||
-        [self.contactsSelected containsObject:contact]) {
-        cell.accessoryType = UITableViewCellAccessoryCheckmark;
-    } else {
-        cell.accessoryType = UITableViewCellAccessoryNone;
-    }
+    cell.accessoryType = [self.contactsSelected containsObject:contact] ? UITableViewCellAccessoryCheckmark : UITableViewCellAccessoryNone;
     
 }
 
-- (void) tableView:(UITableView *)tableView configureCellWithIndexPath:(NSIndexPath *)indexPath usingContact:(Contact *)contact {
-    UITableViewCell * cell = [tableView cellForRowAtIndexPath:indexPath];
-    [self tableView:tableView configureCell:cell withIndexPath:indexPath usingContact:contact];
-}
-
 - (void) tableView:(UITableView *)tableView setCellAccessoryType:(UITableViewCellAccessoryType)accessoryType forCellWithIndexPath:(NSIndexPath *)indexPath {
+    
     UITableViewCell * cell = [tableView cellForRowAtIndexPath:indexPath];
     cell.accessoryType = accessoryType;
+    
 }
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     
-    BOOL searchWasOn = tableView == self.searchDisplayController.searchResultsTableView;
     NSArray * contactsArrayTouched = nil;
-    if (indexPath.section == 0) {
-        contactsArrayTouched = self.contactsSelected;
+    if (tableView == self.friendsTableView) {
+        if (self.isSearchOn) {
+            contactsArrayTouched = self.contactsFiltered;
+        } else {
+            NSString * c = [self.alphabetArray objectAtIndex:indexPath.section];
+            contactsArrayTouched = [self.contactsGrouped objectForKey:c];
+        }
     } else {
-        /* If the requesting table view is the search display controller's table view, return the count of the filtered list, otherwise return the count of the main list. */
-        contactsArrayTouched = searchWasOn ? self.contactsFiltered : self.contacts;
+        contactsArrayTouched = self.contactsSelected;
     }
     
     Contact * contact = (Contact *)[contactsArrayTouched objectAtIndex:indexPath.row];
-    BOOL contactWasSelected = (indexPath.section == 0 || 
+    BOOL contactWasSelected = (contactsArrayTouched == self.contactsSelected || 
                                [self.contactsSelected containsObject:contact]);
-
-    NSIndexPath * indexPathForContactSelected = nil;
-    NSIndexPath * indexPathForContactFiltered = nil;
-    NSIndexPath * indexPathForContactGeneral  = nil;
     
-    if (contactWasSelected) {
-        indexPathForContactSelected = indexPath.section == 0 ? indexPath : [NSIndexPath indexPathForRow:[self.contactsSelected indexOfObject:contact] inSection:0];
-    } else {
-        indexPathForContactSelected = [NSIndexPath indexPathForRow:[self.contactsSelected count] inSection:0];
-    }
-    
-    if (searchWasOn) {
-        indexPathForContactFiltered = [NSIndexPath indexPathForRow:[self.contactsFiltered indexOfObject:contact] inSection:1];
-    }
-    
-    indexPathForContactGeneral = [NSIndexPath indexPathForRow:[self.contacts indexOfObject:contact] inSection:1];
-    
-    NSLog(@"searchWasOn=%d", searchWasOn);
-    NSLog(@"contactWasSelected=%d", contactWasSelected);
-    NSLog(@"indexPathForContactSelected=%@", indexPathForContactSelected);
-    NSLog(@"indexPathForContactFiltered=%@", indexPathForContactFiltered);
-    NSLog(@"indexPathForContactGeneral=%@",  indexPathForContactGeneral);
-    
+    UITableViewCellAccessoryType accessoryType;
     if (contactWasSelected) {
         [self.contactsSelected removeObject:contact];
-        if (searchWasOn) {
-            [tableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:indexPathForContactSelected] withRowAnimation:UITableViewRowAnimationBottom];
-        }
-        [self.tableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:indexPathForContactSelected] withRowAnimation:UITableViewRowAnimationBottom];
+        accessoryType = UITableViewCellAccessoryNone;
     } else {
         [self.contactsSelected addObject:contact];
-        if (searchWasOn) {
-            [tableView insertRowsAtIndexPaths:[NSArray arrayWithObject:indexPathForContactSelected] withRowAnimation:UITableViewRowAnimationBottom];
-        }
-        [self.tableView insertRowsAtIndexPaths:[NSArray arrayWithObject:indexPathForContactSelected] withRowAnimation:UITableViewRowAnimationBottom];
+        accessoryType = UITableViewCellAccessoryCheckmark;
     }
+    [self updateSelectedCountViewWithCount:[self.contactsSelected count]];
     
-    UITableViewCellAccessoryType accessoryType = contactWasSelected ? UITableViewCellAccessoryNone : UITableViewCellAccessoryCheckmark;
-    if (searchWasOn) {
-        [self tableView:tableView setCellAccessoryType:accessoryType forCellWithIndexPath:indexPathForContactFiltered];
+    [self tableView:tableView setCellAccessoryType:accessoryType forCellWithIndexPath:indexPath];
+    if (tableView == self.selectedTableView) {
+        [tableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:indexPath] withRowAnimation:UITableViewRowAnimationFade];
+    } else {
+        [tableView deselectRowAtIndexPath:[tableView indexPathForSelectedRow] animated:YES];
     }
-    [self tableView:self.tableView setCellAccessoryType:accessoryType forCellWithIndexPath:indexPathForContactGeneral];
-    
-    [tableView deselectRowAtIndexPath:[tableView indexPathForSelectedRow] animated:YES];
-//    [self performSelector:@selector(foo) withObject:nil afterDelay:0.3]; // THIS IS A HUGE HACK. It's causing some weirdnesses as well. Taking it out.
     
 }
-     
-//- (void) foo {
-//    if (self.searchDisplayController.active) {
-//        [self.searchDisplayController.searchResultsTableView reloadSections:[NSIndexSet indexSetWithIndex:0] withRowAnimation:UITableViewRowAnimationNone];
-//    }
-//    [self.tableView reloadSections:[NSIndexSet indexSetWithIndex:0] withRowAnimation:UITableViewRowAnimationNone];
-//}
 
-- (BOOL)searchDisplayController:(UISearchDisplayController *)controller shouldReloadTableForSearchString:(NSString *)searchString {
+- (void) updateSelectedCountViewWithCount:(int)count {
+    NSString * buttonText = @"Selected";
+    if (count > 0) {
+        buttonText = [buttonText stringByAppendingFormat:@" (%d)", count];
+    }
+    [self.selectedTabButton setTitle:buttonText forState:UIControlStateNormal];
+    [self.selectedTabButton setTitle:buttonText forState:UIControlStateHighlighted];
+}
+
+
+- (void) searchBarTextDidBeginEditing:(UISearchBar *)searchBar {
+    self.isSearchOn = YES;
+    [self.searchBar setShowsCancelButton:YES animated:YES];
+//    [UIView animateWithDuration:0.25 
+//                     animations:^{
+//                         CGRect searchBarFrame = self.searchBar.frame;
+//                         searchBarFrame.size.width = 320;
+//                         self.searchBar.frame = searchBarFrame;
+//                     }];
+    self.contactsFiltered = [self.contactsAll mutableCopy];
+    [self.friendsTableView reloadData];
+}
+
+- (void)searchBarTextDidEndEditing:(UISearchBar *)searchBar {
+    self.isSearchOn = NO;
+    [self.searchBar setShowsCancelButton:NO animated:YES];
+//    [UIView animateWithDuration:0.25 
+//                     animations:^{
+//                         CGRect searchBarFrame = self.searchBar.frame;
+//                         searchBarFrame.size.width = 290;
+//                         self.searchBar.frame = searchBarFrame;
+//                     }];
+    self.searchBar.text = @"";
+    [self.friendsTableView reloadData];
+}
+
+- (void)searchBarCancelButtonClicked:(UISearchBar *)searchBar {
+    [self.searchBar resignFirstResponder];
+}
+
+- (void)searchBar:(UISearchBar *)searchBar textDidChange:(NSString *)searchText {
     [self.contactsFiltered removeAllObjects];
     // It seems like the following loop is going to be craaaazy expensive in terms of processing time. What if someone has 1000 friends? How quickly can we loop through those? Time will tell...
-    for (Contact * contact in self.contacts) {
-        NSComparisonResult result = [contact.fbName compare:searchString options:(NSCaseInsensitiveSearch|NSDiacriticInsensitiveSearch) range:NSMakeRange(0, [searchString length])];
-        if (result == NSOrderedSame) {
-            [self.contactsFiltered insertObject:contact atIndex:[self.contactsFiltered count]];
-//            [self.contactsFiltered addObject:contact];
-        }
+    if ([searchText length] > 0) {
+        for (Contact * contact in self.contactsAll) {
+            NSComparisonResult result = [contact.fbName compare:searchText options:(NSCaseInsensitiveSearch|NSDiacriticInsensitiveSearch) range:NSMakeRange(0, [searchText length])];
+            if (result == NSOrderedSame) {
+                [self.contactsFiltered insertObject:contact atIndex:[self.contactsFiltered count]];
+                //            [self.contactsFiltered addObject:contact];
+            }
+        }        
+    } else {
+        self.contactsFiltered = [self.contactsAll mutableCopy];
     }
-    if ([controller.searchResultsTableView numberOfSections] >= 2 && [controller.searchResultsTableView numberOfRowsInSection:1] >= 1) {
-        [controller.searchResultsTableView scrollToRowAtIndexPath:[NSIndexPath indexPathForRow:0 inSection:1] atScrollPosition:UITableViewScrollPositionTop animated:YES];
-    }
-    return YES;
-}
-
-- (void) searchDisplayControllerWillEndSearch:(UISearchDisplayController *)controller {
-    NSLog(@"searchDisplayControllerDidEndSearch");
-    [self.tableView scrollRectToVisible:CGRectMake(0, 0, 1, 1) animated:YES];
+    [self.friendsTableView reloadData];
+//    NSLog(@"%@", self.contactsFiltered);
 }
 
 - (void)cancelButtonPushed {
@@ -274,13 +345,28 @@
     [self.delegate contactsSelectViewController:self didFinishWithCancel:NO selectedContacts:self.contactsSelected];
 }
 
-//- (void) forceSearchBarCancelButtonTitle {
-//	for (UIView * possibleButton in self.searchBar.subviews) {
+- (void)tabButtonPushed:(UIButton *)tabButton {
+    if (tabButton == self.friendsTabButton) {
+        NSLog(@"Friends tab button touched");
+        self.friendsTableView.hidden = NO;
+        [self.friendsTableView reloadData];
+    } else if (tabButton == self.selectedTabButton) {
+        NSLog(@"Selected tab button touched");
+        self.friendsTableView.hidden = YES;
+        [self.selectedTableView reloadData];
+    } else {
+        NSLog(@"ERROR in ContactsSelectViewController - unrecognized tabButton");
+    }
+}
+
+//- (void) forceSetSearchBarCancelButtonAlpha:(float)alpha {
+//	for (UIView * possibleButton in self.searchBar.subviews)
+//	{
 //		if ([possibleButton isKindOfClass:[UIButton class]]) {
-//			UIButton * theCancelButton = (UIButton *)possibleButton;
-//            [theCancelButton setTitle:@"View All" forState:UIControlStateNormal];
-//            [theCancelButton setTitle:@"View All" forState:UIControlStateHighlighted];
-//            break;
+//			UIButton * searchBarCancelButton = (UIButton *)possibleButton;
+//			searchBarCancelButton.alpha = alpha;
+//            NSLog(@"Found button %@", searchBarCancelButton);
+//			break;
 //		}
 //	}
 //}

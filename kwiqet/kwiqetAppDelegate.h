@@ -15,7 +15,7 @@
 #import "CoreDataModel.h"
 #import "FacebookManager.h"
 
-@interface kwiqetAppDelegate : NSObject <UIApplicationDelegate, UITabBarControllerDelegate, SplashScreenViewControllerDelegate, WebConnectorDelegate> {
+@interface kwiqetAppDelegate : NSObject <UIApplicationDelegate, UITabBarControllerDelegate, SplashScreenViewControllerDelegate, WebConnectorDelegate, ContactsSelectViewControllerDelegate> {
 
     UIWindow * window;
     

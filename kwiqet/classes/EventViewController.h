@@ -18,10 +18,12 @@
 #import "WebDataTranslator.h"
 #import "ElasticUILabel.h"
 #import "WebActivityView.h"
+#import "FacebookManager.h"
+#import "ContactsSelectViewController.h"
 
 @protocol CardPageViewControllerDelegate;
 
-@interface EventViewController : UIViewController <MFMailComposeViewControllerDelegate, WebConnectorDelegate, MapViewControllerDelegate, UIScrollViewDelegate> {
+@interface EventViewController : UIViewController <MFMailComposeViewControllerDelegate, WebConnectorDelegate, MapViewControllerDelegate, UIScrollViewDelegate, UIActionSheetDelegate, ContactsSelectViewControllerDelegate> {
     
     UIView * backgroundColorView;
     UIView * navigationBar;
@@ -71,12 +73,15 @@
     UIAlertView * connectionErrorOnUserActionRequestAlertView;
     BOOL deletedEventDueToGoingToEvent;
 //    BOOL loadedImage;
+    UIActionSheet * letsGoChoiceActionSheet;
+    FacebookManager * facebookManager;
 
 }
 
 @property (nonatomic, retain) Event * event;
 @property (assign) id<CardPageViewControllerDelegate> delegate;
 @property (nonatomic, retain) CoreDataModel * coreDataModel;
+@property (nonatomic, retain) FacebookManager * facebookManager;
 
 - (void) viewControllerIsFinished;
 - (void) updateViewsFromData;

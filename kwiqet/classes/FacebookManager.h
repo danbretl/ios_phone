@@ -15,13 +15,17 @@ static NSString * const FBM_ACCOUNT_ACTIVITY_ACTION_KEY = @"fbmAccountActivityAc
 static NSString * const FBM_ACCOUNT_ACTIVITY_ACTION_LOGOUT = @"fbmAccountActivityActionLogout";
 static NSString * const FBM_ACCOUNT_ACTIVITY_ACTION_LOGIN = @"fbmAccountActivityActionLogin";
 static NSString * const FBM_ACCOUNT_ACTIVITY_ACTION_FAILURE = @"fbmAccountActivityActionFailure";
-static NSString * const FBM_FRIENDS_UPDATE_SUCCESS_KEY = @"fbmFriendsUpdateSuccess";
-static NSString * const FBM_FRIENDS_UPDATE_FAILURE_KEY = @"fbmFriendsUpdateFailure";
-
+static NSString * const FBM_FRIENDS_UPDATE_SUCCESS_KEY = @"FBM_FRIENDS_UPDATE_SUCCESS_KEY";
+static NSString * const FBM_FRIENDS_UPDATE_FAILURE_KEY = @"FBM_FRIENDS_UPDATE_FAILURE_KEY";
+static NSString * const FBM_CREATE_EVENT_SUCCESS_KEY = @"FBM_CREATE_EVENT_SUCCESS_KEY";
+static NSString * const FBM_CREATE_EVENT_FAILURE_KEY = @"FBM_CREATE_EVENT_FAILURE_KEY";
+static NSString * const FBM_EVENT_INVITE_FRIENDS_SUCCESS_KEY = @"FBM_EVENT_INVITE_FRIENDS_SUCCESS_KEY";
+static NSString * const FBM_EVENT_INVITE_FRIENDS_FAILURE_KEY = @"FBM_EVENT_INVITE_FRIENDS_FAILURE_KEY";
 
 @interface FacebookManager : NSObject <FBSessionDelegate, FBRequestDelegate> {
     Facebook * facebook;
     CoreDataModel * coreDataModel;
+    NSArray * eventInvitees;
 }
 
 @property (nonatomic, readonly) Facebook * facebook;
@@ -32,7 +36,9 @@ static NSString * const FBM_FRIENDS_UPDATE_FAILURE_KEY = @"fbmFriendsUpdateFailu
 - (void) pushAuthenticationInfoToDefaults;
 - (void) authorizeWithStandardPermissionsAndDelegate:(id<FBSessionDelegate>)delegate;
 - (void) login;
-- (void) updateFacebookFriends;
 - (void) logout;
+- (void) createFacebookEventWithParameters:(NSMutableDictionary *)parameters inviteContacts:(NSArray *)contactsToInvite;
+- (void) updateFacebookFriends;
+- (void) inviteToEvent:(NSString *)eventID contacts:(NSArray *)contacts withPersonalMessage:(NSString *)personalMessage;
 
 @end

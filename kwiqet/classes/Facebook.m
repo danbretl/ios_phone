@@ -455,6 +455,8 @@ static NSString* kSDKVersion = @"2";
                 andHttpMethod:(NSString *)httpMethod
                   andDelegate:(id <FBRequestDelegate>)delegate {
   NSString * fullURL = [kRestserverBaseURL stringByAppendingString:methodName];
+//  NSLog(@"fbURL %@", fullURL);
+//  NSLog(@"fbParams %@", params);
   return [self openUrl:fullURL
                 params:params
             httpMethod:httpMethod

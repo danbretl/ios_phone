@@ -92,11 +92,14 @@ CGFloat const FEV_DESCRIPTION_LABEL_PADDING_HORIZONTAL = 20.0;
 @property (retain) UIButton * mapButton;
 @property (retain) UIView * noFeaturedEventView;
 
-@property (retain) NSArray * contactsToInvite;
-
 - (void) mapButtonTouched;
 - (void) shareButtonTouched;
 - (void) letsGoButtonTouched;
+
+- (void) facebookEventCreateSuccess:(NSNotification *)notification;
+- (void) facebookEventCreateFailure:(NSNotification *)notification;
+- (void) facebookEventInviteSuccess:(NSNotification *)notification;
+- (void) facebookEventInviteFailure:(NSNotification *)notification;
 
 @end
 
@@ -105,7 +108,6 @@ CGFloat const FEV_DESCRIPTION_LABEL_PADDING_HORIZONTAL = 20.0;
 @synthesize mapViewController;
 @synthesize actionBarView, letsGoButton, shareButton, scrollView, imageView, titleBarView, titleLabel, detailsView, letsGoChoiceActionSheet, webActivityView;
 @synthesize timeLabel, dateLabel, venueNameLabel, addressFirstLineLabel, addressSecondLineLabel, phoneNumberButton, priceLabel, eventDetailsContainer, eventDetailsLabel, mapButton, noFeaturedEventView, refreshHeaderView;
-@synthesize contactsToInvite;
 
 #pragma mark -
 #pragma mark Initialization
@@ -152,8 +154,6 @@ CGFloat const FEV_DESCRIPTION_LABEL_PADDING_HORIZONTAL = 20.0;
     [mapButton release];
     [noFeaturedEventView release];
     [refreshHeaderView release];
-    
-    [contactsToInvite release];
     
     [super dealloc];
 }
@@ -348,6 +348,12 @@ CGFloat const FEV_DESCRIPTION_LABEL_PADDING_HORIZONTAL = 20.0;
     [self.view bringSubviewToFront:self.webActivityView];
     
     [self suggestToGetNewFeaturedEvent]; NSLog(@"FROM EVENT DAY VIEW CONTROLLER VIEW DID LOAD LINE 291");
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(facebookEventCreateSuccess:) name:FBM_CREATE_EVENT_SUCCESS_KEY object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(facebookEventCreateFailure:) name:FBM_CREATE_EVENT_FAILURE_KEY object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(facebookEventInviteSuccess:) name:FBM_EVENT_INVITE_FRIENDS_SUCCESS_KEY object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(facebookEventInviteFailure:) name:FBM_EVENT_INVITE_FRIENDS_FAILURE_KEY object:nil];
+
 }
 
 - (void)viewWillAppear:(BOOL)animated {
@@ -645,139 +651,6 @@ CGFloat const FEV_DESCRIPTION_LABEL_PADDING_HORIZONTAL = 20.0;
     [[UIApplication sharedApplication] openURL:[NSURL URLWithString:[NSString stringWithFormat:@"tel:%@", [self.coreDataModel getFeaturedEvent].phone]]];
 }
 
-- (void)actionSheet:(UIActionSheet *)actionSheet didDismissWithButtonIndex:(NSInteger)buttonIndex {
-    
-    if (actionSheet == self.letsGoChoiceActionSheet) {
-        
-        Event * featuredEvent = [self.coreDataModel getFeaturedEvent];
-        
-        if (buttonIndex == 0) {
-            
-            ContactsSelectViewController * contactsSelectViewController = [[ContactsSelectViewController alloc] initWithNibName:@"ContactsSelectViewController" bundle:[NSBundle mainBundle]];
-            contactsSelectViewController.contacts = [self.coreDataModel getAllFacebookContacts];
-            contactsSelectViewController.delegate = self;
-            [self presentModalViewController:contactsSelectViewController animated:YES];
-            [contactsSelectViewController release];
-            
-        } else if (buttonIndex == 1) {
-            
-            // Add to calendar
-            [ActionsManagement addEventToCalendar:featuredEvent usingWebDataTranslator:self.webDataTranslator];
-            // Show confirmation alert
-            UIAlertView * alert = [[UIAlertView alloc] initWithTitle:@"Event added to Calendar!" message:[NSString stringWithFormat:@"The event \"%@\" has been added to your calendar.", featuredEvent.title] delegate:nil cancelButtonTitle:@"Ok" otherButtonTitles:nil];
-            [alert show];
-            [alert release];
-                        
-        }
-
-    }
-    
-}
-
-- (void)contactsSelectViewController:(ContactsSelectViewController *)contactsSelectViewController didFinishWithCancel:(BOOL)didCancel selectedContacts:(NSArray *)selectedContacts {
-    if (!didCancel) {
-        
-        self.contactsToInvite = selectedContacts;
-        
-        Event * featuredEvent = [self.coreDataModel getFeaturedEvent];
-        NSMutableDictionary * parameters = [NSMutableDictionary dictionary];
-
-        NSString * title = featuredEvent.title;
-        [parameters setObject:title forKey:@"name"];
-
-        NSDate * startDate = featuredEvent.startDatetime;
-        NSDate * endDate = [startDate dateByAddingTimeInterval:3600];
-        if ([featuredEvent.endTimeValid boolValue]) {
-            endDate = featuredEvent.endDatetime;
-        }
-        NSTimeInterval startDateTimeInterval = [startDate timeIntervalSince1970];
-        NSTimeInterval endDateTimeInterval = [endDate timeIntervalSince1970];
-        // TEMPORARY HACK FIX FOR FACEBOOK TIMEZONE PROBLEM
-        {
-            NSTimeZone * pacificTimeZone = [NSTimeZone timeZoneWithName:@"US/Pacific"];
-            NSTimeZone * easternTimeZone = [NSTimeZone timeZoneWithName:@"US/Eastern"]; // THIS SHOULD NOT BE HARDCODED AS THE EASTERN TIME ZONE - IT SHOULD BE THE TIME ZONE OF WHEREVER THE EVENT IS TAKING PLACE.
-            NSTimeInterval pacificInterval = [pacificTimeZone secondsFromGMT];
-            NSTimeInterval easternInterval = [easternTimeZone secondsFromGMT];
-            NSLog(@"%f %f", pacificInterval, easternInterval);
-            startDateTimeInterval += (easternInterval - pacificInterval);
-            endDateTimeInterval += (easternInterval - pacificInterval);
-        }
-        [parameters setObject:[NSString stringWithFormat:@"%.0f", startDateTimeInterval] forKey:@"start_time"];
-        [parameters setObject:[NSString stringWithFormat:@"%.0f", endDateTimeInterval] forKey:@"end_time"];
-
-        NSString * locationName = featuredEvent.venue;
-        if (locationName) {
-            [parameters setObject:locationName forKey:@"location"];
-        }
-
-        if (featuredEvent.address) { 
-            [parameters setObject:featuredEvent.address forKey:@"street"];
-        }
-        if (featuredEvent.city) { 
-            [parameters setObject:featuredEvent.city forKey:@"city"];
-        }
-        if (featuredEvent.state) { 
-            [parameters setObject:featuredEvent.state forKey:@"state"];
-        }
-        if (featuredEvent.zip) { 
-            [parameters setObject:featuredEvent.zip forKey:@"zip"];
-        }
-        [parameters setValue:@"USA" forKey:@"country"];
-        if (featuredEvent.latitude) {
-            [parameters setObject:[NSString stringWithFormat:@"%@", featuredEvent.latitude] forKey:@"latitude"];
-        }
-        if (featuredEvent.longitude) {
-            [parameters setObject:[NSString stringWithFormat:@"%@", featuredEvent.longitude] forKey:@"longitude"];
-        }
-        if (featuredEvent.details) {
-            [parameters setObject:featuredEvent.details forKey:@"description"];
-        }
-        if (self.imageView.image) {
-            [parameters setObject:self.imageView.image forKey:@"picture"];
-        }
-
-        NSLog(@"facebook event parameters: %@", parameters);
-
-        [self.facebookManager.fb requestWithGraphPath:@"me/events"
-                                            andParams:parameters  
-                                        andHttpMethod:@"POST" 
-                                          andDelegate:self];
-        [self showWebActivityView];
-    }
-    [self dismissModalViewControllerAnimated:YES];
-}
-
-- (void)requestLoading:(FBRequest *)request {
-    NSLog(@"Facebook request loading...");
-    [self showWebActivityView];
-}
-
-- (void)request:(FBRequest *)request didLoad:(id)result {
-    NSLog(@"Facebook request loaded - %@", result);
-    [self hideWebActivityView];
-    if ([result objectForKey:@"id"]) {
-        NSString * eventID = [result objectForKey:@"id"];
-        //https://api.facebook.com/method/events.invite?eid=108920282534107&uids=28600139%2C615865238&personal_message=Test+invitation+-+just+ignore+this%21&access_token=210861478950952|2.AQCNMPA1uXDbeFfK.3600.1308855600.0-28600345|bqcrhIy1XJXkxRn4hL1x2TU2WrM&format=json
-        NSMutableString * friendIDs = [NSMutableString stringWithString:@""];
-        if (self.contactsToInvite && [self.contactsToInvite count] > 0) {
-            for (int i=0; i<[self.contactsToInvite count]; i++) {
-                if (i != 0) {
-                    [friendIDs appendString:@","];
-                }
-                Contact * friend = (Contact *)[self.contactsToInvite objectAtIndex:i];
-                [friendIDs appendString:friend.fbID];
-            }
-        }
-        NSString * message = @"Test - just ignore!";
-        [self.facebookManager.fb requestWithMethodName:@"events.invite" andParams:[NSMutableDictionary dictionaryWithObjectsAndKeys:eventID, @"eid", friendIDs, @"uids", message, @"personal_message", nil] andHttpMethod:@"POST" andDelegate:self];
-    }
-}
-
-- (void)request:(FBRequest *)request didFailWithError:(NSError *)error {
-    NSLog(@"Facebook request fail - %@", error);
-    [self hideWebActivityView];
-}
-
 - (void) shareButtonTouched {
     
     MFMailComposeViewController * emailViewController = [ActionsManagement makeEmailViewControllerForEvent:[self.coreDataModel getFeaturedEvent] withMailComposeDelegate:self usingWebDataTranslator:self.webDataTranslator];
@@ -802,10 +675,7 @@ CGFloat const FEV_DESCRIPTION_LABEL_PADDING_HORIZONTAL = 20.0;
     
     // Send learned data to the web
     [self.webConnector sendLearnedDataAboutEvent:featuredEvent.uri withUserAction:@"G"];
-    
-    // Logging
-    NSLog(@"FeaturedEventViewController letsGoButtonTouched - Facebook session is valid? = %d", [self.facebookManager.fb isSessionValid]);
-    
+        
     if ([self.facebookManager.fb isSessionValid]) {
         // Give choice of Facebook event or adding to calendar
         self.letsGoChoiceActionSheet = [[[UIActionSheet alloc] initWithTitle:@"What would you like to do with this event?" delegate:self cancelButtonTitle:@"Cancel" destructiveButtonTitle:nil otherButtonTitles:@"Create Facebook event", @"Add to Calendar", nil] autorelease];
@@ -824,6 +694,76 @@ CGFloat const FEV_DESCRIPTION_LABEL_PADDING_HORIZONTAL = 20.0;
 //    self.letsGoButton.enabled = NO;
     
 }
+
+- (void)actionSheet:(UIActionSheet *)actionSheet didDismissWithButtonIndex:(NSInteger)buttonIndex {
+    
+    if (actionSheet == self.letsGoChoiceActionSheet) {
+        
+        Event * featuredEvent = [self.coreDataModel getFeaturedEvent];
+        
+        if (buttonIndex == 0) {
+            
+            ContactsSelectViewController * contactsSelectViewController = [[ContactsSelectViewController alloc] initWithNibName:@"ContactsSelectViewController" bundle:[NSBundle mainBundle]];
+            contactsSelectViewController.contactsAll = [self.coreDataModel getAllFacebookContacts];
+            contactsSelectViewController.delegate = self;
+            [self presentModalViewController:contactsSelectViewController animated:YES];
+            [contactsSelectViewController release];
+            
+        } else if (buttonIndex == 1) {
+            
+            // Add to calendar
+            [ActionsManagement addEventToCalendar:featuredEvent usingWebDataTranslator:self.webDataTranslator];
+            // Show confirmation alert
+            UIAlertView * alert = [[UIAlertView alloc] initWithTitle:@"Event added to Calendar!" message:[NSString stringWithFormat:@"The event \"%@\" has been added to your calendar.", featuredEvent.title] delegate:nil cancelButtonTitle:@"Ok" otherButtonTitles:nil];
+            [alert show];
+            [alert release];
+            
+        }
+        
+    }
+    
+}
+
+- (void)contactsSelectViewController:(ContactsSelectViewController *)contactsSelectViewController didFinishWithCancel:(BOOL)didCancel selectedContacts:(NSArray *)selectedContacts {
+    if (!didCancel) {
+        
+        NSMutableDictionary * parameters = [ActionsManagement makeFacebookEventParametersFromEvent:[self.coreDataModel getFeaturedEvent] eventImage:self.imageView.image];
+        [self.facebookManager createFacebookEventWithParameters:parameters inviteContacts:selectedContacts];
+        [self showWebActivityView];
+    }
+    [self dismissModalViewControllerAnimated:YES];
+}
+
+- (void) facebookEventCreateSuccess:(NSNotification *)notification {
+    if (self.view.window) {
+        // Wait until after facebook invites...
+    }
+}
+- (void) facebookEventCreateFailure:(NSNotification *)notification {
+    if (self.view.window) {
+        UIAlertView * alertView = [[UIAlertView alloc] initWithTitle:@"Facebook Connection Error" message:@"Something went wrong while trying to create an event on Facebook. Please try again." delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
+        [alertView show];
+        [alertView release];
+        [self hideWebActivityView];
+    }
+}
+- (void) facebookEventInviteSuccess:(NSNotification *)notification {
+    if (self.view.window) {
+        UIAlertView * alertView = [[UIAlertView alloc] initWithTitle:@"Facebook Event Created" message:@"We successfully created your Facebook event, and invited your selected friends. Have fun at the event!" delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
+        [alertView show];
+        [alertView release];
+        [self hideWebActivityView];
+    }
+}
+- (void) facebookEventInviteFailure:(NSNotification *)notification {
+    if (self.view.window) {
+        UIAlertView * alertView = [[UIAlertView alloc] initWithTitle:@"Facebook Connection Error" message:@"We created your Facebook event no problem, but an error occurred while inviting your friends. You should probably check things over on Facebook." delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
+        [alertView show];
+        [alertView release];    
+        [self hideWebActivityView];
+    }
+}
+
 
 - (void)webConnector:(WebConnector *)webConnector sendLearnedDataSuccess:(ASIHTTPRequest *)request aboutEvent:(NSString *)eventURI userAction:(NSString *)userAction {
     

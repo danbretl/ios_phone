@@ -20,4 +20,6 @@
 
 + (void) addEventToCalendar:(Event *)event usingWebDataTranslator:(WebDataTranslator *)webDataTranslator;
 
++ (NSMutableDictionary *)makeFacebookEventParametersFromEvent:(Event *)event eventImage:(UIImage *)eventImage;
+
 @end

@@ -94,4 +94,68 @@
     
 }
 
++ (NSDictionary *)makeFacebookEventParametersFromEvent:(Event *)event eventImage:(UIImage *)eventImage {
+    
+    NSMutableDictionary * parameters = [NSMutableDictionary dictionary];
+    
+    NSString * title = event.title;
+    [parameters setObject:title forKey:@"name"];
+    
+    NSDate * startDate = event.startDatetime;
+    NSDate * endDate = [startDate dateByAddingTimeInterval:3600];
+    if ([event.endTimeValid boolValue]) {
+        endDate = event.endDatetime;
+    }
+    NSTimeInterval startDateTimeInterval = [startDate timeIntervalSince1970];
+    NSTimeInterval endDateTimeInterval = [endDate timeIntervalSince1970];
+    // TEMPORARY HACK FIX FOR FACEBOOK TIMEZONE PROBLEM
+    {
+        NSTimeZone * pacificTimeZone = [NSTimeZone timeZoneWithName:@"US/Pacific"];
+        NSTimeZone * easternTimeZone = [NSTimeZone timeZoneWithName:@"US/Eastern"]; // THIS SHOULD NOT BE HARDCODED AS THE EASTERN TIME ZONE - IT SHOULD BE THE TIME ZONE OF WHEREVER THE EVENT IS TAKING PLACE.
+        NSTimeInterval pacificInterval = [pacificTimeZone secondsFromGMT];
+        NSTimeInterval easternInterval = [easternTimeZone secondsFromGMT];
+        NSLog(@"%f %f", pacificInterval, easternInterval);
+        startDateTimeInterval += (easternInterval - pacificInterval);
+        endDateTimeInterval += (easternInterval - pacificInterval);
+    }
+    [parameters setObject:[NSString stringWithFormat:@"%.0f", startDateTimeInterval] forKey:@"start_time"];
+    [parameters setObject:[NSString stringWithFormat:@"%.0f", endDateTimeInterval] forKey:@"end_time"];
+    
+    NSString * locationName = event.venue;
+    if (locationName) {
+        [parameters setObject:locationName forKey:@"location"];
+    }
+    
+    if (event.address) { 
+        [parameters setObject:event.address forKey:@"street"];
+    }
+    if (event.city) { 
+        [parameters setObject:event.city forKey:@"city"];
+    }
+    if (event.state) { 
+        [parameters setObject:event.state forKey:@"state"];
+    }
+    if (event.zip) { 
+        [parameters setObject:event.zip forKey:@"zip"];
+    }
+    [parameters setValue:@"USA" forKey:@"country"];
+    if (event.latitude) {
+        [parameters setObject:[NSString stringWithFormat:@"%@", event.latitude] forKey:@"latitude"];
+    }
+    if (event.longitude) {
+        [parameters setObject:[NSString stringWithFormat:@"%@", event.longitude] forKey:@"longitude"];
+    }
+    if (event.details) {
+        [parameters setObject:event.details forKey:@"description"];
+    }
+    if (eventImage) {
+        [parameters setObject:eventImage forKey:@"picture"];
+    }
+    
+    NSLog(@"facebook event parameters: %@", parameters);
+    
+    return parameters;
+    
+}
+
 @end

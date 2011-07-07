@@ -48,6 +48,7 @@
 @property (retain) UIView * detailsBackgroundColorView;
 @property (retain) UILabel * detailsLabel;
 @property (nonatomic, retain) WebActivityView * webActivityView;
+@property (retain) UIActionSheet * letsGoChoiceActionSheet;
 
 @property (retain) MapViewController * mapViewController;
 @property (nonatomic, readonly) WebConnector * webConnector;
@@ -82,6 +83,8 @@
 @synthesize delegate;
 @synthesize coreDataModel;
 @synthesize mapViewController;
+@synthesize letsGoChoiceActionSheet;
+@synthesize facebookManager;
 
 - (void)dealloc {
     [event release];
@@ -119,6 +122,8 @@
     [mapViewController release];
     [webConnector release]; // ---?
     [webDataTranslator release];
+    [letsGoChoiceActionSheet release];
+    [facebookManager release];
     [super dealloc];
 	
 }
@@ -392,7 +397,8 @@
 -(void) showWebLoadingViews  {
     if (self.view.window) {
         // ACTIVITY VIEWS
-        [self.webActivityView showAnimated:NO];
+        [self.view bringSubviewToFront:self.webActivityView];
+        [self.webActivityView showAnimated:YES];
         // USER INTERACTION
         self.view.userInteractionEnabled = NO;
     }
@@ -696,27 +702,6 @@
     [self.scrollView bringSubviewToFront:self.titleBarBorderCheatView];
 }
 
-///send learned data to ML with tag G
-- (void)letsGoButtonTouched {
-    
-    [self showWebLoadingViews];
-    
-    // Send learned data to the web
-    [self.webConnector sendLearnedDataAboutEvent:self.event.uri withUserAction:@"G"];
-    
-    [ActionsManagement addEventToCalendar:self.event usingWebDataTranslator:self.webDataTranslator];
-    
-	// Show alert
-	UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Event added to Calendar!" message:[NSString stringWithFormat:@"The event \"%@\" has been added to your calendar.", self.event.title] delegate:nil cancelButtonTitle:@"Ok" otherButtonTitles:nil];
-	[alert show];
-	[alert release];
-    
-    // Change appearance of "Let's Go" button
-    [self.letsGoButton setBackgroundImage:[UIImage imageNamed:@"btn_going.png"] forState: UIControlStateNormal];
-    self.letsGoButton.enabled = NO;
-
-}
-
 -(void)shareButtonTouched {
     
     MFMailComposeViewController * emailViewController = [ActionsManagement makeEmailViewControllerForEvent:self.event withMailComposeDelegate:self usingWebDataTranslator:self.webDataTranslator];
@@ -736,12 +721,106 @@
 
 //delete event from core data and revert back to table
 -(void)deleteButtonTouched {
-
+    
     [self.webConnector sendLearnedDataAboutEvent:self.event.uri withUserAction:@"X"];
     [self showWebLoadingViews];
     // Wait for response from server
     
 }
+
+///send learned data to ML with tag G
+- (void)letsGoButtonTouched {
+    
+    // Send learned data to the web
+    [self.webConnector sendLearnedDataAboutEvent:self.event.uri withUserAction:@"G"];
+    
+    if ([self.facebookManager.fb isSessionValid]) {
+        // Give choice of Facebook event or adding to calendar
+        self.letsGoChoiceActionSheet = [[[UIActionSheet alloc] initWithTitle:@"What would you like to do with this event?" delegate:self cancelButtonTitle:@"Cancel" destructiveButtonTitle:nil otherButtonTitles:@"Create Facebook event", @"Add to Calendar", nil] autorelease];
+        [self.letsGoChoiceActionSheet showFromRect:self.letsGoButton.frame inView:self.letsGoButton animated:YES];
+    } else {
+        // Add to calendar
+        [ActionsManagement addEventToCalendar:self.event usingWebDataTranslator:self.webDataTranslator];
+        // Show confirmation alert
+        UIAlertView * alert = [[UIAlertView alloc] initWithTitle:@"Event added to Calendar!" message:[NSString stringWithFormat:@"The event \"%@\" has been added to your calendar.", self.event.title] delegate:nil cancelButtonTitle:@"Ok" otherButtonTitles:nil];
+        [alert show];
+        [alert release];
+    }
+    
+//    // Change appearance of "Let's Go" button
+//    [self.letsGoButton setBackgroundImage:[UIImage imageNamed:@"btn_going.png"] forState: UIControlStateNormal];
+//    self.letsGoButton.enabled = NO;
+
+}
+
+- (void)actionSheet:(UIActionSheet *)actionSheet didDismissWithButtonIndex:(NSInteger)buttonIndex {
+    
+    if (actionSheet == self.letsGoChoiceActionSheet) {
+                
+        if (buttonIndex == 0) {
+            
+            ContactsSelectViewController * contactsSelectViewController = [[ContactsSelectViewController alloc] initWithNibName:@"ContactsSelectViewController" bundle:[NSBundle mainBundle]];
+            contactsSelectViewController.contactsAll = [self.coreDataModel getAllFacebookContacts];
+            contactsSelectViewController.delegate = self;
+            [self presentModalViewController:contactsSelectViewController animated:YES];
+            [contactsSelectViewController release];
+            
+        } else if (buttonIndex == 1) {
+            
+            // Add to calendar
+            [ActionsManagement addEventToCalendar:self.event usingWebDataTranslator:self.webDataTranslator];
+            // Show confirmation alert
+            UIAlertView * alert = [[UIAlertView alloc] initWithTitle:@"Event added to Calendar!" message:[NSString stringWithFormat:@"The event \"%@\" has been added to your calendar.", self.event.title] delegate:nil cancelButtonTitle:@"Ok" otherButtonTitles:nil];
+            [alert show];
+            [alert release];
+            
+        }
+        
+    }
+    
+}
+
+- (void)contactsSelectViewController:(ContactsSelectViewController *)contactsSelectViewController didFinishWithCancel:(BOOL)didCancel selectedContacts:(NSArray *)selectedContacts {
+    if (!didCancel) {
+        NSMutableDictionary * parameters = [ActionsManagement makeFacebookEventParametersFromEvent:self.event eventImage:self.imageView.image];
+        [self.facebookManager createFacebookEventWithParameters:parameters inviteContacts:selectedContacts];
+        [self showWebLoadingViews];
+    }
+    [self dismissModalViewControllerAnimated:YES];
+}
+
+- (void) facebookEventCreateSuccess:(NSNotification *)notification {
+    if (self.view.window) {
+        // Wait until after facebook invites...
+    }
+}
+- (void) facebookEventCreateFailure:(NSNotification *)notification {
+    if (self.view.window) {
+        UIAlertView * alertView = [[UIAlertView alloc] initWithTitle:@"Facebook Connection Error" message:@"Something went wrong while trying to create an event on Facebook. Please try again." delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
+        [alertView show];
+        [alertView release];
+        [self hideWebLoadingViews];
+    }
+}
+- (void) facebookEventInviteSuccess:(NSNotification *)notification {
+    if (self.view.window) {
+        UIAlertView * alertView = [[UIAlertView alloc] initWithTitle:@"Facebook Event Created" message:@"We successfully created your Facebook event, and invited your selected friends. Have fun at the event!" delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
+        [alertView show];
+        [alertView release];
+        [self hideWebLoadingViews];
+    }
+}
+- (void) facebookEventInviteFailure:(NSNotification *)notification {
+    if (self.view.window) {
+        UIAlertView * alertView = [[UIAlertView alloc] initWithTitle:@"Facebook Connection Error" message:@"We created your Facebook event no problem, but an error occurred while inviting your friends. You should probably check things over on Facebook." delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
+        [alertView show];
+        [alertView release];    
+        [self hideWebLoadingViews];
+    }
+}
+
+
+
 
 - (void)webConnector:(WebConnector *)webConnector sendLearnedDataSuccess:(ASIHTTPRequest *)request aboutEvent:(NSString *)eventURI userAction:(NSString *)userAction {
             

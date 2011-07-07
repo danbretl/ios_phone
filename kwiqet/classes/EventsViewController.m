@@ -119,6 +119,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 @synthesize cardPageViewController;
 @synthesize indexPathOfRowAttemptingToDelete, indexPathOfSelectedRow, searchButton;
 @synthesize logoButton, tableFooterView;
+@synthesize facebookManager;
 
 - (void)dealloc {
     [filtersBackgroundView release];
@@ -151,6 +152,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     [indexPathOfSelectedRow release];
     [logoButton release];
     [tableFooterView release];
+    [facebookManager release];
     [super dealloc];
 }
 
@@ -1128,6 +1130,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     self.cardPageViewController = [[[EventViewController alloc] init] autorelease];
     self.cardPageViewController.coreDataModel = self.coreDataModel;
     self.cardPageViewController.delegate = self;
+    self.cardPageViewController.facebookManager = self.facebookManager;
     self.cardPageViewController.hidesBottomBarWhenPushed = YES;
     
     Event * event = (Event *)[self.eventsForCurrentSource objectAtIndex:indexPath.row];
