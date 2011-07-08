@@ -7,6 +7,7 @@
 //
 
 #import "FacebookViewController.h"
+#import "DefaultsModel.h"
 
 @interface FacebookViewController()
 
@@ -95,7 +96,7 @@
 }
 
 - (void)disconnectFacebookButtonTouched {
-    [self.facebookManager logout];
+    [self.facebookManager logoutAndForgetFacebookAccessToken:YES associatedWithKwiqetIdentfier:[DefaultsModel retrieveKwiqetUserIdentifierFromUserDefaults]];
 }
 
 - (void) doneButtonTouched {

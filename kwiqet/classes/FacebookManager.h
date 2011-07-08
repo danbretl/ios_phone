@@ -26,6 +26,8 @@ static NSString * const FBM_EVENT_INVITE_FRIENDS_FAILURE_KEY = @"FBM_EVENT_INVIT
     Facebook * facebook;
     CoreDataModel * coreDataModel;
     NSArray * eventInvitees;
+    BOOL shouldForgetFacebookAccessTokenOnLogout;
+    NSString * kwiqetIdentifierForWhichToForgetFacebookAccessToken;
 }
 
 @property (nonatomic, readonly) Facebook * facebook;
@@ -36,7 +38,7 @@ static NSString * const FBM_EVENT_INVITE_FRIENDS_FAILURE_KEY = @"FBM_EVENT_INVIT
 - (void) pushAuthenticationInfoToDefaults;
 - (void) authorizeWithStandardPermissionsAndDelegate:(id<FBSessionDelegate>)delegate;
 - (void) login;
-- (void) logout;
+- (void) logoutAndForgetFacebookAccessToken:(BOOL)shouldForget associatedWithKwiqetIdentfier:(NSString *)kwiqetIdentifier;
 - (void) createFacebookEventWithParameters:(NSMutableDictionary *)parameters inviteContacts:(NSArray *)contactsToInvite;
 - (void) updateFacebookFriends;
 - (void) inviteToEvent:(NSString *)eventID contacts:(NSArray *)contacts withPersonalMessage:(NSString *)personalMessage;

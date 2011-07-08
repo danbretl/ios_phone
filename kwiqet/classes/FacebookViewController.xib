@@ -55,7 +55,7 @@
 								<string key="NSFrame">{{124, 3}, {72, 37}}</string>
 								<reference key="NSSuperview" ref="230264335"/>
 								<reference key="NSWindow"/>
-								<reference key="NSNextKeyView" ref="852393079"/>
+								<reference key="NSNextKeyView" ref="321525554"/>
 								<object class="NSColor" key="IBUIBackgroundColor">
 									<int key="NSColorSpace">1</int>
 									<bytes key="NSRGB">MSAwLjAzNTM1MTYwNjYxIDAgMAA</bytes>
@@ -123,10 +123,10 @@
 					<object class="IBUILabel" id="684005617">
 						<reference key="NSNextResponder" ref="191373211"/>
 						<int key="NSvFlags">274</int>
-						<string key="NSFrame">{{20, 197}, {280, 141}}</string>
+						<string key="NSFrame">{{20, 202}, {280, 136}}</string>
 						<reference key="NSSuperview" ref="191373211"/>
 						<reference key="NSWindow"/>
-						<reference key="NSNextKeyView" ref="74835443"/>
+						<reference key="NSNextKeyView" ref="679959556"/>
 						<bool key="IBUIOpaque">NO</bool>
 						<bool key="IBUIClipsSubviews">YES</bool>
 						<int key="IBUIContentMode">7</int>
@@ -179,10 +179,10 @@
 							<string key="NSResourceName">fbdisconnect.png</string>
 						</object>
 					</object>
-					<object class="IBUIImageView" id="852393079">
+					<object class="IBUIImageView" id="321525554">
 						<reference key="NSNextResponder" ref="191373211"/>
 						<int key="NSvFlags">293</int>
-						<string key="NSFrame">{{0, 64}, {320, 125}}</string>
+						<string key="NSFrame">{{0, 69}, {320, 125}}</string>
 						<reference key="NSSuperview" ref="191373211"/>
 						<reference key="NSWindow"/>
 						<reference key="NSNextKeyView" ref="684005617"/>
@@ -194,7 +194,7 @@
 							<string key="NSResourceName">fbConnected.png</string>
 						</object>
 					</object>
-					<object class="IBUIButton" id="74835443">
+					<object class="IBUIButton" id="679959556">
 						<reference key="NSNextResponder" ref="191373211"/>
 						<int key="NSvFlags">269</int>
 						<string key="NSFrame">{{18, 346}, {284, 44}}</string>
@@ -301,7 +301,7 @@
 				<object class="IBConnectionRecord">
 					<object class="IBCocoaTouchEventConnection" key="connection">
 						<string key="label">doneButtonTouched</string>
-						<reference key="source" ref="74835443"/>
+						<reference key="source" ref="679959556"/>
 						<reference key="destination" ref="372490531"/>
 						<int key="IBEventType">7</int>
 					</object>
@@ -320,7 +320,7 @@
 					<object class="IBCocoaTouchOutletConnection" key="connection">
 						<string key="label">doneButton</string>
 						<reference key="source" ref="372490531"/>
-						<reference key="destination" ref="74835443"/>
+						<reference key="destination" ref="679959556"/>
 					</object>
 					<int key="connectionID">26</int>
 				</object>
@@ -342,8 +342,8 @@
 							<reference ref="230264335"/>
 							<reference ref="684005617"/>
 							<reference ref="232764828"/>
-							<reference ref="74835443"/>
-							<reference ref="852393079"/>
+							<reference ref="679959556"/>
+							<reference ref="321525554"/>
 						</object>
 						<reference key="parent" ref="0"/>
 					</object>
@@ -390,12 +390,12 @@
 					</object>
 					<object class="IBObjectRecord">
 						<int key="objectID">19</int>
-						<reference key="object" ref="852393079"/>
+						<reference key="object" ref="321525554"/>
 						<reference key="parent" ref="191373211"/>
 					</object>
 					<object class="IBObjectRecord">
 						<int key="objectID">20</int>
-						<reference key="object" ref="74835443"/>
+						<reference key="object" ref="679959556"/>
 						<reference key="parent" ref="191373211"/>
 					</object>
 				</object>

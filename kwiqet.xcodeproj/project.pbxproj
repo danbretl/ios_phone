@@ -228,6 +228,7 @@
 		32D970AF13C778EA00AA73AD /* fbdone_touch@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 32D970A313C778EA00AA73AD /* fbdone_touch@2x.png */; };
 		32D970B013C778EA00AA73AD /* fbdone.png in Resources */ = {isa = PBXBuildFile; fileRef = 32D970A413C778EA00AA73AD /* fbdone.png */; };
 		32D970B113C778EA00AA73AD /* fbdone@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 32D970A513C778EA00AA73AD /* fbdone@2x.png */; };
+		32D970BC13C788E500AA73AD /* CryptoUtilities.m in Sources */ = {isa = PBXBuildFile; fileRef = 32D970BB13C788E500AA73AD /* CryptoUtilities.m */; };
 		32EE74BD13B907D30002E11F /* CategoryBreadcrumb.m in Sources */ = {isa = PBXBuildFile; fileRef = 32EE74BC13B907D30002E11F /* CategoryBreadcrumb.m */; };
 		32F3092513C3BB16003930F2 /* ContactsSelectViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 32F3092313C3BB16003930F2 /* ContactsSelectViewController.m */; };
 		32F3092613C3BB16003930F2 /* ContactsSelectViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 32F3092413C3BB16003930F2 /* ContactsSelectViewController.xib */; };
@@ -533,6 +534,8 @@
 		32D970A313C778EA00AA73AD /* fbdone_touch@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "fbdone_touch@2x.png"; sourceTree = "<group>"; };
 		32D970A413C778EA00AA73AD /* fbdone.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = fbdone.png; sourceTree = "<group>"; };
 		32D970A513C778EA00AA73AD /* fbdone@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "fbdone@2x.png"; sourceTree = "<group>"; };
+		32D970BA13C788E500AA73AD /* CryptoUtilities.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CryptoUtilities.h; sourceTree = "<group>"; };
+		32D970BB13C788E500AA73AD /* CryptoUtilities.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CryptoUtilities.m; sourceTree = "<group>"; };
 		32EE74BA13B902A90002E11F /* kwiqet 003.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "kwiqet 003.xcdatamodel"; sourceTree = "<group>"; };
 		32EE74BB13B907D20002E11F /* CategoryBreadcrumb.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CategoryBreadcrumb.h; path = classes/CategoryBreadcrumb.h; sourceTree = "<group>"; };
 		32EE74BC13B907D30002E11F /* CategoryBreadcrumb.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = CategoryBreadcrumb.m; path = classes/CategoryBreadcrumb.m; sourceTree = "<group>"; };
@@ -912,6 +915,8 @@
 		32D7FEE113B0BD08005E8406 /* 3rd party */ = {
 			isa = PBXGroup;
 			children = (
+				32D970BA13C788E500AA73AD /* CryptoUtilities.h */,
+				32D970BB13C788E500AA73AD /* CryptoUtilities.m */,
 				32FD381A13AFF52F007549B6 /* ASIAuthenticationDialog.h */,
 				32FD381B13AFF52F007549B6 /* ASIAuthenticationDialog.m */,
 				32FD381C13AFF52F007549B6 /* ASICacheDelegate.h */,
@@ -1447,6 +1452,7 @@
 				32253F4413C36884004FBDD6 /* FacebookViewController.m in Sources */,
 				32253F4913C39EF1004FBDD6 /* ActionsManagement.m in Sources */,
 				32F3092513C3BB16003930F2 /* ContactsSelectViewController.m in Sources */,
+				32D970BC13C788E500AA73AD /* CryptoUtilities.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

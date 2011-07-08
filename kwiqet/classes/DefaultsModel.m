@@ -6,9 +6,18 @@
 //  Copyright 2011 N/A. All rights reserved.
 //
 
+static NSString * const DM_FACEBOOK_ACCESS_INFO_POSTFIX = @"_fbAccessInfo";
+static NSString * const DM_FACEBOOK_ACCESS_TOKEN_POSTFIX = @"_accessToken";
+static NSString * const DM_FACEBOOK_EXPIRATION_DATE_POSTFIX = @"_expirationDate";
+
 #import "DefaultsModel.h"
+#import "CryptoUtilities.h"
 
 @implementation DefaultsModel
+
++ (BOOL)isLoggedInWithKwiqet {
+    return [DefaultsModel retrieveAPIFromUserDefaults] != nil;
+}
 
 //login methods
 + (void)saveAPIToUserDefaults:(NSString*)loginString {
@@ -49,6 +58,21 @@
 }
 + (void) deleteKwiqetUserIdentifier {
     [[NSUserDefaults standardUserDefaults] removeObjectForKey:@"kwiqetUserIdentifier"];
+}
+
++ (void) saveFacebookAccessToken:(NSString *)accessToken expirationDate:(NSDate *)expirationDate attachedToKwiqetIdentifier:(NSString *)kwiqetIdentifier {
+    NSUserDefaults * defaults = [NSUserDefaults standardUserDefaults];
+    [defaults setObject:accessToken forKey:[[CryptoUtilities md5Encrypt:kwiqetIdentifier] stringByAppendingFormat:@"%@%@", DM_FACEBOOK_ACCESS_INFO_POSTFIX, DM_FACEBOOK_ACCESS_TOKEN_POSTFIX]];
+    [defaults setObject:expirationDate forKey:[[CryptoUtilities md5Encrypt:kwiqetIdentifier] stringByAppendingFormat:@"%@%@", DM_FACEBOOK_ACCESS_INFO_POSTFIX, DM_FACEBOOK_EXPIRATION_DATE_POSTFIX]];
+}
++ (NSDictionary *) retrieveFacebookAccessInfoAttachedToKwiqetIdentifier:(NSString *)kwiqetIdentifier {
+    NSString * accessToken = [[NSUserDefaults standardUserDefaults] stringForKey:[[CryptoUtilities md5Encrypt:kwiqetIdentifier] stringByAppendingFormat:@"%@%@", DM_FACEBOOK_ACCESS_INFO_POSTFIX, DM_FACEBOOK_ACCESS_TOKEN_POSTFIX]];
+    NSDate * expirationDate = (NSDate *)[[NSUserDefaults standardUserDefaults] objectForKey:[[CryptoUtilities md5Encrypt:kwiqetIdentifier] stringByAppendingFormat:@"%@%@", DM_FACEBOOK_ACCESS_INFO_POSTFIX, DM_FACEBOOK_EXPIRATION_DATE_POSTFIX]];
+    return [NSDictionary dictionaryWithObjectsAndKeys:accessToken, DM_FACEBOOK_ACCESS_INFO_DICTIONARY_ACCESS_TOKEN_KEY, expirationDate, DM_FACEBOOK_ACCESS_INFO_DICTIONARY_EXPIRATION_DATE_KEY, nil];
+}
++ (void) deleteFacebookAccessInfoAttachedToKwiqetIdentifier:(NSString *)kwiqetIdentifier {
+    [[NSUserDefaults standardUserDefaults] removeObjectForKey:[[CryptoUtilities md5Encrypt:kwiqetIdentifier] stringByAppendingFormat:@"%@%@", DM_FACEBOOK_ACCESS_INFO_POSTFIX, DM_FACEBOOK_ACCESS_TOKEN_POSTFIX]];
+    [[NSUserDefaults standardUserDefaults] removeObjectForKey:[[CryptoUtilities md5Encrypt:kwiqetIdentifier] stringByAppendingFormat:@"%@%@", DM_FACEBOOK_ACCESS_INFO_POSTFIX, DM_FACEBOOK_EXPIRATION_DATE_POSTFIX]];
 }
 
 + (void)saveBackgroundDate:(NSString*)date  {

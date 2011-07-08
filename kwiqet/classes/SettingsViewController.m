@@ -109,7 +109,8 @@
     NSDictionary * userInfo = [notification userInfo];
     NSString * action = [userInfo valueForKey:@"action"];
     if ([action isEqualToString:@"logout"]) {
-        [self.facebookManager logout]; // If user signs out of Kwiqet, then their potential Facebook connection should also be undone.
+        // If user signs out of Kwiqet, then their potential Facebook connection should also be undone. We should in this case however, hang on to the Facebook access token attached to their kwiqet id though, so that if they reconnect their kwiqet account, their Facebook connection will come back along for the ride as well.
+        [self.facebookManager logoutAndForgetFacebookAccessToken:NO associatedWithKwiqetIdentfier:nil];
     }
     [self.tableView reloadData]; // Heavyweight
 }
@@ -160,6 +161,7 @@
         
         if (buttonIndex == 0) {
             [DefaultsModel deleteAPIKey];
+            [DefaultsModel deleteKwiqetUserIdentifier];
             NSDictionary * infoDictionary = [NSDictionary dictionaryWithObjectsAndKeys:@"logout", @"action", nil];
             [[NSNotificationCenter defaultCenter] postNotificationName:@"loginActivity" object:self userInfo:infoDictionary];
             UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Logged Out" 
