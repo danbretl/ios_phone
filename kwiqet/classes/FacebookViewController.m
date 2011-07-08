@@ -15,9 +15,11 @@
 @property (retain) IBOutlet UIButton * logoButton;
 @property (retain) IBOutlet UILabel * messageLabel;
 @property (retain) IBOutlet UIButton * disconnectButton;
+@property (retain) IBOutlet UIButton * doneButton;
 
 - (IBAction) backButtonTouched;
 - (IBAction) disconnectFacebookButtonTouched;
+- (IBAction) doneButtonTouched;
 - (void) facebookAccountActivity:(NSNotification *)notification;
 
 @end
@@ -26,7 +28,7 @@
 
 @synthesize navBar, backButton, logoButton;
 @synthesize messageLabel;
-@synthesize disconnectButton;
+@synthesize disconnectButton, doneButton;
 @synthesize facebookManager;
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
@@ -45,6 +47,7 @@
     [logoButton release];
     [messageLabel release];
     [disconnectButton release];
+    [doneButton release];
     [facebookManager release];
     [super dealloc];
 }
@@ -59,13 +62,16 @@
 
 #pragma mark - View lifecycle
 
-- (void)viewDidLoad
-{
+- (void)viewDidLoad {
     [super viewDidLoad];
+    
+    self.view.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"settingsGrayTexturedBG.png"]];
     
     self.navBar.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"navbar_blank.png"]];
     
     self.messageLabel.font = [UIFont fontWithName:@"HelveticaNeueLTStd-Cn" size:16.0];
+    self.messageLabel.text = @"You have connected Kwiqet to your Facebook account, enabling you to connect, share, and plan events with your friends more easily.";
+//    self.messageLabel.backgroundColor = [UIColor yellowColor];
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(facebookAccountActivity:) name:FBM_ACCOUNT_ACTIVITY_KEY object:nil];
     
@@ -90,6 +96,10 @@
 
 - (void)disconnectFacebookButtonTouched {
     [self.facebookManager logout];
+}
+
+- (void) doneButtonTouched {
+    [self.navigationController popViewControllerAnimated:YES];
 }
 
 - (void) facebookAccountActivity:(NSNotification *)notification {

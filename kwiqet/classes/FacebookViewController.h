@@ -16,6 +16,7 @@
     IBOutlet UIButton * logoButton;
     IBOutlet UILabel * messageLabel;
     IBOutlet UIButton * disconnectButton;
+    IBOutlet UIButton * doneButton;
     
     FacebookManager * facebookManager;
     
