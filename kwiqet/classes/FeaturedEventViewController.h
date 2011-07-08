@@ -20,6 +20,7 @@
 #import "MapViewController.h"
 #import "FacebookManager.h"
 #import "WebActivityView.h"
+#import "ElasticUILabel.h"
 
 #import "ContactsSelectViewController.h"
 
@@ -41,8 +42,8 @@ extern CGFloat const FEATURED_EVENT_BACKGROUND_COLOR_ALPHA;
     UIButton * shareButton;
     UIScrollView * scrollView;
     UIImageView * imageView;
-    UIView * titleBarView;
-    UILabel * titleLabel;
+    ElasticUILabel * titleBar;
+    
     UIView * detailsView;
     UIActionSheet * letsGoChoiceActionSheet;
     WebActivityView * webActivityView;

@@ -18,7 +18,6 @@
     if (self) {
         // Initialization code
         self.backgroundColor = [UIColor clearColor];
-        self.color = [UIColor blackColor];
     }
     return self;
 }
@@ -30,8 +29,8 @@
 }
 
 - (void)setColor:(UIColor *)theColor {
-    NSLog(@"Trying to set the color");
     if (color != theColor) {
+        NSLog(@"GradientView setColor:%@", theColor);
         [color release];
         color = [theColor retain];
         [self setNeedsDisplay];
@@ -48,8 +47,6 @@
     CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
     CGFloat locations[] = { 0.0, 1.0 };
     
-//    CGColorRef startColor = [[UIColor clearColor] CGColor];
-//    CGColorRef endColor = [[UIColor redColor] CGColor];    
     CGColorRef startColor = [[self.color colorWithAlphaComponent:0.0] CGColor];
     CGColorRef endColor = [self.color CGColor];
     

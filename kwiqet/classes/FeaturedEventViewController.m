@@ -73,8 +73,7 @@ CGFloat const FEV_DESCRIPTION_LABEL_PADDING_HORIZONTAL = 20.0;
 @property (retain) UIButton * shareButton;
 @property (retain) UIScrollView * scrollView;
 @property (retain) UIImageView * imageView;
-@property (retain) UIView * titleBarView;
-@property (retain) UILabel * titleLabel;
+@property (retain) ElasticUILabel * titleBar;
 @property (retain) UIView * detailsView;
 @property (retain) UIActionSheet * letsGoChoiceActionSheet;
 @property (retain) WebActivityView * webActivityView;
@@ -107,7 +106,7 @@ CGFloat const FEV_DESCRIPTION_LABEL_PADDING_HORIZONTAL = 20.0;
 @implementation FeaturedEventViewController
 @synthesize mostRecentGetNewFeaturedEventSuggestionDate, coreDataModel, facebookManager;
 @synthesize mapViewController;
-@synthesize actionBarView, letsGoButton, shareButton, scrollView, imageView, titleBarView, titleLabel, detailsView, letsGoChoiceActionSheet, webActivityView;
+@synthesize actionBarView, letsGoButton, shareButton, scrollView, imageView, titleBar, detailsView, letsGoChoiceActionSheet, webActivityView;
 @synthesize timeLabel, dateLabel, venueNameLabel, addressFirstLineLabel, addressSecondLineLabel, phoneNumberButton, priceLabel, eventDetailsContainer, eventDetailsLabel, mapButton, noFeaturedEventView, refreshHeaderView;
 @synthesize imageFull;
 
@@ -132,8 +131,7 @@ CGFloat const FEV_DESCRIPTION_LABEL_PADDING_HORIZONTAL = 20.0;
     [shareButton release];
     [scrollView release];
     [imageView release];
-    [titleBarView release];
-    [titleLabel release];
+    [titleBar release];
     [detailsView release];
     [letsGoChoiceActionSheet release];
     [webActivityView release];
@@ -204,22 +202,12 @@ CGFloat const FEV_DESCRIPTION_LABEL_PADDING_HORIZONTAL = 20.0;
         [self.scrollView addSubview:self.imageView];
         
         // Title bar
-        self.titleBarView = [[[UIView alloc]initWithFrame:CGRectMake(0, CGRectGetMaxY(self.imageView.frame), self.scrollView.bounds.size.width, FEV_TITLE_BAR_HEIGHT)] autorelease];
-        self.titleBarView.backgroundColor = [UIColor blackColor];
-        [self.scrollView addSubview:self.titleBarView];
-        {
-            // Title Label
-            self.titleLabel = [[[UILabel alloc] initWithFrame:CGRectMake(FEV_TITLE_BAR_PADDING, FEV_TITLE_BAR_PADDING, self.titleBarView.bounds.size.width - FEV_TITLE_BAR_PADDING * 2, FEV_TITLE_LABEL_HEIGHT)] autorelease];
-            self.titleLabel.font = [UIFont fontWithName:FEV_TITLE_LABEL_FONT_NAME size:FEV_TITLE_LABEL_FONT_SIZE];
-            self.titleLabel.backgroundColor = [UIColor clearColor];
-            self.titleLabel.textColor = [UIColor whiteColor];
-            self.titleLabel.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleHeight;
-            self.titleLabel.textAlignment = UITextAlignmentLeft;
-            [self.titleBarView addSubview:self.titleLabel];
-        }
+        titleBar = [[ElasticUILabel alloc] initWithFrame:CGRectMake(0, CGRectGetMaxY(self.imageView.frame), self.scrollView.bounds.size.width, FEV_TITLE_BAR_HEIGHT)];
+        self.titleBar.color = [UIColor blackColor];
+        [self.scrollView addSubview:self.titleBar];
         
         // Event details view
-        self.detailsView = [[UIView alloc] initWithFrame:CGRectMake(0, CGRectGetMaxY(self.titleBarView.frame), self.scrollView.bounds.size.width, FEV_DETAILS_VIEW_HEIGHT)];
+        self.detailsView = [[UIView alloc] initWithFrame:CGRectMake(0, CGRectGetMaxY(self.titleBar.frame), self.scrollView.bounds.size.width, FEV_DETAILS_VIEW_HEIGHT)];
         self.detailsView.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"eotd_card.png"]];
         [self.scrollView addSubview:self.detailsView];
         {
@@ -528,15 +516,15 @@ CGFloat const FEV_DESCRIPTION_LABEL_PADDING_HORIZONTAL = 20.0;
         if (!theDescription) { theDescription = FEATURED_EVENT_DESCRIPTION_NOT_AVAILABLE; }
         
         // "Category" display color
-        UIColor * categoryColor = [UIColor colorWithWhite:25.0/255.0 alpha:1.0];
+        UIColor * categoryColor = [UIColor colorWithRed:25.0/255.0 green:25.0/255.0 blue:25.0/255.0 alpha:1.0];
         
         // Update UI
         // Background
         self.view.backgroundColor = [categoryColor colorWithAlphaComponent:FEATURED_EVENT_BACKGROUND_COLOR_ALPHA];
         // Title bar
-        self.titleBarView.backgroundColor = categoryColor;
+        self.titleBar.color = categoryColor;
         // Title text
-        self.titleLabel.text = title;
+        self.titleBar.text = title;
         // Date & Time
         self.timeLabel.text = time;
         self.timeLabel.textColor = categoryColor;

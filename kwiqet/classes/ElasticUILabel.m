@@ -55,6 +55,9 @@ CGFloat const ELASTICUILABEL_GRADIENT_VIEW_WIDTH = 45.0;
         self.gradientView.userInteractionEnabled = NO;
         [self addSubview:self.gradientView];
         [self bringSubviewToFront:self.gradientView];
+        
+        self.color = [UIColor blackColor];
+        self.text = @"";
 
     }
     return self;
@@ -89,6 +92,7 @@ CGFloat const ELASTICUILABEL_GRADIENT_VIEW_WIDTH = 45.0;
         self.label.text = self.text;
         [self.label sizeToFit];
         BOOL textIsTooBig = (self.label.frame.origin.x + self.label.bounds.size.width + 5 > self.scrollView.bounds.size.width);
+        NSLog(@"textIsTooBig?=%d", textIsTooBig);
         self.scrollView.scrollEnabled = textIsTooBig;
         self.gradientView.hidden = !textIsTooBig;
         self.scrollView.contentSize = CGSizeMake(self.label.bounds.size.width + ELASTICUILABEL_GRADIENT_VIEW_WIDTH, self.scrollView.bounds.size.height);
@@ -97,6 +101,7 @@ CGFloat const ELASTICUILABEL_GRADIENT_VIEW_WIDTH = 45.0;
 
 - (void)setColor:(UIColor *)theColor {
     if (color != theColor) {
+        NSLog(@"ElasticUILabel setColor:%@", theColor);
         [color release];
         color = [theColor retain];
         self.backgroundColor = self.color;
