@@ -14,12 +14,6 @@
 #import "DefaultsModel.h"
 #import "WebUtil.h"
 
-#define CATEGORYIMAGEVIEW_TAG 1
-#define TITLEFIELD_TAG 2
-#define LOCATIONFIELD_TAG 3
-#define DATEFIELD_TAG 4
-#define TIMEFIELD_TAG 5
-
 static NSString * const EVENTS_FILTER_RECOMMENDED = @"recommended";
 static NSString * const EVENTS_FILTER_FREE = @"free";
 static NSString * const EVENTS_FILTER_POPULAR = @"popular";
@@ -1169,7 +1163,11 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     
     // Display an internet connection error message
     if ([userAction isEqualToString:@"V"] && self.cardPageViewController) {
-        [self.connectionErrorStandardAlertView show];
+        NSLog(@"foo");
+        if (![self.connectionErrorStandardAlertView isVisible]) {
+            NSLog(@"foospecial");
+            [self.connectionErrorStandardAlertView show];            
+        }
         //[self presentModalViewController:self.cardPageViewController animated:YES];
     } else if ([userAction isEqualToString:@"X"]) {
         [self.connectionErrorOnDeleteAlertView show];

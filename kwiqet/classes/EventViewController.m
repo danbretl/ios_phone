@@ -452,9 +452,12 @@
 	NSLog(@"%@", statusMessage);
 	NSError *error = [request error];
 	NSLog(@"%@", error);
-    UIAlertView * alertView = [[UIAlertView alloc] initWithTitle:@"Connection Error" message:WEB_CONNECTION_ERROR_MESSAGE_STANDARD delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil];
-    [alertView show];
-    [alertView release];
+    NSLog(@"EventViewController getEventFailure");
+    if (self.view.window) {
+        UIAlertView * alertView = [[UIAlertView alloc] initWithTitle:@"Connection Error" message:WEB_CONNECTION_ERROR_MESSAGE_STANDARD delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil];
+        [alertView show];
+        [alertView release];
+    }
     [self viewControllerIsFinished];
     [self hideWebLoadingViews];
 }
