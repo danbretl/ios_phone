@@ -68,7 +68,7 @@ static NSString * const FBM_REQUEST_INVITE_FRIENDS_TO_EVENT = @"fbmRequestTypeIn
 }
 
 - (void)authorizeWithStandardPermissionsAndDelegate:(id<FBSessionDelegate>)delegate {
-    NSArray * permissions = [NSArray arrayWithObjects:@"user_events", @"create_event", @"rsvp_event", @"user_likes", @"user_interests", @"user_religion_politics", nil];
+    NSArray * permissions = [NSArray arrayWithObjects:@"user_events", @"create_event", @"rsvp_event", @"user_likes", @"user_interests", @"user_religion_politics", @"offline_access", nil];
     [self.fb authorize:permissions delegate:delegate];
 }
 

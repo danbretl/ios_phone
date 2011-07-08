@@ -63,6 +63,8 @@ extern CGFloat const FEATURED_EVENT_BACKGROUND_COLOR_ALPHA;
     // Map stuff
     MapViewController * mapViewController;
     
+    UIImage * imageFull;
+    
 }
 
 @property (nonatomic, readonly) WebConnector * webConnector;

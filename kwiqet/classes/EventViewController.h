@@ -75,6 +75,7 @@
 //    BOOL loadedImage;
     UIActionSheet * letsGoChoiceActionSheet;
     FacebookManager * facebookManager;
+    UIImage * imageFull;
 
 }
 

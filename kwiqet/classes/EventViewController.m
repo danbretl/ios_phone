@@ -54,6 +54,7 @@
 @property (nonatomic, readonly) WebConnector * webConnector;
 @property (nonatomic, readonly) WebDataTranslator * webDataTranslator;
 @property (nonatomic, readonly) UIAlertView * connectionErrorOnUserActionRequestAlertView;
+@property (retain) UIImage * imageFull;
 - (void)displayImage:(UIImage *)image;
 
 - (void) backButtonTouched;
@@ -63,6 +64,11 @@
 - (void) deleteButtonTouched;
 - (void) phoneButtonTouched;
 - (void) mapButtonTouched;
+
+- (void) facebookEventCreateSuccess:(NSNotification *)notification;
+- (void) facebookEventCreateFailure:(NSNotification *)notification;
+- (void) facebookEventInviteSuccess:(NSNotification *)notification;
+- (void) facebookEventInviteFailure:(NSNotification *)notification;
 
 @end
 
@@ -85,6 +91,7 @@
 @synthesize mapViewController;
 @synthesize letsGoChoiceActionSheet;
 @synthesize facebookManager;
+@synthesize imageFull;
 
 - (void)dealloc {
     [event release];
@@ -124,6 +131,7 @@
     [webDataTranslator release];
     [letsGoChoiceActionSheet release];
     [facebookManager release];
+    [imageFull release];
     [super dealloc];
 	
 }
@@ -392,16 +400,24 @@
     if (self.event) {
         [self updateViewsFromData];
     }
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(facebookEventCreateSuccess:) name:FBM_CREATE_EVENT_SUCCESS_KEY object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(facebookEventCreateFailure:) name:FBM_CREATE_EVENT_FAILURE_KEY object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(facebookEventInviteSuccess:) name:FBM_EVENT_INVITE_FRIENDS_SUCCESS_KEY object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(facebookEventInviteFailure:) name:FBM_EVENT_INVITE_FRIENDS_FAILURE_KEY object:nil];
+    
 }
 
 -(void) showWebLoadingViews  {
-    if (self.view.window) {
+//    NSLog(@"showWebLoadingViews");
+//    if (self.view.window) {
+//        NSLog(@"self.view.window");
         // ACTIVITY VIEWS
         [self.view bringSubviewToFront:self.webActivityView];
         [self.webActivityView showAnimated:YES];
         // USER INTERACTION
         self.view.userInteractionEnabled = NO;
-    }
+//    }
 }
 
 -(void)hideWebLoadingViews  {
@@ -692,6 +708,7 @@
         //    loadedImage = YES;
     }
     NSLog(@"EventViewController loadImage with imageLocation=%@", imageLocation); // -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+    self.imageFull = image;
 	[self performSelectorOnMainThread:@selector(displayImage:) withObject:image waitUntilDone:NO];
 }
 
@@ -782,7 +799,7 @@
 
 - (void)contactsSelectViewController:(ContactsSelectViewController *)contactsSelectViewController didFinishWithCancel:(BOOL)didCancel selectedContacts:(NSArray *)selectedContacts {
     if (!didCancel) {
-        NSMutableDictionary * parameters = [ActionsManagement makeFacebookEventParametersFromEvent:self.event eventImage:self.imageView.image];
+        NSMutableDictionary * parameters = [ActionsManagement makeFacebookEventParametersFromEvent:self.event eventImage:self.imageFull];
         [self.facebookManager createFacebookEventWithParameters:parameters inviteContacts:selectedContacts];
         [self showWebLoadingViews];
     }

@@ -91,6 +91,7 @@ CGFloat const FEV_DESCRIPTION_LABEL_PADDING_HORIZONTAL = 20.0;
 @property (retain) UILabel * eventDetailsLabel;
 @property (retain) UIButton * mapButton;
 @property (retain) UIView * noFeaturedEventView;
+@property (retain) UIImage * imageFull;
 
 - (void) mapButtonTouched;
 - (void) shareButtonTouched;
@@ -108,6 +109,7 @@ CGFloat const FEV_DESCRIPTION_LABEL_PADDING_HORIZONTAL = 20.0;
 @synthesize mapViewController;
 @synthesize actionBarView, letsGoButton, shareButton, scrollView, imageView, titleBarView, titleLabel, detailsView, letsGoChoiceActionSheet, webActivityView;
 @synthesize timeLabel, dateLabel, venueNameLabel, addressFirstLineLabel, addressSecondLineLabel, phoneNumberButton, priceLabel, eventDetailsContainer, eventDetailsLabel, mapButton, noFeaturedEventView, refreshHeaderView;
+@synthesize imageFull;
 
 #pragma mark -
 #pragma mark Initialization
@@ -154,6 +156,8 @@ CGFloat const FEV_DESCRIPTION_LABEL_PADDING_HORIZONTAL = 20.0;
     [mapButton release];
     [noFeaturedEventView release];
     [refreshHeaderView release];
+    
+    [imageFull release];
     
     [super dealloc];
 }
@@ -638,6 +642,7 @@ CGFloat const FEV_DESCRIPTION_LABEL_PADDING_HORIZONTAL = 20.0;
         }
     }
     
+    self.imageFull = image;
     [self performSelectorOnMainThread:@selector(displayImage:) withObject:image waitUntilDone:NO];
     
 }
@@ -727,7 +732,7 @@ CGFloat const FEV_DESCRIPTION_LABEL_PADDING_HORIZONTAL = 20.0;
 - (void)contactsSelectViewController:(ContactsSelectViewController *)contactsSelectViewController didFinishWithCancel:(BOOL)didCancel selectedContacts:(NSArray *)selectedContacts {
     if (!didCancel) {
         
-        NSMutableDictionary * parameters = [ActionsManagement makeFacebookEventParametersFromEvent:[self.coreDataModel getFeaturedEvent] eventImage:self.imageView.image];
+        NSMutableDictionary * parameters = [ActionsManagement makeFacebookEventParametersFromEvent:[self.coreDataModel getFeaturedEvent] eventImage:self.imageFull];
         [self.facebookManager createFacebookEventWithParameters:parameters inviteContacts:selectedContacts];
         [self showWebActivityView];
     }
