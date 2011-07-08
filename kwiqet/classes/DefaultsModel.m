@@ -9,6 +9,7 @@
 static NSString * const DM_FACEBOOK_ACCESS_INFO_POSTFIX = @"_fbAccessInfo";
 static NSString * const DM_FACEBOOK_ACCESS_TOKEN_POSTFIX = @"_accessToken";
 static NSString * const DM_FACEBOOK_EXPIRATION_DATE_POSTFIX = @"_expirationDate";
+static NSString * const DM_TAB_BAR_SELECTED_INDEX_KEY = @"DM_TAB_BAR_SELECTED_INDEX_KEY";
 
 #import "DefaultsModel.h"
 #import "CryptoUtilities.h"
@@ -137,6 +138,14 @@ static NSString * const DM_FACEBOOK_EXPIRATION_DATE_POSTFIX = @"_expirationDate"
         lastFeaturedEventGetDate = (NSDate*)[standardUserDefaults objectForKey:key];
     }
     return lastFeaturedEventGetDate;
+}
+
++ (void) saveTabBarSelectedIndex:(NSUInteger)index {
+    [[NSUserDefaults standardUserDefaults] setInteger:index forKey:DM_TAB_BAR_SELECTED_INDEX_KEY];
+}
+
++ (NSUInteger) loadTabBarSelectedIndex {
+    return [[NSUserDefaults standardUserDefaults] integerForKey:DM_TAB_BAR_SELECTED_INDEX_KEY];
 }
 
 @end

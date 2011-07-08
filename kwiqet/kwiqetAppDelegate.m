@@ -81,11 +81,13 @@
         self.tabBarController.viewControllers = [NSArray arrayWithObjects:self.featuredEventViewController, self.eventsNavController, self.settingsNavController, nil];
         [self.window addSubview:tabBarController.view];
         [self.window bringSubviewToFront:self.splashScreenViewController.view]; // Make sure the splash screen stays in front
-        
+
         // Taking care of assorted things...
         application.applicationSupportsShakeToEdit = YES; // This is the default iOS behavior. Any reason for setting it explicitly?
         
         [self.facebookManager pullAuthenticationInfoFromDefaults];
+        
+        self.tabBarController.selectedIndex = [DefaultsModel loadTabBarSelectedIndex];
         
     } else {
         
@@ -262,6 +264,8 @@
     [self saveContext];
     
     [self.splashScreenViewController showConnectionErrorTextView:NO animated:NO];
+    
+    [DefaultsModel saveTabBarSelectedIndex:self.tabBarController.selectedIndex];
 }
 
 
@@ -279,6 +283,8 @@
     [self.featuredEventViewController tempSolutionResetAndEnableLetsGoButton];
     [self.featuredEventViewController suggestToGetNewFeaturedEvent]; NSLog(@"FROM THE APP DELEGATE LINE 189");
     [self.eventsViewController suggestToRedrawEventsList];
+    
+//    self.tabBarController.selectedIndex = [DefaultsModel loadTabBarSelectedIndex]; // Duh - we get this for free with multitasking.
     
 }
 

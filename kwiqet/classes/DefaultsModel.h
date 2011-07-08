@@ -43,4 +43,7 @@ static NSString * const DM_FACEBOOK_ACCESS_INFO_DICTIONARY_EXPIRATION_DATE_KEY =
 + (void) saveDate:(NSDate *)date withKey:(NSString *)key;
 + (NSDate *) loadDateWithKey:(NSString *)key;
 
++ (void) saveTabBarSelectedIndex:(NSUInteger)index;
++ (NSUInteger) loadTabBarSelectedIndex;
+
 @end
