@@ -177,8 +177,7 @@
                                               cancelButtonTitle:@"Ok" otherButtonTitles:nil]; 
         [alert show]; 
         [alert release];
-    }
-    else {
+    } else {
         //save the api key in nsuserdefaults
         [DefaultsModel saveAPIToUserDefaults:responseString];
         [DefaultsModel saveKwiqetUserIdentifierToUserDefaults:self.usernameField.text]; // TEMPORARY HACK - IN FUTURE, WE WILL GET THE USER IDENTIFIER FROM OUR WEB CALL RESPONSE, JUST THE SAME AS HOW WE'RE GETTING THE API KEY
