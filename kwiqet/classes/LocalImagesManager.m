@@ -7,9 +7,11 @@
 //
 
 #import "LocalImagesManager.h"
+#import "CryptoUtilities.h"
 
 static NSString * const LOCAL_IMAGES_MANAGER_SAVED_IMAGES_ROOT_FOLDER_PATH = @"SavedImages/";
 static NSString * const LOCAL_IMAGES_MANAGER_FEATURED_EVENT_IMAGES_PATH = @"FeaturedEventImages/";
+static NSString * const LOCAL_IMAGES_MANAGER_EVENT_IMAGES_PATH = @"EventImages/";
 
 @implementation LocalImagesManager
 
@@ -81,8 +83,10 @@ static NSString * const LOCAL_IMAGES_MANAGER_FEATURED_EVENT_IMAGES_PATH = @"Feat
     return [fileManager fileExistsAtPath:fullPath];
 }
 
+
+
 + (void) saveFeaturedEventImageData:(NSData *)imageData imageName:(NSString *)imageName {
-    [self saveImageData:imageData extraPath:(NSString *)LOCAL_IMAGES_MANAGER_FEATURED_EVENT_IMAGES_PATH imageName:imageName];
+    [self saveImageData:imageData extraPath:LOCAL_IMAGES_MANAGER_FEATURED_EVENT_IMAGES_PATH imageName:imageName];
 }
 
 + (void) removeFeaturedEventImage:(NSString*)imageName {
@@ -95,6 +99,19 @@ static NSString * const LOCAL_IMAGES_MANAGER_FEATURED_EVENT_IMAGES_PATH = @"Feat
 
 + (BOOL) featuredEventImageExistsWithName:(NSString*)imageName {
     return [self imageExistsAtPath:[NSString stringWithFormat:@"%@%@", LOCAL_IMAGES_MANAGER_FEATURED_EVENT_IMAGES_PATH, imageName]];
+}
+
++ (void) saveEventImageData:(NSData *)imageData sourceLocation:(NSString *)imageSourceLocation {
+    [self saveImageData:imageData extraPath:LOCAL_IMAGES_MANAGER_EVENT_IMAGES_PATH imageName:[imageSourceLocation stringByReplacingOccurrencesOfString:@"/" withString:@""]];
+}
++ (void) removeEventImageDataFromSourceLocation:(NSString *)imageSourceLocation {
+    [self removeImage:[NSString stringWithFormat:@"%@%@", LOCAL_IMAGES_MANAGER_EVENT_IMAGES_PATH, [imageSourceLocation stringByReplacingOccurrencesOfString:@"/" withString:@""]]];
+}
++ (UIImage *) loadEventImageDataFromSourceLocation:(NSString *)imageSourceLocation {
+    return [self loadImage:[NSString stringWithFormat:@"%@%@", LOCAL_IMAGES_MANAGER_EVENT_IMAGES_PATH, [imageSourceLocation stringByReplacingOccurrencesOfString:@"/" withString:@""]]];
+}
++ (BOOL) eventImageExistsFromSourceLocation:(NSString *)imageSourceLocation {
+    return [self imageExistsAtPath:[NSString stringWithFormat:@"%@%@", LOCAL_IMAGES_MANAGER_EVENT_IMAGES_PATH, [imageSourceLocation stringByReplacingOccurrencesOfString:@"/" withString:@""]]];
 }
 
 @end

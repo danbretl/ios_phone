@@ -14,6 +14,7 @@
 #import "WebUtil.h"
 #import <QuartzCore/QuartzCore.h>
 #import "ActionsManagement.h"
+#import "LocalImagesManager.h"
 
 #define CGFLOAT_MAX_TEXT_SIZE 10000
 
@@ -55,7 +56,9 @@
 @property (nonatomic, readonly) WebDataTranslator * webDataTranslator;
 @property (nonatomic, readonly) UIAlertView * connectionErrorOnUserActionRequestAlertView;
 @property (retain) UIImage * imageFull;
-- (void)displayImage:(UIImage *)image;
+@property (retain) NSURLConnection * loadImageURLConnection;
+@property (retain) NSMutableData * loadImageData;
+- (void) displayImage:(UIImage *)image;
 
 - (void) backButtonTouched;
 - (void) logoButtonTouched;
@@ -64,6 +67,7 @@
 - (void) deleteButtonTouched;
 - (void) phoneButtonTouched;
 - (void) mapButtonTouched;
+- (void) loadImage;
 
 - (void) facebookEventCreateSuccess:(NSNotification *)notification;
 - (void) facebookEventCreateFailure:(NSNotification *)notification;
@@ -92,6 +96,7 @@
 @synthesize letsGoChoiceActionSheet;
 @synthesize facebookManager;
 @synthesize imageFull;
+@synthesize loadImageURLConnection, loadImageData;
 
 - (void)dealloc {
     [event release];
@@ -132,6 +137,8 @@
     [letsGoChoiceActionSheet release];
     [facebookManager release];
     [imageFull release];
+    [loadImageURLConnection release];
+    [loadImageData release];
     [super dealloc];
 	
 }
@@ -343,10 +350,13 @@
                 self.phoneNumberButton = [UIButton buttonWithType:UIButtonTypeCustom];
                 self.phoneNumberButton.frame = CGRectMake(10, 135, 150, 20);
                 [self.phoneNumberButton setTitleColor:[UIColor colorWithRed:0.2549 green:0.41568 blue:0.70196 alpha:1.0] forState:UIControlStateNormal];
+                [self.phoneNumberButton setTitleColor:[UIColor colorWithRed:0.2549 green:0.41568 blue:0.70196 alpha:0.5] forState:UIControlStateDisabled];
                 [self.phoneNumberButton addTarget:self action:@selector(phoneButtonTouched) forControlEvents:UIControlEventTouchUpInside];
                 self.phoneNumberButton.backgroundColor = [UIColor clearColor];
                 self.phoneNumberButton.titleLabel.font = [UIFont fontWithName:@"HelveticaNeueLTStd-BdCn" size:12];
                 self.phoneNumberButton.contentHorizontalAlignment = UIControlContentHorizontalAlignmentLeft;
+                self.phoneNumberButton.userInteractionEnabled = NO;
+                self.phoneNumberButton.enabled = NO;
                 [self.eventInfoDividerView addSubview:self.phoneNumberButton];
                 
                 // Map button
@@ -529,8 +539,11 @@
     self.mapButton.enabled = self.event.latitude && self.event.longitude;
     
     // Phone
-    NSString * phone = self.event.phone ? self.event.phone : EVENT_PHONE_NOT_AVAILABLE;
+    BOOL havePhoneNumber = self.event.phone != nil && [self.event.phone length] > 0;
+    NSString * phone = havePhoneNumber ? self.event.phone : EVENT_PHONE_NOT_AVAILABLE;
     [self.phoneNumberButton setTitle:phone forState:UIControlStateNormal];
+    self.phoneNumberButton.userInteractionEnabled = havePhoneNumber;
+    self.phoneNumberButton.enabled = havePhoneNumber;
     
     // Description
     NSString * descriptionString = self.event.details ? self.event.details : EVENT_DESCRIPTION_NOT_AVAILABLE;
@@ -540,13 +553,13 @@
     CGRect detailsLabelFrame = self.detailsLabel.frame;
     detailsLabelFrame.size.height = detailsLabelSize.height;
     self.detailsLabel.frame = detailsLabelFrame;
-    NSLog(@"%@", NSStringFromCGRect(self.detailsLabel.frame));
+//    NSLog(@"%@", NSStringFromCGRect(self.detailsLabel.frame));
     CGRect detailsContainerFrame = self.detailsContainer.frame;
     detailsContainerFrame.size.height = CGRectGetMaxY(self.detailsLabel.frame) + self.detailsLabel.frame.origin.y - 6; // TEMPORARY HACK, INFERRING THAT THE ORIGIN Y OF THE DETAILS LABEL IS EQUAL TO THE VERTICAL PADDING WE SHOULD GIVE UNDER THAT LABEL. // EVEN WORSE TEMPORARY HACK, HARDCODING AN OFFSET BECAUSE PUTTING EQUAL PADDING AFTER AS BEFORE DOES NOT LOOK EVEN.
     self.detailsContainer.frame = detailsContainerFrame;
     self.detailsContainerShadowCheat.frame = self.detailsContainer.frame;
     [self.scrollView setContentSize:CGSizeMake(self.scrollView.bounds.size.width, CGRectGetMaxY(self.detailsContainer.frame))];
-    NSLog(@"%@", NSStringFromCGSize(self.scrollView.contentSize));
+//    NSLog(@"%@", NSStringFromCGSize(self.scrollView.contentSize));
     
     // Breadcrumbs
     NSMutableString * breadcrumbsString = [self.event.concreteParentCategory.title mutableCopy];
@@ -556,24 +569,81 @@
     }
     self.breadcrumbsLabel.text = breadcrumbsString;
     
+    [self loadImage];
     
-//    if (!self.imageView.image) {
-//        [self displayImage:[UIImage imageNamed:@"event_img_placeholder.png"]];
-//    }
-	// If an image has not already been successfully loaded and set, then attempt to load and set an image for this event.
-//    if (!loadedImage) {
-    if(!self.imageView.image) {
-        NSOperationQueue *queue = [[NSOperationQueue alloc]init];
-        NSInvocationOperation *operation = [[NSInvocationOperation alloc] 
-                                            initWithTarget:self
-                                            selector:@selector(loadImage) 
-                                            object:nil];
-        
-        [queue addOperation:operation];
-        [operation release];
-        [queue release];
+}
+
+- (NSURL *) imageURLForEvent:(Event *)theEvent {
+    NSMutableString * urlString = [NSMutableString string];
+    URLBuilder * urlBuilder = [[URLBuilder alloc] init];
+    [urlString appendString:urlBuilder.baseURL];
+    [urlBuilder release];
+    [urlString appendString:theEvent.imageLocation];
+    NSURL * url = [NSURL URLWithString:urlString];
+    NSLog(@"EventViewController imageURLForEvent %@", urlString);
+    return url;
+}
+
+- (void)loadImage {
+    
+    NSString * imageLocation = self.event.imageLocation;
+    
+    if (imageLocation != nil) {
+        // First, check to see if the image has been saved locally
+        BOOL imageExistsLocally = [LocalImagesManager eventImageExistsFromSourceLocation:imageLocation];
+        if (imageExistsLocally) {
+            self.imageFull = [LocalImagesManager loadEventImageDataFromSourceLocation:imageLocation];
+            NSLog(@"EventViewController about to displayImage from loadImage when image is saved locally");
+            [self displayImage:self.imageFull];
+        } else {
+            NSURL * imageURL = [self imageURLForEvent:self.event];
+            NSURLRequest * request = [NSURLRequest requestWithURL:imageURL];
+            self.loadImageData = nil;
+            self.loadImageURLConnection = [[[NSURLConnection alloc] initWithRequest:request delegate:self] autorelease];   
+        }
+    } else {
+        self.imageFull = [UIImage imageNamed:@"event_img_placeholder.png"];
+        NSLog(@"EventViewController about to displayImage from loadImage when imageLocation is nil");
+        [self displayImage:self.imageFull];
     }
-    
+
+}
+
+- (void)connection:(NSURLConnection *)connection didReceiveData:(NSData *)data {
+    if (connection == self.loadImageURLConnection) {
+        if (self.loadImageData == nil) {
+            self.loadImageData = [NSMutableData data];
+        }
+        [self.loadImageData appendData:data];
+    }
+}
+
+- (void)connectionDidFinishLoading:(NSURLConnection *)connection {
+    NSLog(@"EventViewController connectionDidFinishLoading:%@", connection);
+    self.imageFull = [UIImage imageWithData:self.loadImageData];
+    [LocalImagesManager saveEventImageData:self.loadImageData sourceLocation:self.event.imageLocation];
+    NSLog(@"EventViewController about to displayImage from connectionDidFinishLoading");
+    [self displayImage:self.imageFull];
+    self.loadImageData = nil;
+    self.loadImageURLConnection = nil;
+}
+
+- (void)connection:(NSURLConnection *)connection didFailWithError:(NSError *)error {
+    if (connection == self.loadImageURLConnection) {
+        self.imageFull = [UIImage imageNamed:@"event_img_placeholder.png"];
+        NSLog(@"EventViewController about to displayImage from connection...didFailWithError, using placeholder image");
+        [self displayImage:self.imageFull];
+        self.loadImageData = nil;
+        self.loadImageURLConnection = nil;
+    }
+}
+
+- (void)displayImage:(UIImage *)image {
+    //NSLog(@"image is %f by %f", image.size.width, image.size.height);
+    NSLog(@"EventViewController displayImage:%@ (%fx%f)", image, image.size.width, image.size.height);
+	[self.imageView setImage:image];
+    [self.scrollView bringSubviewToFront:self.titleBar];
+    [self.scrollView bringSubviewToFront:self.titleBarBorderCheatView];
 }
 
 - (WebConnector *) webConnector {
@@ -600,13 +670,13 @@
     NSString * descriptionText = [WebUtil stringOrNil:[rawEventDictionary objectForKey:@"description"]];
     
     NSString * startDate = [WebUtil stringOrNil:[firstOccurrenceDictionary objectForKey:@"start_date"]];
-    NSLog(@"startDate:%@", startDate);
+//    NSLog(@"startDate:%@", startDate);
     NSString * endDate = [WebUtil stringOrNil:[firstOccurrenceDictionary objectForKey:@"end_date"]];
-    NSLog(@"endDate:%@", endDate);
+//    NSLog(@"endDate:%@", endDate);
     NSString * startTime = [WebUtil stringOrNil:[firstOccurrenceDictionary objectForKey:@"start_time"]];
-    NSLog(@"startTime:%@", startTime);
+//    NSLog(@"startTime:%@", startTime);
     NSString * endTime = [WebUtil stringOrNil:[firstOccurrenceDictionary objectForKey:@"end_time"]];
-    NSLog(@"endTime:%@", endTime);
+//    NSLog(@"endTime:%@", endTime);
     
     // Date and time
     NSDictionary * startAndEndDatetimesDictionary = [self.webDataTranslator datetimesSummaryFromStartTime:startTime endTime:endTime startDate:startDate endDate:endDate];
@@ -616,7 +686,7 @@
     NSNumber * startTimeValid = [startAndEndDatetimesDictionary valueForKey:WDT_START_TIME_VALID_KEY];
     NSNumber * endDateValid = [startAndEndDatetimesDictionary valueForKey:WDT_END_DATE_VALID_KEY];
     NSNumber * endTimeValid = [startAndEndDatetimesDictionary valueForKey:WDT_END_TIME_VALID_KEY];
-    NSLog(@"%@", startAndEndDatetimesDictionary);
+//    NSLog(@"%@", startAndEndDatetimesDictionary);
     
     // Price
     NSArray * priceArray = [firstOccurrenceDictionary objectForKey:@"prices"];
@@ -674,52 +744,16 @@
     if (descriptionText) { [wellFormattedDataDictionary setValue:descriptionText forKey:@"details"]; }
     if (imageLocation) { [wellFormattedDataDictionary setValue:imageLocation forKey:@"imageLocation"]; }
     
-    NSLog(@"%@", wellFormattedDataDictionary);
+//    NSLog(@"%@", wellFormattedDataDictionary);
     
     return wellFormattedDataDictionary;
 }
 
 - (void) swipedToGoBack:(UISwipeGestureRecognizer *)swipeGesture {
-    NSLog(@"foo");
+//    NSLog(@"foo");
     if (swipeGesture.direction == UISwipeGestureRecognizerDirectionRight) {
         [self viewControllerIsFinished];
     }
-}
-
-//methods for asychronous loading of imageView.  takes url from dictionary
-- (void)loadImage {
-    //build url
-    NSString *urlplist = [[NSBundle mainBundle] pathForResource:@"urls" ofType:@"plist"];
-    NSDictionary * urlDictionary = [NSDictionary dictionaryWithContentsOfFile:urlplist];
-    NSString * url = [urlDictionary valueForKey:@"base_url"];
-    NSString * imageLocation = self.event.imageLocation;
-    UIImage * image = nil;
-    // Check if image location is nil - if it is, default to the concrete parent category image
-    NSLog(@"%@", self.event.concreteParentCategory);
-    if (imageLocation == nil) {
-        NSLog(@"Using concrete parent category thumbnail");
-        imageLocation = self.event.concreteParentCategory.thumbnail;
-    }
-    // If there is no image, then use a placeholder image.
-    if (imageLocation == nil) {
-        NSLog(@"ERROR in EventViewController loadImage - can't find image location. Event is %@ (imageLoc = %@), Category is %@ (imageLoc = %@)", self.event.title, self.event.imageLocation, self.event.concreteParentCategory.title, self.event.concreteParentCategory.thumbnail);
-        image = [UIImage imageNamed:@"event_img_placeholder.png"];
-    } else {
-        NSString * imageURL = [url stringByAppendingString:imageLocation];
-        NSData * imageData = [NSData dataWithContentsOfURL:[NSURL URLWithString:imageURL]];
-        image = [UIImage imageWithData:imageData];
-        //    loadedImage = YES;
-    }
-    NSLog(@"EventViewController loadImage with imageLocation=%@", imageLocation); // -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-    self.imageFull = image;
-	[self performSelectorOnMainThread:@selector(displayImage:) withObject:image waitUntilDone:NO];
-}
-
-- (void)displayImage:(UIImage *)image {
-    //NSLog(@"image is %f by %f", image.size.width, image.size.height);
-	[self.imageView setImage:image];
-    [self.scrollView bringSubviewToFront:self.titleBar];
-    [self.scrollView bringSubviewToFront:self.titleBarBorderCheatView];
 }
 
 -(void)shareButtonTouched {

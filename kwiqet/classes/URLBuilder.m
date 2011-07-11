@@ -34,6 +34,12 @@ static NSString * const URL_BUILDER_GET_EVENTS_LIST_FILTER_POPULAR = @"popular";
     return baseURLKey;
 }
 
+- (NSString *)baseURL {
+    NSDictionary * urlDictionary = [NSDictionary dictionaryWithContentsOfFile:[[NSBundle mainBundle] pathForResource:@"urls" ofType:@"plist"]];
+    NSString * baseURL = [urlDictionary valueForKey:self.baseURLKey];
+    return baseURL;
+}
+
 /////////////
 // SECURITY
 

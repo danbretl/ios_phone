@@ -76,6 +76,8 @@
     UIActionSheet * letsGoChoiceActionSheet;
     FacebookManager * facebookManager;
     UIImage * imageFull;
+    NSURLConnection * loadImageURLConnection;
+    NSMutableData * loadImageData;
 
 }
 
