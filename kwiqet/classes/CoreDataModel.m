@@ -260,20 +260,20 @@
     
     // Date and time
     NSString * startDate = [WebUtil stringOrNil:[firstOccurrenceDictionary objectForKey:@"start_date"]];
-    NSLog(@"startDate:%@", startDate);
+//    NSLog(@"startDate:%@", startDate);
     NSString * endDate = [WebUtil stringOrNil:[firstOccurrenceDictionary objectForKey:@"end_date"]];
-    NSLog(@"endDate:%@", endDate);
+//    NSLog(@"endDate:%@", endDate);
     NSString * startTime = [WebUtil stringOrNil:[firstOccurrenceDictionary objectForKey:@"start_time"]];
-    NSLog(@"startTime:%@", startTime);
+//    NSLog(@"startTime:%@", startTime);
     // THE FOLLOWING IS A TEMPORARY HACK COVERING UP THE FACT THAT OUR SCRAPES ARE NOT DEALING WITH THE FACT THAT VILLAGE VOICE INPUTS A TIME OF 00:00:00 WHEN THEY DON'T HAVE A VALID TIME. THUS, WE ARE CURRENTLY HACKISHLY ASSUMING THAT ANY TIME OF 00:00:00 MEANS AN INVALID UNKNOWN TIME.
     if ([startTime isEqualToString:@"00:00:00"]) {
         startTime = nil;
     }
     NSString * endTime = [WebUtil stringOrNil:[firstOccurrenceDictionary objectForKey:@"end_time"]];
-    NSLog(@"endTime:%@", endTime);
+//    NSLog(@"endTime:%@", endTime);
     // Date and time (continued)
     NSDictionary * startAndEndDatetimesDictionary = [self.webDataTranslator datetimesSummaryFromStartTime:startTime endTime:endTime startDate:startDate endDate:endDate];
-    NSLog(@"%@", startAndEndDatetimesDictionary);
+//    NSLog(@"%@", startAndEndDatetimesDictionary);
     NSDate * startDatetime = (NSDate *)[startAndEndDatetimesDictionary objectForKey:WDT_START_DATETIME_KEY];
     NSDate * endDatetime = (NSDate *)[startAndEndDatetimesDictionary objectForKey:WDT_END_DATETIME_KEY];
     NSNumber * startDateValid = [startAndEndDatetimesDictionary valueForKey:WDT_START_DATE_VALID_KEY];

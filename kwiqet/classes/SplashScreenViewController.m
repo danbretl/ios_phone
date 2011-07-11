@@ -74,7 +74,7 @@ CGFloat const SPLASH_SCREEN_ERROR_CONNECTION_MESSAGE_SHOW_ANIMATION_DURATION = 0
 #pragma mark - Custom methods
 
 - (void)explodeAndFadeViewAnimated {
-    NSLog(@"SplashScreenViewController explodeAndFadeViewAnimated");
+//    NSLog(@"SplashScreenViewController explodeAndFadeViewAnimated");
     CGRect imageViewFrame = self.imageView.frame;
     CGFloat imageViewFrameExplodedWidth = floorf(imageViewFrame.size.width * SPLASH_SCREEN_EXPLOSION_SCALE);
     CGFloat imageViewFrameExplodedHeight = floorf(imageViewFrame.size.height * SPLASH_SCREEN_EXPLOSION_SCALE);

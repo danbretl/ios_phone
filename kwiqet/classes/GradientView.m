@@ -30,7 +30,7 @@
 
 - (void)setColor:(UIColor *)theColor {
     if (color != theColor) {
-        NSLog(@"GradientView setColor:%@", theColor);
+//        NSLog(@"GradientView setColor:%@", theColor);
         [color release];
         color = [theColor retain];
         [self setNeedsDisplay];
@@ -40,7 +40,7 @@
 // Only override drawRect: if you perform custom drawing.
 // An empty implementation adversely affects performance during animation.
 - (void)drawRect:(CGRect)rect {
-    NSLog(@"drawrect");
+//    NSLog(@"drawrect");
     
     CGContextRef context = UIGraphicsGetCurrentContext();
     
