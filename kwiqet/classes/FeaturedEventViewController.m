@@ -276,7 +276,9 @@ CGFloat const FEV_DESCRIPTION_LABEL_PADDING_HORIZONTAL = 20.0;
             phoneNumberButtonFrame.origin.x = self.detailsView.frame.size.width - FEV_PHONE_BUTTON_PADDING_RIGHT - phoneNumberButtonFrame.size.width;
             self.phoneNumberButton.frame = phoneNumberButtonFrame;
             self.phoneNumberButton.userInteractionEnabled = NO;
-            [self.phoneNumberButton setTitleColor:[UIColor colorWithRed:0.2549 green:0.41568 blue:0.70196 alpha:1.0]forState:UIControlStateNormal];
+            self.phoneNumberButton.enabled = NO;
+            [self.phoneNumberButton setTitleColor:[UIColor colorWithRed:0.2549 green:0.41568 blue:0.70196 alpha:1.0] forState:UIControlStateNormal];
+            [self.phoneNumberButton setTitleColor:[UIColor colorWithRed:0.2549 green:0.41568 blue:0.70196 alpha:0.5] forState:UIControlStateDisabled];
             [self.phoneNumberButton addTarget:self action:@selector(phoneCall:) forControlEvents:UIControlEventTouchUpInside];
             self.phoneNumberButton.backgroundColor = [UIColor clearColor];
             self.phoneNumberButton.titleLabel.font = [UIFont fontWithName:@"HelveticaNeueLTStd-BdCn" size:(12)];
@@ -544,21 +546,13 @@ CGFloat const FEV_DESCRIPTION_LABEL_PADDING_HORIZONTAL = 20.0;
         // Price
         self.priceLabel.text = price;
         // Phone number
+        self.phoneNumberButton.enabled = (featuredEvent.phone != nil);
         self.phoneNumberButton.userInteractionEnabled = (featuredEvent.phone != nil);
         [self.phoneNumberButton setTitle:phoneNumber forState:UIControlStateNormal];
         [self.phoneNumberButton sizeToFit];
         CGRect phoneNumberButtonFrame = self.phoneNumberButton.frame;
         phoneNumberButtonFrame.origin.x = self.detailsView.frame.size.width - FEV_PHONE_BUTTON_PADDING_RIGHT - phoneNumberButtonFrame.size.width;
         self.phoneNumberButton.frame = phoneNumberButtonFrame;
-//        if (!(featuredEvent.phone)) {
-//            self.phoneNumberButton.frame = CGRectMake(170,138,150,20);
-//            self.phoneNumberButton.userInteractionEnabled = NO;
-//        } else  {
-//            self.phoneNumberButton.frame = CGRectMake(223,138,100,20);
-//            self.phoneNumberButton.userInteractionEnabled = YES;
-//        }
-//        [self.phoneNumberButton setTitle:phoneNumber forState:UIControlStateNormal];
-//        [self.phoneNumberButton setTitle:self.eventPhoneString forState:UIControlStateNormal];
         // Description
         self.eventDetailsLabel.text = theDescription;
         CGSize eventDetailsLabelSize = [self.eventDetailsLabel.text sizeWithFont:self.eventDetailsLabel.font constrainedToSize:CGSizeMake(self.eventDetailsLabel.bounds.size.width, 4600.0)];
