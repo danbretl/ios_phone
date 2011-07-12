@@ -111,6 +111,10 @@
 									<bytes key="NSRGB">MC4xOTYwNzg0MzQ2IDAuMzA5ODAzOTMyOSAwLjUyMTU2ODY1NgA</bytes>
 								</object>
 								<reference key="IBUINormalTitleShadowColor" ref="1055857812"/>
+								<object class="NSCustomResource" key="IBUIHighlightedImage">
+									<string key="NSClassName">NSImage</string>
+									<string key="NSResourceName">RegDoneButton_touch.png</string>
+								</object>
 								<object class="NSCustomResource" key="IBUINormalImage">
 									<string key="NSClassName">NSImage</string>
 									<string key="NSResourceName">RegDoneButton.png</string>
@@ -119,7 +123,7 @@
 							<object class="IBUIButton" id="526442325">
 								<reference key="NSNextResponder" ref="501986120"/>
 								<int key="NSvFlags">293</int>
-								<string key="NSFrame">{{134, 3}, {53, 38}}</string>
+								<string key="NSFrame">{{122, 7}, {76, 30}}</string>
 								<reference key="NSSuperview" ref="501986120"/>
 								<reference key="NSWindow"/>
 								<reference key="NSNextKeyView" ref="886177638"/>
@@ -141,7 +145,7 @@
 								<reference key="IBUINormalTitleShadowColor" ref="1055857812"/>
 								<object class="NSCustomResource" key="IBUINormalImage">
 									<string key="NSClassName">NSImage</string>
-									<string key="NSResourceName">btn_logo.png</string>
+									<string key="NSResourceName">kfb_connect.png</string>
 								</object>
 							</object>
 						</object>
@@ -163,7 +167,7 @@
 							<object class="IBUIButton" id="949563760">
 								<reference key="NSNextResponder" ref="467130107"/>
 								<int key="NSvFlags">292</int>
-								<string key="NSFrameSize">{210, 36}</string>
+								<string key="NSFrameSize">{206, 36}</string>
 								<reference key="NSSuperview" ref="467130107"/>
 								<reference key="NSWindow"/>
 								<reference key="NSNextKeyView" ref="7352005"/>
@@ -173,9 +177,11 @@
 								</object>
 								<bool key="IBUIOpaque">NO</bool>
 								<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
+								<bool key="IBUISelected">YES</bool>
 								<int key="IBUIContentHorizontalAlignment">0</int>
 								<int key="IBUIContentVerticalAlignment">0</int>
 								<reference key="IBUIFont" ref="415104912"/>
+								<string key="IBUISelectedTitle">Select </string>
 								<string key="IBUINormalTitle">Select Friends to Invite</string>
 								<reference key="IBUIHighlightedTitleColor" ref="1041595714"/>
 								<object class="NSColor" key="IBUINormalTitleColor">
@@ -183,11 +189,19 @@
 									<bytes key="NSRGB">MC4xOTYwNzg0MzQ2IDAuMzA5ODAzOTMyOSAwLjUyMTU2ODY1NgA</bytes>
 								</object>
 								<reference key="IBUINormalTitleShadowColor" ref="1055857812"/>
+								<object class="NSCustomResource" key="IBUISelectedImage">
+									<string key="NSClassName">NSImage</string>
+									<string key="NSResourceName">btn_selectall_over.png</string>
+								</object>
+								<object class="NSCustomResource" key="IBUINormalImage">
+									<string key="NSClassName">NSImage</string>
+									<string key="NSResourceName">btn_selectall.png</string>
+								</object>
 							</object>
 							<object class="IBUIButton" id="7352005">
 								<reference key="NSNextResponder" ref="467130107"/>
 								<int key="NSvFlags">292</int>
-								<string key="NSFrame">{{210, 0}, {110, 36}}</string>
+								<string key="NSFrame">{{206, 0}, {114, 36}}</string>
 								<reference key="NSSuperview" ref="467130107"/>
 								<reference key="NSWindow"/>
 								<reference key="NSNextKeyView" ref="1006222150"/>
@@ -199,14 +213,26 @@
 								<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
 								<int key="IBUIContentHorizontalAlignment">0</int>
 								<int key="IBUIContentVerticalAlignment">0</int>
-								<reference key="IBUIFont" ref="415104912"/>
-								<string key="IBUINormalTitle">Selected</string>
+								<object class="NSFont" key="IBUIFont">
+									<string key="NSName">HelveticaNeue</string>
+									<double key="NSSize">15</double>
+									<int key="NSfFlags">16</int>
+								</object>
+								<string key="IBUINormalTitle">8 Selected</string>
 								<reference key="IBUIHighlightedTitleColor" ref="1041595714"/>
 								<object class="NSColor" key="IBUINormalTitleColor">
 									<int key="NSColorSpace">1</int>
 									<bytes key="NSRGB">MC4xOTYwNzg0MzQ2IDAuMzA5ODAzOTMyOSAwLjUyMTU2ODY1NgA</bytes>
 								</object>
 								<reference key="IBUINormalTitleShadowColor" ref="1055857812"/>
+								<object class="NSCustomResource" key="IBUISelectedBackgroundImage">
+									<string key="NSClassName">NSImage</string>
+									<string key="NSResourceName">btn_selected_touch_notext.png</string>
+								</object>
+								<object class="NSCustomResource" key="IBUINormalBackgroundImage">
+									<string key="NSClassName">NSImage</string>
+									<string key="NSResourceName">btn_selected_notext.png</string>
+								</object>
 							</object>
 						</object>
 						<string key="NSFrame">{{0, 44}, {320, 36}}</string>
@@ -230,10 +256,9 @@
 						<bool key="IBUIClipsSubviews">YES</bool>
 						<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
 						<bool key="IBUIAlwaysBounceVertical">YES</bool>
-						<int key="IBUISeparatorStyle">1</int>
 						<int key="IBUISectionIndexMinimumDisplayRowCount">0</int>
 						<bool key="IBUIShowsSelectionImmediatelyOnTouchBegin">YES</bool>
-						<float key="IBUIRowHeight">44</float>
+						<float key="IBUIRowHeight">51</float>
 						<float key="IBUISectionHeaderHeight">22</float>
 						<float key="IBUISectionFooterHeight">22</float>
 					</object>
@@ -252,10 +277,9 @@
 						<double key="IBUIScrollIndicatorInsets.bottom">0.0</double>
 						<double key="IBUIScrollIndicatorInsets.left">0.0</double>
 						<double key="IBUIScrollIndicatorInsets.right">0.0</double>
-						<int key="IBUISeparatorStyle">1</int>
 						<int key="IBUISectionIndexMinimumDisplayRowCount">0</int>
 						<bool key="IBUIShowsSelectionImmediatelyOnTouchBegin">YES</bool>
-						<float key="IBUIRowHeight">44</float>
+						<float key="IBUIRowHeight">51</float>
 						<float key="IBUISectionHeaderHeight">22</float>
 						<float key="IBUISectionFooterHeight">22</float>
 					</object>
@@ -287,9 +311,7 @@
 						<reference key="NSNextKeyView"/>
 						<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
 						<int key="IBUIBarStyle">1</int>
-						<object class="NSMutableArray" key="IBUIItems">
-							<bool key="EncodedWithXMLCoder">YES</bool>
-						</object>
+						<reference key="IBUIItems" ref="0"/>
 					</object>
 					<object class="IBUISearchBar" id="914387811">
 						<reference key="NSNextResponder" ref="714970162"/>
@@ -632,10 +654,14 @@
 					<string>42.IBPluginDependency</string>
 					<string>43.IBPluginDependency</string>
 					<string>44.IBPluginDependency</string>
+					<string>44.IBUIButtonInspectorSelectedStateConfigurationMetadataKey</string>
 					<string>45.IBPluginDependency</string>
 					<string>46.IBPluginDependency</string>
 					<string>48.IBPluginDependency</string>
+					<string>48.IBUIButtonInspectorSelectedEdgeInsetMetadataKey</string>
+					<string>48.IBUIButtonInspectorSelectedStateConfigurationMetadataKey</string>
 					<string>49.IBPluginDependency</string>
+					<string>49.IBUIButtonInspectorSelectedStateConfigurationMetadataKey</string>
 					<string>64.IBPluginDependency</string>
 					<string>74.IBPluginDependency</string>
 					<string>75.IBPluginDependency</string>
@@ -651,10 +677,14 @@
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
+					<real value="1"/>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
+					<real value="1"/>
+					<real value="2"/>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
+					<real value="2"/>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
@@ -809,14 +839,24 @@
 			<object class="NSArray" key="dict.sortedKeys">
 				<bool key="EncodedWithXMLCoder">YES</bool>
 				<string>RegDoneButton.png</string>
-				<string>btn_logo.png</string>
+				<string>RegDoneButton_touch.png</string>
+				<string>btn_selectall.png</string>
+				<string>btn_selectall_over.png</string>
+				<string>btn_selected_notext.png</string>
+				<string>btn_selected_touch_notext.png</string>
 				<string>cancel.png</string>
+				<string>kfb_connect.png</string>
 			</object>
 			<object class="NSMutableArray" key="dict.values">
 				<bool key="EncodedWithXMLCoder">YES</bool>
 				<string>{74, 32}</string>
-				<string>{53, 38}</string>
+				<string>{74, 32}</string>
+				<string>{206, 36}</string>
+				<string>{206, 36}</string>
+				<string>{114, 36}</string>
+				<string>{114, 36}</string>
 				<string>{72, 30}</string>
+				<string>{76, 30}</string>
 			</object>
 		</object>
 		<string key="IBCocoaTouchPluginVersion">301</string>

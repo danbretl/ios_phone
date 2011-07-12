@@ -8,6 +8,7 @@
 
 #import <UIKit/UIKit.h>
 #import "Contact.h"
+#import "FacebookManager.h"
 
 @protocol ContactsSelectViewControllerDelegate;
 
@@ -39,6 +40,8 @@
     
     BOOL _isSearchOn;
     
+    FacebookManager * facebookManager;
+    
 }
 
 @property (assign) id<ContactsSelectViewControllerDelegate> delegate;
@@ -47,6 +50,7 @@
 @property (retain) NSMutableArray * contactsSelected;
 @property (readonly) NSMutableDictionary * contactsGrouped;
 @property (readonly) NSArray * alphabetArray;
+@property (nonatomic, readonly) FacebookManager * facebookManager;
 
 @end
 

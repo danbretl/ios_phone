@@ -42,5 +42,6 @@ static NSString * const FBM_EVENT_INVITE_FRIENDS_FAILURE_KEY = @"FBM_EVENT_INVIT
 - (void) createFacebookEventWithParameters:(NSMutableDictionary *)parameters inviteContacts:(NSArray *)contactsToInvite;
 - (void) updateFacebookFriends;
 - (void) inviteToEvent:(NSString *)eventID contacts:(NSArray *)contacts withPersonalMessage:(NSString *)personalMessage;
+- (void) getProfilePictureForFacebookID:(NSString *)fbID;
 
 @end

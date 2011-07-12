@@ -16,6 +16,7 @@ static NSString * const FBM_REQUEST_UPDATE_FRIENDS = @"fbmRequestTypeUpdateFrien
 static NSString * const FBM_REQUEST_CREATE_EVENT = @"fbmRequestTypeCreateEvent";
 static NSString * const FBM_REQUEST_INVITE_FRIENDS_TO_EVENT = @"fbmRequestTypeInviteFriendsToEvent";
 static NSString * const FBM_NO_ASSOCIATED_KWIQET_IDENTIFIER = @"FBM_NO_ASSOCIATED_KWIQET_IDENTIFIER";
+static NSString * const FBM_REQUEST_PROFILE_PICTURE = @"FBM_REQUEST_PROFILE_PICTURE";
 
 @interface FacebookManager()
 @property (retain) FBRequest * currentRequest;
@@ -130,6 +131,11 @@ static NSString * const FBM_NO_ASSOCIATED_KWIQET_IDENTIFIER = @"FBM_NO_ASSOCIATE
     
 }
 
+- (void) getProfilePictureForFacebookID:(NSString *)fbID {
+    self.currentRequestType = FBM_REQUEST_PROFILE_PICTURE;
+    self.currentRequest = [self.fb requestWithGraphPath:[NSString stringWithFormat:@"%@/picture", fbID] andDelegate:self];
+}
+
 
 - (void) request:(FBRequest *)request didLoad:(id)result {
     NSLog(@"FB request success %@ - %@", request, result);
@@ -149,6 +155,12 @@ static NSString * const FBM_NO_ASSOCIATED_KWIQET_IDENTIFIER = @"FBM_NO_ASSOCIATE
     } else if ([self.currentRequestType isEqualToString:FBM_REQUEST_INVITE_FRIENDS_TO_EVENT]) {
         
         [[NSNotificationCenter defaultCenter] postNotificationName:FBM_EVENT_INVITE_FRIENDS_SUCCESS_KEY object:self userInfo:nil];
+        
+    } else if ([self.currentRequestType isEqualToString:FBM_REQUEST_PROFILE_PICTURE]) {
+        
+//        NSLog(@"result class is %@", NSStringFromClass([result class]));
+        UIImage * image = [UIImage imageWithData:result];  
+        NSLog(@"result image is %f by %f", image.size.width, image.size.height);
         
     } else {
         NSLog(@"ERROR in FacebookManager - unrecognized FBRequest type");

@@ -7,6 +7,7 @@
 //
 
 #import "ContactsSelectViewController.h"
+#import "ContactCell.h"
 
 @interface ContactsSelectViewController()
 @property (retain) UIView * navBar;
@@ -25,11 +26,16 @@
 @property BOOL isSearchOn;
 - (void) tableView:(UITableView *)tableView configureCell:(UITableViewCell *)cell withIndexPath:(NSIndexPath *)indexPath usingContact:(Contact *)contact;
 - (void) tableView:(UITableView *)tableView setCellAccessoryType:(UITableViewCellAccessoryType)accessoryType forCellWithIndexPath:(NSIndexPath *)indexPath;
+- (void) tableView:(UITableView *)tableView setCellAccessoryType:(UITableViewCellAccessoryType)accessoryType forCell:(UITableViewCell *)cell;
 - (IBAction) cancelButtonPushed;
 - (IBAction) doneSelectingButtonPushed;
 - (IBAction) tabButtonPushed:(UIButton *)tabButton;
 //- (void) forceSearchBarCancelButtonTitle;
 - (void) updateSelectedCountViewWithCount:(int)count;
+- (void) forceSearchBarCancelButtonToBeEnabled;
+- (void) forceSetSearchBarCancelButtonTitle:(NSString *)title;
+- (void) toggleSearch;
+- (void) killScrollForScrollView:(UIScrollView *)scrollView;
 @end
 
 @implementation ContactsSelectViewController
@@ -68,6 +74,7 @@
     [contactsFiltered release];
     [contactsSelected release];
     [contactsGrouped release];
+    [facebookManager release];
     [super dealloc];
 }
 
@@ -85,13 +92,22 @@
 {
     [super viewDidLoad];
     [self.friendsTableView reloadData];
+    self.friendsTableView.scrollsToTop = YES;
+    self.selectedTableView.scrollsToTop = NO;
+    
     self.navBar.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"navbar_blank.png"]];
     self.friendsTableView.tableHeaderView = self.searchContainerView;
     if ([self.friendsTableView numberOfRowsInSection:0]) {
         [self.friendsTableView scrollToRowAtIndexPath:[NSIndexPath indexPathForRow:0 inSection:0] atScrollPosition:UITableViewScrollPositionTop animated:NO];
     }
     [self updateSelectedCountViewWithCount:0];
-    // Do any additional setup after loading the view from its nib.
+    self.selectedTabButton.titleLabel.font = [UIFont fontWithName:@"HelveticaNeueLTStd-BdCn" size:15.0];
+    UIEdgeInsets selectedTabButtonTitleEdgeInsets = self.selectedTabButton.titleEdgeInsets;
+    selectedTabButtonTitleEdgeInsets.top = 9.0;
+    self.selectedTabButton.titleEdgeInsets = selectedTabButtonTitleEdgeInsets;
+    [self.selectedTabButton setTitleColor:[UIColor colorWithWhite:53.0/255.0 alpha:1.0] forState:UIControlStateNormal];
+    [self.selectedTabButton setTitleColor:[UIColor colorWithWhite:251.0/255.0 alpha:1.0] forState:UIControlStateSelected];
+    
 //    [self forceSearchBarCancelButtonTitle];
 }
 
@@ -106,6 +122,13 @@
 {
     // Return YES for supported orientations
     return (interfaceOrientation == UIInterfaceOrientationPortrait);
+}
+
+- (FacebookManager *)facebookManager {
+    if (facebookManager == nil) {
+        facebookManager = [[FacebookManager alloc] init];
+    }
+    return facebookManager;
 }
 
 - (void)setContactsAll:(NSArray *)theContacts {
@@ -172,12 +195,40 @@
     return returnIndex;
 }
 
-- (NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section {
-    NSString * titleForHeader = nil;
-    if (tableView == self.friendsTableView && !self.isSearchOn) {
-        titleForHeader = [self.alphabetArray objectAtIndex:section];
+//- (NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section {
+//    NSString * titleForHeader = nil;
+//    if (tableView == self.friendsTableView && !self.isSearchOn) {
+//        titleForHeader = [self.alphabetArray objectAtIndex:section];
+//    }
+//    return titleForHeader;
+//}
+
+- (UIView *)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section {
+    UIView * sectionHeaderView = [[[UIView alloc] initWithFrame:CGRectMake(0, 0, tableView.bounds.size.width, tableView.sectionHeaderHeight)] autorelease];
+    UIImageView * shBackgroundImageView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"divider_cell.png"]];
+    shBackgroundImageView.frame = sectionHeaderView.bounds;
+    [sectionHeaderView addSubview:shBackgroundImageView];
+    [shBackgroundImageView release];
+    CGFloat shLabelOriginX = 8;
+    UILabel * shLabel = [[UILabel alloc] initWithFrame:CGRectMake(shLabelOriginX, -2, tableView.bounds.size.width - shLabelOriginX, 30)];
+    shLabel.backgroundColor = [UIColor clearColor];
+    shLabel.textAlignment = UITextAlignmentLeft;
+    shLabel.font = [UIFont fontWithName:@"HelveticaNeueLTStd-BdCn" size:15.0];
+    shLabel.textColor = [UIColor colorWithWhite:1.0 alpha:0.95];
+    shLabel.shadowColor = [UIColor colorWithWhite:0.25 alpha:0.75];
+    shLabel.shadowOffset = CGSizeMake(1.0, 1.0);
+    [sectionHeaderView addSubview:shLabel];
+    [shLabel release];
+    if (tableView == self.friendsTableView) {
+        if (!self.isSearchOn) {
+            shLabel.text = [self.alphabetArray objectAtIndex:section];
+        } else {
+            shLabel.text = @"Search Results";
+        }
+    } else {
+        shLabel.text = @"Selected Friends";
     }
-    return titleForHeader;
+    return sectionHeaderView;
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
@@ -218,7 +269,7 @@
     
     UITableViewCell * cell = [tableView dequeueReusableCellWithIdentifier:cellID];
     if (cell == nil) {
-        cell = [[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:cellID] autorelease];
+        cell = [[[ContactCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:cellID] autorelease];
     }
     
     Contact * contact = (Contact *)[contactsArray objectAtIndex:indexPath.row];
@@ -230,15 +281,31 @@
 
 - (void) tableView:(UITableView *)tableView configureCell:(UITableViewCell *)cell withIndexPath:(NSIndexPath *)indexPath usingContact:(Contact *)contact {
     
-    cell.textLabel.text = contact.fbName;
-    cell.accessoryType = [self.contactsSelected containsObject:contact] ? UITableViewCellAccessoryCheckmark : UITableViewCellAccessoryNone;
+    ContactCell * contactCell = (ContactCell *)cell;
+    contactCell.nameLabel.text = contact.fbName;
+    UITableViewCellAccessoryType accessoryType = [self.contactsSelected containsObject:contact] ? UITableViewCellAccessoryCheckmark : UITableViewCellAccessoryNone;
+//    [self.facebookManager getProfilePictureForFacebookID:contact.fbID];
+    [self tableView:tableView setCellAccessoryType:accessoryType forCell:cell];
     
 }
 
 - (void) tableView:(UITableView *)tableView setCellAccessoryType:(UITableViewCellAccessoryType)accessoryType forCellWithIndexPath:(NSIndexPath *)indexPath {
     
     UITableViewCell * cell = [tableView cellForRowAtIndexPath:indexPath];
+    [self tableView:tableView setCellAccessoryType:accessoryType forCell:cell];
+    
+}
+
+- (void) tableView:(UITableView *)tableView setCellAccessoryType:(UITableViewCellAccessoryType)accessoryType forCell:(UITableViewCell *)cell {
+    
     cell.accessoryType = accessoryType;
+    if (cell.accessoryType == UITableViewCellAccessoryCheckmark) {
+        UIImageView * checkImageView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"check-icon.png"]];
+        cell.accessoryView = checkImageView;
+        [checkImageView release];
+    } else {
+        cell.accessoryView = nil;
+    }
     
 }
 
@@ -275,49 +342,69 @@
         [tableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:indexPath] withRowAnimation:UITableViewRowAnimationFade];
     } else {
         [tableView deselectRowAtIndexPath:[tableView indexPathForSelectedRow] animated:YES];
+//        self.selectedTabButton.enabled = [self.contactsSelected count] > 0;
     }
     
 }
 
 - (void) updateSelectedCountViewWithCount:(int)count {
-    NSString * buttonText = @"Selected";
+    NSString * countText = @"None ";
+    NSString * selectedWord = @"Selected";
     if (count > 0) {
-        buttonText = [buttonText stringByAppendingFormat:@" (%d)", count];
+        countText = [NSString stringWithFormat:@"%d ", count];
+        selectedWord = [selectedWord capitalizedString];
     }
+    NSString * buttonText = [NSString stringWithFormat:@"%@%@", countText, selectedWord];
+//    NSString * buttonText = [NSString stringWithFormat:@"%d", count];
     [self.selectedTabButton setTitle:buttonText forState:UIControlStateNormal];
     [self.selectedTabButton setTitle:buttonText forState:UIControlStateHighlighted];
 }
 
-
-- (void) searchBarTextDidBeginEditing:(UISearchBar *)searchBar {
-    self.isSearchOn = YES;
-    [self.searchBar setShowsCancelButton:YES animated:YES];
-//    [UIView animateWithDuration:0.25 
-//                     animations:^{
-//                         CGRect searchBarFrame = self.searchBar.frame;
-//                         searchBarFrame.size.width = 320;
-//                         self.searchBar.frame = searchBarFrame;
-//                     }];
-    self.contactsFiltered = [self.contactsAll mutableCopy];
-    [self.friendsTableView reloadData];
-}
-
-- (void)searchBarTextDidEndEditing:(UISearchBar *)searchBar {
-    self.isSearchOn = NO;
-    [self.searchBar setShowsCancelButton:NO animated:YES];
-//    [UIView animateWithDuration:0.25 
-//                     animations:^{
-//                         CGRect searchBarFrame = self.searchBar.frame;
-//                         searchBarFrame.size.width = 290;
-//                         self.searchBar.frame = searchBarFrame;
-//                     }];
+- (void)toggleSearch {
+    [self.searchBar setShowsCancelButton:!self.isSearchOn animated:YES];
+    if (self.isSearchOn) {
+        [self.searchBar resignFirstResponder];
+        //    [UIView animateWithDuration:0.25 
+        //                     animations:^{
+        //                         CGRect searchBarFrame = self.searchBar.frame;
+        //                         searchBarFrame.size.width = 290;
+        //                         self.searchBar.frame = searchBarFrame;
+        //                     }];
+    } else {
+        [self forceSetSearchBarCancelButtonTitle:@"Cancel"];
+        //    [UIView animateWithDuration:0.25 
+        //                     animations:^{
+        //                         CGRect searchBarFrame = self.searchBar.frame;
+        //                         searchBarFrame.size.width = 320;
+        //                         self.searchBar.frame = searchBarFrame;
+        //                     }];
+        self.contactsFiltered = [self.contactsAll mutableCopy];
+    }
+    self.isSearchOn = !self.isSearchOn;
     self.searchBar.text = @"";
     [self.friendsTableView reloadData];
 }
 
-- (void)searchBarCancelButtonClicked:(UISearchBar *)searchBar {
-    [self.searchBar resignFirstResponder];
+- (void) searchBarTextDidBeginEditing:(UISearchBar *)searchBar {
+    if (!self.isSearchOn) {
+        [self toggleSearch];
+    } else {
+        [self forceSetSearchBarCancelButtonTitle:@"Cancel"];
+    }
 }
+
+//- (void)searchBarTextDidEndEditing:(UISearchBar *)searchBar {
+//    self.isSearchOn = NO;
+//    [self.searchBar setShowsCancelButton:NO animated:YES];
+////    [UIView animateWithDuration:0.25 
+////                     animations:^{
+////                         CGRect searchBarFrame = self.searchBar.frame;
+////                         searchBarFrame.size.width = 290;
+////                         self.searchBar.frame = searchBarFrame;
+////                     }];
+//    self.searchBar.text = @"";
+//    [self.friendsTableView reloadData];
+//}
 
 - (void)searchBar:(UISearchBar *)searchBar textDidChange:(NSString *)searchText {
     [self.contactsFiltered removeAllObjects];
@@ -337,6 +424,16 @@
 //    NSLog(@"%@", self.contactsFiltered);
 }
 
+- (void) searchBarCancelButtonClicked:(UISearchBar *)theSearchBar {
+    [self toggleSearch];
+}
+
+- (void)searchBarSearchButtonClicked:(UISearchBar *)theSearchBar {
+	[self.searchBar resignFirstResponder];
+    [self forceSetSearchBarCancelButtonTitle:@"Done"];
+    [self forceSearchBarCancelButtonToBeEnabled];
+}
+
 - (void)cancelButtonPushed {
     [self.delegate contactsSelectViewController:self didFinishWithCancel:YES selectedContacts:nil];
 }
@@ -345,17 +442,59 @@
     [self.delegate contactsSelectViewController:self didFinishWithCancel:NO selectedContacts:self.contactsSelected];
 }
 
+- (void) killScrollForScrollView:(UIScrollView *)scrollView {
+    
+    CGPoint offset = scrollView.contentOffset;
+    if (offset.y < 0 ||
+        scrollView.contentSize.height <= scrollView.bounds.size.height) { 
+        offset.y = 0;
+    } else {
+        offset.y = MIN(scrollView.contentSize.height - scrollView.bounds.size.height, offset.y);
+    }
+    [scrollView setContentOffset:offset animated:NO];
+    
+}
+
 - (void)tabButtonPushed:(UIButton *)tabButton {
+    if (self.isSearchOn) {
+        [self.searchBar resignFirstResponder];
+        [self forceSetSearchBarCancelButtonTitle:@"Done"];
+        [self forceSearchBarCancelButtonToBeEnabled];
+//        [self toggleSearch];
+    }
+    UITableView * activeTableView = self.friendsTableView.hidden ? self.selectedTableView : self.friendsTableView;
+    [self killScrollForScrollView:activeTableView];
+    activeTableView.scrollsToTop = NO;
     if (tabButton == self.friendsTabButton) {
         NSLog(@"Friends tab button touched");
         self.friendsTableView.hidden = NO;
         [self.friendsTableView reloadData];
+        [self.friendsTabButton setSelected:YES];
+        [self.selectedTabButton setSelected:NO];
+        self.friendsTableView.scrollsToTop = YES;
     } else if (tabButton == self.selectedTabButton) {
         NSLog(@"Selected tab button touched");
         self.friendsTableView.hidden = YES;
         [self.selectedTableView reloadData];
+        [self.friendsTabButton setSelected:NO];
+        [self.selectedTabButton setSelected:YES];
+        self.selectedTableView.scrollsToTop = YES;
     } else {
         NSLog(@"ERROR in ContactsSelectViewController - unrecognized tabButton");
+    }
+}
+
+- (void)scrollViewDidScroll:(UIScrollView *)theScrollView {
+    if (theScrollView == self.friendsTableView &&
+        self.isSearchOn &&
+        [self.searchBar isFirstResponder]) {
+        [self.searchBar resignFirstResponder];
+        [self forceSetSearchBarCancelButtonTitle:@"Done"];
+        [self forceSearchBarCancelButtonToBeEnabled];
+//        CGRect searchBarFrame = self.searchBar.frame;
+//        searchBarFrame.origin.y = MAX(0, theScrollView.contentOffset.y);
+//        self.searchBar.frame = searchBarFrame;
+//        [theScrollView bringSubviewToFront:self.searchBar];
     }
 }
 
@@ -370,5 +509,30 @@
 //		}
 //	}
 //}
+
+- (void) forceSearchBarCancelButtonToBeEnabled {
+	for (UIView * possibleButton in self.searchBar.subviews)
+	{
+		if ([possibleButton isKindOfClass:[UIButton class]]) {
+			UIButton * searchBarCancelButton = (UIButton *)possibleButton;
+			searchBarCancelButton.enabled = YES;
+			break;
+		}
+	}
+}
+
+- (void) forceSetSearchBarCancelButtonTitle:(NSString *)title {
+	for (UIView * possibleButton in self.searchBar.subviews)
+	{
+		if ([possibleButton isKindOfClass:[UIButton class]]) {
+			UIButton * searchBarCancelButton = (UIButton *)possibleButton;
+            [searchBarCancelButton setTitle:title forState:UIControlStateNormal];
+            [searchBarCancelButton setTitle:title forState:UIControlStateHighlighted];
+            [searchBarCancelButton setTitle:title forState:UIControlStateSelected];
+			searchBarCancelButton.enabled = YES;
+			break;
+		}
+	}
+}
 
 @end

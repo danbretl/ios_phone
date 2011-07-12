@@ -410,6 +410,9 @@
     if (self.event) {
         [self updateViewsFromData];
     }
+    self.imageFull = [UIImage imageNamed:@"event_img_placeholder.png"];
+    NSLog(@"EventViewController about to displayImage from viewDidLoad with a placeholder image");
+    [self displayImage:self.imageFull];
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(facebookEventCreateSuccess:) name:FBM_CREATE_EVENT_SUCCESS_KEY object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(facebookEventCreateFailure:) name:FBM_CREATE_EVENT_FAILURE_KEY object:nil];
@@ -444,20 +447,23 @@
         [event release];
         event = [theEvent retain];
         [self.webConnector getEventWithURI:self.event.uri];
+        NSLog(@"%@", theEvent);
         [self showWebLoadingViews];
     }
 }
 
 - (void)webConnector:(WebConnector *)webConnector getEventSuccess:(ASIHTTPRequest *)request forEventURI:(NSString *)eventURI {
+    [self hideWebLoadingViews];
     NSString * responseString = [request responseString];
     NSError *error = nil;
     NSDictionary * eventDictionary = [responseString yajl_JSONWithOptions:YAJLParserOptionsAllowComments error:&error];
     [self.coreDataModel updateEvent:self.event usingEventDictionary:eventDictionary featuredOverride:nil fromSearchOverride:nil];
     [self updateViewsFromData];
-    [self hideWebLoadingViews];
+    [self loadImage];
 }
 
 - (void)webConnector:(WebConnector *)webConnector getEventFailure:(ASIHTTPRequest *)request forEventURI:(NSString *)eventURI {
+    [self hideWebLoadingViews];
 	NSString * statusMessage = [request responseStatusMessage];
 	NSLog(@"%@", statusMessage);
 	NSError *error = [request error];
@@ -469,7 +475,6 @@
         [alertView release];
     }
     [self viewControllerIsFinished];
-    [self hideWebLoadingViews];
 }
 
 -(void) updateViewsFromData {
@@ -569,8 +574,6 @@
     }
     self.breadcrumbsLabel.text = breadcrumbsString;
     
-    [self loadImage];
-    
 }
 
 - (NSURL *) imageURLForEvent:(Event *)theEvent {
@@ -589,18 +592,27 @@
     NSString * imageLocation = self.event.imageLocation;
     
     if (imageLocation != nil) {
-        // First, check to see if the image has been saved locally
-        BOOL imageExistsLocally = [LocalImagesManager eventImageExistsFromSourceLocation:imageLocation];
-        if (imageExistsLocally) {
-            self.imageFull = [LocalImagesManager loadEventImageDataFromSourceLocation:imageLocation];
-            NSLog(@"EventViewController about to displayImage from loadImage when image is saved locally");
-            [self displayImage:self.imageFull];
-        } else {
+//        // First, check to see if the image has been saved locally
+//        BOOL imageExistsLocally = [LocalImagesManager eventImageExistsFromSourceLocation:imageLocation];
+//        if (imageExistsLocally) {
+//            self.imageFull = [LocalImagesManager loadEventImageDataFromSourceLocation:imageLocation];
+//            NSLog(@"EventViewController about to displayImage from loadImage when image is saved locally");
+//            [self displayImage:self.imageFull];
+//        } else {
+        NSLog(@"current disk usage = %d", [[NSURLCache sharedURLCache] currentMemoryUsage]);
             NSURL * imageURL = [self imageURLForEvent:self.event];
             NSURLRequest * request = [NSURLRequest requestWithURL:imageURL];
-            self.loadImageData = nil;
-            self.loadImageURLConnection = [[[NSURLConnection alloc] initWithRequest:request delegate:self] autorelease];   
-        }
+            self.loadImageURLConnection = [[[NSURLConnection alloc] initWithRequest:request delegate:self] autorelease];
+            if (self.loadImageURLConnection) {
+                self.loadImageData = [NSMutableData data];
+                // Wait for response...
+            } else {
+                // Error
+                self.imageFull = [UIImage imageNamed:@"event_img_placeholder.png"];
+                NSLog(@"EventViewController about to displayImage from loadImage when there was an error making NSURLConnection");
+                [self displayImage:self.imageFull];
+            }
+//        }
     } else {
         self.imageFull = [UIImage imageNamed:@"event_img_placeholder.png"];
         NSLog(@"EventViewController about to displayImage from loadImage when imageLocation is nil");
@@ -609,11 +621,25 @@
 
 }
 
+- (void)connection:(NSURLConnection *)connection didReceiveResponse:(NSURLResponse *)response {
+    if (connection == self.loadImageURLConnection) {
+        NSLog(@"EventViewController connection...didReceiveResponse");
+        // This method is called when the server has determined that it has enough information to create the NSURLResponse.
+        // It can be called multiple times, for example in the case of a redirect, so each time we reset the data.
+        [self.loadImageData setLength:0];
+    }
+}
+
+- (NSCachedURLResponse *)connection:(NSURLConnection *)connection willCacheResponse:(NSCachedURLResponse *)cachedResponse {
+    NSLog(@"EventViewController connection...willCacheResponse");
+    if (connection == self.loadImageURLConnection) {
+        NSLog(@"EventViewController connection...willCacheResponse (and it's the NSURLConnection we care about)");
+    }
+    return cachedResponse;
+}
+
 - (void)connection:(NSURLConnection *)connection didReceiveData:(NSData *)data {
     if (connection == self.loadImageURLConnection) {
-        if (self.loadImageData == nil) {
-            self.loadImageData = [NSMutableData data];
-        }
         [self.loadImageData appendData:data];
     }
 }
@@ -621,11 +647,9 @@
 - (void)connectionDidFinishLoading:(NSURLConnection *)connection {
     NSLog(@"EventViewController connectionDidFinishLoading:%@", connection);
     self.imageFull = [UIImage imageWithData:self.loadImageData];
-    [LocalImagesManager saveEventImageData:self.loadImageData sourceLocation:self.event.imageLocation];
+//    [LocalImagesManager saveEventImageData:self.loadImageData sourceLocation:self.event.imageLocation];
     NSLog(@"EventViewController about to displayImage from connectionDidFinishLoading");
     [self displayImage:self.imageFull];
-    self.loadImageData = nil;
-    self.loadImageURLConnection = nil;
 }
 
 - (void)connection:(NSURLConnection *)connection didFailWithError:(NSError *)error {
@@ -633,8 +657,6 @@
         self.imageFull = [UIImage imageNamed:@"event_img_placeholder.png"];
         NSLog(@"EventViewController about to displayImage from connection...didFailWithError, using placeholder image");
         [self displayImage:self.imageFull];
-        self.loadImageData = nil;
-        self.loadImageURLConnection = nil;
     }
 }
 

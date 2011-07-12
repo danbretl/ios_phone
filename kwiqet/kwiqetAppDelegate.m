@@ -23,6 +23,12 @@
 #pragma mark Application lifecycle
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
+    
+    // Setup stuff
+    NSLog(@"%d", [[NSURLCache sharedURLCache] memoryCapacity]);
+    [[NSURLCache sharedURLCache] setMemoryCapacity:1024*1024*10]; // http://stackoverflow.com/questions/1870004/does-nsurlconnection-take-advantage-of-nsurlcache/3900432#3900432
+    NSLog(@"%d", [[NSURLCache sharedURLCache] memoryCapacity]);
+    
     // Order of operations:
     // - kwiqetAppDelegate should make the categoryRequest (NOT the categoryTreeModel itself) immediately, IF the category tree has not already previous been retrieved and processed.
     categoryTreeHasBeenRetrieved = NO || [DefaultsModel loadCategoryTreeHasBeenRetrieved];
@@ -91,12 +97,12 @@
         
     } else {
         
-//        ContactsSelectViewController * csvc = [[ContactsSelectViewController alloc] initWithNibName:@"ContactsSelectViewController" bundle:[NSBundle mainBundle]];
-//        csvc.contactsAll = [self.coreDataModel getAllFacebookContacts];
-//        csvc.delegate = self;
-//        [UIApplication sharedApplication].statusBarHidden = YES;
-//        [self.window addSubview:csvc.view];
-//        //[csvc release];
+        ContactsSelectViewController * csvc = [[ContactsSelectViewController alloc] initWithNibName:@"ContactsSelectViewController" bundle:[NSBundle mainBundle]];
+        csvc.contactsAll = [self.coreDataModel getAllFacebookContacts];
+        csvc.delegate = self;
+        [UIApplication sharedApplication].statusBarHidden = YES;
+        [self.window addSubview:csvc.view];
+        //[csvc release];
         
     }
     
