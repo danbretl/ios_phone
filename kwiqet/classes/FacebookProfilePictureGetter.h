@@ -17,7 +17,7 @@
     NSIndexPath * indexPathInTableView;
     
     NSMutableData * imageData;
-    NSURLConnection * imageConnection;
+//    NSURLConnection * imageConnection;
     
 }
 
@@ -26,7 +26,7 @@
 @property (retain) NSIndexPath * indexPathInTableView;
 
 - (void) startDownload;
-- (void) cancelDownload;
+//- (void) cancelDownload;
 
 @end
 

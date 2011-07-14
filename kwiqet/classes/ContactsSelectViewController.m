@@ -49,7 +49,7 @@ float const CSVC_TAB_BUTTON_ANIMATION_DURATION = .25;
 - (void) setSelectedTabButton:(UIButton *)tabButton;
 - (void) startProfilePictureDownloadForContact:(Contact *)contact atIndexPath:(NSIndexPath *)indexPath;
 - (void) facebookProfilePictureGetterFinished:(FacebookProfilePictureGetter *)profilePictureGetter;
-- (void) cancelAllPendingProfilePictureDownloads;
+//- (void) cancelAllPendingProfilePictureDownloads;
 @end
 
 @implementation ContactsSelectViewController
@@ -104,13 +104,13 @@ float const CSVC_TAB_BUTTON_ANIMATION_DURATION = .25;
 {
     // Releases the view if it doesn't have a superview.
     [super didReceiveMemoryWarning];
-    [self cancelAllPendingProfilePictureDownloads];
+//    [self cancelAllPendingProfilePictureDownloads];
 }
 
-- (void) cancelAllPendingProfilePictureDownloads {
-    NSArray * allProfilePictureDownloaders = [self.profilePictureDownloaders allValues];
-    [allProfilePictureDownloaders makeObjectsPerformSelector:@selector(cancelDownload)];
-}
+//- (void) cancelAllPendingProfilePictureDownloads {
+//    NSArray * allProfilePictureDownloaders = [self.profilePictureDownloaders allValues];
+//    [allProfilePictureDownloaders makeObjectsPerformSelector:@selector(cancelDownload)];
+//}
 
 #pragma mark - View lifecycle
 
@@ -167,13 +167,13 @@ float const CSVC_TAB_BUTTON_ANIMATION_DURATION = .25;
 
 - (void) viewWillDisappear:(BOOL)animated {
     [super viewWillDisappear:animated];
-    [self cancelAllPendingProfilePictureDownloads];
+//    [self cancelAllPendingProfilePictureDownloads];
 }
 
 - (void)viewDidUnload
 {
     [super viewDidUnload];
-    [self cancelAllPendingProfilePictureDownloads];
+//    [self cancelAllPendingProfilePictureDownloads];
     // Release any retained subviews of the main view.
     // e.g. self.myOutlet = nil;
 }
@@ -566,12 +566,12 @@ float const CSVC_TAB_BUTTON_ANIMATION_DURATION = .25;
 }
 
 - (void)cancelButtonPushed {
-    [self cancelAllPendingProfilePictureDownloads];
+//    [self cancelAllPendingProfilePictureDownloads];
     [self.delegate contactsSelectViewController:self didFinishWithCancel:YES selectedContacts:nil];
 }
 
 - (void)doneSelectingButtonPushed {
-    [self cancelAllPendingProfilePictureDownloads];
+//    [self cancelAllPendingProfilePictureDownloads];
     [self.delegate contactsSelectViewController:self didFinishWithCancel:NO selectedContacts:self.contactsSelected];
 }
 
