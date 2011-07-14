@@ -114,7 +114,7 @@ static NSString * const WDT_DATA_UNAVAILABLE_EVENT_LIST_TIME  = @"";
 - (NSString *)dateSpanStringFromStartDatetime:(NSDate *)startDatetime endDatetime:(NSDate *)endDatetime relativeDates:(BOOL)relativeDates dataUnavailableString:(NSString *)dataUnavailableString {
     
     [self.dateFormatter setDateFormat:@"YYYY-MM-dd"];
-    NSLog(@"dateSpanStringFromStartDatetime start:%@ end:%@", [self.dateFormatter stringFromDate:startDatetime], [self.dateFormatter stringFromDate:endDatetime]);
+//    NSLog(@"dateSpanStringFromStartDatetime start:%@ end:%@", [self.dateFormatter stringFromDate:startDatetime], [self.dateFormatter stringFromDate:endDatetime]);
     
     NSString * dateDisplayString = nil;
     

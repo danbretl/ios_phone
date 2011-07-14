@@ -256,7 +256,7 @@
 	NSDictionary *dictionaryFromJSON = [responseString yajl_JSONWithOptions:YAJLParserOptionsAllowComments error:&error];
     NSString * apiKey = [[[dictionaryFromJSON valueForKey:@"objects"] objectAtIndex:0] valueForKey:@"key"];
     NSString * fullName = [[[dictionaryFromJSON valueForKey:@"objects"] objectAtIndex:0] valueForKey:@"full_name"];
-    fullName = nil; // DISABLING THIS FUNCTIONALITY UNTIL WE CAN LOOK INTO IT MORE. Going back to email for now.
+//    fullName = nil; // DISABLING THIS FUNCTIONALITY UNTIL WE CAN LOOK INTO IT MORE. Going back to email for now.
     NSString * kwiqetIdentifier = fullName && [fullName length] > 0 ? fullName : self.usernameField.text;
     
     [DefaultsModel saveAPIToUserDefaults:apiKey];

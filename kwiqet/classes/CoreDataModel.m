@@ -24,6 +24,7 @@
     [managedObjectModel release];
     [persistentStoreCoordinator release];
     [tempSolutionCategoriesOrderDictionary release];
+    [tempSolutionCategoriesIconThumbsDictionary release];
     [coreDataYes release];
     [coreDataNo release];
     [super dealloc];
@@ -109,27 +110,131 @@
     if (tempSolutionCategoriesOrderDictionary == nil) {
         tempSolutionCategoriesOrderDictionary = 
         [[NSDictionary alloc] initWithObjectsAndKeys:
-         [NSNumber numberWithInt:1], @"/api/v1/category/136/",
-         [NSNumber numberWithInt:2], @"/api/v1/category/137/",
-         [NSNumber numberWithInt:3], @"/api/v1/category/1/",
-         [NSNumber numberWithInt:4], @"/api/v1/category/38/",
-         [NSNumber numberWithInt:5], @"/api/v1/category/139/",
-         [NSNumber numberWithInt:6], @"/api/v1/category/138/",
-         [NSNumber numberWithInt:7], @"/api/v1/category/9/",
-         [NSNumber numberWithInt:8], @"/api/v1/category/16/",
+         [NSNumber numberWithInt: 5], @"/api/v1/category/136/",
+         [NSNumber numberWithInt:10], @"/api/v1/category/137/",
+         [NSNumber numberWithInt:15], @"/api/v1/category/1/"  ,
+         [NSNumber numberWithInt:20], @"/api/v1/category/38/" ,
+         [NSNumber numberWithInt:25], @"/api/v1/category/139/",
+         [NSNumber numberWithInt:30], @"/api/v1/category/138/",
+         [NSNumber numberWithInt:35], @"/api/v1/category/9/"  ,
+         [NSNumber numberWithInt:40], @"/api/v1/category/16/" ,
          nil];
     }
     return tempSolutionCategoriesOrderDictionary;
 }
 
-- (void) coreDataAddCategoryWithURI:(NSString *)uri title:(NSString *)titleString color:(NSString *)colorString thumb:(NSString *)thumbnailString {
+- (NSDictionary *)tempSolutionCategoriesIconThumbsDictionary {
+    if (tempSolutionCategoriesIconThumbsDictionary == nil) {
+        tempSolutionCategoriesIconThumbsDictionary = 
+        [[NSDictionary alloc] initWithObjectsAndKeys:
+         @"icon_movies&media.png",      @"/api/v1/category/136/",
+         @"icon_music.png",             @"/api/v1/category/137/",
+         @"icon_sports&recreation.png", @"/api/v1/category/1/"  ,
+         @"icon_food&drink.png",        @"/api/v1/category/38/" ,
+         @"icon_arts&theater.png",      @"/api/v1/category/139/",
+         @"icon_hobbies&interest.png",  @"/api/v1/category/138/",
+         @"icon_gatherings.png",        @"/api/v1/category/9/"  ,
+         @"icon_nightlife.png",         @"/api/v1/category/16/" ,
+         nil];
+    }
+    return tempSolutionCategoriesIconThumbsDictionary;
+}
+
+- (void) addOrUpdateConcreteCategories:(NSArray *)concreteCategories deleteOthers:(BOOL)shouldDeleteOthers {
+    
+    if (concreteCategories) {
+        
+        // Prepare the sorted array of new categories
+        NSArray * newConcreteCategoriesSortedByResourceURI = [concreteCategories sortedArrayUsingDescriptors:[NSArray arrayWithObject:[NSSortDescriptor sortDescriptorWithKey:@"resource_uri" ascending:YES]]];
+        NSMutableArray * newConcreteCategoryURIs = [NSMutableArray array];
+        for (NSDictionary * newConcreteCategoryDictionary in newConcreteCategoriesSortedByResourceURI) {
+            [newConcreteCategoryURIs addObject:[newConcreteCategoryDictionary valueForKey:@"resource_uri"]];
+        }
+        
+        // Create the fetch request to get all existing Categories matching the new URIs
+        NSFetchRequest * fetchRequest = [[[NSFetchRequest alloc] init] autorelease];
+        [fetchRequest setEntity:[NSEntityDescription entityForName:@"Category" inManagedObjectContext:self.managedObjectContext]];
+        [fetchRequest setPredicate: [NSPredicate predicateWithFormat: @"(uri IN %@)", newConcreteCategoryURIs]];
+        // Make sure the results will be sorted as well
+        [fetchRequest setSortDescriptors:[NSArray arrayWithObject:[NSSortDescriptor sortDescriptorWithKey:@"uri" ascending:YES]]];
+        // Execute the fetch
+        NSError * error = nil;
+        NSArray * existingConcreteCategoriesMatchingURIs = [self.managedObjectContext executeFetchRequest:fetchRequest error:&error];
+        
+        int newConcreteCategoryURIsIndex = 0;
+        int existingConcreteCategoriesIndex = 0;
+        BOOL moreExistingCategoriesToCheckAgainst = existingConcreteCategoriesMatchingURIs && existingConcreteCategoriesIndex < [existingConcreteCategoriesMatchingURIs count];
+        NSString * newConcreteCategoryURI;
+        Category * existingCategory;
+        
+        while (newConcreteCategoryURIsIndex < [newConcreteCategoryURIs count]) {
+            
+            newConcreteCategoryURI = [newConcreteCategoryURIs objectAtIndex:newConcreteCategoryURIsIndex];
+            
+            moreExistingCategoriesToCheckAgainst &= existingConcreteCategoriesIndex < [existingConcreteCategoriesMatchingURIs count];
+            if (moreExistingCategoriesToCheckAgainst) {
+                existingCategory = (Category *)[existingConcreteCategoriesMatchingURIs objectAtIndex:existingConcreteCategoriesIndex];
+            }
+            
+            BOOL newAndExistingCategoriesMatchURIs = moreExistingCategoriesToCheckAgainst && [newConcreteCategoryURI isEqualToString:existingCategory.uri];
+            BOOL shouldCreateNewCategory = (!moreExistingCategoriesToCheckAgainst ||
+                                            !newAndExistingCategoriesMatchURIs);
+            
+            NSDictionary * newConcreteCategoryDictionary = nil;
+            NSString * newConcreteCategoryTitle = nil;
+            NSString * newConcreteCategoryColor = nil;
+            NSString * newConcreteCategoryButtonThumb = nil;
+            if (shouldCreateNewCategory || newAndExistingCategoriesMatchURIs) {
+                newConcreteCategoryDictionary = [newConcreteCategoriesSortedByResourceURI objectAtIndex:newConcreteCategoryURIsIndex];
+                newConcreteCategoryTitle = [WebUtil stringOrNil:[newConcreteCategoryDictionary valueForKey:@"title"]];
+                newConcreteCategoryColor = [WebUtil stringOrNil:[newConcreteCategoryDictionary valueForKey:@"color"]];
+                newConcreteCategoryButtonThumb = [WebUtil stringOrNil:[newConcreteCategoryDictionary valueForKey:@"thumb"]];
+            }
+            
+            if (shouldCreateNewCategory) {
+                NSLog(@"Creating new category");
+                [self addCategoryWithURI:newConcreteCategoryURI title:newConcreteCategoryTitle color:newConcreteCategoryColor buttonThumb:newConcreteCategoryButtonThumb];
+            } else {
+                if (newAndExistingCategoriesMatchURIs) {
+                    NSLog(@"Updating category");
+                    existingCategory.title = newConcreteCategoryTitle;
+                    existingCategory.colorHex = newConcreteCategoryColor;
+                    existingCategory.buttonThumb = newConcreteCategoryButtonThumb;
+                }
+                existingConcreteCategoriesIndex++;
+            }
+            
+            newConcreteCategoryURIsIndex++;
+            
+        }
+        
+        if (shouldDeleteOthers) {
+            NSLog(@"Should delete other categories that were not in the new group we just pulled down and processed.");
+            [fetchRequest setPredicate:[NSPredicate predicateWithFormat:@"!(uri IN %@)", newConcreteCategoryURIs]];
+            NSArray * existingConcreteCategoriesUnmatched = [self.managedObjectContext executeFetchRequest:fetchRequest error:&error];
+            if (existingConcreteCategoriesUnmatched && [existingConcreteCategoriesUnmatched count] > 0) {
+                NSLog(@"Deleting %d categories", [existingConcreteCategoriesUnmatched count]);
+                for (Category * categoryToDelete in existingConcreteCategoriesUnmatched) {
+                    [self.managedObjectContext deleteObject:categoryToDelete];
+                }
+            } else {
+                NSLog(@"Not deleting any categories");
+            }
+        }
+        
+    }
+    
+}
+
+- (void) addCategoryWithURI:(NSString *)uri title:(NSString *)titleString color:(NSString *)colorString buttonThumb:(NSString *)buttonThumbnailString {
     
     Category * categoryObject = [NSEntityDescription insertNewObjectForEntityForName:@"Category" inManagedObjectContext:self.managedObjectContext];
     categoryObject.uri = uri;
     categoryObject.title = titleString;
     categoryObject.colorHex = colorString;
-    categoryObject.thumbnail = thumbnailString;
+    categoryObject.buttonThumb = buttonThumbnailString;
     categoryObject.displayOrder = [self.tempSolutionCategoriesOrderDictionary valueForKey:categoryObject.uri];
+    categoryObject.iconThumb = [self.tempSolutionCategoriesIconThumbsDictionary valueForKey:categoryObject.uri];
     
 }
 
@@ -453,52 +558,78 @@
 // CONTACTS //
 //////////////
 
-- (void)addOrUpdateContactsFromFacebook:(NSArray *)fbContacts {
-    NSLog(@"addOrUpdateContactsFromFacebook %@", fbContacts);
+- (void) addOrUpdateContactsFromFacebook:(NSArray *)fbContacts deleteOthers:(BOOL)shouldDeleteOthers {
     
     if (fbContacts) {
     
         // Prepare the sorted array of Facebook contact IDs
-        NSArray * fbContactsSortedByID = [fbContacts sortedArrayUsingDescriptors:[NSArray arrayWithObject:[NSSortDescriptor sortDescriptorWithKey:@"id" ascending:YES]]];
-        NSMutableArray * fbIDs = [NSMutableArray array];
-        for (NSDictionary * contactDictionary in fbContactsSortedByID) {
-            [fbIDs addObject:[contactDictionary valueForKey:@"id"]];
+        NSArray * newContactsSortedByID = [fbContacts sortedArrayUsingDescriptors:[NSArray arrayWithObject:[NSSortDescriptor sortDescriptorWithKey:@"id" ascending:YES]]];
+        NSMutableArray * newContactIDs = [NSMutableArray array];
+        for (NSDictionary * newContactDictionary in newContactsSortedByID) {
+            [newContactIDs addObject:[newContactDictionary valueForKey:@"id"]];
         }
         
         // Create the fetch request to get all Contacts matching the IDs
         NSFetchRequest * fetchRequest = [[[NSFetchRequest alloc] init] autorelease];
         [fetchRequest setEntity:[NSEntityDescription entityForName:@"Contact" inManagedObjectContext:self.managedObjectContext]];
-        [fetchRequest setPredicate: [NSPredicate predicateWithFormat: @"(fbID IN %@)", fbIDs]];
+        [fetchRequest setPredicate: [NSPredicate predicateWithFormat: @"(fbID IN %@)", newContactIDs]];
         // Make sure the results will be sorted as well
         [fetchRequest setSortDescriptors:[NSArray arrayWithObject:[NSSortDescriptor sortDescriptorWithKey:@"fbID" ascending:YES]]];
         // Execute the fetch
         NSError * error = nil;
-        NSArray * contactsMatchingIDs = [self.managedObjectContext executeFetchRequest:fetchRequest error:&error];
+        NSArray * existingContactsMatchingIDs = [self.managedObjectContext executeFetchRequest:fetchRequest error:&error];
         
-        int fbIDsArrayIndex = 0;
-        int contactsIndex = 0;
-        BOOL moreContactsToCheckAgainst = contactsMatchingIDs && contactsIndex < [contactsMatchingIDs count];
-        NSString * fbID;
-        Contact * contact;
+        int newContactIDsIndex = 0;
+        int existingContactsIndex = 0;
+        BOOL moreExistingContactsToCheckAgainst = existingContactsMatchingIDs && existingContactsIndex < [existingContactsMatchingIDs count];
+        NSString * newContactID;
+        Contact * existingContact;
         
-        while (fbIDsArrayIndex < [fbIDs count]) {
+        while (newContactIDsIndex < [newContactIDs count]) {
             
-            fbID = [fbIDs objectAtIndex:fbIDsArrayIndex];
+            newContactID = [newContactIDs objectAtIndex:newContactIDsIndex];
             
-            moreContactsToCheckAgainst &= contactsIndex < [contactsMatchingIDs count];
-            if (moreContactsToCheckAgainst) {
-                contact = (Contact *)[contactsMatchingIDs objectAtIndex:contactsIndex];
+            moreExistingContactsToCheckAgainst &= existingContactsIndex < [existingContactsMatchingIDs count];
+            if (moreExistingContactsToCheckAgainst) {
+                existingContact = (Contact *)[existingContactsMatchingIDs objectAtIndex:existingContactsIndex];
             }
             
-            if (!moreContactsToCheckAgainst ||
-                ![fbID isEqualToString:contact.fbID]) {
-                [self addContactWithFacebookID:fbID facebookName:[[fbContactsSortedByID objectAtIndex:fbIDsArrayIndex] valueForKey:@"name"]];
+            BOOL newAndExistingContactsMatchIDs = moreExistingContactsToCheckAgainst && [newContactID isEqualToString:existingContact.fbID];
+            BOOL shouldCreateNewContact = (!moreExistingContactsToCheckAgainst ||
+                                           !newAndExistingContactsMatchIDs);
+            
+            NSDictionary * newContactDictionary = nil;
+            NSString * newContactName = nil;
+            if (shouldCreateNewContact || newAndExistingContactsMatchIDs) {
+                newContactDictionary = [newContactsSortedByID objectAtIndex:newContactIDsIndex];
+                newContactName = [newContactDictionary valueForKey:@"name"];
+            }
+            
+            if (shouldCreateNewContact) {
+                [self addContactWithFacebookID:newContactID facebookName:newContactName];
             } else {
-                contactsIndex++;
+                if (newAndExistingContactsMatchIDs) {
+                    existingContact.fbName = newContactName;
+                }
+                existingContactsIndex++;
             }
             
-            fbIDsArrayIndex++;
+            newContactIDsIndex++;
             
+        }
+        
+        if (shouldDeleteOthers) {
+            NSLog(@"Should delete other contacts that were not in the new group we just pulled down and processed.");
+            [fetchRequest setPredicate:[NSPredicate predicateWithFormat:@"!(fbID IN %@)", newContactIDs]];
+            NSArray * existingContactsUnmatched = [self.managedObjectContext executeFetchRequest:fetchRequest error:&error];
+            if (existingContactsUnmatched && [existingContactsUnmatched count] > 0) {
+                NSLog(@"Deleting %d contacts", [existingContactsUnmatched count]);
+                for (Contact * contactToDelete in existingContactsUnmatched) {
+                    [self.managedObjectContext deleteObject:contactToDelete];
+                }
+            } else {
+                NSLog(@"Not deleting any categories");
+            }
         }
         
     }

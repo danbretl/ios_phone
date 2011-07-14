@@ -30,7 +30,6 @@
 @synthesize navBar, backButton, logoButton;
 @synthesize messageLabel;
 @synthesize disconnectButton, doneButton;
-@synthesize facebookManager;
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
@@ -51,6 +50,14 @@
     [doneButton release];
     [facebookManager release];
     [super dealloc];
+}
+
+- (FacebookManager *)facebookManager {
+    if (facebookManager == nil) {
+        facebookManager = [[FacebookManager alloc] init];
+        [facebookManager pullAuthenticationInfoFromDefaults];
+    }
+    return facebookManager;
 }
 
 - (void)didReceiveMemoryWarning

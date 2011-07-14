@@ -225,6 +225,10 @@
 									<bytes key="NSRGB">MC4xOTYwNzg0MzQ2IDAuMzA5ODAzOTMyOSAwLjUyMTU2ODY1NgA</bytes>
 								</object>
 								<reference key="IBUINormalTitleShadowColor" ref="1055857812"/>
+								<object class="NSCustomResource" key="IBUIDisabledBackgroundImage">
+									<string key="NSClassName">NSImage</string>
+									<string key="NSResourceName">btn_selected_notext_disabled.png</string>
+								</object>
 								<object class="NSCustomResource" key="IBUISelectedBackgroundImage">
 									<string key="NSClassName">NSImage</string>
 									<string key="NSResourceName">btn_selected_touch_notext.png</string>
@@ -258,9 +262,9 @@
 						<bool key="IBUIAlwaysBounceVertical">YES</bool>
 						<int key="IBUISectionIndexMinimumDisplayRowCount">0</int>
 						<bool key="IBUIShowsSelectionImmediatelyOnTouchBegin">YES</bool>
-						<float key="IBUIRowHeight">51</float>
-						<float key="IBUISectionHeaderHeight">22</float>
-						<float key="IBUISectionFooterHeight">22</float>
+						<float key="IBUIRowHeight">50</float>
+						<float key="IBUISectionHeaderHeight">21</float>
+						<float key="IBUISectionFooterHeight">21</float>
 					</object>
 					<object class="IBUITableView" id="677581085">
 						<reference key="NSNextResponder" ref="191373211"/>
@@ -279,9 +283,9 @@
 						<double key="IBUIScrollIndicatorInsets.right">0.0</double>
 						<int key="IBUISectionIndexMinimumDisplayRowCount">0</int>
 						<bool key="IBUIShowsSelectionImmediatelyOnTouchBegin">YES</bool>
-						<float key="IBUIRowHeight">51</float>
-						<float key="IBUISectionHeaderHeight">22</float>
-						<float key="IBUISectionFooterHeight">22</float>
+						<float key="IBUIRowHeight">50</float>
+						<float key="IBUISectionHeaderHeight">21</float>
+						<float key="IBUISectionFooterHeight">21</float>
 					</object>
 				</object>
 				<string key="NSFrameSize">{320, 480}</string>
@@ -682,7 +686,7 @@
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<real value="1"/>
-					<real value="2"/>
+					<real value="3"/>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<real value="2"/>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
@@ -843,6 +847,7 @@
 				<string>btn_selectall.png</string>
 				<string>btn_selectall_over.png</string>
 				<string>btn_selected_notext.png</string>
+				<string>btn_selected_notext_disabled.png</string>
 				<string>btn_selected_touch_notext.png</string>
 				<string>cancel.png</string>
 				<string>kfb_connect.png</string>
@@ -853,6 +858,7 @@
 				<string>{74, 32}</string>
 				<string>{206, 36}</string>
 				<string>{206, 36}</string>
+				<string>{114, 36}</string>
 				<string>{114, 36}</string>
 				<string>{114, 36}</string>
 				<string>{72, 30}</string>

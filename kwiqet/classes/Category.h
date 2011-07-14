@@ -18,9 +18,10 @@
 @property (nonatomic, retain) NSString * colorHex;
 @property (nonatomic, retain) NSString * title;
 @property (nonatomic, retain) NSString * uri;
-@property (nonatomic, retain) NSString * thumbnail;
+@property (nonatomic, retain) NSString * buttonThumb;
 @property (nonatomic, retain) NSNumber * displayOrder;
 @property (nonatomic, retain) NSSet* breadcrumbs;
 @property (nonatomic, retain) NSSet* events;
+@property (nonatomic, retain) NSString * iconThumb;
 
 @end

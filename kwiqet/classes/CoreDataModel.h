@@ -20,6 +20,7 @@
     NSPersistentStoreCoordinator * persistentStoreCoordinator;
     
     NSDictionary * tempSolutionCategoriesOrderDictionary;
+    NSDictionary * tempSolutionCategoriesIconThumbsDictionary;
     
     WebDataTranslator * webDataTranslator;
     NSNumber * coreDataYes;
@@ -32,6 +33,7 @@
 @property (nonatomic, retain) NSPersistentStoreCoordinator *persistentStoreCoordinator;
 
 @property (nonatomic, readonly) NSDictionary * tempSolutionCategoriesOrderDictionary;
+@property (nonatomic, readonly) NSDictionary * tempSolutionCategoriesIconThumbsDictionary;
 
 // Util
 @property (nonatomic, readonly) WebDataTranslator * webDataTranslator;
@@ -44,7 +46,8 @@
 - (NSArray *) getAllObjectsForEntityName:(NSString *)entityName predicate:(NSPredicate *)predicate sortDescriptors:(NSArray *)sortDescriptors;
 
 // Categories
-- (void) coreDataAddCategoryWithURI:(NSString *)uri title:(NSString *)titleString color:(NSString *)colorString thumb:(NSString *)thumbnailString; // This should be updated to allow for/enable updating the category tree after initial category-tree-get.
+- (void) addOrUpdateConcreteCategories:(NSArray *)concreteCategories deleteOthers:(BOOL)shouldDeleteOthers;
+- (void) addCategoryWithURI:(NSString *)uri title:(NSString *)titleString color:(NSString *)colorString buttonThumb:(NSString *)buttonThumbnailString; // This should be updated to allow for/enable updating the category tree after initial category-tree-get.
 - (Category *) getCategoryWithURI:(NSString *)uri;
 - (NSArray *) getAllCategories;
 - (NSArray *) getAllCategoriesWithColor;
@@ -65,7 +68,7 @@
 
 // Contacts
 - (void) addContactWithFacebookID:(NSString *)fbID facebookName:(NSString *)fbName;
-- (void) addOrUpdateContactsFromFacebook:(NSArray *)fbContacts;
+- (void) addOrUpdateContactsFromFacebook:(NSArray *)fbContacts deleteOthers:(BOOL)shouldDeleteOthers;
 - (NSArray *) getAllContacts;
 - (NSArray *) getAllFacebookContacts;
 

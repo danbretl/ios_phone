@@ -29,4 +29,9 @@
 + (UIImage *) loadEventImageDataFromSourceLocation:(NSString *)imageSourceLocation;
 + (BOOL) eventImageExistsFromSourceLocation:(NSString *)imageSourceLocation;
 
++ (void) saveFacebookProfilePicture:(NSData *)imageData facebookID:(NSString *)facebookID;
++ (void) removeFacebookProfilePictureFromFacebookID:(NSString *)facebookID;
++ (UIImage *) FacebookProfilePictureFromFacebookID:(NSString *)facebookID;
++ (BOOL) facebookProfilePictureExistsFromFacebookID:(NSString *)facebookID;
+
 @end

@@ -16,6 +16,10 @@ static NSString * const DM_TAB_BAR_SELECTED_INDEX_KEY = @"DM_TAB_BAR_SELECTED_IN
 
 @implementation DefaultsModel
 
++ (BOOL) synchronize {
+    return [[NSUserDefaults standardUserDefaults] synchronize];
+}
+
 + (BOOL)isLoggedInWithKwiqet {
     return [DefaultsModel retrieveAPIFromUserDefaults] != nil;
 }
@@ -106,6 +110,13 @@ static NSString * const DM_TAB_BAR_SELECTED_INDEX_KEY = @"DM_TAB_BAR_SELECTED_IN
         value = [standardUserDefaults boolForKey:@"CategoryTreeRetrieved"];
     }
     return value;
+}
+
++ (void) saveCategoryTreeMostRecentRetrievalDate:(NSDate *)date {
+    [self saveDate:date withKey:@"CategoryTreeMostRecentRetrievalDate"];
+}
++ (NSDate *) loadCategoryTreeMostRecentRetrievalDate {
+    return [self loadDateWithKey:@"CategoryTreeMostRecentRetrievalDate"];
 }
 
 + (void)saveLastFeaturedEventGetDate:(NSDate *)date {

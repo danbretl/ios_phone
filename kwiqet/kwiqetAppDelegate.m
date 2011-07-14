@@ -13,6 +13,11 @@
 #import "WebUtil.h"
 #import "ContactsSelectViewController.h"
 
+@interface kwiqetAppDelegate()
+- (void) facebookAuthError:(NSNotification *)notification;
+- (void) facebookFriendsRetrieved:(NSNotification *)notification;
+@end
+
 @implementation kwiqetAppDelegate
 @synthesize window;
 @synthesize splashView, splashScreenViewController;
@@ -25,9 +30,15 @@
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     
     // Setup stuff
+    // Caching...
     NSLog(@"%d", [[NSURLCache sharedURLCache] memoryCapacity]);
     [[NSURLCache sharedURLCache] setMemoryCapacity:1024*1024*10]; // http://stackoverflow.com/questions/1870004/does-nsurlconnection-take-advantage-of-nsurlcache/3900432#3900432
     NSLog(@"%d", [[NSURLCache sharedURLCache] memoryCapacity]);
+    // Notifications...
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(facebookAuthError:) name:FBM_AUTH_ERROR_KEY object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(facebookFriendsRetrieved:) name:FBM_FRIENDS_UPDATE_SUCCESS_KEY object:nil];
+    // Variables...
+    BOOL forceGetCategoryTree = NO;
     
     // Order of operations:
     // - kwiqetAppDelegate should make the categoryRequest (NOT the categoryTreeModel itself) immediately, IF the category tree has not already previous been retrieved and processed.
@@ -39,7 +50,17 @@
     if (!self.categoryTreeHasBeenRetrieved) {
         [self.webConnector getCategoryTree];
     } else {
-        [self.splashScreenViewController explodeAndFadeViewAnimated];
+        NSDate * categoryTreeMostRecentRetrievalDate = [DefaultsModel loadCategoryTreeMostRecentRetrievalDate];
+        NSDateFormatter * dateFormatter = [[NSDateFormatter alloc] init];
+        [dateFormatter setDateFormat:@"YYYY-MM-dd"];
+        if (forceGetCategoryTree ||
+            !categoryTreeMostRecentRetrievalDate ||
+            ![[dateFormatter stringFromDate:categoryTreeMostRecentRetrievalDate] isEqualToString:[dateFormatter stringFromDate:[NSDate date]]]) {
+            [self.webConnector getCategoryTree];
+        } else {
+            [self.splashScreenViewController explodeAndFadeViewAnimated];
+        }
+        [dateFormatter release];
     }
     
     // - kwiqetAppDelegate should alloc/init a SplashScreenViewController and add its view to the window. This VC should remain until the AppDelegate receives a response from the categoryRequest.
@@ -61,14 +82,14 @@
         self.featuredEventViewController.coreDataModel = self.coreDataModel;
         UITabBarItem * featuredEventTabBarItem = [[[UITabBarItem alloc] initWithTabBarSystemItem:UITabBarSystemItemFeatured tag:0] autorelease];
         self.featuredEventViewController.tabBarItem = featuredEventTabBarItem;
-        self.featuredEventViewController.facebookManager = self.facebookManager;
+//        self.featuredEventViewController.facebookManager = self.facebookManager;
         
         // Events List View Controller
         self.eventsViewController = [[[EventsViewController alloc] init] autorelease];
         self.eventsViewController.coreDataModel = self.coreDataModel;
         UITabBarItem * eventsTabBarItem = [[[UITabBarItem alloc] initWithTitle:@"Events" image:[UIImage imageNamed:@"tab_home.png"] tag:1] autorelease];
         self.eventsViewController.tabBarItem = eventsTabBarItem;
-        self.eventsViewController.facebookManager = self.facebookManager;
+//        self.eventsViewController.facebookManager = self.facebookManager;
         // Events List Navigation Controller
         self.eventsNavController = [[[UINavigationController alloc] initWithRootViewController:self.eventsViewController] autorelease];
         self.eventsNavController.navigationBarHidden = YES;
@@ -77,7 +98,7 @@
         self.settingsViewController = [[[SettingsViewController alloc] initWithNibName:@"SettingsViewController" bundle:[NSBundle mainBundle]] autorelease];
         UITabBarItem * settingsTabBarItem = [[[UITabBarItem alloc] initWithTitle:@"Settings" image:[UIImage imageNamed:@"tab_settings.png"] tag:2] autorelease];
         self.settingsViewController.tabBarItem = settingsTabBarItem;
-        self.settingsViewController.facebookManager = self.facebookManager;
+//        self.settingsViewController.facebookManager = self.facebookManager;
         self.settingsViewController.coreDataModel = self.coreDataModel;
         // Settings Navigation Controller
         settingsNavController = [[UINavigationController alloc] initWithRootViewController:self.settingsViewController];
@@ -98,8 +119,9 @@
     } else {
         
         ContactsSelectViewController * csvc = [[ContactsSelectViewController alloc] initWithNibName:@"ContactsSelectViewController" bundle:[NSBundle mainBundle]];
-        csvc.contactsAll = [self.coreDataModel getAllFacebookContacts];
+//        csvc.contactsAll = [self.coreDataModel getAllFacebookContacts];
         csvc.delegate = self;
+        csvc.coreDataModel = self.coreDataModel;
         [UIApplication sharedApplication].statusBarHidden = YES;
         [self.window addSubview:csvc.view];
         //[csvc release];
@@ -111,6 +133,20 @@
     return YES;
 }
 
+- (void) navigateToSettingsViewController {
+    [self.tabBarController setSelectedViewController:self.settingsNavController];
+}
+
+- (void) facebookAuthError:(NSNotification *)notification {
+    [self.facebookManager logoutAndForgetFacebookAccessToken:YES associatedWithKwiqetIdentfier:[DefaultsModel retrieveKwiqetUserIdentifierFromUserDefaults]];
+}
+
+- (void) facebookFriendsRetrieved:(NSNotification *)notification {
+    [self.coreDataModel addOrUpdateContactsFromFacebook:[[notification userInfo] objectForKey:@"data"] deleteOthers:YES];
+    [self.coreDataModel coreDataSave];
+    [[NSNotificationCenter defaultCenter] postNotificationName:FBM_FRIENDS_LOCAL_DATA_UPDATED_KEY object:self];
+}
+
 - (void)contactsSelectViewController:(ContactsSelectViewController *)contactsSelectViewController didFinishWithCancel:(BOOL)didCancel selectedContacts:(NSArray *)selectedContacts {
     NSLog(@"contactsSelectViewController didFinish");
     NSLog(@"Did cancel? %d", didCancel);
@@ -119,7 +155,8 @@
 
 // FOR NOW, the only reason we'd have to handle an open url is to handle Facebook's login response. If that ever changes, then the logic of this method will obviously have to get more complicated.
 - (BOOL)application:(UIApplication *)application handleOpenURL:(NSURL *)url {
-    BOOL returnVal = [self.facebookManager.fb handleOpenURL:url];
+    BOOL returnVal = [self.settingsViewController.facebookManager.fb handleOpenURL:url];
+//    BOOL returnVal = [self.facebookManager.fb handleOpenURL:url];
 //    if (returnVal) {
 //        [[NSNotificationCenter defaultCenter] postNotificationName:@"HANDLED_FACEBOOK_OPEN_URL" object:self userInfo:nil];
 //    }
@@ -129,7 +166,8 @@
 - (FacebookManager *)facebookManager {
     if (facebookManager == nil) {
         facebookManager = [[FacebookManager alloc] init];
-        facebookManager.coreDataModel = self.coreDataModel;
+//        facebookManager.coreDataModel = self.coreDataModel;
+        [facebookManager pullAuthenticationInfoFromDefaults];
     }
     return facebookManager;
 }
@@ -160,10 +198,11 @@
     if (allGoodForProcessing) {
         [self processLoadedCategoriesFromHTTPRequest:request];
         categoryTreeHasBeenRetrieved = YES;
-        [DefaultsModel saveCategoryTreeHasBeenRetrieved:self.categoryTreeHasBeenRetrieved];
         // Animate out the SplashScreenViewController's view
-        [self.splashScreenViewController explodeAndFadeViewAnimated];
         [self.eventsViewController forceToReloadEventsList]; // We currently need to make SURE that the events list gets reloaded sometime AFTER we get the category tree - otherwise the categories do not appear correctly in that view controller.
+        [DefaultsModel saveCategoryTreeHasBeenRetrieved:self.categoryTreeHasBeenRetrieved];
+        [DefaultsModel saveCategoryTreeMostRecentRetrievalDate:[NSDate date]];
+        [self.splashScreenViewController explodeAndFadeViewAnimated];
     } else {
         [self webConnector:theWebConnector getCategoryTreeFailure:request];
     }
@@ -175,24 +214,21 @@
     //	NSLog(@"%@",statusMessage);
     //	NSError *error = [request error];
     //	NSLog(@"%@",error);
-    [splashScreenViewController showConnectionErrorTextView:YES animated:YES];
+    if ([DefaultsModel loadCategoryTreeHasBeenRetrieved]) {
+        [self.splashScreenViewController explodeAndFadeViewAnimated];
+    } else {
+        [self.splashScreenViewController showConnectionErrorTextView:YES animated:YES];
+    }
 }
 
 - (void) processLoadedCategoriesFromHTTPRequest:(ASIHTTPRequest *)httpRequest {
     
-    [self.coreDataModel deleteAllObjectsForEntityName:@"Category"]; // Does it not matter that we are totally wiping out the old category tree we might have previously had?
+//    [self.coreDataModel deleteAllObjectsForEntityName:@"Category"];
 	
-    NSDictionary *dictionaryFromJSON = [[httpRequest responseString] yajl_JSON];
+    NSDictionary * dictionaryFromJSON = [[httpRequest responseString] yajl_JSON];
     NSArray * categoriesArray = [dictionaryFromJSON valueForKey:@"objects"];
     
-    for (NSDictionary * categoryDictionary in categoriesArray) {
-        NSString * uri = [WebUtil stringOrNil:[categoryDictionary valueForKey:@"resource_uri"]];
-        NSString * title = [WebUtil stringOrNil:[categoryDictionary valueForKey:@"title"]];
-        NSString * color = [WebUtil stringOrNil:[categoryDictionary valueForKey:@"color"]];
-        NSString * thumb = [WebUtil stringOrNil:[categoryDictionary valueForKey:@"thumb"]];
-        [self.coreDataModel coreDataAddCategoryWithURI:uri title:title color:color thumb:thumb];
-    }
-    
+    [self.coreDataModel addOrUpdateConcreteCategories:categoriesArray deleteOthers:YES];
     [self.coreDataModel coreDataSave];
     
 }

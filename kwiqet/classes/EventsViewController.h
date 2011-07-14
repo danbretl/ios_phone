@@ -15,7 +15,7 @@
 #import "EventTableViewCell.h"
 #import "WebDataTranslator.h"
 #import "WebActivityView.h"
-#import "FacebookManager.h"
+//#import "FacebookManager.h"
 
 extern float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT;
 
@@ -71,11 +71,11 @@ extern float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT;
     
     BOOL problemViewWasShowing;
     
-    FacebookManager * facebookManager;
+//    FacebookManager * facebookManager;
 
 }
 
-@property (nonatomic, retain) FacebookManager * facebookManager;
+//@property (nonatomic, retain) FacebookManager * facebookManager;
 @property (nonatomic, retain) CoreDataModel *coreDataModel;
 //- (void) suggestToReloadEventsList; // This method is only a "suggestion" to the object because if the object determines it doesn't NEED to try to get a new featured event from the web, then it will simply ignore the request. (It ignores the request if the date of the last events list web-get was the same day as "today" i.e. the day of the method call.)
 - (void) suggestToRedrawEventsList;

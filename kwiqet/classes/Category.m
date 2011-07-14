@@ -13,7 +13,8 @@
 @dynamic colorHex;
 @dynamic title;
 @dynamic uri;
-@dynamic thumbnail;
+@dynamic buttonThumb;
+@dynamic iconThumb;
 @dynamic displayOrder;
 @dynamic breadcrumbs;
 @dynamic events;

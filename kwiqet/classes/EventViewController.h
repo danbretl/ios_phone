@@ -84,7 +84,7 @@
 @property (nonatomic, retain) Event * event;
 @property (assign) id<CardPageViewControllerDelegate> delegate;
 @property (nonatomic, retain) CoreDataModel * coreDataModel;
-@property (nonatomic, retain) FacebookManager * facebookManager;
+@property (nonatomic, readonly) FacebookManager * facebookManager;
 
 - (void) viewControllerIsFinished;
 - (void) updateViewsFromData;

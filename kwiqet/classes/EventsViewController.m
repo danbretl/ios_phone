@@ -113,7 +113,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 @synthesize cardPageViewController;
 @synthesize indexPathOfRowAttemptingToDelete, indexPathOfSelectedRow, searchButton;
 @synthesize logoButton, tableFooterView;
-@synthesize facebookManager;
+//@synthesize facebookManager;
 
 - (void)dealloc {
     [filtersBackgroundView release];
@@ -146,7 +146,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     [indexPathOfSelectedRow release];
     [logoButton release];
     [tableFooterView release];
-    [facebookManager release];
+//    [facebookManager release];
     [super dealloc];
 }
 
@@ -189,7 +189,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
                 //set icon image here
                 Category * category = (Category *)[self.concreteParentCategoriesArray objectAtIndex:index-1];
                 categoryTitleLabel.text = category.title;
-                [categoryButton setBackgroundImage:[UIImage imageNamed:category.thumbnail] forState: UIControlStateNormal];
+                [categoryButton setBackgroundImage:[UIImage imageNamed:category.buttonThumb] forState: UIControlStateNormal];
                 categoryButton.tag = index-1;
             }
             [categoryButton addTarget:self action:@selector(categoryButtonPressed:) forControlEvents:UIControlEventTouchUpInside];
@@ -401,7 +401,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     NSString * logoCategoryThumbnail = @"logo_";
     if (theCategoryURI) {
         Category * matchedCategory = (Category *)[self.concreteParentCategoriesDictionary objectForKey:theCategoryURI];
-        NSString * normalCategoryThumbnail = matchedCategory.thumbnail;
+        NSString * normalCategoryThumbnail = matchedCategory.buttonThumb;
         logoCategoryThumbnail = [logoCategoryThumbnail stringByAppendingString:normalCategoryThumbnail];
     } else {
         logoCategoryThumbnail = [logoCategoryThumbnail stringByAppendingString:@"btn_cat_all.png"];
@@ -1124,7 +1124,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     self.cardPageViewController = [[[EventViewController alloc] init] autorelease];
     self.cardPageViewController.coreDataModel = self.coreDataModel;
     self.cardPageViewController.delegate = self;
-    self.cardPageViewController.facebookManager = self.facebookManager;
+//    self.cardPageViewController.facebookManager = self.facebookManager;
     self.cardPageViewController.hidesBottomBarWhenPushed = YES;
     
     Event * event = (Event *)[self.eventsForCurrentSource objectAtIndex:indexPath.row];

@@ -9,6 +9,8 @@
 #import <UIKit/UIKit.h>
 #import "Contact.h"
 #import "FacebookManager.h"
+#import "WebActivityView.h"
+#import "CoreDataModel.h"
 
 @protocol ContactsSelectViewControllerDelegate;
 
@@ -41,9 +43,12 @@
     BOOL _isSearchOn;
     
     FacebookManager * facebookManager;
+    WebActivityView * webActivityView;
+    BOOL _isLoadingContacts;
     
 }
 
+@property (nonatomic, retain) CoreDataModel * coreDataModel;
 @property (assign) id<ContactsSelectViewControllerDelegate> delegate;
 @property (nonatomic, retain) NSArray * contactsAll;
 @property (retain) NSMutableArray * contactsFiltered;
@@ -51,6 +56,8 @@
 @property (readonly) NSMutableDictionary * contactsGrouped;
 @property (readonly) NSArray * alphabetArray;
 @property (nonatomic, readonly) FacebookManager * facebookManager;
+- (void) showWebActivityView;
+- (void) hideWebActivityView;
 
 @end
 

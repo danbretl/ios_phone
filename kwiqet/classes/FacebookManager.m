@@ -8,6 +8,7 @@
 
 #import "FacebookManager.h"
 #import "DefaultsModel.h"
+#import "Contact.h"
 
 static NSString * const FB_FACEBOOK_APP_ID = @"210861478950952";
 static NSString * const FB_FACEBOOK_ACCESS_TOKEN_KEY = @"FBAccessTokenKey";
@@ -28,7 +29,7 @@ static NSString * const FBM_REQUEST_PROFILE_PICTURE = @"FBM_REQUEST_PROFILE_PICT
 
 @implementation FacebookManager
 
-@synthesize coreDataModel;
+//@synthesize coreDataModel;
 @synthesize currentRequest, currentRequestType;
 @synthesize eventInvitees;
 @synthesize shouldForgetFacebookAccessTokenOnLogout;
@@ -36,7 +37,7 @@ static NSString * const FBM_REQUEST_PROFILE_PICTURE = @"FBM_REQUEST_PROFILE_PICT
 
 - (void)dealloc {
     [facebook release];
-    [coreDataModel release];
+//    [coreDataModel release];
     [currentRequest release];
     [currentRequestType release];
     [eventInvitees release];
@@ -58,26 +59,31 @@ static NSString * const FBM_REQUEST_PROFILE_PICTURE = @"FBM_REQUEST_PROFILE_PICT
         kwiqetIdentifier = FBM_NO_ASSOCIATED_KWIQET_IDENTIFIER;
     }
     [DefaultsModel saveFacebookAccessToken:self.fb.accessToken expirationDate:self.fb.expirationDate attachedToKwiqetIdentifier:kwiqetIdentifier];
+    [DefaultsModel synchronize];
 }
 
 - (void)pullAuthenticationInfoFromDefaults {
+    NSLog(@"FacebookManager pullAuthenticationInfoFromDefaults");
     NSString * kwiqetIdentifier = [DefaultsModel retrieveKwiqetUserIdentifierFromUserDefaults];
     if (!kwiqetIdentifier) {
+        NSLog(@"no kwiqet id available");
         kwiqetIdentifier = FBM_NO_ASSOCIATED_KWIQET_IDENTIFIER;
     }
     NSDictionary * accessInfo = [DefaultsModel retrieveFacebookAccessInfoAttachedToKwiqetIdentifier:kwiqetIdentifier];
     if (accessInfo) {
+        NSLog(@"accessInfo exists? = %@", accessInfo);
         self.fb.accessToken = [accessInfo objectForKey:DM_FACEBOOK_ACCESS_INFO_DICTIONARY_ACCESS_TOKEN_KEY];
         self.fb.expirationDate = [accessInfo objectForKey:DM_FACEBOOK_ACCESS_INFO_DICTIONARY_EXPIRATION_DATE_KEY];
     }
 }
 
 - (void) login {
-    [self pullAuthenticationInfoFromDefaults];
+    NSLog(@"FacebookManager login");
     [self authorizeWithStandardPermissionsAndDelegate:self];
 }
 
 - (void)authorizeWithStandardPermissionsAndDelegate:(id<FBSessionDelegate>)delegate {
+    NSLog(@"FacebookManager authorizeWithStandardPermissionsAndDelegate");
     NSArray * permissions = [NSArray arrayWithObjects:@"user_events", @"create_event", @"rsvp_event", @"user_likes", @"user_interests", @"user_religion_politics", @"offline_access", nil];
     [self.fb authorize:permissions delegate:delegate];
 }
@@ -138,13 +144,11 @@ static NSString * const FBM_REQUEST_PROFILE_PICTURE = @"FBM_REQUEST_PROFILE_PICT
 
 
 - (void) request:(FBRequest *)request didLoad:(id)result {
-    NSLog(@"FB request success %@ - %@", request, result);
+//    NSLog(@"FB request success %@ - %@", request, result);
         
     if ([self.currentRequestType isEqualToString:FBM_REQUEST_UPDATE_FRIENDS]) {
         
-        [self.coreDataModel addOrUpdateContactsFromFacebook:[result objectForKey:@"data"]];
-        [self.coreDataModel coreDataSave];
-        [[NSNotificationCenter defaultCenter] postNotificationName:FBM_FRIENDS_UPDATE_SUCCESS_KEY object:self userInfo:nil];
+        [[NSNotificationCenter defaultCenter] postNotificationName:FBM_FRIENDS_UPDATE_SUCCESS_KEY object:self userInfo:result];
         
     } else if ([self.currentRequestType isEqualToString:FBM_REQUEST_CREATE_EVENT]) {
         
@@ -174,30 +178,40 @@ static NSString * const FBM_REQUEST_PROFILE_PICTURE = @"FBM_REQUEST_PROFILE_PICT
     NSLog(@"FB error details: %@", [error description]);
     NSLog(@"FB error userInfo: %@", [error userInfo]);
     
-    if ([self.currentRequestType isEqualToString:FBM_REQUEST_UPDATE_FRIENDS]) {
+    NSLog(@"%@", [[[error userInfo] objectForKey:@"error"] objectForKey:@"type"]);
+    if ([[[[error userInfo] objectForKey:@"error"] objectForKey:@"type"] isEqualToString:@"OAuthException"]) {
         
-        [[NSNotificationCenter defaultCenter] postNotificationName:FBM_FRIENDS_UPDATE_FAILURE_KEY object:self userInfo:nil];
-        
-    } else if ([self.currentRequestType isEqualToString:FBM_REQUEST_CREATE_EVENT]) {
-        
-        [[NSNotificationCenter defaultCenter] postNotificationName:FBM_CREATE_EVENT_FAILURE_KEY object:self userInfo:nil];
-        
-    } else if ([self.currentRequestType isEqualToString:FBM_REQUEST_INVITE_FRIENDS_TO_EVENT]) {
-        
-        // TEMPORARY HACK - FOR SOME REASON, WE ARE GETTING A FACEBOOK ERROR CODE 10000, BUT STILL THE INVITE IS SUCCESSFUL. SO, FOR NOW, WE ARE GOING TO CHECK IF THE ERROR CODE IS 10000, AND IF IT IS, WE ARE GOING TO HOPE/ASSUME THAT EVERYTHING WENT GREAT.
-        if ([error code] == 10000) {
-            [[NSNotificationCenter defaultCenter] postNotificationName:FBM_EVENT_INVITE_FRIENDS_SUCCESS_KEY object:self userInfo:nil];
-        } else {
-            [[NSNotificationCenter defaultCenter] postNotificationName:FBM_EVENT_INVITE_FRIENDS_FAILURE_KEY object:self userInfo:nil];
-        }
+        [[NSNotificationCenter defaultCenter] postNotificationName:FBM_AUTH_ERROR_KEY object:self userInfo:nil];
         
     } else {
-        NSLog(@"ERROR in FacebookManager - unrecognized FBRequest type");
+        
+        if ([self.currentRequestType isEqualToString:FBM_REQUEST_UPDATE_FRIENDS]) {
+            
+            [[NSNotificationCenter defaultCenter] postNotificationName:FBM_FRIENDS_UPDATE_FAILURE_KEY object:self userInfo:nil];
+            
+        } else if ([self.currentRequestType isEqualToString:FBM_REQUEST_CREATE_EVENT]) {
+            
+            [[NSNotificationCenter defaultCenter] postNotificationName:FBM_CREATE_EVENT_FAILURE_KEY object:self userInfo:nil];
+            [self.currentRequest connect];
+            
+        } else if ([self.currentRequestType isEqualToString:FBM_REQUEST_INVITE_FRIENDS_TO_EVENT]) {
+            
+            // TEMPORARY HACK - FOR SOME REASON, WE ARE GETTING A FACEBOOK ERROR CODE 10000, BUT STILL THE INVITE IS SUCCESSFUL. SO, FOR NOW, WE ARE GOING TO CHECK IF THE ERROR CODE IS 10000, AND IF IT IS, WE ARE GOING TO HOPE/ASSUME THAT EVERYTHING WENT GREAT.
+            if ([error code] == 10000) {
+                [[NSNotificationCenter defaultCenter] postNotificationName:FBM_EVENT_INVITE_FRIENDS_SUCCESS_KEY object:self userInfo:nil];
+            } else {
+                [[NSNotificationCenter defaultCenter] postNotificationName:FBM_EVENT_INVITE_FRIENDS_FAILURE_KEY object:self userInfo:nil];
+            }
+            
+        } else {
+            NSLog(@"ERROR in FacebookManager - unrecognized FBRequest type");
+        }
+                 
     }
     
     self.currentRequest = nil;
     self.currentRequestType = nil;
-    
+
 }
 
 - (void) logoutAndForgetFacebookAccessToken:(BOOL)shouldForget associatedWithKwiqetIdentfier:(NSString *)kwiqetIdentifier {
@@ -210,6 +224,7 @@ static NSString * const FBM_REQUEST_PROFILE_PICTURE = @"FBM_REQUEST_PROFILE_PICT
     NSLog(@"fbDidLogout");
     // This comment is old, and needs updating. --- We don't really NEED to do the following, but I think it provides a "more trustworthy" user experience. If we didn't do the following, then the user could touch to disconnect facebook, then touch to connect facebook again, and they might automatically be connected without any sort of dialog or anything (because the access token was still valid for the given expiration date). That is convenient, but a user would rarely be trying to do this, and I would argue that it would be more likely that logout and login would be touched in a way that would expect a dialog. (Bad sentence, but hopefully you get my point.)
     if (self.shouldForgetFacebookAccessTokenOnLogout) {
+        NSLog(@"shouldForgetFacebookAccessTokenOnLogout");
         NSString * kwiqetIdentifier = self.kwiqetIdentifierForWhichToForgetFacebookAccessToken;
         if (!kwiqetIdentifier) {
             kwiqetIdentifier = FBM_NO_ASSOCIATED_KWIQET_IDENTIFIER;

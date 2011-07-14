@@ -73,7 +73,7 @@ extern CGFloat const FEATURED_EVENT_BACKGROUND_COLOR_ALPHA;
 @property(nonatomic, retain) CoreDataModel * coreDataModel;
 @property(nonatomic,readonly) EGORefreshTableHeaderView *refreshHeaderView;
 @property (retain) MapViewController * mapViewController;
-@property (nonatomic, retain) FacebookManager * facebookManager;
+@property (nonatomic, readonly) FacebookManager * facebookManager;
 
 - (void) updateInterfaceFromFeaturedEvent:(Event *)featuredEvent;
 - (void) loadImageWithLocation:(NSString *)imageLocation;

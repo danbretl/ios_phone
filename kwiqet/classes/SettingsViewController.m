@@ -32,7 +32,7 @@
 
 @synthesize tableView = _tableView;
 @synthesize settingsModel;
-@synthesize coreDataModel, facebookManager;
+@synthesize coreDataModel;
 
 - (void)dealloc
 {
@@ -105,18 +105,28 @@
     return (interfaceOrientation == UIInterfaceOrientationPortrait);
 }
 
+- (FacebookManager *)facebookManager {
+    if (facebookManager == nil) {
+        facebookManager = [[FacebookManager alloc] init];
+        [facebookManager pullAuthenticationInfoFromDefaults];
+    }
+    return facebookManager;
+}
+
 - (void)loginActivity:(NSNotification *)notification {
     NSDictionary * userInfo = [notification userInfo];
     NSString * action = [userInfo valueForKey:@"action"];
     if ([action isEqualToString:@"logout"]) {
         // If user signs out of Kwiqet, then their potential Facebook connection should also be undone. We should in this case however, hang on to the Facebook access token attached to their kwiqet id though, so that if they reconnect their kwiqet account, their Facebook connection will come back along for the ride as well.
-        [self.facebookManager logoutAndForgetFacebookAccessToken:NO associatedWithKwiqetIdentfier:nil];
+//        [self.facebookManager logoutAndForgetFacebookAccessToken:NO associatedWithKwiqetIdentfier:nil];
+        self.facebookManager.fb.accessToken = nil;
+        self.facebookManager.fb.expirationDate = nil;
     }
     [self.tableView reloadData]; // Heavyweight
 }
 
 - (void)facebookAccountActivity:(NSNotification *)notification {
-    NSLog(@"SettingsViewController facebookAccountActivity");
+    NSLog(@"SettingsViewController facebookAccountActivity %@", notification);
     if ([[[notification userInfo] valueForKey:FBM_ACCOUNT_ACTIVITY_ACTION_KEY] isEqualToString:FBM_ACCOUNT_ACTIVITY_ACTION_LOGOUT]) {
         [self.tableView reloadData]; // Heavyweight
     } else if ([[[notification userInfo] valueForKey:FBM_ACCOUNT_ACTIVITY_ACTION_KEY] isEqualToString:FBM_ACCOUNT_ACTIVITY_ACTION_LOGIN]) {
@@ -194,7 +204,7 @@
         [self.facebookManager login];
     } else {
         FacebookViewController * fvc = [[FacebookViewController alloc] initWithNibName:@"FacebookViewController" bundle:[NSBundle mainBundle]];
-        fvc.facebookManager = self.facebookManager;
+//        fvc.facebookManager = self.facebookManager;
         [self.navigationController pushViewController:fvc animated:YES];
         [fvc release];
     }

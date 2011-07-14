@@ -12,6 +12,7 @@
 static NSString * const LOCAL_IMAGES_MANAGER_SAVED_IMAGES_ROOT_FOLDER_PATH = @"SavedImages/";
 static NSString * const LOCAL_IMAGES_MANAGER_FEATURED_EVENT_IMAGES_PATH = @"FeaturedEventImages/";
 static NSString * const LOCAL_IMAGES_MANAGER_EVENT_IMAGES_PATH = @"EventImages/";
+static NSString * const LOCAL_IMAGES_MANAGER_FACEBOOK_PROFILE_PICTURES_PATH = @"FacebookProfilePictures/";
 
 @implementation LocalImagesManager
 
@@ -101,6 +102,8 @@ static NSString * const LOCAL_IMAGES_MANAGER_EVENT_IMAGES_PATH = @"EventImages/"
     return [self imageExistsAtPath:[NSString stringWithFormat:@"%@%@", LOCAL_IMAGES_MANAGER_FEATURED_EVENT_IMAGES_PATH, imageName]];
 }
 
+
+
 + (void) saveEventImageData:(NSData *)imageData sourceLocation:(NSString *)imageSourceLocation {
     [self saveImageData:imageData extraPath:LOCAL_IMAGES_MANAGER_EVENT_IMAGES_PATH imageName:[imageSourceLocation stringByReplacingOccurrencesOfString:@"/" withString:@""]];
 }
@@ -112,6 +115,21 @@ static NSString * const LOCAL_IMAGES_MANAGER_EVENT_IMAGES_PATH = @"EventImages/"
 }
 + (BOOL) eventImageExistsFromSourceLocation:(NSString *)imageSourceLocation {
     return [self imageExistsAtPath:[NSString stringWithFormat:@"%@%@", LOCAL_IMAGES_MANAGER_EVENT_IMAGES_PATH, [imageSourceLocation stringByReplacingOccurrencesOfString:@"/" withString:@""]]];
+}
+
+
+
++ (void) saveFacebookProfilePicture:(NSData *)imageData facebookID:(NSString *)facebookID {
+    [self saveImageData:imageData extraPath:LOCAL_IMAGES_MANAGER_FACEBOOK_PROFILE_PICTURES_PATH imageName:[CryptoUtilities md5Encrypt:facebookID]];
+}
++ (void) removeFacebookProfilePictureFromFacebookID:(NSString *)facebookID {
+    [self removeImage:[NSString stringWithFormat:@"%@%@", LOCAL_IMAGES_MANAGER_FACEBOOK_PROFILE_PICTURES_PATH, [CryptoUtilities md5Encrypt:facebookID]]];
+}
++ (UIImage *) FacebookProfilePictureFromFacebookID:(NSString *)facebookID {
+    return [self loadImage:[NSString stringWithFormat:@"%@%@", LOCAL_IMAGES_MANAGER_FACEBOOK_PROFILE_PICTURES_PATH, [CryptoUtilities md5Encrypt:facebookID]]];
+}
++ (BOOL) facebookProfilePictureExistsFromFacebookID:(NSString *)facebookID {
+    return [self imageExistsAtPath:[NSString stringWithFormat:@"%@%@", LOCAL_IMAGES_MANAGER_FACEBOOK_PROFILE_PICTURES_PATH, [CryptoUtilities md5Encrypt:facebookID]]];
 }
 
 @end

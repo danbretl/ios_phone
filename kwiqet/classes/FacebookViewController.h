@@ -22,6 +22,6 @@
     
 }
 
-@property (retain) FacebookManager * facebookManager;
+@property (nonatomic, readonly) FacebookManager * facebookManager;
 
 @end

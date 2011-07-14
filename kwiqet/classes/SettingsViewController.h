@@ -29,6 +29,6 @@
 }
 
 @property (nonatomic, retain) CoreDataModel * coreDataModel;
-@property (nonatomic, retain) FacebookManager * facebookManager;
+@property (nonatomic, readonly) FacebookManager * facebookManager;
 
 @end

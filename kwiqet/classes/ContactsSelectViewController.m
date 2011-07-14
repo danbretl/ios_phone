@@ -24,6 +24,8 @@
 @property (retain) UITableView * friendsTableView;
 @property (retain) UITableView * selectedTableView;
 @property BOOL isSearchOn;
+@property (nonatomic, retain) WebActivityView * webActivityView;
+@property BOOL isLoadingContacts;
 - (void) tableView:(UITableView *)tableView configureCell:(UITableViewCell *)cell withIndexPath:(NSIndexPath *)indexPath usingContact:(Contact *)contact;
 - (void) tableView:(UITableView *)tableView setCellAccessoryType:(UITableViewCellAccessoryType)accessoryType forCellWithIndexPath:(NSIndexPath *)indexPath;
 - (void) tableView:(UITableView *)tableView setCellAccessoryType:(UITableViewCellAccessoryType)accessoryType forCell:(UITableViewCell *)cell;
@@ -36,6 +38,7 @@
 - (void) forceSetSearchBarCancelButtonTitle:(NSString *)title;
 - (void) toggleSearch;
 - (void) killScrollForScrollView:(UIScrollView *)scrollView;
+- (void) contactsUpdatedLocally:(NSNotification *)notification;
 @end
 
 @implementation ContactsSelectViewController
@@ -46,6 +49,9 @@
 @synthesize friendsTableView = _friendsTableView, selectedTableView = _selectedTableView;
 @synthesize contactsAll, contactsFiltered, contactsSelected, contactsGrouped;
 @synthesize isSearchOn=_isSearchOn;
+@synthesize webActivityView;
+@synthesize isLoadingContacts=_isLoadingContacts;
+@synthesize coreDataModel;
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil {
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
@@ -75,6 +81,8 @@
     [contactsSelected release];
     [contactsGrouped release];
     [facebookManager release];
+    [webActivityView release];
+    [coreDataModel release];
     [super dealloc];
 }
 
@@ -107,8 +115,25 @@
     self.selectedTabButton.titleEdgeInsets = selectedTabButtonTitleEdgeInsets;
     [self.selectedTabButton setTitleColor:[UIColor colorWithWhite:53.0/255.0 alpha:1.0] forState:UIControlStateNormal];
     [self.selectedTabButton setTitleColor:[UIColor colorWithWhite:251.0/255.0 alpha:1.0] forState:UIControlStateSelected];
+    [self.selectedTabButton setTitleColor:[UIColor colorWithWhite:190.0/255.0 alpha:1.0] forState:UIControlStateDisabled];
+    self.selectedTabButton.enabled = self.contactsSelected && [self.contactsSelected count] > 0;
+    
+    CGFloat webActivityViewSize = 60.0;
+    webActivityView = [[WebActivityView alloc] initWithSize:CGSizeMake(webActivityViewSize, webActivityViewSize) centeredInFrame:self.view.frame];
+    [self.view addSubview:self.webActivityView];
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(contactsUpdatedLocally:) name:FBM_FRIENDS_LOCAL_DATA_UPDATED_KEY object:nil];
+    self.isLoadingContacts = YES;
+    [self.facebookManager updateFacebookFriends];
     
 //    [self forceSearchBarCancelButtonTitle];
+    
+}
+
+- (void)viewDidAppear:(BOOL)animated {
+    if (self.isLoadingContacts) {
+        [self showWebActivityView];
+    }
 }
 
 - (void)viewDidUnload
@@ -127,8 +152,32 @@
 - (FacebookManager *)facebookManager {
     if (facebookManager == nil) {
         facebookManager = [[FacebookManager alloc] init];
+        [facebookManager pullAuthenticationInfoFromDefaults];
     }
     return facebookManager;
+}
+
+- (void)contactsUpdatedLocally:(NSNotification *)notification {
+    self.isLoadingContacts = NO;
+    self.contactsAll = [self.coreDataModel getAllFacebookContacts];
+    [self.friendsTableView reloadData];
+    [self hideWebActivityView];
+}
+
+- (void) showWebActivityView  {
+    if (self.view.window) {
+        // ACTIVITY VIEWS
+        [self.webActivityView showAnimated:NO];
+        // USER INTERACTION
+        self.view.userInteractionEnabled = NO;
+    }
+}
+
+- (void) hideWebActivityView  {
+    // ACTIVITY VIEWS
+    [self.webActivityView hideAnimated:NO];
+    // USER INTERACTION
+    self.view.userInteractionEnabled = YES;
 }
 
 - (void)setContactsAll:(NSArray *)theContacts {
@@ -204,29 +253,32 @@
 //}
 
 - (UIView *)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section {
-    UIView * sectionHeaderView = [[[UIView alloc] initWithFrame:CGRectMake(0, 0, tableView.bounds.size.width, tableView.sectionHeaderHeight)] autorelease];
-    UIImageView * shBackgroundImageView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"divider_cell.png"]];
-    shBackgroundImageView.frame = sectionHeaderView.bounds;
-    [sectionHeaderView addSubview:shBackgroundImageView];
-    [shBackgroundImageView release];
-    CGFloat shLabelOriginX = 8;
-    UILabel * shLabel = [[UILabel alloc] initWithFrame:CGRectMake(shLabelOriginX, -2, tableView.bounds.size.width - shLabelOriginX, 30)];
-    shLabel.backgroundColor = [UIColor clearColor];
-    shLabel.textAlignment = UITextAlignmentLeft;
-    shLabel.font = [UIFont fontWithName:@"HelveticaNeueLTStd-BdCn" size:15.0];
-    shLabel.textColor = [UIColor colorWithWhite:1.0 alpha:0.95];
-    shLabel.shadowColor = [UIColor colorWithWhite:0.25 alpha:0.75];
-    shLabel.shadowOffset = CGSizeMake(1.0, 1.0);
-    [sectionHeaderView addSubview:shLabel];
-    [shLabel release];
-    if (tableView == self.friendsTableView) {
-        if (!self.isSearchOn) {
-            shLabel.text = [self.alphabetArray objectAtIndex:section];
+    UIView * sectionHeaderView = nil;
+    if ([self tableView:tableView numberOfRowsInSection:section] > 0) {
+        sectionHeaderView = [[[UIView alloc] initWithFrame:CGRectMake(0, 0, tableView.bounds.size.width, tableView.sectionHeaderHeight)] autorelease];
+        UIImageView * shBackgroundImageView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"divider_cell.png"]];
+        shBackgroundImageView.frame = sectionHeaderView.bounds;
+        [sectionHeaderView addSubview:shBackgroundImageView];
+        [shBackgroundImageView release];
+        CGFloat shLabelOriginX = 8;
+        UILabel * shLabel = [[UILabel alloc] initWithFrame:CGRectMake(shLabelOriginX, -2, tableView.bounds.size.width - shLabelOriginX, 30)];
+        shLabel.backgroundColor = [UIColor clearColor];
+        shLabel.textAlignment = UITextAlignmentLeft;
+        shLabel.font = [UIFont fontWithName:@"HelveticaNeueLTStd-BdCn" size:15.0];
+        shLabel.textColor = [UIColor colorWithWhite:1.0 alpha:0.95];
+        shLabel.shadowColor = [UIColor colorWithWhite:0.25 alpha:0.75];
+        shLabel.shadowOffset = CGSizeMake(1.0, 1.0);
+        [sectionHeaderView addSubview:shLabel];
+        [shLabel release];
+        if (tableView == self.friendsTableView) {
+            if (!self.isSearchOn) {
+                shLabel.text = [self.alphabetArray objectAtIndex:section];
+            } else {
+                shLabel.text = @"Search Results";
+            }
         } else {
-            shLabel.text = @"Search Results";
-        }
-    } else {
-        shLabel.text = @"Selected Friends";
+            shLabel.text = @"Selected Friends";
+        }    
     }
     return sectionHeaderView;
 }
@@ -342,7 +394,7 @@
         [tableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:indexPath] withRowAnimation:UITableViewRowAnimationFade];
     } else {
         [tableView deselectRowAtIndexPath:[tableView indexPathForSelectedRow] animated:YES];
-//        self.selectedTabButton.enabled = [self.contactsSelected count] > 0;
+        self.selectedTabButton.enabled = [self.contactsSelected count] > 0;
     }
     
 }
@@ -472,6 +524,7 @@
         [self.friendsTabButton setSelected:YES];
         [self.selectedTabButton setSelected:NO];
         self.friendsTableView.scrollsToTop = YES;
+        self.selectedTabButton.enabled = [self.contactsSelected count] > 0;
     } else if (tabButton == self.selectedTabButton) {
         NSLog(@"Selected tab button touched");
         self.friendsTableView.hidden = YES;
