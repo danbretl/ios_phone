@@ -60,6 +60,22 @@ static NSString * const LOCAL_IMAGES_MANAGER_FACEBOOK_PROFILE_PICTURES_PATH = @"
     
 }
 
++ (void)removeAllImages:(NSString *)pathToImages {
+    
+    NSFileManager * fileManager = [NSFileManager defaultManager];
+    
+    NSArray * paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+    
+    NSString * documentsDirectory = [paths objectAtIndex:0];
+    
+    NSString * fullPath = [[documentsDirectory stringByAppendingPathComponent:LOCAL_IMAGES_MANAGER_SAVED_IMAGES_ROOT_FOLDER_PATH] stringByAppendingPathComponent:pathToImages];
+    
+    [fileManager removeItemAtPath:fullPath error:NULL];
+    
+    [fileManager createDirectoryAtPath:fullPath withIntermediateDirectories:YES attributes:nil error:NULL];
+    
+}
+
 //loading an image
 
 + (UIImage*)loadImage:(NSString*)imagePath {
@@ -125,7 +141,10 @@ static NSString * const LOCAL_IMAGES_MANAGER_FACEBOOK_PROFILE_PICTURES_PATH = @"
 + (void) removeFacebookProfilePictureFromFacebookID:(NSString *)facebookID {
     [self removeImage:[NSString stringWithFormat:@"%@%@", LOCAL_IMAGES_MANAGER_FACEBOOK_PROFILE_PICTURES_PATH, [CryptoUtilities md5Encrypt:facebookID]]];
 }
-+ (UIImage *) FacebookProfilePictureFromFacebookID:(NSString *)facebookID {
++ (void) removeAllFacebookProfilePictures {
+    [self removeAllImages:LOCAL_IMAGES_MANAGER_FACEBOOK_PROFILE_PICTURES_PATH];
+}
++ (UIImage *) facebookProfilePictureFromFacebookID:(NSString *)facebookID {
     return [self loadImage:[NSString stringWithFormat:@"%@%@", LOCAL_IMAGES_MANAGER_FACEBOOK_PROFILE_PICTURES_PATH, [CryptoUtilities md5Encrypt:facebookID]]];
 }
 + (BOOL) facebookProfilePictureExistsFromFacebookID:(NSString *)facebookID {

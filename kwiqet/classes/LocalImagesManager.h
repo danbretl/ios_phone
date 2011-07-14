@@ -16,6 +16,7 @@
 + (void) saveImageData:(NSData *)imageData extraPath:(NSString *)extraPath imageName:(NSString *)imageName;
 + (void) saveImageAsPNG:(UIImage*)image extraPath:(NSString *)extraPath imageName:(NSString*)imageName;
 + (void) removeImage:(NSString*)imagePath;
++ (void) removeAllImages:(NSString *)pathToImages;
 + (UIImage *) loadImage:(NSString*)imagePath;
 + (BOOL) imageExistsAtPath:(NSString *)filePath;
 
@@ -31,7 +32,8 @@
 
 + (void) saveFacebookProfilePicture:(NSData *)imageData facebookID:(NSString *)facebookID;
 + (void) removeFacebookProfilePictureFromFacebookID:(NSString *)facebookID;
-+ (UIImage *) FacebookProfilePictureFromFacebookID:(NSString *)facebookID;
++ (void) removeAllFacebookProfilePictures;
++ (UIImage *) facebookProfilePictureFromFacebookID:(NSString *)facebookID;
 + (BOOL) facebookProfilePictureExistsFromFacebookID:(NSString *)facebookID;
 
 @end

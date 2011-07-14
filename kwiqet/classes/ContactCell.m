@@ -33,7 +33,7 @@
         pictureImageView = [[UIImageView alloc] initWithFrame:CGRectMake(3, 3, 44, 44)];
         self.pictureImageView.contentMode = UIViewContentModeScaleAspectFill;
         [self.contentView addSubview:self.pictureImageView];
-        self.picture = [UIImage imageNamed:@"fbPicturePlaceholder.png"];
+        self.picture = nil;
         
         CGFloat nameLabelOriginX = 60;
         nameLabel = [[UILabel alloc] initWithFrame:CGRectMake(nameLabelOriginX, 16, self.contentView.bounds.size.width - nameLabelOriginX, 30)];
@@ -48,6 +48,9 @@
 }
 
 - (void)setPicture:(UIImage *)thePicture {
+    if (thePicture == nil) {
+        thePicture = [UIImage imageNamed:@"fbPicturePlaceholder.png"];
+    }
     if (picture != thePicture) {
         [picture release];
         picture = [thePicture retain];

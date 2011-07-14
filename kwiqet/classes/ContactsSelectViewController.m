@@ -8,6 +8,7 @@
 
 #import "ContactsSelectViewController.h"
 #import "ContactCell.h"
+#import "LocalImagesManager.h"
 
 float const CSVC_TAB_BUTTON_ANIMATION_DURATION = .25;
 
@@ -29,9 +30,12 @@ float const CSVC_TAB_BUTTON_ANIMATION_DURATION = .25;
 @property BOOL isSearchOn;
 @property (nonatomic, retain) WebActivityView * webActivityView;
 @property BOOL isLoadingContacts;
+@property (retain) NSMutableDictionary * profilePictureDownloaders;
 - (void) tableView:(UITableView *)tableView configureCell:(UITableViewCell *)cell withIndexPath:(NSIndexPath *)indexPath usingContact:(Contact *)contact;
 - (void) tableView:(UITableView *)tableView setCellAccessoryType:(UITableViewCellAccessoryType)accessoryType forCellWithIndexPath:(NSIndexPath *)indexPath;
 - (void) tableView:(UITableView *)tableView setCellAccessoryType:(UITableViewCellAccessoryType)accessoryType forCell:(UITableViewCell *)cell;
+- (void) tableView:(UITableView *)tableView setCellPicture:(UIImage *)picture forCellWithIndexPath:(NSIndexPath *)indexPath;
+- (void) tableView:(UITableView *)tableView setCellPicture:(UIImage *)picture forCell:(UITableViewCell *)cell;
 - (IBAction) cancelButtonPushed;
 - (IBAction) doneSelectingButtonPushed;
 - (IBAction) tabButtonPushed:(UIButton *)tabButton;
@@ -43,6 +47,9 @@ float const CSVC_TAB_BUTTON_ANIMATION_DURATION = .25;
 - (void) killScrollForScrollView:(UIScrollView *)scrollView;
 - (void) contactsUpdatedLocally:(NSNotification *)notification;
 - (void) setSelectedTabButton:(UIButton *)tabButton;
+- (void) startProfilePictureDownloadForContact:(Contact *)contact atIndexPath:(NSIndexPath *)indexPath;
+- (void) facebookProfilePictureGetterFinished:(FacebookProfilePictureGetter *)profilePictureGetter;
+- (void) cancelAllPendingProfilePictureDownloads;
 @end
 
 @implementation ContactsSelectViewController
@@ -56,6 +63,7 @@ float const CSVC_TAB_BUTTON_ANIMATION_DURATION = .25;
 @synthesize webActivityView;
 @synthesize isLoadingContacts=_isLoadingContacts;
 @synthesize coreDataModel;
+@synthesize profilePictureDownloaders;
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil {
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
@@ -67,7 +75,7 @@ float const CSVC_TAB_BUTTON_ANIMATION_DURATION = .25;
 
 - (void)dealloc
 {
-    [navBar release];
+    [navBar release]; 
     [cancelButton release];
     [doneSelectingButton release];
     [logoButton release];
@@ -88,6 +96,7 @@ float const CSVC_TAB_BUTTON_ANIMATION_DURATION = .25;
     [facebookManager release];
     [webActivityView release];
     [coreDataModel release];
+    [profilePictureDownloaders release];
     [super dealloc];
 }
 
@@ -95,8 +104,12 @@ float const CSVC_TAB_BUTTON_ANIMATION_DURATION = .25;
 {
     // Releases the view if it doesn't have a superview.
     [super didReceiveMemoryWarning];
-    
-    // Release any cached data, images, etc that aren't in use.
+    [self cancelAllPendingProfilePictureDownloads];
+}
+
+- (void) cancelAllPendingProfilePictureDownloads {
+    NSArray * allProfilePictureDownloaders = [self.profilePictureDownloaders allValues];
+    [allProfilePictureDownloaders makeObjectsPerformSelector:@selector(cancelDownload)];
 }
 
 #pragma mark - View lifecycle
@@ -104,6 +117,11 @@ float const CSVC_TAB_BUTTON_ANIMATION_DURATION = .25;
 - (void)viewDidLoad
 {
     [super viewDidLoad];
+    
+    [LocalImagesManager removeAllFacebookProfilePictures];
+    
+    self.profilePictureDownloaders = [NSMutableDictionary dictionary];
+    
     [self.friendsTableView reloadData];
     self.friendsTableView.scrollsToTop = YES;
     self.selectedTableView.scrollsToTop = NO;
@@ -147,9 +165,15 @@ float const CSVC_TAB_BUTTON_ANIMATION_DURATION = .25;
     }
 }
 
+- (void) viewWillDisappear:(BOOL)animated {
+    [super viewWillDisappear:animated];
+    [self cancelAllPendingProfilePictureDownloads];
+}
+
 - (void)viewDidUnload
 {
     [super viewDidUnload];
+    [self cancelAllPendingProfilePictureDownloads];
     // Release any retained subviews of the main view.
     // e.g. self.myOutlet = nil;
 }
@@ -353,6 +377,30 @@ float const CSVC_TAB_BUTTON_ANIMATION_DURATION = .25;
 //    [self.facebookManager getProfilePictureForFacebookID:contact.fbID];
     [self tableView:tableView setCellAccessoryType:accessoryType forCell:cell];
     
+    // Profile picture...
+    if ([LocalImagesManager facebookProfilePictureExistsFromFacebookID:contact.fbID]) {
+        [self tableView:tableView setCellPicture:[LocalImagesManager facebookProfilePictureFromFacebookID:contact.fbID] forCell:cell];
+    } else {
+        [self tableView:tableView setCellPicture:nil forCell:cell];
+        [self startProfilePictureDownloadForContact:contact atIndexPath:indexPath];
+    }
+    
+}
+
+- (void) startProfilePictureDownloadForContact:(Contact *)contact atIndexPath:(NSIndexPath *)indexPath {
+    FacebookProfilePictureGetter * profilePictureGetter = [self.profilePictureDownloaders objectForKey:indexPath];
+    if (profilePictureGetter == nil) {
+        profilePictureGetter = [[[FacebookProfilePictureGetter alloc] init] autorelease];
+        profilePictureGetter.indexPathInTableView = indexPath;
+        profilePictureGetter.delegate = self;
+        profilePictureGetter.facebookID = contact.fbID;
+        [self.profilePictureDownloaders setObject:profilePictureGetter forKey:indexPath];
+    }
+    [profilePictureGetter startDownload];
+}
+
+- (void)facebookProfilePictureGetterFinished:(FacebookProfilePictureGetter *)profilePictureGetter {
+    [self tableView:self.friendsTableView setCellPicture:[LocalImagesManager facebookProfilePictureFromFacebookID:profilePictureGetter.facebookID] forCellWithIndexPath:profilePictureGetter.indexPathInTableView]; // THIS IS GOING TO MISS THE MARK A LOT OF THE TIME. DEAL WITH THIS LATER.
 }
 
 - (void) tableView:(UITableView *)tableView setCellAccessoryType:(UITableViewCellAccessoryType)accessoryType forCellWithIndexPath:(NSIndexPath *)indexPath {
@@ -372,6 +420,20 @@ float const CSVC_TAB_BUTTON_ANIMATION_DURATION = .25;
     } else {
         cell.accessoryView = nil;
     }
+    
+}
+
+- (void) tableView:(UITableView *)tableView setCellPicture:(UIImage *)picture forCellWithIndexPath:(NSIndexPath *)indexPath {
+    
+    UITableViewCell * cell = [tableView cellForRowAtIndexPath:indexPath];
+    [self tableView:tableView setCellPicture:picture forCell:cell];
+    
+}
+
+- (void) tableView:(UITableView *)tableView setCellPicture:(UIImage *)picture forCell:(UITableViewCell *)cell {
+    
+    ContactCell * contactCell = (ContactCell *)cell;
+    contactCell.picture = picture;
     
 }
 
@@ -504,10 +566,12 @@ float const CSVC_TAB_BUTTON_ANIMATION_DURATION = .25;
 }
 
 - (void)cancelButtonPushed {
+    [self cancelAllPendingProfilePictureDownloads];
     [self.delegate contactsSelectViewController:self didFinishWithCancel:YES selectedContacts:nil];
 }
 
 - (void)doneSelectingButtonPushed {
+    [self cancelAllPendingProfilePictureDownloads];
     [self.delegate contactsSelectViewController:self didFinishWithCancel:NO selectedContacts:self.contactsSelected];
 }
 

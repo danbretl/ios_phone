@@ -11,10 +11,11 @@
 #import "FacebookManager.h"
 #import "WebActivityView.h"
 #import "CoreDataModel.h"
+#import "FacebookProfilePictureGetter.h"
 
 @protocol ContactsSelectViewControllerDelegate;
 
-@interface ContactsSelectViewController : UIViewController <UITableViewDelegate, UITableViewDataSource, UISearchBarDelegate> {
+@interface ContactsSelectViewController : UIViewController <UITableViewDelegate, UITableViewDataSource, UISearchBarDelegate, FacebookProfilePictureGetterDelegate> {
     
     IBOutlet UIView * navBar;
     IBOutlet UIButton * cancelButton;
@@ -46,6 +47,8 @@
     FacebookManager * facebookManager;
     WebActivityView * webActivityView;
     BOOL _isLoadingContacts;
+
+    NSMutableDictionary * profilePictureDownloaders;
     
 }
 
