@@ -15,7 +15,7 @@ static NSString * const EVENT_TABLE_VIEW_CELL_FILLER_PRICE = @"Price";
 
 @implementation EventTableViewCell
 
-@synthesize backgroundViewNormal, backgroundViewSelected, categoryColorView, titleLabel, locationLabel, dateAndTimeLabel, priceLabel;
+@synthesize backgroundViewNormal, backgroundViewSelected, categoryColorView, iconImageView, titleLabel, locationLabel, dateAndTimeLabel, priceLabel;
 @synthesize categoryColor;
 
 - (void)dealloc
@@ -23,6 +23,7 @@ static NSString * const EVENT_TABLE_VIEW_CELL_FILLER_PRICE = @"Price";
     [backgroundViewNormal release];
     [backgroundViewSelected release];
     [categoryColorView release];
+    [iconImageView release];
     [titleLabel release];
     [locationLabel release];
     [dateAndTimeLabel release];
@@ -46,6 +47,11 @@ static NSString * const EVENT_TABLE_VIEW_CELL_FILLER_PRICE = @"Price";
         categoryColorView = [[UINeverClearView alloc] initWithFrame:CGRectMake(0, 1, 20, 75)];
         [self setCategoryColor:[UIColor redColor]];
         [self.contentView addSubview:self.categoryColorView];
+        
+        // Icon image view
+        iconImageView = [[UIImageView alloc] initWithFrame:self.categoryColorView.bounds];
+        iconImageView.contentMode = UIViewContentModeCenter;
+        [self.categoryColorView addSubview:self.iconImageView];
         
         // Title label
         titleLabel = [[UILabel alloc]initWithFrame:CGRectMake(25,5,300,26)];

@@ -14,6 +14,7 @@
     UIView * backgroundViewNormal;
     UIView * backgroundViewSelected;
     UINeverClearView * categoryColorView;
+    UIImageView * iconImageView;
     UILabel * titleLabel;
     UILabel * locationLabel;
     UILabel * dateAndTimeLabel;
@@ -24,6 +25,7 @@
 }
 
 @property (readonly) UIView * categoryColorView;
+@property (readonly) UIImageView * iconImageView;
 @property (readonly) UILabel * titleLabel;
 @property (readonly) UILabel * locationLabel;
 @property (readonly) UILabel * dateAndTimeLabel;

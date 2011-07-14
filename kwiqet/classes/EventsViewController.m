@@ -1089,6 +1089,10 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     if (colorHex) {
         cell.categoryColorView.backgroundColor = [WebUtil colorFromHexString:colorHex];
     }
+    NSString * iconThumb = concreteParentCategory.iconThumb;
+    if (iconThumb) {
+        cell.iconImageView.image = [UIImage imageNamed:iconThumb];
+    }
     
     if (location || address) {
         if (location) {
