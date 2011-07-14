@@ -22,8 +22,9 @@
     IBOutlet UIButton * logoButton;
     
     IBOutlet UIView * tabsBar;
-    IBOutlet UIButton * friendsTabButton;
-    IBOutlet UIButton * selectedTabButton;
+    IBOutlet UIButton * showAllFriendsTabButton;
+    IBOutlet UIImageView * showAllFriendsTabButtonBorder;
+    IBOutlet UIButton * showSelectedFriendsTabButton;
     
     IBOutlet UIView * searchContainerView;
     IBOutlet UINavigationBar * searchNavBarBack;
@@ -58,6 +59,7 @@
 @property (nonatomic, readonly) FacebookManager * facebookManager;
 - (void) showWebActivityView;
 - (void) hideWebActivityView;
+- (void) setShowSelectedTabButtonVisible:(BOOL)selectedVisible animated:(BOOL)animated;
 
 @end
 

@@ -9,14 +9,17 @@
 #import "ContactsSelectViewController.h"
 #import "ContactCell.h"
 
+float const CSVC_TAB_BUTTON_ANIMATION_DURATION = .25;
+
 @interface ContactsSelectViewController()
 @property (retain) UIView * navBar;
 @property (retain) UIButton * cancelButton;
 @property (retain) UIButton * doneSelectingButton;
 @property (retain) UIButton * logoButton;
 @property (retain) UIView * tabsBar;
-@property (retain) UIButton * friendsTabButton;
-@property (retain) UIButton * selectedTabButton;
+@property (retain) UIButton * showAllFriendsTabButton;
+@property (retain) UIImageView * showAllFriendsTabButtonBorder;
+@property (retain) UIButton * showSelectedFriendsTabButton;
 @property (retain) UIView * searchContainerView;
 @property (retain) UISearchBar * searchBar;
 @property (retain) UINavigationBar * searchNavBarBack;
@@ -39,12 +42,13 @@
 - (void) toggleSearch;
 - (void) killScrollForScrollView:(UIScrollView *)scrollView;
 - (void) contactsUpdatedLocally:(NSNotification *)notification;
+- (void) setSelectedTabButton:(UIButton *)tabButton;
 @end
 
 @implementation ContactsSelectViewController
 @synthesize delegate;
 @synthesize navBar, cancelButton, doneSelectingButton, logoButton;
-@synthesize tabsBar, friendsTabButton, selectedTabButton;
+@synthesize tabsBar, showAllFriendsTabButton, showAllFriendsTabButtonBorder, showSelectedFriendsTabButton;
 @synthesize searchContainerView, searchBar, searchNavBarBack, searchCancelButton;
 @synthesize friendsTableView = _friendsTableView, selectedTableView = _selectedTableView;
 @synthesize contactsAll, contactsFiltered, contactsSelected, contactsGrouped;
@@ -68,8 +72,9 @@
     [doneSelectingButton release];
     [logoButton release];
     [tabsBar release];
-    [friendsTabButton release];
-    [selectedTabButton release];
+    [showAllFriendsTabButton release];
+    [showAllFriendsTabButtonBorder release];
+    [showSelectedFriendsTabButton release];
     [searchContainerView release];
     [searchBar release];
     [searchNavBarBack release];
@@ -104,19 +109,25 @@
     self.selectedTableView.scrollsToTop = NO;
     
     self.navBar.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"navbar_blank.png"]];
+    
+    self.showAllFriendsTabButton.imageView.contentMode = UIViewContentModeCenter;
+    self.showAllFriendsTabButton.imageView.autoresizingMask = UIViewAutoresizingFlexibleWidth;
+    self.showAllFriendsTabButton.titleLabel.autoresizingMask = UIViewAutoresizingFlexibleWidth;
+    [self setSelectedTabButton:self.showAllFriendsTabButton];
+    
     self.friendsTableView.tableHeaderView = self.searchContainerView;
     if ([self.friendsTableView numberOfRowsInSection:0]) {
         [self.friendsTableView scrollToRowAtIndexPath:[NSIndexPath indexPathForRow:0 inSection:0] atScrollPosition:UITableViewScrollPositionTop animated:NO];
     }
     [self updateSelectedCountViewWithCount:0];
-    self.selectedTabButton.titleLabel.font = [UIFont fontWithName:@"HelveticaNeueLTStd-BdCn" size:15.0];
-    UIEdgeInsets selectedTabButtonTitleEdgeInsets = self.selectedTabButton.titleEdgeInsets;
+    self.showSelectedFriendsTabButton.titleLabel.font = [UIFont fontWithName:@"HelveticaNeueLTStd-BdCn" size:15.0];
+    UIEdgeInsets selectedTabButtonTitleEdgeInsets = self.showSelectedFriendsTabButton.titleEdgeInsets;
     selectedTabButtonTitleEdgeInsets.top = 9.0;
-    self.selectedTabButton.titleEdgeInsets = selectedTabButtonTitleEdgeInsets;
-    [self.selectedTabButton setTitleColor:[UIColor colorWithWhite:53.0/255.0 alpha:1.0] forState:UIControlStateNormal];
-    [self.selectedTabButton setTitleColor:[UIColor colorWithWhite:251.0/255.0 alpha:1.0] forState:UIControlStateSelected];
-    [self.selectedTabButton setTitleColor:[UIColor colorWithWhite:190.0/255.0 alpha:1.0] forState:UIControlStateDisabled];
-    self.selectedTabButton.enabled = self.contactsSelected && [self.contactsSelected count] > 0;
+    self.showSelectedFriendsTabButton.titleEdgeInsets = selectedTabButtonTitleEdgeInsets;
+    [self.showSelectedFriendsTabButton setTitleColor:[UIColor colorWithWhite:53.0/255.0 alpha:1.0] forState:UIControlStateNormal];
+    [self.showSelectedFriendsTabButton setTitleColor:[UIColor colorWithWhite:251.0/255.0 alpha:1.0] forState:UIControlStateSelected];
+    [self.showSelectedFriendsTabButton setTitleColor:[UIColor colorWithWhite:190.0/255.0 alpha:1.0] forState:UIControlStateDisabled];
+    [self setShowSelectedTabButtonVisible:(self.contactsSelected && [self.contactsSelected count] > 0) animated:NO];
     
     CGFloat webActivityViewSize = 60.0;
     webActivityView = [[WebActivityView alloc] initWithSize:CGSizeMake(webActivityViewSize, webActivityViewSize) centeredInFrame:self.view.frame];
@@ -254,7 +265,9 @@
 
 - (UIView *)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section {
     UIView * sectionHeaderView = nil;
-    if ([self tableView:tableView numberOfRowsInSection:section] > 0) {
+    if ([self tableView:tableView numberOfRowsInSection:section] > 0 ||
+        self.isSearchOn || 
+        tableView == self.selectedTableView) {
         sectionHeaderView = [[[UIView alloc] initWithFrame:CGRectMake(0, 0, tableView.bounds.size.width, tableView.sectionHeaderHeight)] autorelease];
         UIImageView * shBackgroundImageView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"divider_cell.png"]];
         shBackgroundImageView.frame = sectionHeaderView.bounds;
@@ -392,9 +405,12 @@
     [self tableView:tableView setCellAccessoryType:accessoryType forCellWithIndexPath:indexPath];
     if (tableView == self.selectedTableView) {
         [tableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:indexPath] withRowAnimation:UITableViewRowAnimationFade];
+        if ([self.contactsSelected count] == 0) {
+            [self tabButtonPushed:self.showAllFriendsTabButton];
+        }
     } else {
         [tableView deselectRowAtIndexPath:[tableView indexPathForSelectedRow] animated:YES];
-        self.selectedTabButton.enabled = [self.contactsSelected count] > 0;
+        [self setShowSelectedTabButtonVisible:(self.contactsSelected && [self.contactsSelected count] > 0) animated:YES];
     }
     
 }
@@ -402,14 +418,14 @@
 - (void) updateSelectedCountViewWithCount:(int)count {
     NSString * countText = @"None ";
     NSString * selectedWord = @"Selected";
-    if (count > 0) {
+//    if (count > 0) {
         countText = [NSString stringWithFormat:@"%d ", count];
         selectedWord = [selectedWord capitalizedString];
-    }
+//    }
     NSString * buttonText = [NSString stringWithFormat:@"%@%@", countText, selectedWord];
 //    NSString * buttonText = [NSString stringWithFormat:@"%d", count];
-    [self.selectedTabButton setTitle:buttonText forState:UIControlStateNormal];
-    [self.selectedTabButton setTitle:buttonText forState:UIControlStateHighlighted];
+    [self.showSelectedFriendsTabButton setTitle:buttonText forState:UIControlStateNormal];
+    [self.showSelectedFriendsTabButton setTitle:buttonText forState:UIControlStateHighlighted];
 }
 
 - (void)toggleSearch {
@@ -517,24 +533,60 @@
     UITableView * activeTableView = self.friendsTableView.hidden ? self.selectedTableView : self.friendsTableView;
     [self killScrollForScrollView:activeTableView];
     activeTableView.scrollsToTop = NO;
-    if (tabButton == self.friendsTabButton) {
+    if (tabButton == self.showAllFriendsTabButton) {
         NSLog(@"Friends tab button touched");
         self.friendsTableView.hidden = NO;
         [self.friendsTableView reloadData];
-        [self.friendsTabButton setSelected:YES];
-        [self.selectedTabButton setSelected:NO];
         self.friendsTableView.scrollsToTop = YES;
-        self.selectedTabButton.enabled = [self.contactsSelected count] > 0;
-    } else if (tabButton == self.selectedTabButton) {
+        [self setShowSelectedTabButtonVisible:(self.contactsSelected && [self.contactsSelected count] > 0) animated:YES];
+    } else if (tabButton == self.showSelectedFriendsTabButton) {
         NSLog(@"Selected tab button touched");
         self.friendsTableView.hidden = YES;
         [self.selectedTableView reloadData];
-        [self.friendsTabButton setSelected:NO];
-        [self.selectedTabButton setSelected:YES];
         self.selectedTableView.scrollsToTop = YES;
     } else {
         NSLog(@"ERROR in ContactsSelectViewController - unrecognized tabButton");
     }
+    [self setSelectedTabButton:tabButton];
+}
+
+- (void) setSelectedTabButton:(UIButton *)tabButton {
+    if (tabButton == self.showAllFriendsTabButton) {
+        [self.showAllFriendsTabButton setSelected:YES];
+        [self.showSelectedFriendsTabButton setSelected:NO];
+        self.showAllFriendsTabButton.userInteractionEnabled = NO;
+        self.showSelectedFriendsTabButton.userInteractionEnabled = YES;
+    } else if (tabButton == self.showSelectedFriendsTabButton) {
+        [self.showAllFriendsTabButton setSelected:NO];
+        [self.showSelectedFriendsTabButton setSelected:YES];
+        self.showAllFriendsTabButton.userInteractionEnabled = YES;
+        self.showSelectedFriendsTabButton.userInteractionEnabled = NO;
+    } else {
+        NSLog(@"ERROR in ContactsSelectViewController - unrecognized selected tab button");
+    }
+}
+
+- (void) setShowSelectedTabButtonVisible:(BOOL)selectedVisible animated:(BOOL)animated {
+
+    self.showSelectedFriendsTabButton.userInteractionEnabled = selectedVisible;
+    
+    void (^frameShiftBlock)(void) = ^{
+        CGRect friendsTabButtonFrame = self.showAllFriendsTabButton.frame;
+        if (selectedVisible) {
+            friendsTabButtonFrame.size.width = 206;
+        } else {
+            friendsTabButtonFrame.size.width = 321;
+        }
+        self.showAllFriendsTabButton.frame = friendsTabButtonFrame;
+        self.showAllFriendsTabButtonBorder.frame = friendsTabButtonFrame;
+    };
+    
+    if (animated) {
+        [UIView animateWithDuration:CSVC_TAB_BUTTON_ANIMATION_DURATION animations:frameShiftBlock];
+    } else {
+        frameShiftBlock();
+    }
+
 }
 
 - (void)scrollViewDidScroll:(UIScrollView *)theScrollView {
