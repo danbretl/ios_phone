@@ -8,7 +8,7 @@
 
 #import "ContactsSelectViewController.h"
 #import "ContactCell.h"
-#import "LocalImagesManager.h"
+//#import "LocalImagesManager.h"
 
 float const CSVC_TAB_BUTTON_ANIMATION_DURATION = .25;
 
@@ -48,8 +48,8 @@ float const CSVC_TAB_BUTTON_ANIMATION_DURATION = .25;
 - (void) contactsUpdatedLocally:(NSNotification *)notification;
 - (void) setSelectedTabButton:(UIButton *)tabButton;
 - (void) startProfilePictureDownloadForContact:(Contact *)contact atIndexPath:(NSIndexPath *)indexPath;
-- (void) facebookProfilePictureGetterFinished:(FacebookProfilePictureGetter *)profilePictureGetter;
-//- (void) cancelAllPendingProfilePictureDownloads;
+- (void) facebookProfilePictureGetterFinished:(FacebookProfilePictureGetter *)profilePictureGetter withImage:(UIImage *)image;
+- (void) ignoreAllPendingProfilePictureDownloads;
 @end
 
 @implementation ContactsSelectViewController
@@ -104,13 +104,15 @@ float const CSVC_TAB_BUTTON_ANIMATION_DURATION = .25;
 {
     // Releases the view if it doesn't have a superview.
     [super didReceiveMemoryWarning];
-//    [self cancelAllPendingProfilePictureDownloads];
+//    [self ignoreAllPendingProfilePictureDownloads];
 }
 
-//- (void) cancelAllPendingProfilePictureDownloads {
-//    NSArray * allProfilePictureDownloaders = [self.profilePictureDownloaders allValues];
-//    [allProfilePictureDownloaders makeObjectsPerformSelector:@selector(cancelDownload)];
-//}
+- (void) ignoreAllPendingProfilePictureDownloads {
+    NSArray * allProfilePictureDownloaders = [self.profilePictureDownloaders allValues];
+    [allProfilePictureDownloaders makeObjectsPerformSelector:@selector(cancelDownload)];
+//    [allProfilePictureDownloaders makeObjectsPerformSelector:@selector(setDelegate:) withObject:nil];
+    
+}
 
 #pragma mark - View lifecycle
 
@@ -118,7 +120,7 @@ float const CSVC_TAB_BUTTON_ANIMATION_DURATION = .25;
 {
     [super viewDidLoad];
     
-    [LocalImagesManager removeAllFacebookProfilePictures];
+//    [LocalImagesManager removeAllFacebookProfilePictures];
     
     self.profilePictureDownloaders = [NSMutableDictionary dictionary];
     
@@ -167,13 +169,17 @@ float const CSVC_TAB_BUTTON_ANIMATION_DURATION = .25;
 
 - (void) viewWillDisappear:(BOOL)animated {
     [super viewWillDisappear:animated];
-//    [self cancelAllPendingProfilePictureDownloads];
+}
+
+- (void) viewDidDisappear:(BOOL)animated {
+    [super viewDidDisappear:animated];
+    [self ignoreAllPendingProfilePictureDownloads];
 }
 
 - (void)viewDidUnload
 {
     [super viewDidUnload];
-//    [self cancelAllPendingProfilePictureDownloads];
+//    [self ignoreAllPendingProfilePictureDownloads];
     // Release any retained subviews of the main view.
     // e.g. self.myOutlet = nil;
 }
@@ -378,8 +384,10 @@ float const CSVC_TAB_BUTTON_ANIMATION_DURATION = .25;
     [self tableView:tableView setCellAccessoryType:accessoryType forCell:cell];
     
     // Profile picture...
-    if ([LocalImagesManager facebookProfilePictureExistsFromFacebookID:contact.fbID]) {
-        [self tableView:tableView setCellPicture:[LocalImagesManager facebookProfilePictureFromFacebookID:contact.fbID] forCell:cell];
+    FacebookProfilePictureGetter * profilePictureGetter = [self.profilePictureDownloaders objectForKey:indexPath];
+    if (profilePictureGetter != nil &&
+        profilePictureGetter.image != nil) {
+        [self tableView:tableView setCellPicture:profilePictureGetter.image forCell:cell];
     } else {
         [self tableView:tableView setCellPicture:nil forCell:cell];
         [self startProfilePictureDownloadForContact:contact atIndexPath:indexPath];
@@ -399,8 +407,8 @@ float const CSVC_TAB_BUTTON_ANIMATION_DURATION = .25;
     [profilePictureGetter startDownload];
 }
 
-- (void)facebookProfilePictureGetterFinished:(FacebookProfilePictureGetter *)profilePictureGetter {
-    [self tableView:self.friendsTableView setCellPicture:[LocalImagesManager facebookProfilePictureFromFacebookID:profilePictureGetter.facebookID] forCellWithIndexPath:profilePictureGetter.indexPathInTableView]; // THIS IS GOING TO MISS THE MARK A LOT OF THE TIME. DEAL WITH THIS LATER.
+- (void)facebookProfilePictureGetterFinished:(FacebookProfilePictureGetter *)profilePictureGetter withImage:(UIImage *)image {
+    [self tableView:self.friendsTableView setCellPicture:image forCellWithIndexPath:profilePictureGetter.indexPathInTableView]; // THIS IS GOING TO MISS THE MARK A LOT OF THE TIME. DEAL WITH THIS LATER.
 }
 
 - (void) tableView:(UITableView *)tableView setCellAccessoryType:(UITableViewCellAccessoryType)accessoryType forCellWithIndexPath:(NSIndexPath *)indexPath {
@@ -566,12 +574,12 @@ float const CSVC_TAB_BUTTON_ANIMATION_DURATION = .25;
 }
 
 - (void)cancelButtonPushed {
-//    [self cancelAllPendingProfilePictureDownloads];
+//    [self ignoreAllPendingProfilePictureDownloads];
     [self.delegate contactsSelectViewController:self didFinishWithCancel:YES selectedContacts:nil];
 }
 
 - (void)doneSelectingButtonPushed {
-//    [self cancelAllPendingProfilePictureDownloads];
+//    [self ignoreAllPendingProfilePictureDownloads];
     [self.delegate contactsSelectViewController:self didFinishWithCancel:NO selectedContacts:self.contactsSelected];
 }
 

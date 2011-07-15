@@ -15,23 +15,25 @@
     id<FacebookProfilePictureGetterDelegate> delegate;
     NSString * facebookID;
     NSIndexPath * indexPathInTableView;
-    
+    NSOperationQueue * operationQueue;
     NSMutableData * imageData;
-//    NSURLConnection * imageConnection;
+    UIImage * imagePrivate;
+    NSURLConnection * imageConnection;
     
 }
 
-@property (assign) id<FacebookProfilePictureGetterDelegate> delegate;
-@property (copy) NSString * facebookID;
-@property (retain) NSIndexPath * indexPathInTableView;
+@property (nonatomic, assign) id<FacebookProfilePictureGetterDelegate> delegate;
+@property (nonatomic, copy) NSString * facebookID;
+@property (nonatomic, retain) NSIndexPath * indexPathInTableView;
+@property (nonatomic, readonly) UIImage * image;
 
 - (void) startDownload;
-//- (void) cancelDownload;
+- (void) cancelDownload;
 
 @end
 
 @protocol FacebookProfilePictureGetterDelegate <NSObject>
 
-- (void) facebookProfilePictureGetterFinished:(FacebookProfilePictureGetter *)profilePictureGetter;
+- (void) facebookProfilePictureGetterFinished:(FacebookProfilePictureGetter *)profilePictureGetter withImage:(UIImage *)image;
 
 @end
