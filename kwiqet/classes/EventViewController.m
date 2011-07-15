@@ -515,6 +515,7 @@
     // Day name
     [dateFormatter setDateFormat:@"EEE"];
     NSString * dayName = [dateFormatter stringFromDate:self.event.startDateDatetime];
+    [dateFormatter release];
     self.dayNameLabel.text = [dayName uppercaseString];
     // Time
     NSString * time = [self.webDataTranslator timeSpanStringFromStartDatetime:self.event.startTimeDatetime endDatetime:self.event.endTimeDatetime dataUnavailableString:EVENT_TIME_NOT_AVAILABLE];
@@ -683,94 +684,6 @@
         webDataTranslator = [[WebDataTranslator alloc] init];
     }
     return webDataTranslator;
-}
-
-- (NSDictionary *) tempSolutionWellFormattedDataFromDictionary:(NSDictionary *)rawEventDictionary {
-    
-    NSDictionary * firstOccurrenceDictionary = [[rawEventDictionary valueForKey:@"occurrences"] objectAtIndex:0];
-    
-    NSString * uri = [WebUtil stringOrNil:[rawEventDictionary objectForKey:@"resource_uri"]];
-    NSString * titleText = [WebUtil stringOrNil:[rawEventDictionary objectForKey:@"title"]];
-    NSString * descriptionText = [WebUtil stringOrNil:[rawEventDictionary objectForKey:@"description"]];
-    
-    NSString * startDate = [WebUtil stringOrNil:[firstOccurrenceDictionary objectForKey:@"start_date"]];
-//    NSLog(@"startDate:%@", startDate);
-    NSString * endDate = [WebUtil stringOrNil:[firstOccurrenceDictionary objectForKey:@"end_date"]];
-//    NSLog(@"endDate:%@", endDate);
-    NSString * startTime = [WebUtil stringOrNil:[firstOccurrenceDictionary objectForKey:@"start_time"]];
-//    NSLog(@"startTime:%@", startTime);
-    NSString * endTime = [WebUtil stringOrNil:[firstOccurrenceDictionary objectForKey:@"end_time"]];
-//    NSLog(@"endTime:%@", endTime);
-    
-    // Date and time
-    NSDictionary * startAndEndDatetimesDictionary = [self.webDataTranslator datetimesSummaryFromStartTime:startTime endTime:endTime startDate:startDate endDate:endDate];
-    NSDate * startDatetime = (NSDate *)[startAndEndDatetimesDictionary objectForKey:WDT_START_DATETIME_KEY];
-    NSDate * endDatetime = (NSDate *)[startAndEndDatetimesDictionary objectForKey:WDT_END_DATETIME_KEY];
-    NSNumber * startDateValid = [startAndEndDatetimesDictionary valueForKey:WDT_START_DATE_VALID_KEY];
-    NSNumber * startTimeValid = [startAndEndDatetimesDictionary valueForKey:WDT_START_TIME_VALID_KEY];
-    NSNumber * endDateValid = [startAndEndDatetimesDictionary valueForKey:WDT_END_DATE_VALID_KEY];
-    NSNumber * endTimeValid = [startAndEndDatetimesDictionary valueForKey:WDT_END_TIME_VALID_KEY];
-//    NSLog(@"%@", startAndEndDatetimesDictionary);
-    
-    // Price
-    NSArray * priceArray = [firstOccurrenceDictionary objectForKey:@"prices"];
-    NSDictionary * pricesMinMaxDictionary = [self.webDataTranslator pricesSummaryFromPriceArray:priceArray];
-    NSNumber * priceMinimum = [pricesMinMaxDictionary objectForKey:@"minimum"];
-    NSNumber * priceMaximum = [pricesMinMaxDictionary objectForKey:@"maximum"];
-    
-    // Address first line
-    NSString * addressLineFirst = [WebUtil stringOrNil:[[[firstOccurrenceDictionary valueForKey:@"place"] valueForKey:@"point"] valueForKey:@"address"]];
-    
-    // Address second line
-    NSString * cityString = [WebUtil stringOrNil:[[[[firstOccurrenceDictionary valueForKey:@"place"] valueForKey:@"point"] valueForKey:@"city"] valueForKey:@"city"]];
-    NSString * stateString = [WebUtil stringOrNil:[[[[firstOccurrenceDictionary valueForKey:@"place"]valueForKey:@"point"] valueForKey:@"city"] valueForKey:@"state"]];
-    NSString * zipCodeString = [WebUtil stringOrNil:[[[firstOccurrenceDictionary valueForKey:@"place"] valueForKey:@"point"] valueForKey:@"zip"]];
-    
-    // Latitude & Longitude
-    NSNumber * latitudeValue  = [WebUtil numberOrNil:[[[[[rawEventDictionary valueForKey:@"occurrences"] objectAtIndex:0]valueForKey:@"place"] valueForKey:@"point"] valueForKey:@"latitude"]];
-    NSNumber * longitudeValue = [WebUtil numberOrNil:[[[[[rawEventDictionary valueForKey:@"occurrences"] objectAtIndex:0] valueForKey:@"place"] valueForKey:@"point"] valueForKey:@"longitude"]];
-    
-    // Phone Number
-    NSString * eventPhoneString = [WebUtil stringOrNil:[[firstOccurrenceDictionary valueForKey:@"place"] valueForKey:@"phone"]];
-    
-    // Venue
-    NSString * venueString = [WebUtil stringOrNil:[[firstOccurrenceDictionary valueForKey:@"place"]valueForKey:@"title"]];
-    
-    // Image location
-    NSString * imageLocation = [WebUtil stringOrNil:[rawEventDictionary valueForKey:@"image"]];
-    if (!imageLocation) {
-        imageLocation = [WebUtil stringOrNil:[rawEventDictionary valueForKey:@"thumbnail_detail"]];
-    }
-    
-    // Concrete parent category
-    NSString * concreteParentCategoryURI = [WebUtil stringOrNil:[rawEventDictionary objectForKey:@"resource_uri"]];
-    
-    NSMutableDictionary * wellFormattedDataDictionary = [NSMutableDictionary dictionary];
-    if (uri) { [wellFormattedDataDictionary setValue:uri forKey:@"uri"]; }
-    if (concreteParentCategoryURI) { [wellFormattedDataDictionary setValue:concreteParentCategoryURI forKey:@"concreteParentCategoryURI"]; }
-    if (titleText) { [wellFormattedDataDictionary setValue:titleText forKey:@"title"]; }
-    if (startDatetime) { [wellFormattedDataDictionary setValue:startDatetime forKey:@"startDatetime"]; }
-    if (endDatetime) { [wellFormattedDataDictionary setValue:endDatetime forKey:@"endDatetime"]; }
-    if (startDateValid) { [wellFormattedDataDictionary setValue:startDateValid forKey:@"startDateValid"]; }
-    if (startTimeValid) { [wellFormattedDataDictionary setValue:startTimeValid forKey:@"startTimeValid"]; }
-    if (endDateValid) { [wellFormattedDataDictionary setValue:endDateValid forKey:@"endDateValid"]; }
-    if (endTimeValid) { [wellFormattedDataDictionary setValue:endTimeValid forKey:@"endTimeValid"]; }
-    if (venueString) { [wellFormattedDataDictionary setValue:venueString forKey:@"venue"]; }
-    if (addressLineFirst) { [wellFormattedDataDictionary setValue:addressLineFirst forKey:@"address"]; }
-    if (cityString) { [wellFormattedDataDictionary setValue:cityString forKey:@"city"]; }
-    if (stateString) { [wellFormattedDataDictionary setValue:stateString forKey:@"state"]; }
-    if (zipCodeString) { [wellFormattedDataDictionary setValue:zipCodeString forKey:@"zip"]; }
-    if (latitudeValue) { [wellFormattedDataDictionary setValue:latitudeValue forKey:@"latitude"]; }
-    if (longitudeValue) { [wellFormattedDataDictionary setValue:longitudeValue forKey:@"longitude"]; }
-    if (priceMinimum) { [wellFormattedDataDictionary setValue:priceMinimum forKey:@"priceMinimum"]; }
-    if (priceMaximum) { [wellFormattedDataDictionary setValue:priceMaximum forKey:@"priceMaximum"]; }
-    if (eventPhoneString) { [wellFormattedDataDictionary setValue:eventPhoneString forKey:@"phone"]; }
-    if (descriptionText) { [wellFormattedDataDictionary setValue:descriptionText forKey:@"details"]; }
-    if (imageLocation) { [wellFormattedDataDictionary setValue:imageLocation forKey:@"imageLocation"]; }
-    
-//    NSLog(@"%@", wellFormattedDataDictionary);
-    
-    return wellFormattedDataDictionary;
 }
 
 - (void) swipedToGoBack:(UISwipeGestureRecognizer *)swipeGesture {
