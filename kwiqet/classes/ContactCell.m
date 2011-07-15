@@ -8,10 +8,6 @@
 
 #import "ContactCell.h"
 
-@interface ContactCell()
-@property (retain) UIImageView * pictureImageView;
-@end
-
 @implementation ContactCell
 
 @synthesize pictureImageView;

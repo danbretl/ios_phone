@@ -76,8 +76,8 @@ extern CGFloat const FEATURED_EVENT_BACKGROUND_COLOR_ALPHA;
 @property (nonatomic, readonly) FacebookManager * facebookManager;
 
 - (void) updateInterfaceFromFeaturedEvent:(Event *)featuredEvent;
-- (void) loadImageWithLocation:(NSString *)imageLocation;
-- (void) displayImage:(UIImage *)image;
+//- (void) loadImageWithLocation:(NSString *)imageLocation;
+//- (void) displayImage:(UIImage *)image;
 - (BOOL) isLastFeaturedEventGetDateToday;
 - (void) suggestToGetNewFeaturedEvent; // This method is only a "suggestion" to the object because if the object determines it doesn't NEED to try to get a new featured event from the web, then it will simply ignore the request. (It ignores the request if the date of the last featured event web-get was the same day as "today" i.e. the day of the method call.)
 - (void) enableRefreshHeaderView;

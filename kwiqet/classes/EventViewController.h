@@ -20,10 +20,12 @@
 #import "WebActivityView.h"
 #import "FacebookManager.h"
 #import "ContactsSelectViewController.h"
+#import "UIImageView+WebCache.h"
+#import "SDWebImageManager.h"
 
 @protocol CardPageViewControllerDelegate;
 
-@interface EventViewController : UIViewController <MFMailComposeViewControllerDelegate, WebConnectorDelegate, MapViewControllerDelegate, UIScrollViewDelegate, UIActionSheetDelegate, ContactsSelectViewControllerDelegate> {
+@interface EventViewController : UIViewController <MFMailComposeViewControllerDelegate, WebConnectorDelegate, MapViewControllerDelegate, UIScrollViewDelegate, UIActionSheetDelegate, ContactsSelectViewControllerDelegate, SDWebImageManagerDelegate> {
     
     UIView * backgroundColorView;
     UIView * navigationBar;
@@ -75,7 +77,7 @@
 //    BOOL loadedImage;
     UIActionSheet * letsGoChoiceActionSheet;
     FacebookManager * facebookManager;
-    UIImage * imageFull;
+//    UIImage * imageFull;
     NSURLConnection * loadImageURLConnection;
     NSMutableData * loadImageData;
 

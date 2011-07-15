@@ -12,6 +12,7 @@
 #import "WebActivityView.h"
 #import "CoreDataModel.h"
 #import "FacebookProfilePictureGetter.h"
+#import "UIImageView+WebCache.h"
 
 @protocol ContactsSelectViewControllerDelegate;
 

@@ -14,7 +14,6 @@ CGFloat const ELASTICUILABEL_GRADIENT_VIEW_WIDTH = 45.0;
 @property (nonatomic, retain) GradientView * gradientView;
 @property (nonatomic, retain) UIScrollView * scrollView;
 @property (nonatomic, retain) UILabel * label;
-- (void) scrollViewContentOffsetToOriginAnimated;
 @end
 
 @implementation ElasticUILabel
@@ -76,13 +75,13 @@ CGFloat const ELASTICUILABEL_GRADIENT_VIEW_WIDTH = 45.0;
 - (void) scrollViewDidEndDecelerating:(UIScrollView *)theScrollView {
     if (theScrollView == self.scrollView) {
         if (self.scrollView.contentOffset.x > 0) {
-            [self scrollViewContentOffsetToOriginAnimated];
+            [self scrollTextToOriginAnimated:YES];
         }
     }
 }
 
-- (void) scrollViewContentOffsetToOriginAnimated {
-    [self.scrollView setContentOffset:CGPointMake(0, 0) animated:YES];
+- (void) scrollTextToOriginAnimated:(BOOL)animated {
+    [self.scrollView setContentOffset:CGPointMake(0, 0) animated:animated];
 }
 
 - (void)setText:(NSString *)theText {

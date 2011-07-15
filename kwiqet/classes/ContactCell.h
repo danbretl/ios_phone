@@ -18,6 +18,7 @@
     
 }
 
+@property (readonly) UIImageView * pictureImageView;
 @property (nonatomic, retain) UIImage * picture;
 @property (retain) UILabel * nameLabel;
 

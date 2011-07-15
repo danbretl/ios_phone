@@ -30,6 +30,8 @@
 - (void) startDownload;
 - (void) cancelDownload;
 
++ (NSURL *) urlForFacebookProfilePictureForFacebookID:(NSString *)fbID;
+
 @end
 
 @protocol FacebookProfilePictureGetterDelegate <NSObject>

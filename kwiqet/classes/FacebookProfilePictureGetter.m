@@ -41,11 +41,15 @@ static NSString * const FPPG_PICTURE_URL_POSTFIX = @"/picture";
     [super dealloc];
 }
 
++ (NSURL *)urlForFacebookProfilePictureForFacebookID:(NSString *)fbID {
+    return [NSURL URLWithString:[NSString stringWithFormat:@"%@%@%@", FPPG_BASE_URL, fbID, FPPG_PICTURE_URL_POSTFIX]];
+}
+
 - (void) startDownload {
     
     if (self.imageData == nil &&
         self.imageConnection == nil) {
-        self.imageConnection = [NSURLConnection connectionWithRequest:[NSURLRequest requestWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@%@%@", FPPG_BASE_URL, self.facebookID, FPPG_PICTURE_URL_POSTFIX]]] delegate:self];
+        self.imageConnection = [NSURLConnection connectionWithRequest:[NSURLRequest requestWithURL:[FacebookProfilePictureGetter urlForFacebookProfilePictureForFacebookID:self.facebookID]] delegate:self];
     }
     
 //    if (self.image == nil &&
@@ -59,15 +63,10 @@ static NSString * const FPPG_PICTURE_URL_POSTFIX = @"/picture";
 }
 
 - (void) loadImage {
-    self.imageData = [NSData dataWithContentsOfURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@%@%@", FPPG_BASE_URL, self.facebookID, FPPG_PICTURE_URL_POSTFIX]]];
+    self.imageData = [NSData dataWithContentsOfURL:[FacebookProfilePictureGetter urlForFacebookProfilePictureForFacebookID:self.facebookID]];
 //    [LocalImagesManager saveFacebookProfilePicture:self.imageData facebookID:self.facebookID];
     self.imagePrivate = [UIImage imageWithData:self.imageData];
     [self performSelectorOnMainThread:@selector(notifyMainThread) withObject:nil waitUntilDone:NO];
-}
-
-- (void) setDelegate:(id<FacebookProfilePictureGetterDelegate>)theDelegate {
-    NSLog(@"setDelegate to %@", delegate);
-    delegate = theDelegate;
 }
 
 - (void) notifyMainThread {

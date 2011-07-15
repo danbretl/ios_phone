@@ -384,14 +384,15 @@ float const CSVC_TAB_BUTTON_ANIMATION_DURATION = .25;
     [self tableView:tableView setCellAccessoryType:accessoryType forCell:cell];
     
     // Profile picture...
-    FacebookProfilePictureGetter * profilePictureGetter = [self.profilePictureDownloaders objectForKey:indexPath];
-    if (profilePictureGetter != nil &&
-        profilePictureGetter.image != nil) {
-        [self tableView:tableView setCellPicture:profilePictureGetter.image forCell:cell];
-    } else {
-        [self tableView:tableView setCellPicture:nil forCell:cell];
-        [self startProfilePictureDownloadForContact:contact atIndexPath:indexPath];
-    }
+    [contactCell.pictureImageView setImageWithURL:[FacebookProfilePictureGetter urlForFacebookProfilePictureForFacebookID:contact.fbID] placeholderImage:[UIImage imageNamed:@"fbPicturePlaceholder.png"]];
+//    FacebookProfilePictureGetter * profilePictureGetter = [self.profilePictureDownloaders objectForKey:indexPath];
+//    if (profilePictureGetter != nil &&
+//        profilePictureGetter.image != nil) {
+//        [self tableView:tableView setCellPicture:profilePictureGetter.image forCell:cell];
+//    } else {
+//        [self tableView:tableView setCellPicture:nil forCell:cell];
+//        [self startProfilePictureDownloadForContact:contact atIndexPath:indexPath];
+//    }
     
 }
 

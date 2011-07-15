@@ -9,7 +9,8 @@
 #import "SDImageCache.h"
 #import <CommonCrypto/CommonDigest.h>
 
-static NSInteger cacheMaxCacheAge = 60*60*24*7; // 1 week
+//static NSInteger cacheMaxCacheAge = 60*60*24*7; // 1 week // Default, changing it to 1 day for us
+static NSInteger cacheMaxCacheAge = 60*60*24*1; // 1 day
 
 static SDImageCache *instance;
 

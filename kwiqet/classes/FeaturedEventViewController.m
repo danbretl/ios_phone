@@ -14,6 +14,7 @@
 #import "LocalImagesManager.h"
 #import "WebUtil.h"
 #import "ActionsManagement.h"
+#import "UIImageView+WebCache.h"
 
 // "Data not available" strings
 static NSString * const FEATURED_EVENT_TITLE_NOT_AVAILABLE = @"Event";
@@ -353,10 +354,15 @@ CGFloat const FEV_DESCRIPTION_LABEL_PADDING_HORIZONTAL = 20.0;
 }
 
 - (void)viewWillAppear:(BOOL)animated {
-    
+    [super viewWillAppear:animated];
     [self suggestToGetNewFeaturedEvent]; NSLog(@"FROM EVENT DAY VIEW CONTROLLER VIEW WILL APPEAR LINE 291");
     [self tempSolutionResetAndEnableLetsGoButton];
     
+}
+
+- (void) viewDidDisappear:(BOOL)animated {
+    [super viewDidDisappear:animated];
+    [self.titleBar scrollTextToOriginAnimated:animated];
 }
 
 - (void) tempSolutionResetAndEnableLetsGoButton {
@@ -570,70 +576,73 @@ CGFloat const FEV_DESCRIPTION_LABEL_PADDING_HORIZONTAL = 20.0;
         CGFloat endOfInfoY = CGRectGetMaxY(self.eventDetailsContainer.frame);
         [self.scrollView setContentSize:CGSizeMake(self.scrollView.bounds.size.width, endOfInfoY)];
         
-        // Invoke the NSOperation
-        NSOperationQueue * queue = [[NSOperationQueue alloc] init];
-        NSInvocationOperation * operation = [[NSInvocationOperation alloc] initWithTarget:self selector:@selector(loadImageWithLocation:) object:featuredEvent.imageLocation];
-        [queue addOperation:operation];
-        [operation release];
-        [queue release];
+        [self.imageView setImageWithURL:[URLBuilder imageURLForImageLocation:featuredEvent.imageLocation] placeholderImage:[UIImage imageNamed:@"event_img_placeholder.png"]];
+        
+        
+//        // Invoke the NSOperation
+//        NSOperationQueue * queue = [[NSOperationQueue alloc] init];
+//        NSInvocationOperation * operation = [[NSInvocationOperation alloc] initWithTarget:self selector:@selector(loadImageWithLocation:) object:featuredEvent.imageLocation];
+//        [queue addOperation:operation];
+//        [operation release];
+//        [queue release];
         
     }
 }
 
-- (void)loadImageWithLocation:(NSString *)imageLocation {
-    NSLog(@"FeaturedEventViewController loadImageWithLocation:%@", imageLocation);
-    
-    UIImage * image = nil;
-    
-    NSString * imageLocationLocalWithoutSlashes = [imageLocation stringByReplacingOccurrencesOfString:@"/" withString:@""];
-    
-    // First, check to see if we already have the image cached locally.
-    BOOL imageExistsLocally = [LocalImagesManager featuredEventImageExistsWithName:imageLocationLocalWithoutSlashes];
+//- (void)loadImageWithLocation:(NSString *)imageLocation {
+//    NSLog(@"FeaturedEventViewController loadImageWithLocation:%@", imageLocation);
+//    
+//    UIImage * image = nil;
+//    
+//    NSString * imageLocationLocalWithoutSlashes = [imageLocation stringByReplacingOccurrencesOfString:@"/" withString:@""];
+//    
+//    // First, check to see if we already have the image cached locally.
+//    BOOL imageExistsLocally = [LocalImagesManager featuredEventImageExistsWithName:imageLocationLocalWithoutSlashes];
+//
+//    if (imageExistsLocally) {
+//        NSLog(@"Image exists locally");
+//        // If we do have the image cached locally, then just load it up!
+//        image = [LocalImagesManager loadFeaturedEventImage:imageLocationLocalWithoutSlashes];
+//    } else {
+//        NSLog(@"Image does not exist locally");
+//        // If we do not already have the image cached locally, then try to pull it from the web.
+//        
+//        // Build URL
+//        NSString * urlplist = [[NSBundle mainBundle] pathForResource:@"urls" ofType:@"plist"];
+//        NSDictionary * urlDictionary = [[NSDictionary alloc] initWithContentsOfFile:urlplist];
+//        NSString * url = [URLBuilder baseURL];
+//        NSString * final_url_string = [[NSString alloc]initWithString:[url stringByAppendingString:imageLocation]];
+//        NSData * imageData = [[NSData alloc] initWithContentsOfURL:[NSURL URLWithString:final_url_string]];
+//        image = [[[UIImage alloc] initWithData:imageData] autorelease];
+//        //NSLog(@"image is loaded, and it is %fx%f pixels", image.size.width, image.size.height);
+//        
+//        [imageData release];
+//        [final_url_string release];
+//        [urlDictionary release];
+//
+//        if (image) {
+//            NSLog(@"image retrieved successfully, and now it will be saved");
+//            // If the image was retrieved successfully from the internet, then we should cache it locally.
+//            // Save new image
+//            [LocalImagesManager saveFeaturedEventImageData:imageData imageName:imageLocationLocalWithoutSlashes];
+//        } else {
+//            // If the image was NOT successfully retrieved online (after also not being available in our local cache), then we should probably fall back onto some sort of default featured event image.
+//            // ...
+//            // ... TO BE IMPLEMENTED LATER
+//            // ... TO BE IMPLEMENTED LATER
+//            // ... TO BE IMPLEMENTED LATER
+//            // ...
+//        }
+//    }
+//    
+//    self.imageFull = image;
+//    [self performSelectorOnMainThread:@selector(displayImage:) withObject:image waitUntilDone:NO];
+//    
+//}
 
-    if (imageExistsLocally) {
-        NSLog(@"Image exists locally");
-        // If we do have the image cached locally, then just load it up!
-        image = [LocalImagesManager loadFeaturedEventImage:imageLocationLocalWithoutSlashes];
-    } else {
-        NSLog(@"Image does not exist locally");
-        // If we do not already have the image cached locally, then try to pull it from the web.
-        
-        // Build URL
-        NSString * urlplist = [[NSBundle mainBundle] pathForResource:@"urls" ofType:@"plist"];
-        NSDictionary * urlDictionary = [[NSDictionary alloc] initWithContentsOfFile:urlplist];
-        NSString * url = [URLBuilder baseURL];
-        NSString * final_url_string = [[NSString alloc]initWithString:[url stringByAppendingString:imageLocation]];
-        NSData * imageData = [[NSData alloc] initWithContentsOfURL:[NSURL URLWithString:final_url_string]];
-        image = [[[UIImage alloc] initWithData:imageData] autorelease];
-        //NSLog(@"image is loaded, and it is %fx%f pixels", image.size.width, image.size.height);
-        
-        [imageData release];
-        [final_url_string release];
-        [urlDictionary release];
-
-        if (image) {
-            NSLog(@"image retrieved successfully, and now it will be saved");
-            // If the image was retrieved successfully from the internet, then we should cache it locally.
-            // Save new image
-            [LocalImagesManager saveFeaturedEventImageData:imageData imageName:imageLocationLocalWithoutSlashes];
-        } else {
-            // If the image was NOT successfully retrieved online (after also not being available in our local cache), then we should probably fall back onto some sort of default featured event image.
-            // ...
-            // ... TO BE IMPLEMENTED LATER
-            // ... TO BE IMPLEMENTED LATER
-            // ... TO BE IMPLEMENTED LATER
-            // ...
-        }
-    }
-    
-    self.imageFull = image;
-    [self performSelectorOnMainThread:@selector(displayImage:) withObject:image waitUntilDone:NO];
-    
-}
-
-- (void)displayImage:(UIImage *)image {
-    self.imageView.image = image;
-}
+//- (void)displayImage:(UIImage *)image {
+//    self.imageView.image = image;
+//}
 
 -(IBAction)phoneCall:(id)sender  {
 	NSLog(@"phone call");

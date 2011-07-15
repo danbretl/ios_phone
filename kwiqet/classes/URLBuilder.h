@@ -20,6 +20,9 @@
 + (NSString *) baseURLKey;
 + (NSString *) baseURL;
 
+// Images
++ (NSURL *)imageURLForImageLocation:(NSString *)imageLocation;
+
 // Security
 -(NSString*)buildCredentialString;
 

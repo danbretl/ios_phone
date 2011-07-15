@@ -27,5 +27,6 @@ extern CGFloat const ELASTICUILABEL_GRADIENT_VIEW_WIDTH;
 @property (nonatomic, retain) UIColor * color;
 //- (void) wiggleLabel;
 //- (void) flashScrollBar;
+- (void) scrollTextToOriginAnimated:(BOOL)animated;
 
 @end

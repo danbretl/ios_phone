@@ -25,8 +25,7 @@
 
     self.image = placeholder;
 
-    if (url)
-    {
+    if (url) {
         [manager downloadWithURL:url delegate:self];
     }
 }
