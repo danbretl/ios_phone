@@ -601,7 +601,7 @@ CGFloat const FEV_DESCRIPTION_LABEL_PADDING_HORIZONTAL = 20.0;
         // Build URL
         NSString * urlplist = [[NSBundle mainBundle] pathForResource:@"urls" ofType:@"plist"];
         NSDictionary * urlDictionary = [[NSDictionary alloc] initWithContentsOfFile:urlplist];
-        NSString * url = [urlDictionary valueForKey:@"base_url"];
+        NSString * url = [URLBuilder baseURL];
         NSString * final_url_string = [[NSString alloc]initWithString:[url stringByAppendingString:imageLocation]];
         NSData * imageData = [[NSData alloc] initWithContentsOfURL:[NSURL URLWithString:final_url_string]];
         image = [[[UIImage alloc] initWithData:imageData] autorelease];

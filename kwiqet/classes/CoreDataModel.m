@@ -411,10 +411,8 @@
     NSString * venueString = [WebUtil stringOrNil:[[firstOccurrenceDictionary valueForKey:@"place"]valueForKey:@"title"]];
     
     // Image location
-    NSString * imageLocation = [WebUtil stringOrNil:[eventDictionary valueForKey:@"image"]];
-    if (!imageLocation) {
-        imageLocation = [WebUtil stringOrNil:[eventDictionary valueForKey:@"thumbnail_detail"]];
-    }
+    NSString * imageLocation = [WebUtil stringOrNil:[eventDictionary valueForKey:@"thumbnail_detail"]];
+    if (!imageLocation) { imageLocation = @""; }
     
     // Concrete parent category
     NSString * concreteParentCategoryURI = [WebUtil stringOrNil:[eventDictionary objectForKey:@"concrete_parent_category"]];

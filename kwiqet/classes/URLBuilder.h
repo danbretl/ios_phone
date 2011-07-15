@@ -16,6 +16,10 @@
 @property (readonly) NSString * baseURLKey;
 @property (readonly) NSString * baseURL;
 
+// General
++ (NSString *) baseURLKey;
++ (NSString *) baseURL;
+
 // Security
 -(NSString*)buildCredentialString;
 
