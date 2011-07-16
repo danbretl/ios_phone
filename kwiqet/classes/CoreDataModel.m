@@ -196,7 +196,7 @@
                 [self addCategoryWithURI:newConcreteCategoryURI title:newConcreteCategoryTitle color:newConcreteCategoryColor buttonThumb:newConcreteCategoryButtonThumb];
             } else {
                 if (newAndExistingCategoriesMatchURIs) {
-                    NSLog(@"Updating category");
+                    //NSLog(@"Updating category");
                     existingCategory.title = newConcreteCategoryTitle;
                     existingCategory.colorHex = newConcreteCategoryColor;
                     existingCategory.buttonThumb = newConcreteCategoryButtonThumb;
