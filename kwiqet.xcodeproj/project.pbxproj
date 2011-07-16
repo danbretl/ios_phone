@@ -802,7 +802,22 @@
 				322CDFE813CF4AA6005203C2 /* btn_selectall_full_border@2x.png */,
 				322CDFE913CF4AA6005203C2 /* btn_selectall_full_norightborder.png */,
 				322CDFEA13CF4AA6005203C2 /* btn_selectall_full_norightborder@2x.png */,
-				32E2C1B213CDFC7C001B7EA5 /* category icons */,
+				32E2C1B313CDFCA9001B7EA5 /* icon_arts&theater.png */,
+				32E2C1B413CDFCA9001B7EA5 /* icon_arts&theater@2x.png */,
+				32E2C1B513CDFCA9001B7EA5 /* icon_food&drink.png */,
+				32E2C1B613CDFCA9001B7EA5 /* icon_food&drink@2x.png */,
+				32E2C1B713CDFCA9001B7EA5 /* icon_gatherings.png */,
+				32E2C1B813CDFCA9001B7EA5 /* icon_gatherings@2x.png */,
+				32E2C1B913CDFCA9001B7EA5 /* icon_hobbies&interest.png */,
+				32E2C1BA13CDFCA9001B7EA5 /* icon_hobbies&interest@2x.png */,
+				32E2C1BB13CDFCA9001B7EA5 /* icon_movies&media.png */,
+				32E2C1BC13CDFCA9001B7EA5 /* icon_movies&media@2x.png */,
+				32E2C1BD13CDFCA9001B7EA5 /* icon_music.png */,
+				32E2C1BE13CDFCA9001B7EA5 /* icon_music@2x.png */,
+				32E2C1BF13CDFCA9001B7EA5 /* icon_nightlife.png */,
+				32E2C1C013CDFCA9001B7EA5 /* icon_nightlife@2x.png */,
+				32E2C1C113CDFCA9001B7EA5 /* icon_sports&recreation.png */,
+				32E2C1C213CDFCA9001B7EA5 /* icon_sports&recreation@2x.png */,
 				32E2A3FE13CD0AC00083F1AD /* btn_selected_notext_disabled.png */,
 				32E2A3FF13CD0AC00083F1AD /* btn_selected_notext_disabled@2x.png */,
 				32C3A62C13CC28D800A12C12 /* fbPicturePlaceholder.png */,
@@ -1216,29 +1231,6 @@
 				32FD384613AFF52F007549B6 /* LocalImagesManager.m */,
 			);
 			name = "models etc";
-			sourceTree = "<group>";
-		};
-		32E2C1B213CDFC7C001B7EA5 /* category icons */ = {
-			isa = PBXGroup;
-			children = (
-				32E2C1B313CDFCA9001B7EA5 /* icon_arts&theater.png */,
-				32E2C1B413CDFCA9001B7EA5 /* icon_arts&theater@2x.png */,
-				32E2C1B513CDFCA9001B7EA5 /* icon_food&drink.png */,
-				32E2C1B613CDFCA9001B7EA5 /* icon_food&drink@2x.png */,
-				32E2C1B713CDFCA9001B7EA5 /* icon_gatherings.png */,
-				32E2C1B813CDFCA9001B7EA5 /* icon_gatherings@2x.png */,
-				32E2C1B913CDFCA9001B7EA5 /* icon_hobbies&interest.png */,
-				32E2C1BA13CDFCA9001B7EA5 /* icon_hobbies&interest@2x.png */,
-				32E2C1BB13CDFCA9001B7EA5 /* icon_movies&media.png */,
-				32E2C1BC13CDFCA9001B7EA5 /* icon_movies&media@2x.png */,
-				32E2C1BD13CDFCA9001B7EA5 /* icon_music.png */,
-				32E2C1BE13CDFCA9001B7EA5 /* icon_music@2x.png */,
-				32E2C1BF13CDFCA9001B7EA5 /* icon_nightlife.png */,
-				32E2C1C013CDFCA9001B7EA5 /* icon_nightlife@2x.png */,
-				32E2C1C113CDFCA9001B7EA5 /* icon_sports&recreation.png */,
-				32E2C1C213CDFCA9001B7EA5 /* icon_sports&recreation@2x.png */,
-			);
-			name = "category icons";
 			sourceTree = "<group>";
 		};
 		32E2C1D313CE1224001B7EA5 /* ASI */ = {
