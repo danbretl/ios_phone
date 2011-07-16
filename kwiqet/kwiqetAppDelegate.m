@@ -12,6 +12,7 @@
 #import "DefaultsModel.h"
 #import "WebUtil.h"
 #import "ContactsSelectViewController.h"
+#import "LocalyticsSession.h"
 
 @interface kwiqetAppDelegate()
 - (void) facebookAuthError:(NSNotification *)notification;
@@ -130,6 +131,9 @@
     
     [self.window makeKeyAndVisible];
     //[self animateSplashScreen];
+    
+    [[LocalyticsSession sharedLocalyticsSession] startSession:@"197b1a7c8264f82ee994c7c-0c5db5e8-af3b-11e0-037d-007f58cb3154"];
+    
     return YES;
 }
 
@@ -308,6 +312,9 @@
     [self.splashScreenViewController showConnectionErrorTextView:NO animated:NO];
     
     [DefaultsModel saveTabBarSelectedIndex:self.tabBarController.selectedIndex];
+    
+    [[LocalyticsSession sharedLocalyticsSession] close];
+	[[LocalyticsSession sharedLocalyticsSession] upload];
 }
 
 
@@ -328,6 +335,9 @@
     
 //    self.tabBarController.selectedIndex = [DefaultsModel loadTabBarSelectedIndex]; // Duh - we get this for free with multitasking.
     
+    [[LocalyticsSession sharedLocalyticsSession] resume];
+    [[LocalyticsSession sharedLocalyticsSession] upload];
+    
 }
 
 
@@ -343,6 +353,8 @@
  */
 - (void)applicationWillTerminate:(UIApplication *)application {
     [self saveContext];
+    [[LocalyticsSession sharedLocalyticsSession] close];
+    [[LocalyticsSession sharedLocalyticsSession] upload];
 }
 
 - (void)saveContext {

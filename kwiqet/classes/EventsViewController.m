@@ -13,6 +13,7 @@
 #import <YAJL/YAJL.h>
 #import "DefaultsModel.h"
 #import "WebUtil.h"
+#import "LocalyticsSession.h"
 
 static NSString * const EVENTS_FILTER_RECOMMENDED = @"recommended";
 static NSString * const EVENTS_FILTER_FREE = @"free";
@@ -495,6 +496,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     self.categoryURIProposed = theProposedCategoryURI;
     [self showWebLoadingViews];
     [self.webConnector getEventsListWithFilter:self.filterStringProposed categoryURI:self.categoryURIProposed];
+    [[LocalyticsSession sharedLocalyticsSession] tagEvent:@"Test - Get Events"];
 }
 
 // Process the new retrieved events (if there are indeed successfully retrieved events) and get htem into Core Data

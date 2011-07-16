@@ -197,6 +197,8 @@
 		326F6C7B13D0E2B80032CA5F /* SDWebImageManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 326F6C7113D0E2B80032CA5F /* SDWebImageManager.m */; };
 		326F6C7C13D0E2B80032CA5F /* SDWebImageDownloader.m in Sources */ = {isa = PBXBuildFile; fileRef = 326F6C7413D0E2B80032CA5F /* SDWebImageDownloader.m */; };
 		326F6C7D13D0E2B80032CA5F /* SDImageCache.m in Sources */ = {isa = PBXBuildFile; fileRef = 326F6C7813D0E2B80032CA5F /* SDImageCache.m */; };
+		326F6C8C13D108260032CA5F /* UploaderThread.m in Sources */ = {isa = PBXBuildFile; fileRef = 326F6C8813D108260032CA5F /* UploaderThread.m */; };
+		326F6C8D13D108260032CA5F /* LocalyticsSession.m in Sources */ = {isa = PBXBuildFile; fileRef = 326F6C8A13D108260032CA5F /* LocalyticsSession.m */; };
 		32733E1013B0FBBA0053C44A /* Facebook.m in Sources */ = {isa = PBXBuildFile; fileRef = 32733DF613B0FBBA0053C44A /* Facebook.m */; };
 		32733E1113B0FBBA0053C44A /* FBConnect.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 32733DF713B0FBBA0053C44A /* FBConnect.bundle */; };
 		32733E1213B0FBBA0053C44A /* FBDialog.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 32733DF913B0FBBA0053C44A /* FBDialog.bundle */; };
@@ -549,6 +551,11 @@
 		326F6C7713D0E2B80032CA5F /* SDImageCacheDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDImageCacheDelegate.h; sourceTree = "<group>"; };
 		326F6C7813D0E2B80032CA5F /* SDImageCache.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SDImageCache.m; sourceTree = "<group>"; };
 		326F6C7913D0E2B80032CA5F /* SDImageCache.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDImageCache.h; sourceTree = "<group>"; };
+		326F6C8713D108260032CA5F /* WebserviceConstants.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WebserviceConstants.h; sourceTree = "<group>"; };
+		326F6C8813D108260032CA5F /* UploaderThread.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UploaderThread.m; sourceTree = "<group>"; };
+		326F6C8913D108260032CA5F /* UploaderThread.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UploaderThread.h; sourceTree = "<group>"; };
+		326F6C8A13D108260032CA5F /* LocalyticsSession.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LocalyticsSession.m; sourceTree = "<group>"; };
+		326F6C8B13D108260032CA5F /* LocalyticsSession.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LocalyticsSession.h; sourceTree = "<group>"; };
 		32733DF413B0FBBA0053C44A /* facebook_ios_sdk_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = facebook_ios_sdk_Prefix.pch; path = kwiqet/classes/facebook_ios_sdk_Prefix.pch; sourceTree = SOURCE_ROOT; };
 		32733DF513B0FBBA0053C44A /* Facebook.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Facebook.h; path = kwiqet/classes/Facebook.h; sourceTree = SOURCE_ROOT; };
 		32733DF613B0FBBA0053C44A /* Facebook.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Facebook.m; path = kwiqet/classes/Facebook.m; sourceTree = SOURCE_ROOT; };
@@ -1059,6 +1066,18 @@
 			name = SDWebImage;
 			sourceTree = "<group>";
 		};
+		326F6C8613D108100032CA5F /* localytics */ = {
+			isa = PBXGroup;
+			children = (
+				326F6C8713D108260032CA5F /* WebserviceConstants.h */,
+				326F6C8813D108260032CA5F /* UploaderThread.m */,
+				326F6C8913D108260032CA5F /* UploaderThread.h */,
+				326F6C8A13D108260032CA5F /* LocalyticsSession.m */,
+				326F6C8B13D108260032CA5F /* LocalyticsSession.h */,
+			);
+			name = localytics;
+			sourceTree = "<group>";
+		};
 		32733E0213B0FBBA0053C44A /* JSON */ = {
 			isa = PBXGroup;
 			children = (
@@ -1083,6 +1102,7 @@
 		32D7FEE113B0BD08005E8406 /* 3rd party */ = {
 			isa = PBXGroup;
 			children = (
+				326F6C8613D108100032CA5F /* localytics */,
 				326F6C6C13D0E2540032CA5F /* SDWebImage */,
 				32E2C1D413CE1234001B7EA5 /* assorted */,
 				32E2C1D313CE1224001B7EA5 /* ASI */,
@@ -1718,6 +1738,8 @@
 				326F6C7B13D0E2B80032CA5F /* SDWebImageManager.m in Sources */,
 				326F6C7C13D0E2B80032CA5F /* SDWebImageDownloader.m in Sources */,
 				326F6C7D13D0E2B80032CA5F /* SDImageCache.m in Sources */,
+				326F6C8C13D108260032CA5F /* UploaderThread.m in Sources */,
+				326F6C8D13D108260032CA5F /* LocalyticsSession.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
