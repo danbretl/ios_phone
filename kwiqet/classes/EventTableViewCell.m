@@ -51,7 +51,7 @@ static NSString * const EVENT_TABLE_VIEW_CELL_FILLER_PRICE = @"Price";
         // Icon image view
         iconImageView = [[UIImageView alloc] initWithFrame:self.categoryColorView.bounds];
         iconImageView.contentMode = UIViewContentModeScaleAspectFit;
-        iconImageView.alpha = 0.35;
+        iconImageView.alpha = 0.50;
         [self.categoryColorView addSubview:self.iconImageView];
         
         // Title label
