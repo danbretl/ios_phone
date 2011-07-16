@@ -399,6 +399,9 @@
             self.detailsLabel.numberOfLines = 0;
             [self.detailsContainer addSubview:self.detailsLabel];
             [self.detailsContainer bringSubviewToFront:self.detailsLabel];
+            
+            // Make sure title bar is at front
+            [self.scrollView bringSubviewToFront:self.titleBar];
         }
         
     }
