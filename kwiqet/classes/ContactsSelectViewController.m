@@ -227,7 +227,7 @@ float const CSVC_TAB_BUTTON_ANIMATION_DURATION = .25;
     if (contactsAll != theContacts) {
         [contactsAll release];
         contactsAll = [theContacts retain];
-        self.contactsFiltered = [NSMutableArray arrayWithCapacity:[contactsAll count]];
+        self.contactsFiltered = [NSArray array];
         self.contactsSelected = [NSMutableArray arrayWithCapacity:[contactsAll count]];
         for (Contact * contact in contactsAll) {
             NSString * firstLetterUppercase = [[contact.fbName substringToIndex:1] uppercaseString];
@@ -518,7 +518,7 @@ float const CSVC_TAB_BUTTON_ANIMATION_DURATION = .25;
         //                         searchBarFrame.size.width = 320;
         //                         self.searchBar.frame = searchBarFrame;
         //                     }];
-        self.contactsFiltered = [self.contactsAll mutableCopy];
+        self.contactsFiltered = self.contactsAll;
     }
     self.isSearchOn = !self.isSearchOn;
     self.searchBar.text = @"";
@@ -547,18 +547,12 @@ float const CSVC_TAB_BUTTON_ANIMATION_DURATION = .25;
 //}
 
 - (void)searchBar:(UISearchBar *)searchBar textDidChange:(NSString *)searchText {
-    [self.contactsFiltered removeAllObjects];
+//    [self.contactsFiltered removeAllObjects];
     // It seems like the following loop is going to be craaaazy expensive in terms of processing time. What if someone has 1000 friends? How quickly can we loop through those? Time will tell...
     if ([searchText length] > 0) {
-        for (Contact * contact in self.contactsAll) {
-            NSComparisonResult result = [contact.fbName compare:searchText options:(NSCaseInsensitiveSearch|NSDiacriticInsensitiveSearch) range:NSMakeRange(0, [searchText length])];
-            if (result == NSOrderedSame) {
-                [self.contactsFiltered insertObject:contact atIndex:[self.contactsFiltered count]];
-                //            [self.contactsFiltered addObject:contact];
-            }
-        }        
+        self.contactsFiltered = [self.contactsAll filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"SELF.fbName contains[cd] %@", searchText]];// mutableCopy];
     } else {
-        self.contactsFiltered = [self.contactsAll mutableCopy];
+        self.contactsFiltered = self.contactsAll;//[self.contactsAll mutableCopy];
     }
     [self.friendsTableView reloadData];
 //    NSLog(@"%@", self.contactsFiltered);

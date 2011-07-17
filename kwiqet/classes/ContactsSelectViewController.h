@@ -37,7 +37,7 @@
     IBOutlet UITableView * _selectedTableView;
     
     NSArray * contactsAll;
-    NSMutableArray * contactsFiltered;
+    NSArray * contactsFiltered;
     NSMutableArray * contactsSelected;
     NSMutableDictionary * contactsGrouped;
     
@@ -56,7 +56,7 @@
 @property (nonatomic, retain) CoreDataModel * coreDataModel;
 @property (assign) id<ContactsSelectViewControllerDelegate> delegate;
 @property (nonatomic, retain) NSArray * contactsAll;
-@property (retain) NSMutableArray * contactsFiltered;
+@property (retain) NSArray * contactsFiltered;
 @property (retain) NSMutableArray * contactsSelected;
 @property (readonly) NSMutableDictionary * contactsGrouped;
 @property (readonly) NSArray * alphabetArray;
