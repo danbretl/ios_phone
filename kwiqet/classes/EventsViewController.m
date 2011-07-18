@@ -505,6 +505,9 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     self.categoryURIProposed = theProposedCategoryURI;
     [self showWebLoadingViews];
     [self.webConnector getEventsListWithFilter:self.filterStringProposed categoryURI:self.categoryURIProposed];
+    
+    /////////////////////
+    // Localytics below
     NSMutableDictionary * localyticsDictionary = [NSMutableDictionary dictionary];
     NSString * localyticsFilterString = @"recommended";
     if (theProposedFilterString) { 
@@ -518,6 +521,9 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     }
     [localyticsDictionary setValue:localyticsCategoryString forKey:@"category"];
     [[LocalyticsSession sharedLocalyticsSession] tagEvent:@"Test - Get Events" attributes:localyticsDictionary];
+    // Localytics above
+    /////////////////////
+    
 }
 
 // Process the new retrieved events (if there are indeed successfully retrieved events) and get htem into Core Data
