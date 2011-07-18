@@ -30,6 +30,7 @@
 @property (retain) NSIndexPath * resetMachineLearningIndexPath;
 @property (retain) NSIndexPath * facebookIndexPath;
 @property (nonatomic) BOOL facebookCellEnabled;
+@property (retain) UIAlertView * facebookConnectFailureAlertView;
 @end
 
 @implementation SettingsViewController
@@ -39,6 +40,7 @@
 @synthesize coreDataModel;
 @synthesize kwiqetAccountIndexPath, resetMachineLearningIndexPath, facebookIndexPath;
 @synthesize facebookCellEnabled = facebookCellEnabled_;
+@synthesize facebookConnectFailureAlertView;
 
 - (void)dealloc
 {
@@ -51,6 +53,7 @@
     [kwiqetAccountIndexPath release];
     [resetMachineLearningIndexPath release];
     [facebookIndexPath release];
+    [facebookConnectFailureAlertView release];
     [super dealloc];
 }
 
@@ -97,6 +100,7 @@
 
 - (void) viewWillAppear:(BOOL)animated {
     [super viewWillAppear:animated];
+    NSLog(@"SettingsViewController viewWillAppear");
     [self.tableView deselectRowAtIndexPath:[self.tableView indexPathForSelectedRow] animated:YES];
 }
 
@@ -140,10 +144,18 @@
 
 - (void)facebookAccountActivity:(NSNotification *)notification {
     NSLog(@"SettingsViewController facebookAccountActivity %@", notification);
-    if ([[[notification userInfo] valueForKey:FBM_ACCOUNT_ACTIVITY_ACTION_KEY] isEqualToString:FBM_ACCOUNT_ACTIVITY_ACTION_LOGOUT]) {
+    NSString * action = [[notification userInfo] valueForKey:FBM_ACCOUNT_ACTIVITY_ACTION_KEY];
+    
+    if ([action isEqualToString:FBM_ACCOUNT_ACTIVITY_ACTION_LOGOUT]) {
         [self.tableView reloadData]; // Heavyweight
-    } else if ([[[notification userInfo] valueForKey:FBM_ACCOUNT_ACTIVITY_ACTION_KEY] isEqualToString:FBM_ACCOUNT_ACTIVITY_ACTION_LOGIN]) {
+    } else if ([action isEqualToString:FBM_ACCOUNT_ACTIVITY_ACTION_LOGIN]) {
         [self.tableView reloadData]; // Heavyweight        
+    } else if ([action isEqualToString:FBM_ACCOUNT_ACTIVITY_ACTION_FAILURE]) {
+        if (![self.facebookConnectFailureAlertView isVisible]) {
+            self.facebookConnectFailureAlertView = [[[UIAlertView alloc] initWithTitle:@"Facebook Connect Error" message:@"There was a problem while trying to connect with Facebook. Please check your settings and try again." delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil] autorelease];
+            [self.facebookConnectFailureAlertView show];
+        }
+        [self.tableView reloadData];
     }
 }
 

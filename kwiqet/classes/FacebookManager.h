@@ -19,6 +19,8 @@ static NSString * const FBM_ACCOUNT_ACTIVITY_ACTION_LOGIN = @"fbmAccountActivity
 static NSString * const FBM_ACCOUNT_ACTIVITY_ACTION_FAILURE = @"fbmAccountActivityActionFailure";
 static NSString * const FBM_FRIENDS_UPDATE_SUCCESS_KEY = @"FBM_FRIENDS_UPDATE_SUCCESS_KEY";
 static NSString * const FBM_FRIENDS_UPDATE_FAILURE_KEY = @"FBM_FRIENDS_UPDATE_FAILURE_KEY";
+static NSString * const FBM_GET_LIKES_SUCCESS_KEY = @"FBM_GET_LIKES_SUCCESS_KEY";
+static NSString * const FBM_GET_LIKES_FAILURE_KEY = @"FBM_GET_LIKES_FAILURE_KEY";
 static NSString * const FBM_FRIENDS_LOCAL_DATA_UPDATED_KEY = @"FBM_FRIENDS_LOCAL_DATA_UPDATED_KEY";
 static NSString * const FBM_CREATE_EVENT_SUCCESS_KEY = @"FBM_CREATE_EVENT_SUCCESS_KEY";
 static NSString * const FBM_CREATE_EVENT_FAILURE_KEY = @"FBM_CREATE_EVENT_FAILURE_KEY";
@@ -32,11 +34,13 @@ static NSString * const FBM_AUTH_ERROR_KEY = @"FBM_AUTH_ERROR_KEY";
     NSArray * eventInvitees;
     BOOL shouldForgetFacebookAccessTokenOnLogout;
     NSString * kwiqetIdentifierForWhichToForgetFacebookAccessToken;
+    BOOL ignoreRequestResults_;
 }
 
 @property (nonatomic, readonly) Facebook * facebook;
 @property (nonatomic, readonly) Facebook * fb;
 //@property (retain) CoreDataModel * coreDataModel;
+@property BOOL ignoreRequestResults;
 
 - (void) pullAuthenticationInfoFromDefaults;
 - (void) pushAuthenticationInfoToDefaults;
@@ -47,6 +51,7 @@ static NSString * const FBM_AUTH_ERROR_KEY = @"FBM_AUTH_ERROR_KEY";
 - (void) logoutAndForgetFacebookAccessToken:(BOOL)shouldForget associatedWithKwiqetIdentfier:(NSString *)kwiqetIdentifier;
  
 - (void) updateFacebookFriends;
+- (void) getLikes;
 - (void) getProfilePictureForFacebookID:(NSString *)fbID;
 - (void) createFacebookEventWithParameters:(NSMutableDictionary *)parameters inviteContacts:(NSArray *)contactsToInvite;
 - (void) inviteToEvent:(NSString *)eventID contacts:(NSArray *)contacts withPersonalMessage:(NSString *)personalMessage;

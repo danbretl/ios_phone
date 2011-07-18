@@ -14,6 +14,7 @@ static NSString * const FB_FACEBOOK_APP_ID = @"210861478950952";
 static NSString * const FB_FACEBOOK_ACCESS_TOKEN_KEY = @"FBAccessTokenKey";
 static NSString * const FB_FACEBOOK_EXPIRATION_DATE_KEY = @"FBExpirationDateKey";
 static NSString * const FBM_REQUEST_UPDATE_FRIENDS = @"fbmRequestTypeUpdateFriends";
+static NSString * const FBM_REQUEST_GET_LIKES = @"fbmRequestGetLikes";
 static NSString * const FBM_REQUEST_CREATE_EVENT = @"fbmRequestTypeCreateEvent";
 static NSString * const FBM_REQUEST_INVITE_FRIENDS_TO_EVENT = @"fbmRequestTypeInviteFriendsToEvent";
 static NSString * const FBM_NO_ASSOCIATED_KWIQET_IDENTIFIER = @"FBM_NO_ASSOCIATED_KWIQET_IDENTIFIER";
@@ -34,6 +35,7 @@ static NSString * const FBM_REQUEST_PROFILE_PICTURE = @"FBM_REQUEST_PROFILE_PICT
 @synthesize eventInvitees;
 @synthesize shouldForgetFacebookAccessTokenOnLogout;
 @synthesize kwiqetIdentifierForWhichToForgetFacebookAccessToken;
+@synthesize ignoreRequestResults;
 
 - (void)dealloc {
     [facebook release];
@@ -110,6 +112,11 @@ static NSString * const FBM_REQUEST_PROFILE_PICTURE = @"FBM_REQUEST_PROFILE_PICT
     self.currentRequest = [self.fb requestWithGraphPath:@"me/friends" andDelegate:self];
 }
 
+- (void) getLikes {
+    self.currentRequestType = FBM_REQUEST_GET_LIKES;
+    self.currentRequest = [self.fb requestWithGraphPath:@"me/likes" andDelegate:self];
+}
+
 - (void)createFacebookEventWithParameters:(NSMutableDictionary *)parameters inviteContacts:(NSArray *)contactsToInvite {
     self.eventInvitees = contactsToInvite;
     self.currentRequestType = FBM_REQUEST_CREATE_EVENT;
@@ -145,72 +152,89 @@ static NSString * const FBM_REQUEST_PROFILE_PICTURE = @"FBM_REQUEST_PROFILE_PICT
 
 - (void) request:(FBRequest *)request didLoad:(id)result {
 //    NSLog(@"FB request success %@ - %@", request, result);
-        
-    if ([self.currentRequestType isEqualToString:FBM_REQUEST_UPDATE_FRIENDS]) {
-        
-        [[NSNotificationCenter defaultCenter] postNotificationName:FBM_FRIENDS_UPDATE_SUCCESS_KEY object:self userInfo:result];
-        
-    } else if ([self.currentRequestType isEqualToString:FBM_REQUEST_CREATE_EVENT]) {
-        
-        if ([result objectForKey:@"id"]) {
-            [self inviteToEvent:[result objectForKey:@"id"] contacts:self.eventInvitees withPersonalMessage:@"Test invitation message"];
-        }
-        
-    } else if ([self.currentRequestType isEqualToString:FBM_REQUEST_INVITE_FRIENDS_TO_EVENT]) {
-        
-        [[NSNotificationCenter defaultCenter] postNotificationName:FBM_EVENT_INVITE_FRIENDS_SUCCESS_KEY object:self userInfo:nil];
-        
-    } else if ([self.currentRequestType isEqualToString:FBM_REQUEST_PROFILE_PICTURE]) {
-        
-//        NSLog(@"result class is %@", NSStringFromClass([result class]));
-        UIImage * image = [UIImage imageWithData:result];  
-        NSLog(@"result image is %f by %f", image.size.width, image.size.height);
-        
-    } else {
-        NSLog(@"ERROR in FacebookManager - unrecognized FBRequest type");
-    }
-        
-}
-
-- (void)request:(FBRequest *)request didFailWithError:(NSError *)error {
-
-    NSLog(@"FB request failed: %@", [error localizedDescription]);
-    NSLog(@"FB error details: %@", [error description]);
-    NSLog(@"FB error userInfo: %@", [error userInfo]);
     
-    NSLog(@"%@", [[[error userInfo] objectForKey:@"error"] objectForKey:@"type"]);
-    if ([[[[error userInfo] objectForKey:@"error"] objectForKey:@"type"] isEqualToString:@"OAuthException"]) {
-        
-        [[NSNotificationCenter defaultCenter] postNotificationName:FBM_AUTH_ERROR_KEY object:self userInfo:nil];
-        
+    if (self.ignoreRequestResults) {
+        NSLog(@"Ignoring Facebook results");
     } else {
-        
         if ([self.currentRequestType isEqualToString:FBM_REQUEST_UPDATE_FRIENDS]) {
             
-            [[NSNotificationCenter defaultCenter] postNotificationName:FBM_FRIENDS_UPDATE_FAILURE_KEY object:self userInfo:nil];
+            [[NSNotificationCenter defaultCenter] postNotificationName:FBM_FRIENDS_UPDATE_SUCCESS_KEY object:self userInfo:result];
+            
+        } else if ([self.currentRequestType isEqualToString:FBM_REQUEST_GET_LIKES]) {
+            
+            [[NSNotificationCenter defaultCenter] postNotificationName:FBM_GET_LIKES_SUCCESS_KEY object:self userInfo:result];
             
         } else if ([self.currentRequestType isEqualToString:FBM_REQUEST_CREATE_EVENT]) {
             
-            [[NSNotificationCenter defaultCenter] postNotificationName:FBM_CREATE_EVENT_FAILURE_KEY object:self userInfo:nil];
-            [self.currentRequest connect];
+            if ([result objectForKey:@"id"]) {
+                [self inviteToEvent:[result objectForKey:@"id"] contacts:self.eventInvitees withPersonalMessage:@"Test invitation message"];
+            }
             
         } else if ([self.currentRequestType isEqualToString:FBM_REQUEST_INVITE_FRIENDS_TO_EVENT]) {
             
-            // TEMPORARY HACK - FOR SOME REASON, WE ARE GETTING A FACEBOOK ERROR CODE 10000, BUT STILL THE INVITE IS SUCCESSFUL. SO, FOR NOW, WE ARE GOING TO CHECK IF THE ERROR CODE IS 10000, AND IF IT IS, WE ARE GOING TO HOPE/ASSUME THAT EVERYTHING WENT GREAT.
-            if ([error code] == 10000) {
-                [[NSNotificationCenter defaultCenter] postNotificationName:FBM_EVENT_INVITE_FRIENDS_SUCCESS_KEY object:self userInfo:nil];
-            } else {
-                [[NSNotificationCenter defaultCenter] postNotificationName:FBM_EVENT_INVITE_FRIENDS_FAILURE_KEY object:self userInfo:nil];
-            }
+            [[NSNotificationCenter defaultCenter] postNotificationName:FBM_EVENT_INVITE_FRIENDS_SUCCESS_KEY object:self userInfo:nil];
+            
+        } else if ([self.currentRequestType isEqualToString:FBM_REQUEST_PROFILE_PICTURE]) {
+            
+            //        NSLog(@"result class is %@", NSStringFromClass([result class]));
+            UIImage * image = [UIImage imageWithData:result];  
+            NSLog(@"result image is %f by %f", image.size.width, image.size.height);
             
         } else {
             NSLog(@"ERROR in FacebookManager - unrecognized FBRequest type");
         }
-                 
     }
+                
+}
+
+- (void)request:(FBRequest *)request didFailWithError:(NSError *)error {
     
-    self.currentRequest = nil;
-    self.currentRequestType = nil;
+    if (self.ignoreRequestResults) {
+        NSLog(@"Ignoring Facebook results");
+    } else {
+        NSLog(@"FB request failed: %@", [error localizedDescription]);
+        NSLog(@"FB error details: %@", [error description]);
+        NSLog(@"FB error userInfo: %@", [error userInfo]);
+        
+        NSLog(@"%@", [[[error userInfo] objectForKey:@"error"] objectForKey:@"type"]);
+        if ([[[[error userInfo] objectForKey:@"error"] objectForKey:@"type"] isEqualToString:@"OAuthException"]) {
+            
+            [[NSNotificationCenter defaultCenter] postNotificationName:FBM_AUTH_ERROR_KEY object:self userInfo:nil];
+            
+        } else {
+            
+            if ([self.currentRequestType isEqualToString:FBM_REQUEST_UPDATE_FRIENDS]) {
+                
+                [[NSNotificationCenter defaultCenter] postNotificationName:FBM_FRIENDS_UPDATE_FAILURE_KEY object:self userInfo:[error userInfo]];
+                
+            } else if ([self.currentRequestType isEqualToString:FBM_REQUEST_GET_LIKES]) {
+                
+                [[NSNotificationCenter defaultCenter] postNotificationName:FBM_GET_LIKES_FAILURE_KEY object:self userInfo:[error userInfo]];
+                
+            } else if ([self.currentRequestType isEqualToString:FBM_REQUEST_CREATE_EVENT]) {
+                
+                [[NSNotificationCenter defaultCenter] postNotificationName:FBM_CREATE_EVENT_FAILURE_KEY object:self userInfo:[error userInfo]];
+                //            [self.currentRequest connect];
+                
+            } else if ([self.currentRequestType isEqualToString:FBM_REQUEST_INVITE_FRIENDS_TO_EVENT]) {
+                
+                // TEMPORARY HACK - FOR SOME REASON, WE ARE GETTING A FACEBOOK ERROR CODE 10000, BUT STILL THE INVITE IS SUCCESSFUL. SO, FOR NOW, WE ARE GOING TO CHECK IF THE ERROR CODE IS 10000, AND IF IT IS, WE ARE GOING TO HOPE/ASSUME THAT EVERYTHING WENT GREAT.
+                if ([error code] == 10000) {
+                    [[NSNotificationCenter defaultCenter] postNotificationName:FBM_EVENT_INVITE_FRIENDS_SUCCESS_KEY object:self userInfo:nil];
+                } else {
+                    [[NSNotificationCenter defaultCenter] postNotificationName:FBM_EVENT_INVITE_FRIENDS_FAILURE_KEY object:self userInfo:[error userInfo]];
+                }
+                
+            } else {
+                NSLog(@"ERROR in FacebookManager - unrecognized FBRequest type");
+            }
+            
+        }
+        
+        self.currentRequest = nil;
+        self.currentRequestType = nil;
+
+    }
 
 }
 

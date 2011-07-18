@@ -18,6 +18,7 @@
     IBOutlet UITableView * _tableView;
     UIAlertView * accountLogoutWarningAlertView;
     UIAlertView * resetMachineLearningWarningAlertView;
+    UIAlertView * facebookConnectFailureAlertView;
     
     // View models
     NSArray * settingsModel;

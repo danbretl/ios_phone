@@ -93,6 +93,7 @@ float const CSVC_TAB_BUTTON_ANIMATION_DURATION = .25;
     [contactsFiltered release];
     [contactsSelected release];
     [contactsGrouped release];
+    facebookManager = nil;
     [facebookManager release];
     [webActivityView release];
     [coreDataModel release];
@@ -203,7 +204,7 @@ float const CSVC_TAB_BUTTON_ANIMATION_DURATION = .25;
     self.contactsAll = [self.coreDataModel getAllFacebookContacts];
     [self.friendsTableView reloadData];
     [self hideWebActivityView];
-    [self.friendsTableView scrollToRowAtIndexPath:[NSIndexPath indexPathForRow:0 inSection:0] atScrollPosition:UITableViewScrollPositionTop animated:YES];
+    [self.friendsTableView scrollToRowAtIndexPath:[NSIndexPath indexPathForRow:0 inSection:0] atScrollPosition:UITableViewScrollPositionTop animated:YES];   
 }
 
 - (void) showWebActivityView  {
@@ -211,7 +212,11 @@ float const CSVC_TAB_BUTTON_ANIMATION_DURATION = .25;
         // ACTIVITY VIEWS
         [self.webActivityView showAnimated:NO];
         // USER INTERACTION
-        self.view.userInteractionEnabled = NO;
+        self.doneSelectingButton.userInteractionEnabled = NO;
+        self.tabsBar.userInteractionEnabled = NO;
+        self.friendsTableView.userInteractionEnabled = NO;
+        self.selectedTableView.userInteractionEnabled = NO;
+        self.searchContainerView.userInteractionEnabled = NO;
     }
 }
 
@@ -219,7 +224,11 @@ float const CSVC_TAB_BUTTON_ANIMATION_DURATION = .25;
     // ACTIVITY VIEWS
     [self.webActivityView hideAnimated:NO];
     // USER INTERACTION
-    self.view.userInteractionEnabled = YES;
+    self.doneSelectingButton.userInteractionEnabled = YES;
+    self.tabsBar.userInteractionEnabled = YES;
+    self.friendsTableView.userInteractionEnabled = YES;
+    self.selectedTableView.userInteractionEnabled = YES;
+    self.searchContainerView.userInteractionEnabled = YES;
 }
 
 - (void)setContactsAll:(NSArray *)theContacts {
@@ -570,6 +579,7 @@ float const CSVC_TAB_BUTTON_ANIMATION_DURATION = .25;
 
 - (void)cancelButtonPushed {
 //    [self ignoreAllPendingProfilePictureDownloads];
+    self.facebookManager.ignoreRequestResults = YES;
     [self.delegate contactsSelectViewController:self didFinishWithCancel:YES selectedContacts:nil];
 }
 
