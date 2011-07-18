@@ -558,7 +558,7 @@
 
 - (void) addOrUpdateContactsFromFacebook:(NSArray *)fbContacts deleteOthers:(BOOL)shouldDeleteOthers {
     
-    if (fbContacts) {
+    if (fbContacts && [fbContacts count] > 0) {
     
         // Prepare the sorted array of Facebook contact IDs
         NSArray * newContactsSortedByID = [fbContacts sortedArrayUsingDescriptors:[NSArray arrayWithObject:[NSSortDescriptor sortDescriptorWithKey:@"id" ascending:YES]]];

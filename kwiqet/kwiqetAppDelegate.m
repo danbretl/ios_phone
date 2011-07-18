@@ -38,6 +38,7 @@
     // Notifications...
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(facebookAuthError:) name:FBM_AUTH_ERROR_KEY object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(facebookFriendsRetrieved:) name:FBM_FRIENDS_UPDATE_SUCCESS_KEY object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(facebookFriendsRetrieved:) name:FBM_FRIENDS_UPDATE_FAILURE_KEY object:nil];
     // Variables...
     BOOL forceGetCategoryTree = NO;
     
@@ -146,7 +147,8 @@
 }
 
 - (void) facebookFriendsRetrieved:(NSNotification *)notification {
-    [self.coreDataModel addOrUpdateContactsFromFacebook:[[notification userInfo] objectForKey:@"data"] deleteOthers:YES];
+    NSArray * friendsData = [[notification userInfo] objectForKey:@"data"];
+    [self.coreDataModel addOrUpdateContactsFromFacebook:friendsData deleteOthers:YES]; // If the friendsData array is nil or does not contain any friends, then this method call just doesn't do anything.
     [self.coreDataModel coreDataSave];
     [[NSNotificationCenter defaultCenter] postNotificationName:FBM_FRIENDS_LOCAL_DATA_UPDATED_KEY object:self];
 }
