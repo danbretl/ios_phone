@@ -136,18 +136,23 @@
 }
 
 -(IBAction)registerButtonTouched:(id)sender  {
+    if ([usernameField isFirstResponder] ||
+        [passwordField isFirstResponder]) {
+        [usernameField resignFirstResponder];
+        [passwordField resignFirstResponder];
+    }
     // Registration disabled for alpha *******
-//    RegistrationViewController *registrationViewController = [[RegistrationViewController alloc]init];
-//    [self presentModalViewController:registrationViewController animated:YES];
-//    [registrationViewController release];
+    RegistrationViewController *registrationViewController = [[RegistrationViewController alloc]init];
+    [self presentModalViewController:registrationViewController animated:YES];
+    [registrationViewController release];
     
-    UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Action not possible." 
-                                                    message:@"You are unable to register from within the app during the alpha phase." 
-                                                   delegate:nil 
-                                          cancelButtonTitle:@"Ok" 
-                                          otherButtonTitles:nil];
-    [alert show]; 
-    [alert release];
+//    UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Action not possible." 
+//                                                    message:@"You are unable to register from within the app during the alpha phase." 
+//                                                   delegate:nil 
+//                                          cancelButtonTitle:@"Ok" 
+//                                          otherButtonTitles:nil];
+//    [alert show]; 
+//    [alert release];
 }
 
 

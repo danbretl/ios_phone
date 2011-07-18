@@ -26,9 +26,16 @@
     FacebookManager * facebookManager;
     CoreDataModel * coreDataModel;
     
+    NSIndexPath * kwiqetAccountIndexPath;
+    NSIndexPath * resetMachineLearningIndexPath;
+    NSIndexPath * facebookIndexPath;
+    
+    BOOL facebookCellEnabled_;
+    
 }
 
 @property (nonatomic, retain) CoreDataModel * coreDataModel;
 @property (nonatomic, readonly) FacebookManager * facebookManager;
+- (void)setTableViewCell:(UITableViewCell *)cell atIndexPath:(NSIndexPath *)indexPath appearanceEnabled:(BOOL)appearanceEnabled;
 
 @end

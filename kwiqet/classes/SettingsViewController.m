@@ -26,6 +26,10 @@
 - (void) loginActivity:(NSNotification *)notification;
 - (void) facebookAccountActivity:(NSNotification *)notification;
 - (void) configureCell:(UITableViewCell *)cell forRowAtIndexPath:(NSIndexPath *)indexPath;
+@property (retain) NSIndexPath * kwiqetAccountIndexPath;
+@property (retain) NSIndexPath * resetMachineLearningIndexPath;
+@property (retain) NSIndexPath * facebookIndexPath;
+@property (nonatomic) BOOL facebookCellEnabled;
 @end
 
 @implementation SettingsViewController
@@ -33,6 +37,8 @@
 @synthesize tableView = _tableView;
 @synthesize settingsModel;
 @synthesize coreDataModel;
+@synthesize kwiqetAccountIndexPath, resetMachineLearningIndexPath, facebookIndexPath;
+@synthesize facebookCellEnabled = facebookCellEnabled_;
 
 - (void)dealloc
 {
@@ -42,6 +48,9 @@
     [coreDataModel release];
     [accountLogoutWarningAlertView release];
     [resetMachineLearningWarningAlertView release];
+    [kwiqetAccountIndexPath release];
+    [resetMachineLearningIndexPath release];
+    [facebookIndexPath release];
     [super dealloc];
 }
 
@@ -59,6 +68,10 @@
     [super viewDidLoad];
     
     self.view.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+    
+    self.kwiqetAccountIndexPath = [NSIndexPath indexPathForRow:0 inSection:0];
+    self.resetMachineLearningIndexPath = [NSIndexPath indexPathForRow:0 inSection:1];
+    self.facebookIndexPath = [NSIndexPath indexPathForRow:1 inSection:1];
     
     self.settingsModel = [NSArray arrayWithObjects:
                           [NSDictionary dictionaryWithObjectsAndKeys:
@@ -377,19 +390,17 @@
         textLabelText = [[self.settingsModel objectAtIndex:indexPath.row] valueForKey:@"textLabel"];
         imageName = [[self.settingsModel objectAtIndex:indexPath.row] valueForKey:@"imageName"];
         accessoryType = [[[self.settingsModel objectAtIndex:indexPath.row] valueForKey:@"showAccessoryArrow"] boolValue] ? UITableViewCellAccessoryDisclosureIndicator : UITableViewCellAccessoryNone;
-        if ([textLabelText isEqualToString:@"Facebook"]) {
+        if (indexPath == self.facebookIndexPath) {
             [self.facebookManager pullAuthenticationInfoFromDefaults];
             if ([self.facebookManager.fb isSessionValid]) {
                 detailTextLabelText = [[self.settingsModel objectAtIndex:indexPath.row] valueForKey:@"detailTextLabelWhenBooleanYes"];
                 accessoryType = [[self.settingsModel objectAtIndex:indexPath.row] valueForKey:@"showAccessoryArrowWhenBooleanYes"] ? UITableViewCellAccessoryDisclosureIndicator : accessoryType;
+                self.facebookCellEnabled = YES;
+                [self setTableViewCell:cell atIndexPath:indexPath appearanceEnabled:self.facebookCellEnabled];
             } else {
-                if ([DefaultsModel retrieveAPIFromUserDefaults]) {
-                    detailTextLabelText = @"Touch to connect";
-                } else {
-                    cell.imageView.alpha = 0.5;
-                    cell.textLabel.enabled = NO;
-                    cell.userInteractionEnabled = NO;
-                }
+                detailTextLabelText = @"Touch to connect";
+                self.facebookCellEnabled = ([DefaultsModel retrieveAPIFromUserDefaults] != nil);
+                [self setTableViewCell:cell atIndexPath:indexPath appearanceEnabled:self.facebookCellEnabled];
             }
         }
     }
@@ -401,7 +412,40 @@
     
 }
 
+- (void)setTableViewCell:(UITableViewCell *)cell atIndexPath:(NSIndexPath *)indexPath appearanceEnabled:(BOOL)appearanceEnabled {
+    
+    cell.contentView.alpha = appearanceEnabled ? 1.0 : 0.5;
+    cell.selectionStyle = appearanceEnabled ? UITableViewCellSelectionStyleBlue : UITableViewCellSelectionStyleNone;
+//    
+//    if (appearanceEnabled) {
+//        
+//    }
+//    
+//    facebookCellEnabled_ = facebookCellEnabled;
+//    NSLog(@"Foofoofooo - %d", self.facebookCellEnabled);
+//    UITableViewCell * facebookCell = [self.tableView cellForRowAtIndexPath:self.facebookIndexPath];
+//    NSLog(@"%@", facebookCell);
+//    float alpha = self.facebookCellEnabled ? 1.0 : 0.5;
+//    facebookCell.imageView.alpha = alpha;
+//    facebookCell.textLabel.alpha = alpha;
+//    NSLog(@"%f %f", facebookCell.imageView.alpha, facebookCell.textLabel.alpha);
+//    
+}
+
+- (NSIndexPath *)tableView:(UITableView *)tableView willSelectRowAtIndexPath:(NSIndexPath *)indexPath {
+    NSIndexPath * returnPath = indexPath;
+    if (indexPath == self.facebookIndexPath &&
+        !self.facebookCellEnabled) {
+        UIAlertView * alertView = [[UIAlertView alloc] initWithTitle:@"Enable Facebook Connect" message:@"You must log in with a Kwiqet account before you can enable Facebook Connect." delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
+        [alertView show];
+        [alertView release];
+        returnPath = nil;
+    }
+    return returnPath;
+}
+
 - (void) tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
+    NSLog(@"SettingsViewController didSelectRowAtIndexPath");
     if (indexPath.section == 0) {
         [self accountButtonTouched];
     } else {
