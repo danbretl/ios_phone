@@ -505,7 +505,19 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     self.categoryURIProposed = theProposedCategoryURI;
     [self showWebLoadingViews];
     [self.webConnector getEventsListWithFilter:self.filterStringProposed categoryURI:self.categoryURIProposed];
-    [[LocalyticsSession sharedLocalyticsSession] tagEvent:@"Test - Get Events"];
+    NSMutableDictionary * localyticsDictionary = [NSMutableDictionary dictionary];
+    NSString * localyticsFilterString = @"recommended";
+    if (theProposedFilterString) { 
+        localyticsFilterString = theProposedFilterString;
+    }
+    [localyticsDictionary setValue:localyticsFilterString forKey:@"filter"]; 
+    NSString * localyticsCategoryString = @"all";
+    if (theProposedCategoryURI) {
+        Category * category = [self.coreDataModel getCategoryWithURI:theProposedCategoryURI];
+        localyticsCategoryString = category.title;
+    }
+    [localyticsDictionary setValue:localyticsCategoryString forKey:@"category"];
+    [[LocalyticsSession sharedLocalyticsSession] tagEvent:@"Test - Get Events" attributes:localyticsDictionary];
 }
 
 // Process the new retrieved events (if there are indeed successfully retrieved events) and get htem into Core Data
@@ -1064,7 +1076,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 // Customize the appearance of table view cells.
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
 
-    static NSString * CellIdentifier = @"Cell";
+    static NSString * CellIdentifier = @"EventCellGeneral_v2_WithIcons";
     
     EventTableViewCell * cell = (EventTableViewCell*)[tableView dequeueReusableCellWithIdentifier:CellIdentifier];
     if (cell == nil) {
