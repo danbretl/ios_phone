@@ -103,6 +103,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 @property (nonatomic, retain) NSMutableArray * eventsFromSearch;
 @property (nonatomic, readonly) NSMutableArray * eventsForCurrentSource;
 @property (retain) UIView * tableFooterView;
+@property (retain) UIButton * calendarButton;
 @end
 
 @implementation EventsViewController
@@ -114,6 +115,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 @synthesize cardPageViewController;
 @synthesize indexPathOfRowAttemptingToDelete, indexPathOfSelectedRow, searchButton;
 @synthesize logoButton, tableFooterView;
+@synthesize calendarButton;
 //@synthesize facebookManager;
 
 - (void)dealloc {
@@ -147,6 +149,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     [indexPathOfSelectedRow release];
     [logoButton release];
     [tableFooterView release];
+    [calendarButton release];
 //    [facebookManager release];
     [super dealloc];
 }
@@ -271,6 +274,11 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 	self.logoButton = [[[UIButton alloc]initWithFrame:CGRectMake(135,3,53,38)] autorelease];
 	[self.logoButton addTarget:self action:@selector(homeButtonPressed) forControlEvents:UIControlEventTouchUpInside];
     [self setLogoButtonImageWithImageNamed:@"logo_btn_cat_all.png"];
+    
+    self.calendarButton = [[[UIButton alloc] initWithFrame:CGRectMake(238,5,32,32)] autorelease];
+    [self.calendarButton setBackgroundImage:[UIImage imageNamed:@"btn_calendar.png"] forState: UIControlStateNormal];
+    self.calendarButton.hidden = YES;
+    self.calendarButton.userInteractionEnabled = NO;
 	
 	self.searchButton = [[[UIButton alloc]initWithFrame:CGRectMake(280,5,32,32)] autorelease];
 	[self.searchButton setBackgroundImage:[UIImage imageNamed:@"btn_search.png"] forState: UIControlStateNormal];
@@ -282,6 +290,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 	[self.view addSubview:categoriesDrawerButton];
 	[self.view addSubview:logoButton];
 	[self.view addSubview:self.searchButton];
+    [self.view addSubview:self.calendarButton];
 	
 	//clean up
 	[categoriesDrawerButton release];

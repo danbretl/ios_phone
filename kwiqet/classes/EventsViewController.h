@@ -65,6 +65,8 @@ extern float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT;
     NSIndexPath * indexPathOfRowAttemptingToDelete;
     NSIndexPath * indexPathOfSelectedRow;
     
+    UIButton * calendarButton;
+    
     BOOL isSearchOn;
 	UISearchBar * mySearchBar;
     UIButton * searchButton;
