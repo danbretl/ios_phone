@@ -192,7 +192,7 @@
             }
             
             if (shouldCreateNewCategory) {
-                NSLog(@"Creating new category");
+//                NSLog(@"Creating new category");
                 [self addCategoryWithURI:newConcreteCategoryURI title:newConcreteCategoryTitle color:newConcreteCategoryColor buttonThumb:newConcreteCategoryButtonThumb];
             } else {
                 if (newAndExistingCategoriesMatchURIs) {
