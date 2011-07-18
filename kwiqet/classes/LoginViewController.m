@@ -146,10 +146,10 @@
 //    [self presentModalViewController:registrationViewController animated:YES];
 //    [registrationViewController release];
     
-    UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Action not possible." 
-                                                    message:@"You are unable to register from within the app during the alpha phase." 
+    UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Registration Disabled" 
+                                                    message:@"You can't register a new account from within the App during Alpha. Check your email for account activation and login details."
                                                    delegate:nil 
-                                          cancelButtonTitle:@"Ok" 
+                                          cancelButtonTitle:@"OK" 
                                           otherButtonTitles:nil];
     [alert show]; 
     [alert release];
