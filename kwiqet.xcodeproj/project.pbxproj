@@ -199,6 +199,8 @@
 		326F6C7D13D0E2B80032CA5F /* SDImageCache.m in Sources */ = {isa = PBXBuildFile; fileRef = 326F6C7813D0E2B80032CA5F /* SDImageCache.m */; };
 		326F6C8C13D108260032CA5F /* UploaderThread.m in Sources */ = {isa = PBXBuildFile; fileRef = 326F6C8813D108260032CA5F /* UploaderThread.m */; };
 		326F6C8D13D108260032CA5F /* LocalyticsSession.m in Sources */ = {isa = PBXBuildFile; fileRef = 326F6C8A13D108260032CA5F /* LocalyticsSession.m */; };
+		3272016C13D4C601007FF9E9 /* btn_calendar.png in Resources */ = {isa = PBXBuildFile; fileRef = 3272016A13D4C5FB007FF9E9 /* btn_calendar.png */; };
+		3272016D13D4C601007FF9E9 /* btn_calendar@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 3272016B13D4C5FF007FF9E9 /* btn_calendar@2x.png */; };
 		32733E1013B0FBBA0053C44A /* Facebook.m in Sources */ = {isa = PBXBuildFile; fileRef = 32733DF613B0FBBA0053C44A /* Facebook.m */; };
 		32733E1113B0FBBA0053C44A /* FBConnect.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 32733DF713B0FBBA0053C44A /* FBConnect.bundle */; };
 		32733E1213B0FBBA0053C44A /* FBDialog.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 32733DF913B0FBBA0053C44A /* FBDialog.bundle */; };
@@ -552,6 +554,8 @@
 		326F6C8913D108260032CA5F /* UploaderThread.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UploaderThread.h; sourceTree = "<group>"; };
 		326F6C8A13D108260032CA5F /* LocalyticsSession.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LocalyticsSession.m; sourceTree = "<group>"; };
 		326F6C8B13D108260032CA5F /* LocalyticsSession.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LocalyticsSession.h; sourceTree = "<group>"; };
+		3272016A13D4C5FB007FF9E9 /* btn_calendar.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = btn_calendar.png; sourceTree = "<group>"; };
+		3272016B13D4C5FF007FF9E9 /* btn_calendar@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "btn_calendar@2x.png"; sourceTree = "<group>"; };
 		32733DF413B0FBBA0053C44A /* facebook_ios_sdk_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = facebook_ios_sdk_Prefix.pch; path = kwiqet/classes/facebook_ios_sdk_Prefix.pch; sourceTree = SOURCE_ROOT; };
 		32733DF513B0FBBA0053C44A /* Facebook.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Facebook.h; path = kwiqet/classes/Facebook.h; sourceTree = SOURCE_ROOT; };
 		32733DF613B0FBBA0053C44A /* Facebook.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Facebook.m; path = kwiqet/classes/Facebook.m; sourceTree = SOURCE_ROOT; };
@@ -790,6 +794,8 @@
 		32041A3613AFFC700072F95C /* images */ = {
 			isa = PBXGroup;
 			children = (
+				3272016A13D4C5FB007FF9E9 /* btn_calendar.png */,
+				3272016B13D4C5FF007FF9E9 /* btn_calendar@2x.png */,
 				322CDFE713CF4AA6005203C2 /* btn_selectall_full_border.png */,
 				322CDFE813CF4AA6005203C2 /* btn_selectall_full_border@2x.png */,
 				322CDFE913CF4AA6005203C2 /* btn_selectall_full_norightborder.png */,
@@ -1644,6 +1650,8 @@
 				322CDFEC13CF4AA6005203C2 /* btn_selectall_full_border@2x.png in Resources */,
 				322CDFED13CF4AA6005203C2 /* btn_selectall_full_norightborder.png in Resources */,
 				322CDFEE13CF4AA6005203C2 /* btn_selectall_full_norightborder@2x.png in Resources */,
+				3272016C13D4C601007FF9E9 /* btn_calendar.png in Resources */,
+				3272016D13D4C601007FF9E9 /* btn_calendar@2x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
