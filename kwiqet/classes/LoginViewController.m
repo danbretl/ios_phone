@@ -381,6 +381,7 @@
         [self.webActivityView showAnimated:NO];
         // USER INTERACTION
         self.scrollViewContainer.userInteractionEnabled = NO;
+        self.cancelButton.userInteractionEnabled = NO;
         self.loginButton.userInteractionEnabled = NO;
     }
 }
@@ -390,6 +391,7 @@
     [self.webActivityView hideAnimated:NO];
     // USER INTERACTION
     self.scrollViewContainer.userInteractionEnabled = YES;
+    self.cancelButton.userInteractionEnabled = NO;
     self.loginButton.userInteractionEnabled = YES;
 }
 
