@@ -391,7 +391,7 @@
     [self.webActivityView hideAnimated:NO];
     // USER INTERACTION
     self.scrollViewContainer.userInteractionEnabled = YES;
-    self.cancelButton.userInteractionEnabled = NO;
+    self.cancelButton.userInteractionEnabled = YES;
     self.loginButton.userInteractionEnabled = YES;
 }
 
