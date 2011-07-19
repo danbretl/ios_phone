@@ -23,6 +23,7 @@ static NSString * const EVENTS_FILTER_FREE_BUTTON_IMAGE = @"btn_free";
 static NSString * const EVENTS_FILTER_POPULAR_BUTTON_IMAGE = @"btn_popular";
 static NSString * const EVENTS_FILTER_BUTTON_HIGHLIGHT_POSTFIX = @"_over";
 static NSString * const EVENTS_FILTER_BUTTON_EXTENSION = @".png";
+static NSString * const EVENTS_CATEGORY_BUTTON_TOUCH_POSTFIX = @"_touch";
 
 static NSString * const EVENTS_UPDATED_NOTIFICATION_KEY = @"eventsUpdated";
 static NSString * const EVENTS_UPDATED_USER_INFO_KEY_RESULTS = @"results";
@@ -104,6 +105,10 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 @property (nonatomic, readonly) NSMutableArray * eventsForCurrentSource;
 @property (retain) UIView * tableFooterView;
 @property (retain) UIButton * calendarButton;
+- (void) setImagesForCategoryButton:(UIButton *)button forCategory:(Category *)category;
+- (void) setImagesForFilterButton:(UIButton *)button forFilterCode:(NSString *)filterCode selected:(BOOL)selected;
+- (NSString *) filterImageBaseForFilterCode:(NSString *)filterCode;
+- (void) setControlStateNormalImageForFilterButton:(UIButton *)button forFilterCode:(NSString *)filterCode selected:(BOOL)selected;
 @end
 
 @implementation EventsViewController
@@ -183,19 +188,18 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
             categoryButton.enabled = YES;
             UILabel * categoryTitleLabel = [[UILabel alloc]initWithFrame:CGRectMake(0, 50, 100, 25)];
             //if 1st column in 1st row, make all view
+            Category * category = nil;
             if (y == 0 && x == 0) {
-                [categoryButton setBackgroundImage:[UIImage imageNamed:@"btn_cat_all.png"] forState: UIControlStateNormal];
-                [[categoryButton layer] setCornerRadius:12.0f];
-                [[categoryButton layer] setMasksToBounds:YES];
                 categoryButton.tag = -1;
                 categoryTitleLabel.text = @"All Categories";
+                category = nil;
             } else {
                 //set icon image here
-                Category * category = (Category *)[self.concreteParentCategoriesArray objectAtIndex:index-1];
+                category = (Category *)[self.concreteParentCategoriesArray objectAtIndex:index-1];
                 categoryTitleLabel.text = category.title;
-                [categoryButton setBackgroundImage:[UIImage imageNamed:category.buttonThumb] forState: UIControlStateNormal];
                 categoryButton.tag = index-1;
             }
+            [self setImagesForCategoryButton:categoryButton forCategory:category];
             [categoryButton addTarget:self action:@selector(categoryButtonPressed:) forControlEvents:UIControlEventTouchUpInside];
             categoryTitleLabel.font = [UIFont fontWithName:@"HelveticaNeueLTStd-Cn" size:13];
             categoryTitleLabel.textAlignment = UITextAlignmentCenter;
@@ -221,18 +225,20 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     self.recommendedFilterButton = [[[UIButton alloc] initWithFrame:CGRectMake(0, 0, 107, filterButtonHeight)] autorelease];
     self.freeFilterButton = [[[UIButton alloc] initWithFrame:CGRectMake(CGRectGetMaxX(self.recommendedFilterButton.frame), 0, 106, filterButtonHeight)] autorelease];
     self.popularFilterButton = [[[UIButton alloc] initWithFrame:CGRectMake(CGRectGetMaxX(self.freeFilterButton.frame), 0, 107, filterButtonHeight)] autorelease];
+    
+    NSArray * filterButtons = [NSArray arrayWithObjects:self.recommendedFilterButton, self.freeFilterButton, self.popularFilterButton, nil];
+    NSArray * filterCodes = [NSArray arrayWithObjects:EVENTS_FILTER_RECOMMENDED, EVENTS_FILTER_FREE, EVENTS_FILTER_POPULAR, nil];
+    for (int i=0; i<[filterButtons count]; i++) {
+        [self setImagesForFilterButton:[filterButtons objectAtIndex:i] forFilterCode:[filterCodes objectAtIndex:i] selected:NO];
+    }
 
-    [recommendedFilterButton setBackgroundImage:[UIImage imageNamed:@"btn_recommend.png"] forState: UIControlStateNormal];
-    [freeFilterButton setBackgroundImage:[UIImage imageNamed:@"btn_free.png"] forState: UIControlStateNormal];
-    [popularFilterButton setBackgroundImage:[UIImage imageNamed:@"btn_popular.png"] forState: UIControlStateNormal];
+    self.recommendedFilterButton.tag = 1;
+    self.freeFilterButton.tag = 2;
+    self.popularFilterButton.tag = 3;
 
-    recommendedFilterButton.tag = 1;
-    freeFilterButton.tag = 2;
-    popularFilterButton.tag = 3;
-
-    [recommendedFilterButton addTarget:self action:@selector(filterButtonPressed:) forControlEvents:UIControlEventTouchUpInside];
-    [freeFilterButton addTarget:self action:@selector(filterButtonPressed:) forControlEvents:UIControlEventTouchUpInside];
-    [popularFilterButton addTarget:self action:@selector(filterButtonPressed:) forControlEvents:UIControlEventTouchUpInside];
+    [self.recommendedFilterButton addTarget:self action:@selector(filterButtonPressed:) forControlEvents:UIControlEventTouchUpInside];
+    [self.freeFilterButton addTarget:self action:@selector(filterButtonPressed:) forControlEvents:UIControlEventTouchUpInside];
+    [self.popularFilterButton addTarget:self action:@selector(filterButtonPressed:) forControlEvents:UIControlEventTouchUpInside];
     
     [self.filtersBackgroundView addSubview:recommendedFilterButton];
     [self.filtersBackgroundView addSubview:freeFilterButton];
@@ -845,6 +851,20 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     return filterCode;
 }
 
+- (NSString *) filterImageBaseForFilterCode:(NSString *)filterCode {
+    NSString * filterImageBase = nil;
+    if ([filterCode isEqualToString:EVENTS_FILTER_RECOMMENDED]) {
+        filterImageBase = EVENTS_FILTER_RECOMMENDED_BUTTON_IMAGE;
+    } else if ([filterCode isEqualToString:EVENTS_FILTER_FREE]) {
+        filterImageBase = EVENTS_FILTER_FREE_BUTTON_IMAGE;
+    } else if ([filterCode isEqualToString:EVENTS_FILTER_POPULAR]) {
+        filterImageBase = EVENTS_FILTER_POPULAR_BUTTON_IMAGE;
+    } else {
+        NSLog(@"ERROR in EventsViewController - unrecognized filterCode");
+    }
+    return filterImageBase;
+}
+
 - (void) highlightFilterButton:(UIButton *)filterButton {
     NSString * filterCode = [self filterCodeForFilterButton:filterButton];
     [self highlightFilterButtonForFilter:filterCode];
@@ -862,27 +882,15 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
         
     } else {
         
-        NSString * recommendedHighlightString = highlightRecommended ? EVENTS_FILTER_BUTTON_HIGHLIGHT_POSTFIX : @"";
-        NSString * freeHighlightString = highlightFree ? EVENTS_FILTER_BUTTON_HIGHLIGHT_POSTFIX : @"";
-        NSString * popularHighlightString = highlightPopular ? EVENTS_FILTER_BUTTON_HIGHLIGHT_POSTFIX : @"";
-        NSString * recommendedImageString = [NSString stringWithFormat:@"%@%@%@", 
-                                             EVENTS_FILTER_RECOMMENDED_BUTTON_IMAGE, 
-                                             recommendedHighlightString, 
-                                             EVENTS_FILTER_BUTTON_EXTENSION];
-        NSString * freeImageString = [NSString stringWithFormat:@"%@%@%@", 
-                                      EVENTS_FILTER_FREE_BUTTON_IMAGE, 
-                                      freeHighlightString, 
-                                      EVENTS_FILTER_BUTTON_EXTENSION];
-        NSString * popularImageString = [NSString stringWithFormat:@"%@%@%@", 
-                                         EVENTS_FILTER_POPULAR_BUTTON_IMAGE, 
-                                         popularHighlightString, 
-                                         EVENTS_FILTER_BUTTON_EXTENSION];
-        [self.recommendedFilterButton setBackgroundImage:[UIImage imageNamed:recommendedImageString]
-                                                forState:UIControlStateNormal];
-        [self.freeFilterButton setBackgroundImage:[UIImage imageNamed:freeImageString] 
-                                         forState:UIControlStateNormal];
-        [self.popularFilterButton setBackgroundImage:[UIImage imageNamed:popularImageString] 
-                                            forState:UIControlStateNormal];
+//        self.recommendedFilterButton.selected = highlightRecommended; // Relying on the use of this built-in state was causing a flicker in button appearance.
+        self.recommendedFilterButton.userInteractionEnabled = !highlightRecommended;
+        [self setControlStateNormalImageForFilterButton:self.recommendedFilterButton forFilterCode:EVENTS_FILTER_RECOMMENDED selected:highlightRecommended];
+//        self.freeFilterButton.selected = highlightFree; // Relying on the use of this built-in state was causing a flicker in button appearance.
+        self.freeFilterButton.userInteractionEnabled = !highlightFree;
+        [self setControlStateNormalImageForFilterButton:self.freeFilterButton forFilterCode:EVENTS_FILTER_FREE selected:highlightFree];
+//        self.popularFilterButton.selected = highlightPopular; // Relying on the use of this built-in state was causing a flicker in button appearance.
+        self.popularFilterButton.userInteractionEnabled = !highlightPopular;
+        [self setControlStateNormalImageForFilterButton:self.popularFilterButton forFilterCode:EVENTS_FILTER_POPULAR selected:highlightPopular];
         
     }
     
@@ -1327,6 +1335,35 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     self.myTableView.userInteractionEnabled = YES; // Enable user interaction
     self.view.userInteractionEnabled = YES;
 
+}
+
+- (void) setImagesForCategoryButton:(UIButton *)button forCategory:(Category *)category {
+    NSString * baseImageFilename = nil;
+    if (category == nil) {
+        baseImageFilename = @"btn_cat_all.png";
+    } else {
+        baseImageFilename = category.buttonThumb;
+    }
+    [button setBackgroundImage:[UIImage imageNamed:baseImageFilename] forState: UIControlStateNormal];
+    [button setBackgroundImage:[UIImage imageNamed:[baseImageFilename stringByReplacingOccurrencesOfString:@".png" withString:[NSString stringWithFormat:@"%@.png", EVENTS_CATEGORY_BUTTON_TOUCH_POSTFIX]]] forState:UIControlStateHighlighted];
+}
+
+- (void) setImagesForFilterButton:(UIButton *)button forFilterCode:(NSString *)filterCode selected:(BOOL)selected {
+    
+    NSString * imageBaseString = [self filterImageBaseForFilterCode:filterCode];
+    
+    [button setImage:[UIImage imageNamed:[NSString stringWithFormat:@"%@%@%@", imageBaseString, EVENTS_FILTER_BUTTON_HIGHLIGHT_POSTFIX, EVENTS_FILTER_BUTTON_EXTENSION]] forState:UIControlStateHighlighted];
+    [button setImage:[UIImage imageNamed:[NSString stringWithFormat:@"%@%@%@", imageBaseString, EVENTS_FILTER_BUTTON_HIGHLIGHT_POSTFIX, EVENTS_FILTER_BUTTON_EXTENSION]] forState:UIControlStateSelected];
+    [self setControlStateNormalImageForFilterButton:button forFilterCode:filterCode selected:selected];
+    
+}
+
+- (void) setControlStateNormalImageForFilterButton:(UIButton *)button forFilterCode:(NSString *)filterCode selected:(BOOL)selected {
+    
+    NSString * imageBaseString = [self filterImageBaseForFilterCode:filterCode];
+    NSString * touchPostfixString = selected ? EVENTS_FILTER_BUTTON_HIGHLIGHT_POSTFIX : @"";
+    [button setImage:[UIImage imageNamed:[NSString stringWithFormat:@"%@%@%@", imageBaseString, touchPostfixString, EVENTS_FILTER_BUTTON_EXTENSION]] forState:UIControlStateNormal];
+    
 }
 
 #pragma mark -

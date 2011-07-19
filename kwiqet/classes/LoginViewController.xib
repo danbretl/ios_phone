@@ -4471,6 +4471,10 @@ AAgAAAAIAAIACAACAAAAAgAAAAEAAQABAAE</bytes>
 									<int key="NSColorSpace">3</int>
 									<bytes key="NSWhite">MC41AA</bytes>
 								</object>
+								<object class="NSCustomResource" key="IBUIHighlightedImage">
+									<string key="NSClassName">NSImage</string>
+									<string key="NSResourceName">btn_signin_touch.png</string>
+								</object>
 								<object class="NSCustomResource" key="IBUINormalImage">
 									<string key="NSClassName">NSImage</string>
 									<string key="NSResourceName">btn_signin.png</string>
@@ -5026,7 +5030,7 @@ AAgAAAAIAAIACAACAAAAAgAAAAEAAQABAAE</bytes>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
-					<real value="0.0"/>
+					<real value="1"/>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
@@ -5191,6 +5195,7 @@ AAgAAAAIAAIACAACAAAAAgAAAAEAAQABAAE</bytes>
 				<string>btn_forgotpw_touch.png</string>
 				<string>btn_logo.png</string>
 				<string>btn_signin.png</string>
+				<string>btn_signin_touch.png</string>
 				<string>cancel.png</string>
 				<string>kwiqet.png</string>
 			</object>
@@ -5202,6 +5207,7 @@ AAgAAAAIAAIACAACAAAAAgAAAAEAAQABAAE</bytes>
 				<string>{284, 44}</string>
 				<string>{284, 44}</string>
 				<string>{53, 38}</string>
+				<string>{74, 32}</string>
 				<string>{74, 32}</string>
 				<string>{72, 30}</string>
 				<string>{336, 126}</string>

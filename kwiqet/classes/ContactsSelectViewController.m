@@ -497,6 +497,7 @@ float const CSVC_TAB_BUTTON_ANIMATION_DURATION = .25;
 }
 
 - (void) updateSelectedCountViewWithCount:(int)count {
+    NSLog(@"ContactsSelectViewController updateSelectedCountViewWithCount:%d", count);
     NSString * countText = @"None ";
     NSString * selectedWord = @"Selected";
 //    if (count > 0) {
@@ -505,8 +506,10 @@ float const CSVC_TAB_BUTTON_ANIMATION_DURATION = .25;
 //    }
     NSString * buttonText = [NSString stringWithFormat:@"%@%@", countText, selectedWord];
 //    NSString * buttonText = [NSString stringWithFormat:@"%d", count];
+    NSLog(@"%@", self.showSelectedFriendsTabButton);
     [self.showSelectedFriendsTabButton setTitle:buttonText forState:UIControlStateNormal];
     [self.showSelectedFriendsTabButton setTitle:buttonText forState:UIControlStateHighlighted];
+    [self.showSelectedFriendsTabButton setTitle:buttonText forState:UIControlStateSelected];
 }
 
 - (void)toggleSearch {
@@ -630,15 +633,25 @@ float const CSVC_TAB_BUTTON_ANIMATION_DURATION = .25;
 
 - (void) setSelectedTabButton:(UIButton *)tabButton {
     if (tabButton == self.showAllFriendsTabButton) {
-        [self.showAllFriendsTabButton setSelected:YES];
-        [self.showSelectedFriendsTabButton setSelected:NO];
+        
+        self.showAllFriendsTabButton.selected = YES;
+        self.showSelectedFriendsTabButton.selected = NO;
         self.showAllFriendsTabButton.userInteractionEnabled = NO;
         self.showSelectedFriendsTabButton.userInteractionEnabled = YES;
+        
+//        [self.showAllFriendsTabButton setImage:[UIImage imageNamed:@"btn_selectall.png"] forState:UIControlStateNormal];
+//        [self.showSelectedFriendsTabButton setImage:[UIImage imageNamed:@"btn_selected_notext.png"] forState:UIControlStateNormal];
+        
     } else if (tabButton == self.showSelectedFriendsTabButton) {
-        [self.showAllFriendsTabButton setSelected:NO];
-        [self.showSelectedFriendsTabButton setSelected:YES];
+        
+        self.showAllFriendsTabButton.selected = NO;
+        self.showSelectedFriendsTabButton.selected = YES;
         self.showAllFriendsTabButton.userInteractionEnabled = YES;
         self.showSelectedFriendsTabButton.userInteractionEnabled = NO;
+        
+//        [self.showAllFriendsTabButton setImage:[UIImage imageNamed:@"btn_selectall_full_norightborder.png"] forState:UIControlStateNormal];
+//        [self.showSelectedFriendsTabButton setImage:[UIImage imageNamed:@"btn_selected_touch_notext.png"] forState:UIControlStateNormal];
+
     } else {
         NSLog(@"ERROR in ContactsSelectViewController - unrecognized selected tab button");
     }
