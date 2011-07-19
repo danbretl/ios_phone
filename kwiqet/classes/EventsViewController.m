@@ -1082,11 +1082,13 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 // Customize the appearance of table view cells.
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
 
-    static NSString * CellIdentifier = @"EventCellGeneral_v2_WithIcons";
+    static NSString * CellIdentifier = @"EventCellGeneral";
     
     EventTableViewCell * cell = (EventTableViewCell*)[tableView dequeueReusableCellWithIdentifier:CellIdentifier];
     if (cell == nil) {
         cell = [[EventTableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier];
+    } else {
+//        NSLog(@"Got a dequeued");
     }
     [self configureCell:cell forRowAtIndexPath:indexPath];
     
