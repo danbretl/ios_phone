@@ -7,21 +7,23 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "WebActivityView.h"
 
 @protocol LoginViewControllerDelegate;
 
 @interface LoginViewController : UIViewController <UITextFieldDelegate> {
     IBOutlet UIScrollView * scrollViewContainer;
-    IBOutlet UITextField *usernameField;
-    IBOutlet UITextField *passwordField;
-    UILabel * messageLabel;
-    UILabel * infoLabel;
+    IBOutlet UIView * inputContainerView;
+    IBOutlet UIButton * cancelButton;
+    IBOutlet UIButton * loginButton;
+    IBOutlet UITextField * usernameField;
+    IBOutlet UITextField * passwordField;
+    IBOutlet UITextView * messageTextView;
     id<LoginViewControllerDelegate> delegate;
+    WebActivityView * webActivityView;
 }
 
 @property (assign) id<LoginViewControllerDelegate> delegate;
-@property (nonatomic,retain) IBOutlet UITextField *usernameField;
-@property (nonatomic,retain) IBOutlet UITextField *passwordField;
 
 -(IBAction)loginButtonTouched:(id)sender;
 -(IBAction)cancelButtonTouched:(id)sender;

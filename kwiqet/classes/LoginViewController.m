@@ -15,21 +15,31 @@
 #import "DefaultsModel.h"
 #import "WebUtil.h"
 #import "JSON.h"
+#import <QuartzCore/QuartzCore.h>
 
 @interface LoginViewController()
 @property (retain) UIScrollView * scrollViewContainer;
-- (void) keyboardWillShow:(NSNotification *)notification;
-- (void) keyboardWillHide:(NSNotification *)notification;
-- (void) shiftViewsDirectionIsUpward:(BOOL)directionIsUpward keyboardNotificationInfo:(NSDictionary *)info;
-@property (retain) UILabel * messageLabel;
-@property (retain) UILabel * infoLabel;
+//- (void) keyboardWillShow:(NSNotification *)notification;
+//- (void) keyboardWillHide:(NSNotification *)notification;
+//- (void) shiftViewsDirectionIsUpward:(BOOL)directionIsUpward keyboardNotificationInfo:(NSDictionary *)info;
+@property (retain) IBOutlet UIView * inputContainerView;
+@property (retain) IBOutlet UITextField * usernameField;
+@property (retain) IBOutlet UITextField * passwordField;
+@property (retain) IBOutlet UITextView * messageTextView;
+@property (retain) WebActivityView * webActivityView;
+@property (retain) IBOutlet UIButton * cancelButton;
+@property (retain) IBOutlet UIButton * loginButton;
+- (void) showWebActivityView;
+- (void) hideWebActivityView;
 @end
 
 @implementation LoginViewController
 @synthesize scrollViewContainer;
-@synthesize usernameField, passwordField;
-@synthesize messageLabel, infoLabel;
+@synthesize cancelButton, loginButton;
+@synthesize inputContainerView, usernameField, passwordField;
+@synthesize messageTextView;
 @synthesize delegate;
+@synthesize webActivityView;
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
@@ -42,11 +52,14 @@
 
 - (void)dealloc
 {
-    [messageLabel release];
-    [infoLabel release];
+    [cancelButton release];
+    [loginButton release];
+    [messageTextView release];
+    [inputContainerView release];
     [usernameField release];
     [passwordField release];
     [scrollViewContainer release];
+    [webActivityView release];
     [super dealloc];
 }
 
@@ -71,23 +84,23 @@
     self.scrollViewContainer.userInteractionEnabled = YES;
     self.scrollViewContainer.scrollEnabled = YES;
     
-    self.messageLabel = [[[UILabel alloc]initWithFrame:CGRectMake(35, 23, 250, 40)] autorelease];
-    self.messageLabel.backgroundColor = [UIColor clearColor];
-    self.messageLabel.font = [UIFont fontWithName:@"HelveticaNeueLTStd-BdCn" size: 20];
-    self.messageLabel.text = @"Log into Your Kwiqet Account";
-    self.messageLabel.numberOfLines = 1;
-    [self.scrollViewContainer addSubview:self.messageLabel];
-    
-    self.infoLabel = [[[UILabel alloc]initWithFrame:CGRectMake(35, 226, 245, 126)] autorelease];
-    self.infoLabel.backgroundColor = [UIColor clearColor];
-    self.infoLabel.font = [UIFont fontWithName:@"HelveticaNeueLTStd-Cn" size: 16];
-    self.infoLabel.text = @"Creating a Kwiqet account allows you to send invitations to the people you care about most in order to do the things you love best. This is your ticket to the world—the ultimate mobile invitation.";
-    self.infoLabel.numberOfLines = 0;
-    [self.scrollViewContainer addSubview:self.infoLabel];
+    self.inputContainerView.layer.cornerRadius = 10;
+    self.inputContainerView.layer.masksToBounds = YES;
+    self.inputContainerView.layer.borderColor = [[UIColor colorWithWhite:0.65 alpha:1.0] CGColor];
+    self.inputContainerView.layer.borderWidth = 1.0;
+        
+    self.messageTextView.font = [UIFont fontWithName:@"HelveticaNeueLTStd-MdCn" size: 16];
+    self.messageTextView.text = @"Creating a Kwiqet account allows you to send invitations to the people you care about most in order to do the things you love best. This is your ticket to the world - the ultimate mobile invitation.";
+    [self.scrollViewContainer addSubview:self.messageTextView];
     
     // Register for keyboard events
-	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardWillShow:) name:UIKeyboardWillShowNotification object:nil];
-	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardWillHide:) name:UIKeyboardWillHideNotification object:nil];
+//	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardWillShow:) name:UIKeyboardWillShowNotification object:nil];
+//	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardWillHide:) name:UIKeyboardWillHideNotification object:nil];
+    
+    CGFloat webActivityViewSize = 60.0;
+    webActivityView = [[WebActivityView alloc] initWithSize:CGSizeMake(webActivityViewSize, webActivityViewSize) centeredInFrame:self.view.frame];
+    [self.view addSubview:self.webActivityView];
+    [self hideWebActivityView];
 
 }
 
@@ -105,22 +118,12 @@
 }
 
 - (BOOL)textFieldShouldReturn:(UITextField *)textField {
-    if (textField == passwordField) {
-        if ([passwordField.text length] > 0 &&
-            [usernameField.text length] > 0) {
-            [self makeLoginRequest];
-            [textField resignFirstResponder];            
-        } else {
-            UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Empty Fields" 
-                                                            message:@"You must enter a valid email and password."
-                                                           delegate:nil 
-                                                  cancelButtonTitle:@"Ok" 
-                                                  otherButtonTitles:nil];
-            [alert show]; 
-            [alert release];
-        }
-    } else if (textField == usernameField) {
-        [passwordField becomeFirstResponder];
+    if (textField == self.usernameField) {
+        [self.passwordField becomeFirstResponder];
+    } else if (textField == self.passwordField) {
+        [self makeLoginRequest];
+    } else {
+        NSLog(@"ERROR in LoginViewController - unrecognized textField");
     }
     return NO;
 }
@@ -159,32 +162,53 @@
 #pragma login dialog
 -(IBAction)forgotPasswordButtonTouched:(id)sender {
     
-    [passwordField resignFirstResponder];
-    [usernameField resignFirstResponder];
-    
-    URLBuilder *urlBuilder = [[URLBuilder alloc]init];
-    NSURL *url = [urlBuilder buildForgotPasswordURL];
+    if ([self.usernameField.text length] > 0) {
+        
+        [self.usernameField resignFirstResponder];
+        [self.passwordField resignFirstResponder];
+        
+        URLBuilder *urlBuilder = [[URLBuilder alloc]init];
+        NSURL *url = [urlBuilder buildForgotPasswordURL];
+        
+        //build json with {"email": email.text}
+        NSString * usernameValue = [NSString stringWithString:usernameField.text];
+        NSDictionary *jsonDictionary = [[NSDictionary alloc]initWithObjectsAndKeys:usernameValue,@"email", nil];
+        NSString *jsonString = [jsonDictionary JSONRepresentation];
+        [jsonDictionary release];
+        NSLog(@"json: %@",jsonString);
+        NSLog(@"url: %@",url);
+        
+        ASIFormDataRequest * forgotPasswordRequest = [ASIFormDataRequest requestWithURL:url];
+        [forgotPasswordRequest addRequestHeader:@"Content-Type" value:@"application/json"];
+        [forgotPasswordRequest appendPostData:[jsonString  dataUsingEncoding:NSUTF8StringEncoding]];
+        [forgotPasswordRequest setDelegate:self];
+        [forgotPasswordRequest setDidFinishSelector:@selector(passwordRequestFinished:)];
+        [forgotPasswordRequest setDidFailSelector:@selector(passwordRequestFailed:)];
+        [forgotPasswordRequest startAsynchronous];
+        
+        [urlBuilder release];
+        
+        [self showWebActivityView];
 
-    //build json with {"email": email.text}
-    NSString * usernameValue = [NSString stringWithString:usernameField.text];
-    NSDictionary *jsonDictionary = [[NSDictionary alloc]initWithObjectsAndKeys:usernameValue,@"email", nil];
-    NSString *jsonString = [jsonDictionary JSONRepresentation];
-    [jsonDictionary release];
-    NSLog(@"json: %@",jsonString);
-    NSLog(@"url: %@",url);
+    } else {
+        
+        [self.usernameField becomeFirstResponder];
+        
+        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Missing Information" 
+                                                        message:@"You must enter a valid email."
+                                                       delegate:nil 
+                                              cancelButtonTitle:@"OK" 
+                                              otherButtonTitles:nil];
+        [alert show]; 
+        [alert release];
+        
+    }
     
-    ASIFormDataRequest * forgotPasswordRequest = [ASIFormDataRequest requestWithURL:url];
-	[forgotPasswordRequest addRequestHeader:@"Content-Type" value:@"application/json"];
-    [forgotPasswordRequest appendPostData:[jsonString  dataUsingEncoding:NSUTF8StringEncoding]];
-    [forgotPasswordRequest setDelegate:self];
-    [forgotPasswordRequest setDidFinishSelector:@selector(passwordRequestFinished:)];
-    [forgotPasswordRequest setDidFailSelector:@selector(passwordRequestFailed:)];
-    [forgotPasswordRequest startAsynchronous];
-    
-    [urlBuilder release];
 }
 
 - (void)passwordRequestFinished:(ASIHTTPRequest *)request {
+    
+    [self hideWebActivityView];
     NSLog(@"LoginViewController passwordRequestFinished:");
     
 	NSString *responseString = [[NSString alloc]initWithString:[request responseString]];
@@ -208,6 +232,7 @@
 - (void)passwordRequestFailed:(ASIHTTPRequest *)request
 {
     NSLog(@"LoginViewController passwordRequestFailed:");
+    [self hideWebActivityView];
           
 	NSError *error = [request error];
 	NSLog(@"%@",error);
@@ -224,35 +249,62 @@
 -(void)makeLoginRequest {
     NSLog(@"LoginViewController makeLoginRequest");
     
-    [ASIHTTPRequest setSessionCookies:nil];
-    
-    NSString *usernameValue = [[NSString alloc]initWithString:usernameField.text];
-    NSString *passwordValue = [[NSString alloc]initWithString:passwordField.text];
-    
-    URLBuilder *urlBuilder = [[URLBuilder alloc]init];
-    NSURL *url = [urlBuilder buildLoginURL];
-    NSLog(@"LoginViewController makeLoginRequest - url is %@", url);
-    NSLog(@"username: %@",usernameValue);
-    NSLog(@"password: %@",passwordValue);
-    
-    ASIHTTPRequest *loginRequest = [[ASIHTTPRequest alloc]initWithURL:url];
-    [loginRequest setUsername:usernameValue];
-    [loginRequest setPassword:passwordValue];
-    [loginRequest setRequestMethod:@"GET"];
-    loginRequest.useSessionPersistence = NO;
-    [loginRequest setDelegate:self];
-    [loginRequest setDidFinishSelector:@selector(loginRequestFinished:)];
-    [loginRequest setDidFailSelector:@selector(loginRequestFailed:)];
-    [loginRequest startAsynchronous];
-    
-    [usernameValue release];
-    [passwordValue release];
-    [urlBuilder release];
-    [loginRequest release];
+    if ([passwordField.text length] > 0 &&
+        [usernameField.text length] > 0) {
+        
+        [self.usernameField resignFirstResponder];
+        [self.passwordField resignFirstResponder];
+        
+        [ASIHTTPRequest setSessionCookies:nil];
+        
+        NSString *usernameValue = [[NSString alloc]initWithString:usernameField.text];
+        NSString *passwordValue = [[NSString alloc]initWithString:passwordField.text];
+        
+        URLBuilder *urlBuilder = [[URLBuilder alloc]init];
+        NSURL *url = [urlBuilder buildLoginURL];
+        NSLog(@"LoginViewController makeLoginRequest - url is %@", url);
+        NSLog(@"username: %@",usernameValue);
+        NSLog(@"password: %@",passwordValue);
+        
+        ASIHTTPRequest *loginRequest = [[ASIHTTPRequest alloc]initWithURL:url];
+        [loginRequest setUsername:usernameValue];
+        [loginRequest setPassword:passwordValue];
+        [loginRequest setRequestMethod:@"GET"];
+        loginRequest.useSessionPersistence = NO;
+        [loginRequest setDelegate:self];
+        [loginRequest setDidFinishSelector:@selector(loginRequestFinished:)];
+        [loginRequest setDidFailSelector:@selector(loginRequestFailed:)];
+        [loginRequest startAsynchronous];
+        
+        [usernameValue release];
+        [passwordValue release];
+        [urlBuilder release];
+        [loginRequest release];
+        [self showWebActivityView];
+        
+    } else {
+        
+        if ([self.usernameField.text length] == 0) {
+            [self.usernameField becomeFirstResponder];
+        } else if ([self.passwordField.text length] == 0) {
+            [self.passwordField becomeFirstResponder];
+        }
+        
+        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Missing Information" 
+                                                        message:@"You must enter a valid email and password."
+                                                       delegate:nil 
+                                              cancelButtonTitle:@"OK" 
+                                              otherButtonTitles:nil];
+        [alert show]; 
+        [alert release];
+        
+    }
+
 }
 
 - (void)loginRequestFinished:(ASIHTTPRequest *)request {
     NSLog(@"LoginViewController loginRequestFinished:%@", request);
+    [self hideWebActivityView];
     
     NSLog(@"code: %i",[request responseStatusCode]);
 	NSString * responseString = [request responseString];
@@ -284,6 +336,7 @@
 }
 
 - (void)loginRequestFailed:(ASIHTTPRequest *)request {
+    [self hideWebActivityView];
     NSLog(@"LoginViewController requestFailed:");
     
     int responseCode = [request responseStatusCode];
@@ -298,28 +351,46 @@
     [alert release];
 }
 
-- (void)keyboardWillShow:(NSNotification *)notification {
-    [self shiftViewsDirectionIsUpward:YES keyboardNotificationInfo:[notification userInfo]];
+//- (void)keyboardWillShow:(NSNotification *)notification {
+//    [self shiftViewsDirectionIsUpward:YES keyboardNotificationInfo:[notification userInfo]];
+//}
+//
+//- (void)keyboardWillHide:(NSNotification *)notification {
+//    [self shiftViewsDirectionIsUpward:NO keyboardNotificationInfo:[notification userInfo]];
+//}
+
+//- (void) shiftViewsDirectionIsUpward:(BOOL)directionIsUpward keyboardNotificationInfo:(NSDictionary *)info {
+//
+//    CGSize keyboardSize = [[info objectForKey:UIKeyboardFrameBeginUserInfoKey] CGRectValue].size;
+//    double animationDuration = [[info objectForKey:UIKeyboardAnimationDurationUserInfoKey] doubleValue];
+//    
+//    CGFloat contentOffsetY = directionIsUpward ? 40.0 : 0.0;
+//    CGFloat contentInsetBottom = directionIsUpward ? keyboardSize.height - (self.scrollViewContainer.frame.size.height - CGRectGetMaxY(self.messageTextView.frame)) : 0.0;
+//    
+//    [UIView animateWithDuration:animationDuration animations:^{
+//        UIEdgeInsets contentInset = self.scrollViewContainer.contentInset;
+//        contentInset.bottom = contentInsetBottom;
+//        self.scrollViewContainer.contentInset = contentInset;
+//        self.scrollViewContainer.contentOffset = CGPointMake(0, contentOffsetY);
+//    }];
+//}
+
+- (void) showWebActivityView  {
+    if (self.view.window) {
+        // ACTIVITY VIEWS
+        [self.webActivityView showAnimated:NO];
+        // USER INTERACTION
+        self.scrollViewContainer.userInteractionEnabled = NO;
+        self.loginButton.userInteractionEnabled = NO;
+    }
 }
 
-- (void)keyboardWillHide:(NSNotification *)notification {
-    [self shiftViewsDirectionIsUpward:NO keyboardNotificationInfo:[notification userInfo]];
-}
-
-- (void) shiftViewsDirectionIsUpward:(BOOL)directionIsUpward keyboardNotificationInfo:(NSDictionary *)info {
-
-    CGSize keyboardSize = [[info objectForKey:UIKeyboardFrameBeginUserInfoKey] CGRectValue].size;
-    double animationDuration = [[info objectForKey:UIKeyboardAnimationDurationUserInfoKey] doubleValue];
-    
-    CGFloat contentOffsetY = directionIsUpward ? 40.0 : 0.0;
-    CGFloat contentInsetBottom = directionIsUpward ? keyboardSize.height - (self.scrollViewContainer.frame.size.height - CGRectGetMaxY(self.infoLabel.frame)) : 0.0;
-    
-    [UIView animateWithDuration:animationDuration animations:^{
-        UIEdgeInsets contentInset = self.scrollViewContainer.contentInset;
-        contentInset.bottom = contentInsetBottom;
-        self.scrollViewContainer.contentInset = contentInset;
-        self.scrollViewContainer.contentOffset = CGPointMake(0, contentOffsetY);
-    }];
+- (void) hideWebActivityView  {
+    // ACTIVITY VIEWS
+    [self.webActivityView hideAnimated:NO];
+    // USER INTERACTION
+    self.scrollViewContainer.userInteractionEnabled = YES;
+    self.loginButton.userInteractionEnabled = YES;
 }
 
 
