@@ -40,6 +40,7 @@
 @property (nonatomic, retain) NSString * concreteParentCategoryURI;
 @property (nonatomic, retain) Category * concreteParentCategory;
 @property (nonatomic, retain) NSSet * concreteCategoryBreadcrumbs;
+@property (nonatomic, retain) NSString * url;
 
 @property (nonatomic, retain) NSString * summaryAddress;
 @property (nonatomic, retain) NSString * summaryStartDateEarliestString;

@@ -34,6 +34,7 @@
 @dynamic concreteParentCategoryURI;
 @dynamic concreteParentCategory;
 @dynamic fromSearch;
+@dynamic url;
 
 @dynamic summaryAddress;
 @dynamic summaryStartDateEarliestString;

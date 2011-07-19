@@ -48,6 +48,7 @@
 // Categories
 - (void) addOrUpdateConcreteCategories:(NSArray *)concreteCategories deleteOthers:(BOOL)shouldDeleteOthers;
 - (void) addCategoryWithURI:(NSString *)uri title:(NSString *)titleString color:(NSString *)colorString buttonThumb:(NSString *)buttonThumbnailString; // This should be updated to allow for/enable updating the category tree after initial category-tree-get.
+- (void) updateCategory:(Category *)category withTitle:(NSString *)title color:(NSString *)colorHex buttonThumb:(NSString *)buttonThumb;
 - (Category *) getCategoryWithURI:(NSString *)uri;
 - (NSArray *) getAllCategories;
 - (NSArray *) getAllCategoriesWithColor;

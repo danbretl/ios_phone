@@ -46,6 +46,8 @@ static NSString * const WDT_PRICE_MAXIMUM_KEY = @"maximum";
 - (NSString *) priceRangeStringFromMinPrice:(NSNumber *)minPrice maxPrice:(NSNumber *)maxPrice dataUnavailableString:(NSString *)dataUnavailableString;
 // Address
 - (NSString *) addressSecondLineStringFromCity:(NSString *)city state:(NSString *)state zip:(NSString *)zip;
++ (NSString *) addressSecondLineStringFromCity:(NSString *)city state:(NSString *)state zip:(NSString *)zip;
++ (NSString *) fullLocationStringFromAddress:(NSString *)address city:(NSString *)city state:(NSString *)state zip:(NSString *)zip;
 
 /////////////////////////////////
 // DISPLAYING events list data //

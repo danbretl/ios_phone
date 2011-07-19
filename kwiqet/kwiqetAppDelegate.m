@@ -41,6 +41,9 @@
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(facebookFriendsRetrieved:) name:FBM_FRIENDS_UPDATE_FAILURE_KEY object:nil];
     // Variables...
     BOOL forceGetCategoryTree = NO;
+    BOOL forceGetCategoryTreeOneTimeForce = YES;
+    BOOL forceGetCategoryTreeOneTimeForceComplete = [[NSUserDefaults standardUserDefaults] boolForKey:@"forceGetCategoryTreeOneTimeForceComplete"];
+    forceGetCategoryTreeOneTimeForce &= !forceGetCategoryTreeOneTimeForceComplete;
     
     // Order of operations:
     // - kwiqetAppDelegate should make the categoryRequest (NOT the categoryTreeModel itself) immediately, IF the category tree has not already previous been retrieved and processed.
@@ -56,6 +59,7 @@
         NSDateFormatter * dateFormatter = [[NSDateFormatter alloc] init];
         [dateFormatter setDateFormat:@"YYYY-MM-dd"];
         if (forceGetCategoryTree ||
+            forceGetCategoryTreeOneTimeForce ||
             !categoryTreeMostRecentRetrievalDate ||
             ![[dateFormatter stringFromDate:categoryTreeMostRecentRetrievalDate] isEqualToString:[dateFormatter stringFromDate:[NSDate date]]]) {
             [self.webConnector getCategoryTree];
@@ -209,6 +213,7 @@
         [DefaultsModel saveCategoryTreeHasBeenRetrieved:self.categoryTreeHasBeenRetrieved];
         [DefaultsModel saveCategoryTreeMostRecentRetrievalDate:[NSDate date]];
         [self.splashScreenViewController explodeAndFadeViewAnimated];
+        [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"forceGetCategoryTreeOneTimeForceComplete"];
     } else {
         [self webConnector:theWebConnector getCategoryTreeFailure:request];
     }

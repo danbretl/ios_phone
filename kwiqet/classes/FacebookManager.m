@@ -9,6 +9,8 @@
 #import "FacebookManager.h"
 #import "DefaultsModel.h"
 #import "Contact.h"
+#import "URLBuilder.h"
+#import "WebDataTranslator.h"
 
 static NSString * const FB_FACEBOOK_APP_ID = @"210861478950952";
 static NSString * const FB_FACEBOOK_ACCESS_TOKEN_KEY = @"FBAccessTokenKey";
@@ -105,6 +107,32 @@ static NSString * const FBM_REQUEST_PROFILE_PICTURE = @"FBM_REQUEST_PROFILE_PICT
 
 - (void)requestLoading:(FBRequest *)request {
     NSLog(@"Facebook request loading... %@", self.currentRequestType);
+}
+
+- (void) postToFacebookWallWithEvent:(Event *)event {
+    NSMutableDictionary * parameters = [NSMutableDictionary dictionary];
+    [parameters setValue:event.url forKey:@"link"];
+    [parameters setValue:event.title forKey:@"name"];
+    NSURL * url = [URLBuilder imageURLForImageLocation:event.imageLocation];
+    [parameters setValue:[url absoluteString] forKey:@"picture"];
+    NSString * captionString = event.venue ? event.venue : [WebDataTranslator fullLocationStringFromAddress:event.address city:event.city state:event.state zip:event.zip];
+    if (captionString) {
+        [parameters setValue:captionString forKey:@"caption"];
+    }
+    [parameters setValue:event.details forKey:@"description"];
+    [self.fb dialog:@"feed" andParams:parameters andDelegate:self];
+}
+
+- (void)dialogDidComplete:(FBDialog *)dialog {
+    NSLog(@"Facebook wall post complete");
+}
+
+- (void) dialogDidNotComplete:(FBDialog *)dialog {
+    NSLog(@"Facebook wall post did not complete");    
+}
+
+- (void) dialog:(FBDialog *)dialog didFailWithError:(NSError *)error {
+    NSLog(@"Facebook wall post failed");
 }
 
 - (void) updateFacebookFriends {

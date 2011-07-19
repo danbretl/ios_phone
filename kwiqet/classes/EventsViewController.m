@@ -1130,6 +1130,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     }
     NSString * iconThumb = concreteParentCategory.iconThumb;
     if (iconThumb) {
+//        NSLog(@"Have an icon thumb - %@", iconThumb);
         cell.iconImageView.image = [UIImage imageNamed:iconThumb];
     }
     

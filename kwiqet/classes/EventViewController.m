@@ -49,8 +49,6 @@
 @property (retain) UIView * detailsBackgroundColorView;
 @property (retain) UILabel * detailsLabel;
 @property (nonatomic, retain) WebActivityView * webActivityView;
-@property (retain) UIActionSheet * letsGoChoiceActionSheet;
-
 @property (retain) MapViewController * mapViewController;
 @property (nonatomic, readonly) WebConnector * webConnector;
 @property (nonatomic, readonly) WebDataTranslator * webDataTranslator;
@@ -59,6 +57,15 @@
 @property (retain) NSURLConnection * loadImageURLConnection;
 @property (retain) NSMutableData * loadImageData;
 - (void) displayImage:(UIImage *)image;
+
+@property (retain) UIActionSheet * letsGoChoiceActionSheet;
+@property (retain) NSMutableArray * letsGoChoiceActionSheetSelectors;
+@property (retain) UIActionSheet * shareChoiceActionSheet;
+@property (retain) NSMutableArray * shareChoiceActionSheetSelectors;
+- (void) pushedToAddToCalendar;
+- (void) pushedToCreateFacebookEvent;
+- (void) pushedToShareViaEmail;
+- (void) pushedToShareViaFacebook;
 
 - (void) backButtonTouched;
 - (void) logoButtonTouched;
@@ -94,10 +101,10 @@
 @synthesize delegate;
 @synthesize coreDataModel;
 @synthesize mapViewController;
-@synthesize letsGoChoiceActionSheet;
 @synthesize facebookManager;
 //@synthesize imageFull;
 @synthesize loadImageURLConnection, loadImageData;
+@synthesize letsGoChoiceActionSheet, letsGoChoiceActionSheetSelectors, shareChoiceActionSheet, shareChoiceActionSheetSelectors;
 
 - (void)dealloc {
     [event release];
@@ -135,11 +142,15 @@
     [mapViewController release];
     [webConnector release]; // ---?
     [webDataTranslator release];
-    [letsGoChoiceActionSheet release];
     [facebookManager release];
 //    [imageFull release];
     [loadImageURLConnection release];
     [loadImageData release];
+    [letsGoChoiceActionSheet release];
+    [letsGoChoiceActionSheetSelectors release];
+    [shareChoiceActionSheet release];
+    [shareChoiceActionSheetSelectors release];
+
     [super dealloc];
 	
 }
@@ -694,23 +705,6 @@
     }
 }
 
--(void)shareButtonTouched {
-    
-    MFMailComposeViewController * emailViewController = [ActionsManagement makeEmailViewControllerForEvent:self.event withMailComposeDelegate:self usingWebDataTranslator:self.webDataTranslator];
-    [self presentModalViewController:emailViewController animated:YES];
-    
-}
-
-- (void)mailComposeController:(MFMailComposeViewController*)controller  
-          didFinishWithResult:(MFMailComposeResult)result 
-                        error:(NSError*)error;
-{
-    if (result == MFMailComposeResultSent) {
-        NSLog(@"It's away!");
-    }
-    [self dismissModalViewControllerAnimated:YES];
-}
-
 //delete event from core data and revert back to table
 -(void)deleteButtonTouched {
     
@@ -728,58 +722,125 @@
     return facebookManager;
 }
 
-///send learned data to ML with tag G
+-(void)shareButtonTouched {
+    
+    // Lets go choices
+    self.shareChoiceActionSheet = [[[UIActionSheet alloc] initWithTitle:@"How would you like to share this event?" delegate:self cancelButtonTitle:nil destructiveButtonTitle:nil otherButtonTitles:nil] autorelease];
+    self.shareChoiceActionSheetSelectors = [NSMutableArray array];
+    BOOL moreSocialChoicesToBeHad = NO;
+    // Add to calendar
+    [self.shareChoiceActionSheet addButtonWithTitle:@"Send an Email"];
+    [shareChoiceActionSheetSelectors addObject:[NSValue valueWithPointer:@selector(pushedToShareViaEmail)]];
+    // Create Facebook event
+    [self.facebookManager pullAuthenticationInfoFromDefaults];
+    if ([self.facebookManager.fb isSessionValid]) {
+        [self.shareChoiceActionSheet addButtonWithTitle:@"Post to Facebook"];
+        [shareChoiceActionSheetSelectors addObject:[NSValue valueWithPointer:@selector(pushedToShareViaFacebook)]];
+    } else {
+        moreSocialChoicesToBeHad = YES;
+    }
+    // Cancel button
+    [self.shareChoiceActionSheet addButtonWithTitle:@"Cancel"];
+    self.shareChoiceActionSheet.cancelButtonIndex = self.shareChoiceActionSheet.numberOfButtons - 1;
+    // Title modification
+    if (moreSocialChoicesToBeHad) {
+        self.shareChoiceActionSheet.title = [self.shareChoiceActionSheet.title stringByAppendingString:@" Connect your social networks in the 'Settings' tab for even more options."];
+    }
+    // Show action sheet
+    [self.shareChoiceActionSheet showFromRect:self.shareButton.frame inView:self.shareButton animated:YES];
+    
+}
+
+- (void)mailComposeController:(MFMailComposeViewController*)controller  
+          didFinishWithResult:(MFMailComposeResult)result 
+                        error:(NSError*)error;
+{
+    if (result == MFMailComposeResultSent) {
+        NSLog(@"It's away!");
+    }
+    [self dismissModalViewControllerAnimated:YES];
+}
+
 - (void)letsGoButtonTouched {
     
     // Send learned data to the web
     [self.webConnector sendLearnedDataAboutEvent:self.event.uri withUserAction:@"G"];
     
+    // Lets go choices
+    self.letsGoChoiceActionSheet = [[[UIActionSheet alloc] initWithTitle:@"What would you like to do with this event?" delegate:self cancelButtonTitle:nil destructiveButtonTitle:nil otherButtonTitles:nil] autorelease];
+    self.letsGoChoiceActionSheetSelectors = [NSMutableArray array];
+    BOOL moreSocialChoicesToBeHad = NO;
+    // Add to calendar
+    [self.letsGoChoiceActionSheet addButtonWithTitle:@"Add to Calendar"];
+    [letsGoChoiceActionSheetSelectors addObject:[NSValue valueWithPointer:@selector(pushedToAddToCalendar)]];
+    // Create Facebook event
     [self.facebookManager pullAuthenticationInfoFromDefaults];
     if ([self.facebookManager.fb isSessionValid]) {
-        // Give choice of Facebook event or adding to calendar
-        self.letsGoChoiceActionSheet = [[[UIActionSheet alloc] initWithTitle:@"What would you like to do with this event?" delegate:self cancelButtonTitle:@"Cancel" destructiveButtonTitle:nil otherButtonTitles:@"Create Facebook Event", @"Add to Calendar", nil] autorelease];
-        [self.letsGoChoiceActionSheet showFromRect:self.letsGoButton.frame inView:self.letsGoButton animated:YES];
+        [self.letsGoChoiceActionSheet addButtonWithTitle:@"Create Facebook Event"];
+        [letsGoChoiceActionSheetSelectors addObject:[NSValue valueWithPointer:@selector(pushedToCreateFacebookEvent)]];
     } else {
-        // Add to calendar
-        [ActionsManagement addEventToCalendar:self.event usingWebDataTranslator:self.webDataTranslator];
-        // Show confirmation alert
-        UIAlertView * alert = [[UIAlertView alloc] initWithTitle:@"Event added to Calendar!" message:[NSString stringWithFormat:@"The event \"%@\" has been added to your calendar.", self.event.title] delegate:nil cancelButtonTitle:@"Ok" otherButtonTitles:nil];
-        [alert show];
-        [alert release];
+        moreSocialChoicesToBeHad = YES;
     }
-    
-//    // Change appearance of "Let's Go" button
-//    [self.letsGoButton setBackgroundImage:[UIImage imageNamed:@"btn_going.png"] forState: UIControlStateNormal];
-//    self.letsGoButton.enabled = NO;
+    // Cancel button
+    [self.letsGoChoiceActionSheet addButtonWithTitle:@"Cancel"];
+    self.letsGoChoiceActionSheet.cancelButtonIndex = self.letsGoChoiceActionSheet.numberOfButtons - 1;
+    // Title modification
+    if (moreSocialChoicesToBeHad) {
+        self.letsGoChoiceActionSheet.title = [self.letsGoChoiceActionSheet.title stringByAppendingString:@" Connect your social networks in the 'Settings' tab for even more options."];
+    }
+    // Show action sheet
+    [self.letsGoChoiceActionSheet showFromRect:self.letsGoButton.frame inView:self.letsGoButton animated:YES];
 
 }
 
 - (void)actionSheet:(UIActionSheet *)actionSheet didDismissWithButtonIndex:(NSInteger)buttonIndex {
     
-    if (actionSheet == self.letsGoChoiceActionSheet) {
-                
-        if (buttonIndex == 0) {
-            
-            ContactsSelectViewController * contactsSelectViewController = [[ContactsSelectViewController alloc] initWithNibName:@"ContactsSelectViewController" bundle:[NSBundle mainBundle]];
-//            contactsSelectViewController.contactsAll = [self.coreDataModel getAllFacebookContacts];
-            contactsSelectViewController.delegate = self;
-            contactsSelectViewController.coreDataModel = self.coreDataModel;
-            [self presentModalViewController:contactsSelectViewController animated:YES];
-            [contactsSelectViewController release];
-            
-        } else if (buttonIndex == 1) {
-            
-            // Add to calendar
-            [ActionsManagement addEventToCalendar:self.event usingWebDataTranslator:self.webDataTranslator];
-            // Show confirmation alert
-            UIAlertView * alert = [[UIAlertView alloc] initWithTitle:@"Event added to Calendar!" message:[NSString stringWithFormat:@"The event \"%@\" has been added to your calendar.", self.event.title] delegate:nil cancelButtonTitle:@"Ok" otherButtonTitles:nil];
-            [alert show];
-            [alert release];
-            
+    if (actionSheet == self.shareChoiceActionSheet ||
+        actionSheet == self.letsGoChoiceActionSheet) {
+        
+        NSArray * actionSheetSelectors = (actionSheet == self.shareChoiceActionSheet) ? self.shareChoiceActionSheetSelectors : self.letsGoChoiceActionSheetSelectors;
+        
+        if (buttonIndex >= 0 &&
+            actionSheetSelectors && 
+            [actionSheetSelectors count] > buttonIndex) {
+            SEL actionSheetSelector = [[actionSheetSelectors objectAtIndex:buttonIndex] pointerValue];
+            [self performSelector:actionSheetSelector];
+        } else {
+            NSLog(@"ERROR in EventViewController - actionSheet buttonIndex does not have an associated selector");
         }
         
+    } else {
+        NSLog(@"ERROR in EventViewController - unrecognized actionSheet");
     }
     
+}
+
+- (void) pushedToShareViaEmail {
+    MFMailComposeViewController * emailViewController = [ActionsManagement makeEmailViewControllerForEvent:self.event withMailComposeDelegate:self usingWebDataTranslator:self.webDataTranslator];
+    [self presentModalViewController:emailViewController animated:YES];
+}
+
+- (void) pushedToShareViaFacebook {
+    NSLog(@"Pushed to share via Facebook");
+    [self.facebookManager postToFacebookWallWithEvent:self.event];
+}
+
+- (void) pushedToAddToCalendar {
+    // Add to calendar
+    [ActionsManagement addEventToCalendar:self.event usingWebDataTranslator:self.webDataTranslator];
+    // Show confirmation alert
+    UIAlertView * alert = [[UIAlertView alloc] initWithTitle:@"Event added to Calendar!" message:[NSString stringWithFormat:@"The event \"%@\" has been added to your calendar.", self.event.title] delegate:nil cancelButtonTitle:@"Ok" otherButtonTitles:nil];
+    [alert show];
+    [alert release];
+
+}
+- (void) pushedToCreateFacebookEvent {
+    ContactsSelectViewController * contactsSelectViewController = [[ContactsSelectViewController alloc] initWithNibName:@"ContactsSelectViewController" bundle:[NSBundle mainBundle]];
+    //            contactsSelectViewController.contactsAll = [self.coreDataModel getAllFacebookContacts];
+    contactsSelectViewController.delegate = self;
+    contactsSelectViewController.coreDataModel = self.coreDataModel;
+    [self presentModalViewController:contactsSelectViewController animated:YES];
+    [contactsSelectViewController release];
 }
 
 - (void)contactsSelectViewController:(ContactsSelectViewController *)contactsSelectViewController didFinishWithCancel:(BOOL)didCancel selectedContacts:(NSArray *)selectedContacts {

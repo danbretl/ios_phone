@@ -9,6 +9,7 @@
 #import <Foundation/Foundation.h>
 #import "FBConnect.h"
 //#import "CoreDataModel.h"
+#import "Event.h"
 
 static NSString * const FBM_OPEN_URL_OFFERED_HANDLER_KEY = @"FBM_OPEN_URL_OFFERED_HANDLER_KEY";
 
@@ -28,7 +29,7 @@ static NSString * const FBM_EVENT_INVITE_FRIENDS_SUCCESS_KEY = @"FBM_EVENT_INVIT
 static NSString * const FBM_EVENT_INVITE_FRIENDS_FAILURE_KEY = @"FBM_EVENT_INVITE_FRIENDS_FAILURE_KEY";
 static NSString * const FBM_AUTH_ERROR_KEY = @"FBM_AUTH_ERROR_KEY";
 
-@interface FacebookManager : NSObject <FBSessionDelegate, FBRequestDelegate> {
+@interface FacebookManager : NSObject <FBSessionDelegate, FBRequestDelegate, FBDialogDelegate> {
     Facebook * facebook;
 //    CoreDataModel * coreDataModel;
     NSArray * eventInvitees;
@@ -49,6 +50,8 @@ static NSString * const FBM_AUTH_ERROR_KEY = @"FBM_AUTH_ERROR_KEY";
 - (void) login;
 
 - (void) logoutAndForgetFacebookAccessToken:(BOOL)shouldForget associatedWithKwiqetIdentfier:(NSString *)kwiqetIdentifier;
+
+- (void) postToFacebookWallWithEvent:(Event *)event;
  
 - (void) updateFacebookFriends;
 - (void) getLikes;

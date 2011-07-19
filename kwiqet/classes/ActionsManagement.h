@@ -12,9 +12,14 @@
 #import "WebDataTranslator.h"
 #import <EventKit/EventKit.h>
 
-@interface ActionsManagement : NSObject {
+@interface ActionsManagement : NSObject <UIActionSheetDelegate> {
+    
+    UIActionSheet * letsGoActionSheet;
+    NSMutableArray * letsGoActionSheetSelectors;
     
 }
+
+//- (void) showLetsGoActionSheetFromRect:(CGRect)sourceRect inView:(UIView *)viewContainer withCalendar:(BOOL)calendar facebook:(BOOL)facebook;
 
 + (MFMailComposeViewController *) makeEmailViewControllerForEvent:(Event *)event withMailComposeDelegate:(id<MFMailComposeViewControllerDelegate>)mailComposeDelegate usingWebDataTranslator:(WebDataTranslator *)webDataTranslator;
 

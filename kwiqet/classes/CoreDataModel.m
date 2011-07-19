@@ -142,6 +142,8 @@
 
 - (void) addOrUpdateConcreteCategories:(NSArray *)concreteCategories deleteOthers:(BOOL)shouldDeleteOthers {
     
+    NSLog(@"CoreDataModel addOrUpdateConcreteCategories(%d)", concreteCategories ? [concreteCategories count] : 0);
+    
     if (concreteCategories) {
         
         // Prepare the sorted array of new categories
@@ -192,14 +194,12 @@
             }
             
             if (shouldCreateNewCategory) {
-//                NSLog(@"Creating new category");
+                NSLog(@"Creating new category");
                 [self addCategoryWithURI:newConcreteCategoryURI title:newConcreteCategoryTitle color:newConcreteCategoryColor buttonThumb:newConcreteCategoryButtonThumb];
             } else {
                 if (newAndExistingCategoriesMatchURIs) {
-                    //NSLog(@"Updating category");
-                    existingCategory.title = newConcreteCategoryTitle;
-                    existingCategory.colorHex = newConcreteCategoryColor;
-                    existingCategory.buttonThumb = newConcreteCategoryButtonThumb;
+                    NSLog(@"Updating category");
+                    [self updateCategory:existingCategory withTitle:newConcreteCategoryTitle color:newConcreteCategoryColor buttonThumb:newConcreteCategoryButtonThumb];
                 }
                 existingConcreteCategoriesIndex++;
             }
@@ -230,12 +230,16 @@
     
     Category * categoryObject = [NSEntityDescription insertNewObjectForEntityForName:@"Category" inManagedObjectContext:self.managedObjectContext];
     categoryObject.uri = uri;
-    categoryObject.title = titleString;
-    categoryObject.colorHex = colorString;
-    categoryObject.buttonThumb = buttonThumbnailString;
-    categoryObject.displayOrder = [self.tempSolutionCategoriesOrderDictionary valueForKey:categoryObject.uri];
-    categoryObject.iconThumb = [self.tempSolutionCategoriesIconThumbsDictionary valueForKey:categoryObject.uri];
+    [self updateCategory:categoryObject withTitle:titleString color:colorString buttonThumb:buttonThumbnailString];
     
+}
+
+- (void) updateCategory:(Category *)category withTitle:(NSString *)title color:(NSString *)colorHex buttonThumb:(NSString *)buttonThumb {
+    category.title = title ? title : category.title;
+    category.colorHex = colorHex ? colorHex : category.colorHex;
+    category.buttonThumb = buttonThumb ? buttonThumb : category.buttonThumb;
+    category.displayOrder = [self.tempSolutionCategoriesOrderDictionary valueForKey:category.uri];
+    category.iconThumb = [self.tempSolutionCategoriesIconThumbsDictionary valueForKey:category.uri];
 }
 
 - (Category *)getCategoryWithURI:(NSString *)uri {
@@ -363,6 +367,9 @@
     NSString * titleText = [WebUtil stringOrNil:[eventDictionary objectForKey:@"title"]];
     NSString * descriptionText = [WebUtil stringOrNil:[eventDictionary objectForKey:@"description"]];
     
+    // Web
+    NSString * url = [WebUtil stringOrNil:[eventDictionary objectForKey:@"url"]];
+    
     // Date and time
     NSString * startDate = [WebUtil stringOrNil:[firstOccurrenceDictionary objectForKey:@"start_date"]];
 //    NSLog(@"startDate:%@", startDate);
@@ -442,6 +449,7 @@
         event.concreteParentCategory = concreteParentCategory;
     }
     event.title = titleText ? titleText : event.title;
+    event.url = url ? url : event.url;
     event.startDatetime = startDatetime ? startDatetime : event.startDatetime;
     event.endDatetime = endDatetime ? endDatetime : event.endDatetime;
     event.startDateValid = startDateValid ? startDateValid : event.startDateValid;

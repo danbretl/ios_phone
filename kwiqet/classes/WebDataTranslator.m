@@ -259,6 +259,12 @@ static NSString * const WDT_DATA_UNAVAILABLE_EVENT_LIST_TIME  = @"";
 
 - (NSString *)addressSecondLineStringFromCity:(NSString *)city state:(NSString *)state zip:(NSString *)zip {
     
+    return [WebDataTranslator addressSecondLineStringFromCity:city state:state zip:zip];
+    
+}
+
++ (NSString *) addressSecondLineStringFromCity:(NSString *)city state:(NSString *)state zip:(NSString *)zip {
+    
     NSString * addressSecondLine = nil;
     NSMutableString * addressLineSecondTemp = [NSMutableString stringWithString:@""];
     
@@ -283,6 +289,17 @@ static NSString * const WDT_DATA_UNAVAILABLE_EVENT_LIST_TIME  = @"";
     }
     
     return addressSecondLine;
+    
+}
++ (NSString *) fullLocationStringFromAddress:(NSString *)address city:(NSString *)city state:(NSString *)state zip:(NSString *)zip {
+    NSString * fullLocationString = nil;
+    NSString * cityStateZip = [WebDataTranslator addressSecondLineStringFromCity:address state:state zip:zip];
+    if (address && cityStateZip) {
+        fullLocationString = [NSString stringWithFormat:@"%@, %@", address, cityStateZip];
+    } else if (address || cityStateZip) {
+        fullLocationString = address ? address : cityStateZip;
+    }
+    return fullLocationString;
 }
 
 /////////////////////////////////

@@ -45,7 +45,6 @@ extern CGFloat const FEATURED_EVENT_BACKGROUND_COLOR_ALPHA;
     ElasticUILabel * titleBar;
     
     UIView * detailsView;
-    UIActionSheet * letsGoChoiceActionSheet;
     WebActivityView * webActivityView;
     
     UILabel * timeLabel;
@@ -64,7 +63,12 @@ extern CGFloat const FEATURED_EVENT_BACKGROUND_COLOR_ALPHA;
     // Map stuff
     MapViewController * mapViewController;
     
-    UIImage * imageFull;
+//    UIImage * imageFull;
+    
+    UIActionSheet * letsGoChoiceActionSheet;
+    NSMutableArray * letsGoChoiceActionSheetSelectors;
+    UIActionSheet * shareChoiceActionSheet;
+    NSMutableArray * shareChoiceActionSheetSelectors;
     
 }
 

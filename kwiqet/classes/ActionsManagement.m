@@ -8,13 +8,81 @@
 
 #import "ActionsManagement.h"
 
+@interface ActionsManagement()
+@property (retain) UIActionSheet * letsGoActionSheet;
+@property (retain) NSMutableArray * letsGoActionSheetSelectors;
+@end
+
 @implementation ActionsManagement
+@synthesize letsGoActionSheet, letsGoActionSheetSelectors;
+
+- (void)dealloc {
+    [letsGoActionSheet release];
+    [letsGoActionSheetSelectors release];
+    [super dealloc];
+}
+
+//- (void) showLetsGoActionSheetFromRect:(CGRect)sourceRect inView:(UIView *)viewContainer withCalendar:(BOOL)calendar facebook:(BOOL)facebook {
+//    
+//    // Lets go choices
+//    self.letsGoActionSheet = [[[UIActionSheet alloc] initWithTitle:@"What would you like to do with this event?" delegate:self cancelButtonTitle:nil destructiveButtonTitle:nil otherButtonTitles:nil] autorelease];
+//    self.letsGoActionSheetSelectors = [NSMutableArray array];
+//    BOOL moreSocialChoicesToBeHad = NO;
+//    // Add to calendar
+//    if (calendar) {
+//        [self.letsGoActionSheet addButtonWithTitle:@"Add to Calendar"];
+//        [letsGoActionSheetSelectors addObject:[NSValue valueWithPointer:@selector(pushedToAddToCalendar)]];        
+//    }
+//    // Create Facebook event
+//    if (facebook) {
+//        [self.letsGoActionSheet addButtonWithTitle:@"Create Facebook Event"];
+//        [letsGoActionSheetSelectors addObject:[NSValue valueWithPointer:@selector(pushedToCreateFacebookEvent)]];
+//    } else {
+//        moreSocialChoicesToBeHad = YES;
+//    }
+//    // Post to Twitter
+//    // ...
+//    // Cancel button
+//    [self.letsGoActionSheet addButtonWithTitle:@"Cancel"];
+//    self.letsGoActionSheet.cancelButtonIndex = self.letsGoActionSheet.numberOfButtons - 1;
+//    // Title modification
+//    if (moreSocialChoicesToBeHad) {
+//        self.letsGoActionSheet.title = [self.letsGoActionSheet.title stringByAppendingString:@" Connect your social networks in the 'Settings' tab for even more options."];
+//    }
+//    // Show action sheet
+//    [self.letsGoActionSheet showFromRect:sourceRect inView:viewContainer animated:YES];
+//    
+//}
+//
+//- (void)actionSheet:(UIActionSheet *)actionSheet didDismissWithButtonIndex:(NSInteger)buttonIndex {
+//    
+//}
+//
+//- (void) pushedToAddToCalendar {
+//    // Add to calendar
+//    [ActionsManagement addEventToCalendar:self.event usingWebDataTranslator:self.webDataTranslator];
+//    // Show confirmation alert
+//    UIAlertView * alert = [[UIAlertView alloc] initWithTitle:@"Event added to Calendar!" message:[NSString stringWithFormat:@"The event \"%@\" has been added to your calendar.", self.event.title] delegate:nil cancelButtonTitle:@"Ok" otherButtonTitles:nil];
+//    [alert show];
+//    [alert release];
+//    
+//}
+//- (void) pushedToCreateFacebookEvent {
+//    ContactsSelectViewController * contactsSelectViewController = [[ContactsSelectViewController alloc] initWithNibName:@"ContactsSelectViewController" bundle:[NSBundle mainBundle]];
+//    //            contactsSelectViewController.contactsAll = [self.coreDataModel getAllFacebookContacts];
+//    contactsSelectViewController.delegate = self;
+//    contactsSelectViewController.coreDataModel = self.coreDataModel;
+//    [self presentModalViewController:contactsSelectViewController animated:YES];
+//    [contactsSelectViewController release];
+//}
 
 + (MFMailComposeViewController *) makeEmailViewControllerForEvent:(Event *)event withMailComposeDelegate:(id<MFMailComposeViewControllerDelegate>)mailComposeDelegate usingWebDataTranslator:(WebDataTranslator *)webDataTranslator {
     
     NSLog(@"Email"); // Email
     
-    NSString * emailTitle = event.title ? [NSString stringWithFormat:@"    <b>%@</b><br><br>", event.title] : @"";
+    NSString * emailLinkOpen = event.url ? [NSString stringWithFormat:@"<a href='%@'>", event.url] : @"";
+    NSString * emailLinkClose = event.url ? @"</a>" : @"";
+    NSString * emailTitle = event.title ? [NSString stringWithFormat:@"    <b>%@%@%@</b><br><br>", emailLinkOpen, event.title, emailLinkClose] : @"";
     NSString * emailLocation = event.venue ? [NSString stringWithFormat:@"    Location: %@<br>", event.venue] : @"";
     NSString * emailAddressFirst = event.address ? event.address : @"";
     NSString * emailAddressSecond = [webDataTranslator addressSecondLineStringFromCity:event.city state:event.state zip:event.zip];

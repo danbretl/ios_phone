@@ -635,6 +635,7 @@
 		32733E2813B0FCBA0053C44A /* SBJsonParser.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SBJsonParser.m; path = kwiqet/classes/SBJsonParser.m; sourceTree = SOURCE_ROOT; };
 		32733E2913B0FCBA0053C44A /* SBJsonWriter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SBJsonWriter.h; path = kwiqet/classes/SBJsonWriter.h; sourceTree = SOURCE_ROOT; };
 		32733E2A13B0FCBA0053C44A /* SBJsonWriter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SBJsonWriter.m; path = kwiqet/classes/SBJsonWriter.m; sourceTree = SOURCE_ROOT; };
+		329CC46D13D5FEA90077C748 /* kwiqet 007.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "kwiqet 007.xcdatamodel"; sourceTree = "<group>"; };
 		32B36CD913B27DF1004C2068 /* kwiqet 002.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "kwiqet 002.xcdatamodel"; sourceTree = "<group>"; };
 		32BEE72913BA4720009D583E /* cardbg.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = cardbg.png; sourceTree = "<group>"; };
 		32BEE72A13BA4720009D583E /* cardbg@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "cardbg@2x.png"; sourceTree = "<group>"; };
@@ -854,47 +855,17 @@
 		32041A3613AFFC700072F95C /* images */ = {
 			isa = PBXGroup;
 			children = (
-				325033E713D5C53C006E872B /* btn_signin_touch.png */,
-				325033E813D5C53C006E872B /* btn_signin_touch@2x.png */,
-				325033E913D5C53C006E872B /* btn_signin.png */,
-				325033EA13D5C53C006E872B /* btn_signin@2x.png */,
-				325033DF13D5C490006E872B /* btn_done_touch.png */,
-				325033E013D5C490006E872B /* btn_done_touch@2x.png */,
-				325033E113D5C490006E872B /* btn_done.png */,
-				325033E213D5C490006E872B /* btn_done@2x.png */,
+				325033F013D5DDA0006E872B /* LoginViewController */,
+				325033EF13D5DD5F006E872B /* Navigation Buttons */,
 				325033DE13D5C405006E872B /* EventsViewController */,
 				32FF9B4013D4F22600B29E72 /* kwiqet.png */,
 				32FF9B4113D4F22600B29E72 /* kwiqet@2x.png */,
-				32FF9B2F13D4F01500B29E72 /* btn_createacct_touch.png */,
-				32FF9B3013D4F01500B29E72 /* btn_createacct_touch@2x.png */,
-				32FF9B3113D4F01500B29E72 /* btn_createacct.png */,
-				32FF9B3213D4F01500B29E72 /* btn_createacct@2x.png */,
-				32FF9B3313D4F01500B29E72 /* btn_forgotpw_touch.png */,
-				32FF9B3413D4F01500B29E72 /* btn_forgotpw_touch@2x.png */,
-				32FF9B3513D4F01500B29E72 /* btn_forgotpw.png */,
-				32FF9B3613D4F01500B29E72 /* btn_forgotpw@2x.png */,
 				3272016A13D4C5FB007FF9E9 /* btn_calendar.png */,
 				3272016B13D4C5FF007FF9E9 /* btn_calendar@2x.png */,
 				322CDFE713CF4AA6005203C2 /* btn_selectall_full_border.png */,
 				322CDFE813CF4AA6005203C2 /* btn_selectall_full_border@2x.png */,
 				322CDFE913CF4AA6005203C2 /* btn_selectall_full_norightborder.png */,
 				322CDFEA13CF4AA6005203C2 /* btn_selectall_full_norightborder@2x.png */,
-				32E2C1B313CDFCA9001B7EA5 /* icon_arts&theater.png */,
-				32E2C1B413CDFCA9001B7EA5 /* icon_arts&theater@2x.png */,
-				32E2C1B513CDFCA9001B7EA5 /* icon_food&drink.png */,
-				32E2C1B613CDFCA9001B7EA5 /* icon_food&drink@2x.png */,
-				32E2C1B713CDFCA9001B7EA5 /* icon_gatherings.png */,
-				32E2C1B813CDFCA9001B7EA5 /* icon_gatherings@2x.png */,
-				32E2C1B913CDFCA9001B7EA5 /* icon_hobbies&interest.png */,
-				32E2C1BA13CDFCA9001B7EA5 /* icon_hobbies&interest@2x.png */,
-				32E2C1BB13CDFCA9001B7EA5 /* icon_movies&media.png */,
-				32E2C1BC13CDFCA9001B7EA5 /* icon_movies&media@2x.png */,
-				32E2C1BD13CDFCA9001B7EA5 /* icon_music.png */,
-				32E2C1BE13CDFCA9001B7EA5 /* icon_music@2x.png */,
-				32E2C1BF13CDFCA9001B7EA5 /* icon_nightlife.png */,
-				32E2C1C013CDFCA9001B7EA5 /* icon_nightlife@2x.png */,
-				32E2C1C113CDFCA9001B7EA5 /* icon_sports&recreation.png */,
-				32E2C1C213CDFCA9001B7EA5 /* icon_sports&recreation@2x.png */,
 				32E2A3FE13CD0AC00083F1AD /* btn_selected_notext_disabled.png */,
 				32E2A3FF13CD0AC00083F1AD /* btn_selected_notext_disabled@2x.png */,
 				32C3A62C13CC28D800A12C12 /* fbPicturePlaceholder.png */,
@@ -1157,9 +1128,63 @@
 		325033DE13D5C405006E872B /* EventsViewController */ = {
 			isa = PBXGroup;
 			children = (
+				325033F113D5DDE1006E872B /* Category Icons */,
 				325033DD13D5C3ED006E872B /* Category Buttons */,
 			);
 			name = EventsViewController;
+			sourceTree = "<group>";
+		};
+		325033EF13D5DD5F006E872B /* Navigation Buttons */ = {
+			isa = PBXGroup;
+			children = (
+				325033E713D5C53C006E872B /* btn_signin_touch.png */,
+				325033E813D5C53C006E872B /* btn_signin_touch@2x.png */,
+				325033E913D5C53C006E872B /* btn_signin.png */,
+				325033EA13D5C53C006E872B /* btn_signin@2x.png */,
+				325033DF13D5C490006E872B /* btn_done_touch.png */,
+				325033E013D5C490006E872B /* btn_done_touch@2x.png */,
+				325033E113D5C490006E872B /* btn_done.png */,
+				325033E213D5C490006E872B /* btn_done@2x.png */,
+			);
+			name = "Navigation Buttons";
+			sourceTree = "<group>";
+		};
+		325033F013D5DDA0006E872B /* LoginViewController */ = {
+			isa = PBXGroup;
+			children = (
+				32FF9B2F13D4F01500B29E72 /* btn_createacct_touch.png */,
+				32FF9B3013D4F01500B29E72 /* btn_createacct_touch@2x.png */,
+				32FF9B3113D4F01500B29E72 /* btn_createacct.png */,
+				32FF9B3213D4F01500B29E72 /* btn_createacct@2x.png */,
+				32FF9B3313D4F01500B29E72 /* btn_forgotpw_touch.png */,
+				32FF9B3413D4F01500B29E72 /* btn_forgotpw_touch@2x.png */,
+				32FF9B3513D4F01500B29E72 /* btn_forgotpw.png */,
+				32FF9B3613D4F01500B29E72 /* btn_forgotpw@2x.png */,
+			);
+			name = LoginViewController;
+			sourceTree = "<group>";
+		};
+		325033F113D5DDE1006E872B /* Category Icons */ = {
+			isa = PBXGroup;
+			children = (
+				32E2C1B313CDFCA9001B7EA5 /* icon_arts&theater.png */,
+				32E2C1B413CDFCA9001B7EA5 /* icon_arts&theater@2x.png */,
+				32E2C1B513CDFCA9001B7EA5 /* icon_food&drink.png */,
+				32E2C1B613CDFCA9001B7EA5 /* icon_food&drink@2x.png */,
+				32E2C1B713CDFCA9001B7EA5 /* icon_gatherings.png */,
+				32E2C1B813CDFCA9001B7EA5 /* icon_gatherings@2x.png */,
+				32E2C1B913CDFCA9001B7EA5 /* icon_hobbies&interest.png */,
+				32E2C1BA13CDFCA9001B7EA5 /* icon_hobbies&interest@2x.png */,
+				32E2C1BB13CDFCA9001B7EA5 /* icon_movies&media.png */,
+				32E2C1BC13CDFCA9001B7EA5 /* icon_movies&media@2x.png */,
+				32E2C1BD13CDFCA9001B7EA5 /* icon_music.png */,
+				32E2C1BE13CDFCA9001B7EA5 /* icon_music@2x.png */,
+				32E2C1BF13CDFCA9001B7EA5 /* icon_nightlife.png */,
+				32E2C1C013CDFCA9001B7EA5 /* icon_nightlife@2x.png */,
+				32E2C1C113CDFCA9001B7EA5 /* icon_sports&recreation.png */,
+				32E2C1C213CDFCA9001B7EA5 /* icon_sports&recreation@2x.png */,
+			);
+			name = "Category Icons";
 			sourceTree = "<group>";
 		};
 		326F6C6C13D0E2540032CA5F /* SDWebImage */ = {
@@ -1295,8 +1320,6 @@
 				3220DFB413B23B390032C205 /* GradientView.m */,
 				3260038413B3A2B80054936A /* WebActivityView.h */,
 				3260038513B3A2B80054936A /* WebActivityView.m */,
-				32253F4713C39EF1004FBDD6 /* ActionsManagement.h */,
-				32253F4813C39EF1004FBDD6 /* ActionsManagement.m */,
 			);
 			name = views;
 			sourceTree = "<group>";
@@ -1329,6 +1352,8 @@
 				32FD383913AFF52F007549B6 /* EventLocationAnnotation.m */,
 				32FD384513AFF52F007549B6 /* LocalImagesManager.h */,
 				32FD384613AFF52F007549B6 /* LocalImagesManager.m */,
+				32253F4713C39EF1004FBDD6 /* ActionsManagement.h */,
+				32253F4813C39EF1004FBDD6 /* ActionsManagement.m */,
 			);
 			name = "models etc";
 			sourceTree = "<group>";
@@ -2047,9 +2072,10 @@
 				324759B113BBD54A002A9199 /* kwiqet 004.xcdatamodel */,
 				325FE11F13BCD103005BEF4B /* kwiqet 005.xcdatamodel */,
 				32E2C1B013CDEE67001B7EA5 /* kwiqet 006.xcdatamodel */,
+				329CC46D13D5FEA90077C748 /* kwiqet 007.xcdatamodel */,
 				32FD364E13AFF3B6007549B6 /* kwiqet 001.xcdatamodel */,
 			);
-			currentVersion = 32E2C1B013CDEE67001B7EA5 /* kwiqet 006.xcdatamodel */;
+			currentVersion = 329CC46D13D5FEA90077C748 /* kwiqet 007.xcdatamodel */;
 			path = kwiqet.xcdatamodeld;
 			sourceTree = "<group>";
 			versionGroupType = wrapper.xcdatamodel;

@@ -75,11 +75,15 @@
     UIAlertView * connectionErrorOnUserActionRequestAlertView;
     BOOL deletedEventDueToGoingToEvent;
 //    BOOL loadedImage;
-    UIActionSheet * letsGoChoiceActionSheet;
     FacebookManager * facebookManager;
 //    UIImage * imageFull;
     NSURLConnection * loadImageURLConnection;
     NSMutableData * loadImageData;
+    
+    UIActionSheet * letsGoChoiceActionSheet;
+    NSMutableArray * letsGoChoiceActionSheetSelectors;
+    UIActionSheet * shareChoiceActionSheet;
+    NSMutableArray * shareChoiceActionSheetSelectors;
 
 }
 
