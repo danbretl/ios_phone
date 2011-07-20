@@ -55,7 +55,7 @@ static NSString * const EVENT_TABLE_VIEW_CELL_FILLER_PRICE = @"Price";
         [self.categoryColorView addSubview:self.iconImageView];
         
         // Title label
-        titleLabel = [[UILabel alloc]initWithFrame:CGRectMake(25,5,300,26)];
+        titleLabel = [[UILabel alloc]initWithFrame:CGRectMake(25,5,275,26)];
         self.titleLabel.backgroundColor = [UIColor clearColor]; // This will hurt performance
         self.titleLabel.font = [UIFont fontWithName:@"HelveticaNeueLTStd-MdCn" size:20];
         self.titleLabel.text = EVENT_TABLE_VIEW_CELL_FILLER_TITLE;
