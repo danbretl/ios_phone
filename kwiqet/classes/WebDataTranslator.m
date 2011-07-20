@@ -118,7 +118,10 @@ static NSString * const WDT_DATA_UNAVAILABLE_EVENT_LIST_TIME  = @"";
     
     NSString * dateDisplayString = nil;
     
-    if (startDatetime && endDatetime) {
+    NSLog(@"%@ and %@", startDatetime, endDatetime);
+    
+    if (startDatetime && endDatetime &&
+        ![[self.dateFormatter stringFromDate:startDatetime] isEqualToString:[self.dateFormatter stringFromDate:endDatetime]]) {
         [self.dateFormatter setDateFormat:@"YYYY"];
         NSString * yearStart = [self.dateFormatter stringFromDate:startDatetime];
         NSString * yearEnd = [self.dateFormatter stringFromDate:endDatetime];
@@ -156,7 +159,8 @@ static NSString * const WDT_DATA_UNAVAILABLE_EVENT_LIST_TIME  = @"";
             tomorrowVersusEnd = [tomorrowDateOnly compare:endDateOnly];
         }
         
-        if (startDatetime && endDatetime) {
+        if (startDatetime && endDatetime &&
+            ![[self.dateFormatter stringFromDate:startDatetime] isEqualToString:[self.dateFormatter stringFromDate:endDatetime]]) {
             
             if ((todayVersusStart == NSOrderedSame || todayVersusStart == NSOrderedDescending) && (todayVersusEnd == NSOrderedSame || todayVersusEnd == NSOrderedAscending)) {
                 dateDisplayString = [NSString stringWithFormat:@"Today, %@", dateDisplayString];
