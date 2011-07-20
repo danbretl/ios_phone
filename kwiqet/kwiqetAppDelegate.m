@@ -31,10 +31,10 @@
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     
     // Setup stuff
-    // Caching...
-    NSLog(@"%d", [[NSURLCache sharedURLCache] memoryCapacity]);
-    [[NSURLCache sharedURLCache] setMemoryCapacity:1024*1024*10]; // http://stackoverflow.com/questions/1870004/does-nsurlconnection-take-advantage-of-nsurlcache/3900432#3900432
-    NSLog(@"%d", [[NSURLCache sharedURLCache] memoryCapacity]);
+//    // Caching...
+//    NSLog(@"%d", [[NSURLCache sharedURLCache] memoryCapacity]);
+//    [[NSURLCache sharedURLCache] setMemoryCapacity:1024*1024*10]; // http://stackoverflow.com/questions/1870004/does-nsurlconnection-take-advantage-of-nsurlcache/3900432#3900432
+//    NSLog(@"%d", [[NSURLCache sharedURLCache] memoryCapacity]);
     // Notifications...
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(facebookAuthError:) name:FBM_AUTH_ERROR_KEY object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(facebookFriendsRetrieved:) name:FBM_FRIENDS_UPDATE_SUCCESS_KEY object:nil];
@@ -89,6 +89,7 @@
         UITabBarItem * featuredEventTabBarItem = [[[UITabBarItem alloc] initWithTabBarSystemItem:UITabBarSystemItemFeatured tag:0] autorelease];
         self.featuredEventViewController.tabBarItem = featuredEventTabBarItem;
 //        self.featuredEventViewController.facebookManager = self.facebookManager;
+        [self.featuredEventViewController suggestToGetNewFeaturedEvent];
         
         // Events List View Controller
         self.eventsViewController = [[[EventsViewController alloc] init] autorelease];

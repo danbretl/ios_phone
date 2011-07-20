@@ -114,6 +114,7 @@ CGFloat const FEV_DESCRIPTION_LABEL_PADDING_HORIZONTAL = 20.0;
 @end
 
 @implementation FeaturedEventViewController
+@synthesize featuredEvent;
 @synthesize mostRecentGetNewFeaturedEventSuggestionDate, coreDataModel;
 @synthesize mapViewController;
 @synthesize actionBarView, letsGoButton, shareButton, scrollView, imageView, titleBar, detailsView, webActivityView;
@@ -356,7 +357,7 @@ CGFloat const FEV_DESCRIPTION_LABEL_PADDING_HORIZONTAL = 20.0;
     [self.view addSubview:self.webActivityView];
     [self.view bringSubviewToFront:self.webActivityView];
     
-    [self suggestToGetNewFeaturedEvent]; NSLog(@"FROM EVENT DAY VIEW CONTROLLER VIEW DID LOAD LINE 291");
+//    [self suggestToGetNewFeaturedEvent]; NSLog(@"FROM EVENT DAY VIEW CONTROLLER VIEW DID LOAD LINE 291");
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(facebookEventCreateSuccess:) name:FBM_CREATE_EVENT_SUCCESS_KEY object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(facebookEventCreateFailure:) name:FBM_CREATE_EVENT_FAILURE_KEY object:nil];
@@ -364,11 +365,14 @@ CGFloat const FEV_DESCRIPTION_LABEL_PADDING_HORIZONTAL = 20.0;
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(facebookEventInviteFailure:) name:FBM_EVENT_INVITE_FRIENDS_FAILURE_KEY object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(facebookAuthFailure:) name:FBM_AUTH_ERROR_KEY object:nil];
     
+    self.featuredEvent = [self.coreDataModel getFeaturedEvent]; // This could be nil
+    [self updateInterfaceFromFeaturedEvent:self.featuredEvent];
+    
 }
 
 - (void)viewWillAppear:(BOOL)animated {
     [super viewWillAppear:animated];
-    [self suggestToGetNewFeaturedEvent]; NSLog(@"FROM EVENT DAY VIEW CONTROLLER VIEW WILL APPEAR LINE 291");
+//    [self suggestToGetNewFeaturedEvent]; NSLog(@"FROM EVENT DAY VIEW CONTROLLER VIEW WILL APPEAR LINE 291");
     [self tempSolutionResetAndEnableLetsGoButton];
     
 }
@@ -414,17 +418,17 @@ CGFloat const FEV_DESCRIPTION_LABEL_PADDING_HORIZONTAL = 20.0;
 // Ignore the suggestion if...
 // - We have already been suggested less than 1 second previously // This is kind of a hack, but I'm OK with it for now. Basically, we were getting suggested twice almost simultaneously by viewDidLoad and viewWillAppear. Maybe I'm just having an off-day, but the issue was harder to deal with logically than I would have thought, since I did want to suggest we get a new featured event in both of those cases usually. (Just not on first app launch, which is when the double-up was happening.)
 // - The last time we got a new featured event was the same day as the day on which we are currently being suggested to get a new featured event
-- (void)suggestToGetNewFeaturedEvent {
-    if (!self.mostRecentGetNewFeaturedEventSuggestionDate || 
-        ([[NSDate date] timeIntervalSinceDate:self.mostRecentGetNewFeaturedEventSuggestionDate] > 1.0)) {
-        self.mostRecentGetNewFeaturedEventSuggestionDate = [NSDate date];
-        if (![self isLastFeaturedEventGetDateToday]) {
+- (void)suggestToGetNewFeaturedEvent { // For now, we are shifting to an aggressive "getFeaturedEvent" schedule. So, first off, we are taking out any checks of last webGet date or anything of the like. This method is being called by our app delegate on every app launch and app resume.
+//    if (!self.mostRecentGetNewFeaturedEventSuggestionDate || 
+//        ([[NSDate date] timeIntervalSinceDate:self.mostRecentGetNewFeaturedEventSuggestionDate] > 1.0)) {
+//        self.mostRecentGetNewFeaturedEventSuggestionDate = [NSDate date];
+//        if (![self isLastFeaturedEventGetDateToday]) {
             [self.webConnector getFeaturedEvent];
 //            [self showWebActivityView];
-        } else {
-            [self updateInterfaceFromFeaturedEvent:[self.coreDataModel getFeaturedEvent]];
-        }        
-    }
+//        } else {
+//            [self updateInterfaceFromFeaturedEvent:[self.coreDataModel getFeaturedEvent]];
+//        }        
+//    }
 }
 
 - (void) showWebActivityView {
@@ -447,13 +451,21 @@ CGFloat const FEV_DESCRIPTION_LABEL_PADDING_HORIZONTAL = 20.0;
     NSDictionary * featuredEventJSONDictionary = [[[NSDictionary dictionaryWithDictionary:[responseString yajl_JSONWithOptions:YAJLParserOptionsAllowComments error:&error]] valueForKey:@"objects"] objectAtIndex:0];
     
     // Add to/update core data
-    Event * featured = [self.coreDataModel getOrCreateFeaturedEvent];
-    [self.coreDataModel updateEvent:featured usingEventDictionary:featuredEventJSONDictionary featuredOverride:[NSNumber numberWithBool:YES] fromSearchOverride:[NSNumber numberWithBool:NO]];
+    Event * currentFeatured = [self.coreDataModel getOrCreateFeaturedEvent]; // Could be an old featured event, or it could be an empty event (if we had never before successfully retrieved a featured event from the web).
+    NSString * oldFeaturedImageLocation = [[currentFeatured.imageLocation copy] autorelease];
+    [self.coreDataModel updateEvent:currentFeatured usingEventDictionary:featuredEventJSONDictionary featuredOverride:[NSNumber numberWithBool:YES] fromSearchOverride:[NSNumber numberWithBool:NO]];
+    self.featuredEvent = currentFeatured;
     
     [DefaultsModel saveLastFeaturedEventGetDate:[NSDate date]];
-    [self updateInterfaceFromFeaturedEvent:[self.coreDataModel getFeaturedEvent]];
-//    [self hideWebActivityView];
+    [self updateInterfaceFromFeaturedEvent:self.featuredEvent];
     
+    if (self.imageView.image == nil ||
+        oldFeaturedImageLocation == nil ||
+        ![self.featuredEvent.imageLocation isEqualToString:oldFeaturedImageLocation]) {
+        [self.imageView setImageWithURL:[URLBuilder imageURLForImageLocation:self.featuredEvent.imageLocation] placeholderImage:[UIImage imageNamed:@"event_img_placeholder.png"]];
+    }
+    
+//    [self hideWebActivityView];
 }
 
 - (void)webConnector:(WebConnector *)webConnector getFeaturedEventFailure:(ASIHTTPRequest *)request {
@@ -462,7 +474,11 @@ CGFloat const FEV_DESCRIPTION_LABEL_PADDING_HORIZONTAL = 20.0;
 	NSError *error = [request error];
 	NSLog(@"%@",error);
 	//[self serverError];
-    [self updateInterfaceFromFeaturedEvent:[self.coreDataModel getFeaturedEvent]]; // This could be an old featured event, or it could be nothing.
+    self.featuredEvent = [self.coreDataModel getFeaturedEvent]; // This could be an old featured event, or it could be nil (if we had never before successfully retrieved a featured event from the web).
+    [self updateInterfaceFromFeaturedEvent:self.featuredEvent]; // This could be an old featured event, or it could be nothing.
+    if (self.imageView.image == nil) {
+        [self.imageView setImageWithURL:[URLBuilder imageURLForImageLocation:self.featuredEvent.imageLocation] placeholderImage:[UIImage imageNamed:@"event_img_placeholder.png"]];
+    }
 //    [self hideWebActivityView];
 }
 
@@ -474,9 +490,9 @@ CGFloat const FEV_DESCRIPTION_LABEL_PADDING_HORIZONTAL = 20.0;
     self.refreshHeaderView.alpha = 0.0;
 }
 
-- (void) updateInterfaceFromFeaturedEvent:(Event *)featuredEvent {
+- (void) updateInterfaceFromFeaturedEvent:(Event *)theFeaturedEvent {
     
-    if (featuredEvent) {
+    if (theFeaturedEvent) {
         self.noFeaturedEventView.alpha = 0.0;
         self.noFeaturedEventView.userInteractionEnabled = NO;
         self.letsGoButton.alpha = 1.0;
@@ -499,29 +515,29 @@ CGFloat const FEV_DESCRIPTION_LABEL_PADDING_HORIZONTAL = 20.0;
         [self enableRefreshHeaderView];
     }
     
-    if (featuredEvent) {
+    if (theFeaturedEvent) {
 
         // Title
-        NSString * title = featuredEvent.title;
+        NSString * title = theFeaturedEvent.title;
         if (!title) { title = FEATURED_EVENT_TITLE_NOT_AVAILABLE; }
 
         // Date & Time
-        NSString * time = [self.webDataTranslator timeSpanStringFromStartDatetime:featuredEvent.startTimeDatetime endDatetime:featuredEvent.endTimeDatetime dataUnavailableString:FEATURED_EVENT_TIME_NOT_AVAILABLE];
-        NSString * date = [self.webDataTranslator dateSpanStringFromStartDatetime:featuredEvent.startDateDatetime endDatetime:featuredEvent.endDateDatetime relativeDates:YES dataUnavailableString:FEATURED_EVENT_DATE_NOT_AVAILABLE];
+        NSString * time = [self.webDataTranslator timeSpanStringFromStartDatetime:theFeaturedEvent.startTimeDatetime endDatetime:theFeaturedEvent.endTimeDatetime dataUnavailableString:FEATURED_EVENT_TIME_NOT_AVAILABLE];
+        NSString * date = [self.webDataTranslator dateSpanStringFromStartDatetime:theFeaturedEvent.startDateDatetime endDatetime:theFeaturedEvent.endDateDatetime relativeDates:YES dataUnavailableString:FEATURED_EVENT_DATE_NOT_AVAILABLE];
                 
         // Price
-        NSString * price = [self.webDataTranslator priceRangeStringFromMinPrice:featuredEvent.priceMinimum maxPrice:featuredEvent.priceMaximum dataUnavailableString:FEATURED_EVENT_COST_NOT_AVAILABLE];
+        NSString * price = [self.webDataTranslator priceRangeStringFromMinPrice:theFeaturedEvent.priceMinimum maxPrice:theFeaturedEvent.priceMaximum dataUnavailableString:FEATURED_EVENT_COST_NOT_AVAILABLE];
         price = [NSString stringWithFormat:@"Price: %@", price];
         
         // Location & Address
-        NSString * addressFirstLine = featuredEvent.address;
-        NSString * addressSecondLine = [self.webDataTranslator addressSecondLineStringFromCity:featuredEvent.city state:featuredEvent.state zip:featuredEvent.zip];
+        NSString * addressFirstLine = theFeaturedEvent.address;
+        NSString * addressSecondLine = [self.webDataTranslator addressSecondLineStringFromCity:theFeaturedEvent.city state:theFeaturedEvent.state zip:theFeaturedEvent.zip];
         BOOL someLocationInfo = addressFirstLine || addressSecondLine;
         if (!addressFirstLine) { addressFirstLine = FEATURED_EVENT_ADDRESS_NOT_AVAILABLE; }
-        BOOL mapButtonActive = featuredEvent.latitude && featuredEvent.longitude;
+        BOOL mapButtonActive = theFeaturedEvent.latitude && theFeaturedEvent.longitude;
         
         // Venue
-        NSString * theVenue = featuredEvent.venue;
+        NSString * theVenue = theFeaturedEvent.venue;
         if (!theVenue) { 
             if (someLocationInfo) {
                 theVenue = @"Location:";
@@ -531,11 +547,11 @@ CGFloat const FEV_DESCRIPTION_LABEL_PADDING_HORIZONTAL = 20.0;
         }
         
         // Phone number
-        NSString * phoneNumber = featuredEvent.phone;
+        NSString * phoneNumber = theFeaturedEvent.phone;
         if (!phoneNumber) { phoneNumber = FEATURED_EVENT_PHONE_NUMBER_NOT_AVAILABLE; }
         
         // Description
-        NSString * theDescription = featuredEvent.details;
+        NSString * theDescription = theFeaturedEvent.details;
         if (!theDescription) { theDescription = FEATURED_EVENT_DESCRIPTION_NOT_AVAILABLE; }
         
         // "Category" display color
@@ -567,8 +583,8 @@ CGFloat const FEV_DESCRIPTION_LABEL_PADDING_HORIZONTAL = 20.0;
         // Price
         self.priceLabel.text = price;
         // Phone number
-        self.phoneNumberButton.enabled = (featuredEvent.phone != nil);
-        self.phoneNumberButton.userInteractionEnabled = (featuredEvent.phone != nil);
+        self.phoneNumberButton.enabled = (theFeaturedEvent.phone != nil);
+        self.phoneNumberButton.userInteractionEnabled = (theFeaturedEvent.phone != nil);
         [self.phoneNumberButton setTitle:phoneNumber forState:UIControlStateNormal];
         [self.phoneNumberButton sizeToFit];
         CGRect phoneNumberButtonFrame = self.phoneNumberButton.frame;
@@ -589,12 +605,9 @@ CGFloat const FEV_DESCRIPTION_LABEL_PADDING_HORIZONTAL = 20.0;
         CGFloat endOfInfoY = CGRectGetMaxY(self.eventDetailsContainer.frame);
         [self.scrollView setContentSize:CGSizeMake(self.scrollView.bounds.size.width, endOfInfoY)];
         
-        [self.imageView setImageWithURL:[URLBuilder imageURLForImageLocation:featuredEvent.imageLocation] placeholderImage:[UIImage imageNamed:@"event_img_placeholder.png"]];
-        
-        
 //        // Invoke the NSOperation
 //        NSOperationQueue * queue = [[NSOperationQueue alloc] init];
-//        NSInvocationOperation * operation = [[NSInvocationOperation alloc] initWithTarget:self selector:@selector(loadImageWithLocation:) object:featuredEvent.imageLocation];
+//        NSInvocationOperation * operation = [[NSInvocationOperation alloc] initWithTarget:self selector:@selector(loadImageWithLocation:) object:theFeaturedEvent.imageLocation];
 //        [queue addOperation:operation];
 //        [operation release];
 //        [queue release];
@@ -659,7 +672,7 @@ CGFloat const FEV_DESCRIPTION_LABEL_PADDING_HORIZONTAL = 20.0;
 
 -(IBAction)phoneCall:(id)sender  {
 	NSLog(@"phone call");
-    [[UIApplication sharedApplication] openURL:[NSURL URLWithString:[NSString stringWithFormat:@"tel:%@", [self.coreDataModel getFeaturedEvent].phone]]];
+    [[UIApplication sharedApplication] openURL:[NSURL URLWithString:[NSString stringWithFormat:@"tel:%@", self.featuredEvent.phone]]];
 }
 
 - (FacebookManager *)facebookManager {
@@ -711,10 +724,8 @@ CGFloat const FEV_DESCRIPTION_LABEL_PADDING_HORIZONTAL = 20.0;
 
 - (void)letsGoButtonTouched {
     
-    Event * featuredEvent = [self.coreDataModel getFeaturedEvent];
-    
     // Send learned data to the web
-    [self.webConnector sendLearnedDataAboutEvent:featuredEvent.uri withUserAction:@"G"];
+    [self.webConnector sendLearnedDataAboutEvent:self.featuredEvent.uri withUserAction:@"G"];
     
     // Lets go choices
     self.letsGoChoiceActionSheet = [[[UIActionSheet alloc] initWithTitle:@"What would you like to do with this event?" delegate:self cancelButtonTitle:nil destructiveButtonTitle:nil otherButtonTitles:nil] autorelease];
@@ -766,21 +777,20 @@ CGFloat const FEV_DESCRIPTION_LABEL_PADDING_HORIZONTAL = 20.0;
 }
 
 - (void) pushedToShareViaEmail {
-    MFMailComposeViewController * emailViewController = [ActionsManagement makeEmailViewControllerForEvent:[self.coreDataModel getFeaturedEvent] withMailComposeDelegate:self usingWebDataTranslator:self.webDataTranslator];
+    MFMailComposeViewController * emailViewController = [ActionsManagement makeEmailViewControllerForEvent:self.featuredEvent withMailComposeDelegate:self usingWebDataTranslator:self.webDataTranslator];
     [self presentModalViewController:emailViewController animated:YES];
 }
 
 - (void) pushedToShareViaFacebook {
     NSLog(@"Pushed to share via Facebook");
-    [self.facebookManager postToFacebookWallWithEvent:[self.coreDataModel getFeaturedEvent]];
+    [self.facebookManager postToFacebookWallWithEvent:self.featuredEvent];
 }
 
 - (void) pushedToAddToCalendar {
-    Event * featuredEvent = [self.coreDataModel getFeaturedEvent];
     // Add to calendar
-    [ActionsManagement addEventToCalendar:featuredEvent usingWebDataTranslator:self.webDataTranslator];
+    [ActionsManagement addEventToCalendar:self.featuredEvent usingWebDataTranslator:self.webDataTranslator];
     // Show confirmation alert
-    UIAlertView * alert = [[UIAlertView alloc] initWithTitle:@"Event added to Calendar!" message:[NSString stringWithFormat:@"The event \"%@\" has been added to your calendar.", featuredEvent.title] delegate:nil cancelButtonTitle:@"Ok" otherButtonTitles:nil];
+    UIAlertView * alert = [[UIAlertView alloc] initWithTitle:@"Event added to Calendar!" message:[NSString stringWithFormat:@"The event \"%@\" has been added to your calendar.", self.featuredEvent.title] delegate:nil cancelButtonTitle:@"Ok" otherButtonTitles:nil];
     [alert show];
     [alert release];
     
@@ -797,7 +807,7 @@ CGFloat const FEV_DESCRIPTION_LABEL_PADDING_HORIZONTAL = 20.0;
 - (void)contactsSelectViewController:(ContactsSelectViewController *)contactsSelectViewController didFinishWithCancel:(BOOL)didCancel selectedContacts:(NSArray *)selectedContacts {
     
     if (!didCancel) {
-        NSMutableDictionary * parameters = [ActionsManagement makeFacebookEventParametersFromEvent:[self.coreDataModel getFeaturedEvent] eventImage:self.imageView.image/*self.imageFull*/];
+        NSMutableDictionary * parameters = [ActionsManagement makeFacebookEventParametersFromEvent:self.featuredEvent eventImage:self.imageView.image/*self.imageFull*/];
         [self.facebookManager createFacebookEventWithParameters:parameters inviteContacts:selectedContacts];
         [self showWebActivityView];
     }
@@ -860,11 +870,10 @@ CGFloat const FEV_DESCRIPTION_LABEL_PADDING_HORIZONTAL = 20.0;
 - (void) mapButtonTouched {
     self.mapViewController = [[[MapViewController alloc] initWithNibName:@"MapViewController" bundle:[NSBundle mainBundle]] autorelease];
     self.mapViewController.delegate = self;
-    Event * featuredEvent = [self.coreDataModel getFeaturedEvent];
-    self.mapViewController.locationLatitude = featuredEvent.latitude;
-    self.mapViewController.locationLongitude = featuredEvent.longitude;
-    self.mapViewController.locationName = featuredEvent.venue;
-    self.mapViewController.locationAddress = featuredEvent.address;
+    self.mapViewController.locationLatitude = self.featuredEvent.latitude;
+    self.mapViewController.locationLongitude = self.featuredEvent.longitude;
+    self.mapViewController.locationName = self.featuredEvent.venue;
+    self.mapViewController.locationAddress = self.featuredEvent.address;
     [self presentModalViewController:self.mapViewController animated:YES];
 }
 

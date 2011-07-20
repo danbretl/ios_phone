@@ -28,6 +28,8 @@ extern CGFloat const FEATURED_EVENT_MAP_BUTTON_INACTIVE_ALPHA;
 extern CGFloat const FEATURED_EVENT_BACKGROUND_COLOR_ALPHA;
 
 @interface FeaturedEventViewController : UIViewController <MFMailComposeViewControllerDelegate, WebConnectorDelegate, MapViewControllerDelegate, UIActionSheetDelegate, FBRequestDelegate, ContactsSelectViewControllerDelegate>{
+    
+    Event * featuredEvent;
 
     // Model, web, etc
     WebConnector * webConnector;
@@ -78,6 +80,7 @@ extern CGFloat const FEATURED_EVENT_BACKGROUND_COLOR_ALPHA;
 @property(nonatomic,readonly) EGORefreshTableHeaderView *refreshHeaderView;
 @property (retain) MapViewController * mapViewController;
 @property (nonatomic, readonly) FacebookManager * facebookManager;
+@property (retain) Event * featuredEvent;
 
 - (void) updateInterfaceFromFeaturedEvent:(Event *)featuredEvent;
 //- (void) loadImageWithLocation:(NSString *)imageLocation;
