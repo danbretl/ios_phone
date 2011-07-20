@@ -235,9 +235,9 @@
 }
 
 - (void) updateCategory:(Category *)category withTitle:(NSString *)title color:(NSString *)colorHex buttonThumb:(NSString *)buttonThumb {
-    category.title = title ? title : category.title;
-    category.colorHex = colorHex ? colorHex : category.colorHex;
-    category.buttonThumb = buttonThumb ? buttonThumb : category.buttonThumb;
+    category.title = title;
+    category.colorHex = colorHex;
+    category.buttonThumb = buttonThumb;
     category.displayOrder = [self.tempSolutionCategoriesOrderDictionary valueForKey:category.uri];
     category.iconThumb = [self.tempSolutionCategoriesIconThumbsDictionary valueForKey:category.uri];
 }
@@ -448,26 +448,26 @@
         Category * concreteParentCategory = [self getCategoryWithURI:concreteParentCategoryURI];
         event.concreteParentCategory = concreteParentCategory;
     }
-    event.title = titleText ? titleText : event.title;
-    event.url = url ? url : event.url;
-    event.startDatetime = startDatetime ? startDatetime : event.startDatetime;
-    event.endDatetime = endDatetime ? endDatetime : event.endDatetime;
-    event.startDateValid = startDateValid ? startDateValid : event.startDateValid;
-    event.startTimeValid = startTimeValid ? startTimeValid : event.startTimeValid;
-    event.endDateValid = endDateValid ? endDateValid : event.endDateValid;
-    event.endTimeValid = endTimeValid ? endTimeValid : event.endTimeValid;
-    event.venue = venueString ? venueString : event.venue;
-    event.address = addressLineFirst ? addressLineFirst : event.address;
-    event.city = cityString ? cityString : event.city;
-    event.state = stateString ? stateString : event.state;
-    event.zip = zipCodeString ? zipCodeString : event.zip;
-    event.latitude = latitudeValue ? latitudeValue : event.latitude;
-    event.longitude = longitudeValue ? longitudeValue : event.longitude;
-    event.priceMinimum = priceMinimum ? priceMinimum : event.priceMinimum;
-    event.priceMaximum = priceMaximum ? priceMaximum : event.priceMaximum;
-    event.phone = eventPhoneString ? eventPhoneString : event.phone;
-    event.details = descriptionText ? descriptionText : event.details;
-    event.imageLocation = imageLocation ? imageLocation : event.imageLocation;
+    event.title = titleText;// ? titleText : event.title;
+    event.url = url;// ? url : event.url;
+    event.startDatetime = startDatetime;// ? startDatetime : event.startDatetime;
+    event.endDatetime = endDatetime;// ? endDatetime : event.endDatetime;
+    event.startDateValid = startDateValid;// ? startDateValid : event.startDateValid;
+    event.startTimeValid = startTimeValid;// ? startTimeValid : event.startTimeValid;
+    event.endDateValid = endDateValid;// ? endDateValid : event.endDateValid;
+    event.endTimeValid = endTimeValid;// ? endTimeValid : event.endTimeValid;
+    event.venue = venueString;// ? venueString : event.venue;
+    event.address = addressLineFirst;// ? addressLineFirst : event.address;
+    event.city = cityString;// ? cityString : event.city;
+    event.state = stateString;// ? stateString : event.state;
+    event.zip = zipCodeString;// ? zipCodeString : event.zip;
+    event.latitude = latitudeValue;// ? latitudeValue : event.latitude;
+    event.longitude = longitudeValue;// ? longitudeValue : event.longitude;
+    event.priceMinimum = priceMinimum;// ? priceMinimum : event.priceMinimum;
+    event.priceMaximum = priceMaximum;// ? priceMaximum : event.priceMaximum;
+    event.phone = eventPhoneString;// ? eventPhoneString : event.phone;
+    event.details = descriptionText;// ? descriptionText : event.details;
+    event.imageLocation = imageLocation;// ? imageLocation : event.imageLocation;
     if (featuredOverride)   { event.featured = featuredOverride; }
     if (fromSearchOverride) { event.fromSearch = fromSearchOverride; }
     
