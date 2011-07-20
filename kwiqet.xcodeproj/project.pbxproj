@@ -713,7 +713,7 @@
 		32F3092213C3BB16003930F2 /* ContactsSelectViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ContactsSelectViewController.h; sourceTree = "<group>"; };
 		32F3092313C3BB16003930F2 /* ContactsSelectViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ContactsSelectViewController.m; sourceTree = "<group>"; };
 		32F3092413C3BB16003930F2 /* ContactsSelectViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = ContactsSelectViewController.xib; sourceTree = "<group>"; };
-		32FD31EC13AFD82C007549B6 /* kwiqet.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = kwiqet.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		32FD31EC13AFD82C007549B6 /* Kwiqet.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Kwiqet.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		32FD31F013AFD82C007549B6 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		32FD31F213AFD82C007549B6 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		32FD31F413AFD82C007549B6 /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
@@ -1409,7 +1409,7 @@
 		32FD31ED13AFD82C007549B6 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				32FD31EC13AFD82C007549B6 /* kwiqet.app */,
+				32FD31EC13AFD82C007549B6 /* Kwiqet.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -1487,9 +1487,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		32FD31EB13AFD82C007549B6 /* kwiqet */ = {
+		32FD31EB13AFD82C007549B6 /* Kwiqet */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 32FD320C13AFD82D007549B6 /* Build configuration list for PBXNativeTarget "kwiqet" */;
+			buildConfigurationList = 32FD320C13AFD82D007549B6 /* Build configuration list for PBXNativeTarget "Kwiqet" */;
 			buildPhases = (
 				32FD31E813AFD82C007549B6 /* Sources */,
 				32FD31E913AFD82C007549B6 /* Frameworks */,
@@ -1499,9 +1499,9 @@
 			);
 			dependencies = (
 			);
-			name = kwiqet;
+			name = Kwiqet;
 			productName = kwiqet;
-			productReference = 32FD31EC13AFD82C007549B6 /* kwiqet.app */;
+			productReference = 32FD31EC13AFD82C007549B6 /* Kwiqet.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -1521,7 +1521,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				32FD31EB13AFD82C007549B6 /* kwiqet */,
+				32FD31EB13AFD82C007549B6 /* Kwiqet */,
 			);
 		};
 /* End PBXProject section */
@@ -2051,7 +2051,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		32FD320C13AFD82D007549B6 /* Build configuration list for PBXNativeTarget "kwiqet" */ = {
+		32FD320C13AFD82D007549B6 /* Build configuration list for PBXNativeTarget "Kwiqet" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				32FD320D13AFD82D007549B6 /* Debug */,
