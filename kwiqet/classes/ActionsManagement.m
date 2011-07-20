@@ -213,9 +213,18 @@
     if (event.longitude) {
         [parameters setObject:[NSString stringWithFormat:@"%@", event.longitude] forKey:@"longitude"];
     }
+    NSMutableString * facebookEventDescription = [NSMutableString string];
     if (event.details) {
-        [parameters setObject:event.details forKey:@"description"];
+        [facebookEventDescription appendString:event.details];
+        if (event.url) {
+            [facebookEventDescription appendString:@"\n\n"];
+        }
     }
+    if (event.url) {
+        [facebookEventDescription appendFormat:@"View this event on Kwiqet.com: %@", event.url];
+    }
+    [parameters setObject:facebookEventDescription forKey:@"description"];
+
     if (eventImage) {
         [parameters setObject:eventImage forKey:@"picture"];
     }
