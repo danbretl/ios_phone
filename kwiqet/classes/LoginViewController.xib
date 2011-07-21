@@ -4568,7 +4568,7 @@ AAgAAAAIAAIACAACAAAAAgAAAAEAAQABAAE</bytes>
 								<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
 								<object class="NSCustomResource" key="IBUIImage">
 									<string key="NSClassName">NSImage</string>
-									<string key="NSResourceName">kwiqet.png</string>
+									<string key="NSResourceName">kwiqetText_120width.png</string>
 								</object>
 							</object>
 							<object class="IBUIView" id="786487829">
@@ -5197,7 +5197,7 @@ AAgAAAAIAAIACAACAAAAAgAAAAEAAQABAAE</bytes>
 				<string>btn_signin.png</string>
 				<string>btn_signin_touch.png</string>
 				<string>cancel.png</string>
-				<string>kwiqet.png</string>
+				<string>kwiqetText_120width.png</string>
 			</object>
 			<object class="NSMutableArray" key="dict.values">
 				<bool key="EncodedWithXMLCoder">YES</bool>
@@ -5210,7 +5210,7 @@ AAgAAAAIAAIACAACAAAAAgAAAAEAAQABAAE</bytes>
 				<string>{74, 32}</string>
 				<string>{74, 32}</string>
 				<string>{72, 30}</string>
-				<string>{336, 126}</string>
+				<string>{120, 45}</string>
 			</object>
 		</object>
 		<string key="IBCocoaTouchPluginVersion">301</string>
