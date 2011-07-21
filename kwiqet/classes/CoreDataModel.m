@@ -190,7 +190,7 @@
                 newConcreteCategoryDictionary = [newConcreteCategoriesSortedByResourceURI objectAtIndex:newConcreteCategoryURIsIndex];
                 newConcreteCategoryTitle = [WebUtil stringOrNil:[newConcreteCategoryDictionary valueForKey:@"title"]];
                 newConcreteCategoryColor = [WebUtil stringOrNil:[newConcreteCategoryDictionary valueForKey:@"color"]];
-                newConcreteCategoryButtonThumb = [WebUtil stringOrNil:[newConcreteCategoryDictionary valueForKey:@"thumb"]];
+                newConcreteCategoryButtonThumb = [WebUtil stringOrNil:[newConcreteCategoryDictionary valueForKey:@"button_icon"]];
             }
             
             if (shouldCreateNewCategory) {
