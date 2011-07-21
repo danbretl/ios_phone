@@ -125,14 +125,20 @@ static NSString * const FBM_REQUEST_PROFILE_PICTURE = @"FBM_REQUEST_PROFILE_PICT
 
 - (void)dialogDidComplete:(FBDialog *)dialog {
     NSLog(@"Facebook wall post complete");
+    UIAlertView * tempAlertView = [[UIAlertView alloc] initWithTitle:@"Posted to Facebook" message:@"Your Facebook wall post was successful!" delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
+    [tempAlertView show];
+    [tempAlertView release];
 }
 
 - (void) dialogDidNotComplete:(FBDialog *)dialog {
-    NSLog(@"Facebook wall post did not complete");    
+    NSLog(@"Facebook wall post did not complete");
 }
 
 - (void) dialog:(FBDialog *)dialog didFailWithError:(NSError *)error {
     NSLog(@"Facebook wall post failed");
+    UIAlertView * tempAlertView = [[UIAlertView alloc] initWithTitle:@"Facebook Connection Error" message:@"There was a problem while trying to post to your Facebook wall. Check your settings and try again, or if the problem persists, disconnect and reconnect Facebook in the 'Settings' tab." delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
+    [tempAlertView show];
+    [tempAlertView release];
 }
 
 - (void) updateFacebookFriends {
