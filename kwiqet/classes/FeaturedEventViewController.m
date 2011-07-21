@@ -462,7 +462,7 @@ CGFloat const FEV_DESCRIPTION_LABEL_PADDING_HORIZONTAL = 20.0;
     if (self.imageView.image == nil ||
         oldFeaturedImageLocation == nil ||
         ![self.featuredEvent.imageLocation isEqualToString:oldFeaturedImageLocation]) {
-        [self.imageView setImageWithURL:[URLBuilder imageURLForImageLocation:self.featuredEvent.imageLocation] placeholderImage:[UIImage imageNamed:@"event_img_placeholder.png"]];
+        [self.imageView setImageWithURL:[URLBuilder imageURLForImageLocation:self.featuredEvent.imageLocation] placeholderImage:[UIImage imageNamed:@"feat_event_img_placeholder.png"]];
     }
     
 //    [self hideWebActivityView];
@@ -477,7 +477,7 @@ CGFloat const FEV_DESCRIPTION_LABEL_PADDING_HORIZONTAL = 20.0;
     self.featuredEvent = [self.coreDataModel getFeaturedEvent]; // This could be an old featured event, or it could be nil (if we had never before successfully retrieved a featured event from the web).
     [self updateInterfaceFromFeaturedEvent:self.featuredEvent]; // This could be an old featured event, or it could be nothing.
     if (self.imageView.image == nil) {
-        [self.imageView setImageWithURL:[URLBuilder imageURLForImageLocation:self.featuredEvent.imageLocation] placeholderImage:[UIImage imageNamed:@"event_img_placeholder.png"]];
+        [self.imageView setImageWithURL:[URLBuilder imageURLForImageLocation:self.featuredEvent.imageLocation] placeholderImage:[UIImage imageNamed:@"feat_event_img_placeholder.png"]];
     }
 //    [self hideWebActivityView];
 }
