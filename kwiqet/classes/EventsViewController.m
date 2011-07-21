@@ -704,6 +704,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
                 UIAlertView * alertView = [[UIAlertView alloc] initWithTitle:@"No results" message:@"Sorry, we couldn't find any events matching your search." delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
                 [alertView show];
                 [alertView release];
+                [self.mySearchBar becomeFirstResponder];
             }
         } else if ([resultsDetail isEqualToString:EVENTS_UPDATED_USER_INFO_RESULTS_DETAIL_CONNECTION_ERROR]) {
             if (!fromSearch) {
