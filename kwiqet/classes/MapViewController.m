@@ -126,12 +126,18 @@
 }
 
 - (void)viewDidAppear:(BOOL)animated {
-    
+    [super viewDidAppear:animated];
     [self zoomMapToFitEventCoordinate:CLLocationCoordinate2DMake([self.locationLatitude floatValue], [self.locationLongitude floatValue]) andUserLocation:self.mapView.userLocation];
     
 }
 
 - (void) viewWillDisappear:(BOOL)animated {
+    [super viewWillDisappear:animated];
+    [self.locationManager stopUpdatingLocation];
+}
+
+- (void) viewDidDisappear:(BOOL)animated {
+    [super viewDidDisappear:animated];
     [self.locationManager stopUpdatingLocation];
 }
 
@@ -149,6 +155,7 @@
 }
 
 - (void)backButtonPushed {
+    [self.locationManager stopUpdatingLocation];
     [self.delegate mapViewControllerDidPushBackButton:self];
 }
 
