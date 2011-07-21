@@ -50,6 +50,7 @@ float const CSVC_TAB_BUTTON_ANIMATION_DURATION = .25;
 - (void) startProfilePictureDownloadForContact:(Contact *)contact atIndexPath:(NSIndexPath *)indexPath;
 - (void) facebookProfilePictureGetterFinished:(FacebookProfilePictureGetter *)profilePictureGetter withImage:(UIImage *)image;
 - (void) ignoreAllPendingProfilePictureDownloads;
+- (void)facebookAuthFailure:(NSNotification *)notification;
 @end
 
 @implementation ContactsSelectViewController
@@ -120,6 +121,8 @@ float const CSVC_TAB_BUTTON_ANIMATION_DURATION = .25;
 - (void)viewDidLoad
 {
     [super viewDidLoad];
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(facebookAuthFailure:) name:FBM_AUTH_ERROR_KEY object:nil];
     
 //    [LocalImagesManager removeAllFacebookProfilePictures];
     
@@ -729,6 +732,16 @@ float const CSVC_TAB_BUTTON_ANIMATION_DURATION = .25;
 			break;
 		}
 	}
+}
+
+- (void)facebookAuthFailure:(NSNotification *)notification {
+    if (self.view.window) {
+        [self hideWebActivityView];
+        UIAlertView * alertView = [[UIAlertView alloc] initWithTitle:@"Facebook Connection Error" message:@"Something appears to have gone wrong with your Facebook connection. Please go to settings and try reconnecting - that should fix the problem." delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
+        [alertView show];
+        [alertView release];
+        [self.delegate contactsSelectViewController:self didFinishWithCancel:YES selectedContacts:nil];
+    }
 }
 
 @end
