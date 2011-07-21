@@ -732,13 +732,13 @@
     [self.shareChoiceActionSheet addButtonWithTitle:@"Send an Email"];
     [shareChoiceActionSheetSelectors addObject:[NSValue valueWithPointer:@selector(pushedToShareViaEmail)]];
     // Create Facebook event
-    [self.facebookManager pullAuthenticationInfoFromDefaults];
-    if ([self.facebookManager.fb isSessionValid]) {
+//    [self.facebookManager pullAuthenticationInfoFromDefaults];
+//    if ([self.facebookManager.fb isSessionValid]) {
         [self.shareChoiceActionSheet addButtonWithTitle:@"Post to Facebook"];
         [shareChoiceActionSheetSelectors addObject:[NSValue valueWithPointer:@selector(pushedToShareViaFacebook)]];
-    } else {
-        moreSocialChoicesToBeHad = YES;
-    }
+//    } else {
+//        moreSocialChoicesToBeHad = YES;
+//    }
     // Cancel button
     [self.shareChoiceActionSheet addButtonWithTitle:@"Cancel"];
     self.shareChoiceActionSheet.cancelButtonIndex = self.shareChoiceActionSheet.numberOfButtons - 1;
@@ -774,13 +774,13 @@
     [self.letsGoChoiceActionSheet addButtonWithTitle:@"Add to Calendar"];
     [letsGoChoiceActionSheetSelectors addObject:[NSValue valueWithPointer:@selector(pushedToAddToCalendar)]];
     // Create Facebook event
-    [self.facebookManager pullAuthenticationInfoFromDefaults];
-    if ([self.facebookManager.fb isSessionValid]) {
+//    [self.facebookManager pullAuthenticationInfoFromDefaults];
+//    if ([self.facebookManager.fb isSessionValid]) {
         [self.letsGoChoiceActionSheet addButtonWithTitle:@"Create Facebook Event"];
         [letsGoChoiceActionSheetSelectors addObject:[NSValue valueWithPointer:@selector(pushedToCreateFacebookEvent)]];
-    } else {
-        moreSocialChoicesToBeHad = YES;
-    }
+//    } else {
+//        moreSocialChoicesToBeHad = YES;
+//    }
     // Cancel button
     [self.letsGoChoiceActionSheet addButtonWithTitle:@"Cancel"];
     self.letsGoChoiceActionSheet.cancelButtonIndex = self.letsGoChoiceActionSheet.numberOfButtons - 1;
@@ -800,7 +800,9 @@
         
         NSArray * actionSheetSelectors = (actionSheet == self.shareChoiceActionSheet) ? self.shareChoiceActionSheetSelectors : self.letsGoChoiceActionSheetSelectors;
         
-        if (buttonIndex >= 0 &&
+        if (buttonIndex == [actionSheet cancelButtonIndex]) {
+            // Cancel button pushed...
+        } else if (buttonIndex >= 0 &&
             actionSheetSelectors && 
             [actionSheetSelectors count] > buttonIndex) {
             SEL actionSheetSelector = [[actionSheetSelectors objectAtIndex:buttonIndex] pointerValue];
@@ -822,7 +824,14 @@
 
 - (void) pushedToShareViaFacebook {
     NSLog(@"Pushed to share via Facebook");
-    [self.facebookManager postToFacebookWallWithEvent:self.event];
+    [self.facebookManager pullAuthenticationInfoFromDefaults];
+    if ([self.facebookManager.fb isSessionValid]) {
+        [self.facebookManager postToFacebookWallWithEvent:self.event];
+    } else {
+        UIAlertView * facebookNotConnectedAlertView = [[UIAlertView alloc] initWithTitle:@"Facebook Not Connected" message:@"Please go to the 'Settings' tab and connect Facebook to your Kwiqet account." delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
+        [facebookNotConnectedAlertView show];
+        [facebookNotConnectedAlertView release];
+    }
 }
 
 - (void) pushedToAddToCalendar {
@@ -834,13 +843,22 @@
     [alert release];
 
 }
+
 - (void) pushedToCreateFacebookEvent {
-    ContactsSelectViewController * contactsSelectViewController = [[ContactsSelectViewController alloc] initWithNibName:@"ContactsSelectViewController" bundle:[NSBundle mainBundle]];
-    //            contactsSelectViewController.contactsAll = [self.coreDataModel getAllFacebookContacts];
-    contactsSelectViewController.delegate = self;
-    contactsSelectViewController.coreDataModel = self.coreDataModel;
-    [self presentModalViewController:contactsSelectViewController animated:YES];
-    [contactsSelectViewController release];
+    NSLog(@"Pushed to create Facebook event");
+    [self.facebookManager pullAuthenticationInfoFromDefaults];
+    if ([self.facebookManager.fb isSessionValid]) {
+        ContactsSelectViewController * contactsSelectViewController = [[ContactsSelectViewController alloc] initWithNibName:@"ContactsSelectViewController" bundle:[NSBundle mainBundle]];
+        //            contactsSelectViewController.contactsAll = [self.coreDataModel getAllFacebookContacts];
+        contactsSelectViewController.delegate = self;
+        contactsSelectViewController.coreDataModel = self.coreDataModel;
+        [self presentModalViewController:contactsSelectViewController animated:YES];
+        [contactsSelectViewController release];
+    } else {
+        UIAlertView * facebookNotConnectedAlertView = [[UIAlertView alloc] initWithTitle:@"Facebook Not Connected" message:@"Please go to the 'Settings' tab and connect Facebook to your Kwiqet account." delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
+        [facebookNotConnectedAlertView show];
+        [facebookNotConnectedAlertView release];
+    }
 }
 
 - (void)contactsSelectViewController:(ContactsSelectViewController *)contactsSelectViewController didFinishWithCancel:(BOOL)didCancel selectedContacts:(NSArray *)selectedContacts {

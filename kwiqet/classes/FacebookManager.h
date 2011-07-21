@@ -36,6 +36,8 @@ static NSString * const FBM_AUTH_ERROR_KEY = @"FBM_AUTH_ERROR_KEY";
     BOOL shouldForgetFacebookAccessTokenOnLogout;
     NSString * kwiqetIdentifierForWhichToForgetFacebookAccessToken;
     BOOL ignoreRequestResults_;
+    UIAlertView * postToWallSuccessfulAlertView;
+    UIAlertView * postToWallFailureAlertView;
 }
 
 @property (nonatomic, readonly) Facebook * facebook;

@@ -28,6 +28,8 @@ static NSString * const FBM_REQUEST_PROFILE_PICTURE = @"FBM_REQUEST_PROFILE_PICT
 @property (retain) NSArray * eventInvitees;
 @property BOOL shouldForgetFacebookAccessTokenOnLogout;
 @property (copy) NSString * kwiqetIdentifierForWhichToForgetFacebookAccessToken;
+@property (readonly) UIAlertView * postToWallSuccessfulAlertView;
+@property (readonly) UIAlertView * postToWallFailureAlertView;
 @end
 
 @implementation FacebookManager
@@ -38,6 +40,7 @@ static NSString * const FBM_REQUEST_PROFILE_PICTURE = @"FBM_REQUEST_PROFILE_PICT
 @synthesize shouldForgetFacebookAccessTokenOnLogout;
 @synthesize kwiqetIdentifierForWhichToForgetFacebookAccessToken;
 @synthesize ignoreRequestResults;
+@synthesize postToWallSuccessfulAlertView, postToWallFailureAlertView;
 
 - (void)dealloc {
     [facebook release];
@@ -46,6 +49,8 @@ static NSString * const FBM_REQUEST_PROFILE_PICTURE = @"FBM_REQUEST_PROFILE_PICT
     [currentRequestType release];
     [eventInvitees release];
     [kwiqetIdentifierForWhichToForgetFacebookAccessToken release];
+    [postToWallSuccessfulAlertView release];
+    [postToWallFailureAlertView release];
     [super dealloc];
 }
 
@@ -56,6 +61,20 @@ static NSString * const FBM_REQUEST_PROFILE_PICTURE = @"FBM_REQUEST_PROFILE_PICT
     return facebook;
 }
 - (Facebook *)fb { return self.facebook; }
+
+- (UIAlertView *)postToWallSuccessfulAlertView {
+    if (postToWallSuccessfulAlertView == nil) {
+        postToWallSuccessfulAlertView = [[UIAlertView alloc] initWithTitle:@"Posted to Facebook" message:@"Your Facebook wall post was successful!" delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
+    }
+    return postToWallSuccessfulAlertView;
+}
+
+- (UIAlertView *)postToWallFailureAlertView {
+    if (postToWallFailureAlertView == nil) {
+        postToWallFailureAlertView = [[UIAlertView alloc] initWithTitle:@"Facebook Connection Error" message:@"There was a problem while trying to post to your Facebook wall. Check your settings and try again, or if the problem persists, disconnect and reconnect Facebook in the 'Settings' tab." delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
+    }
+    return postToWallFailureAlertView;
+}
 
 - (void)pushAuthenticationInfoToDefaults {
     NSString * kwiqetIdentifier = [DefaultsModel retrieveKwiqetUserIdentifierFromUserDefaults];
@@ -125,9 +144,10 @@ static NSString * const FBM_REQUEST_PROFILE_PICTURE = @"FBM_REQUEST_PROFILE_PICT
 
 - (void)dialogDidComplete:(FBDialog *)dialog {
     NSLog(@"Facebook wall post complete");
-    UIAlertView * tempAlertView = [[UIAlertView alloc] initWithTitle:@"Posted to Facebook" message:@"Your Facebook wall post was successful!" delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
-    [tempAlertView show];
-    [tempAlertView release];
+    if (!([self.postToWallFailureAlertView isVisible] ||
+          [self.postToWallSuccessfulAlertView isVisible])) {
+        [self.postToWallSuccessfulAlertView show];
+    }
 }
 
 - (void) dialogDidNotComplete:(FBDialog *)dialog {
@@ -136,9 +156,10 @@ static NSString * const FBM_REQUEST_PROFILE_PICTURE = @"FBM_REQUEST_PROFILE_PICT
 
 - (void) dialog:(FBDialog *)dialog didFailWithError:(NSError *)error {
     NSLog(@"Facebook wall post failed");
-    UIAlertView * tempAlertView = [[UIAlertView alloc] initWithTitle:@"Facebook Connection Error" message:@"There was a problem while trying to post to your Facebook wall. Check your settings and try again, or if the problem persists, disconnect and reconnect Facebook in the 'Settings' tab." delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
-    [tempAlertView show];
-    [tempAlertView release];
+    if (!([self.postToWallFailureAlertView isVisible] ||
+          [self.postToWallSuccessfulAlertView isVisible])) {
+        [self.postToWallFailureAlertView show];
+    }
 }
 
 - (void) updateFacebookFriends {
