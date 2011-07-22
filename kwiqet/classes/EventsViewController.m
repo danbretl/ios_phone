@@ -13,7 +13,7 @@
 #import <YAJL/YAJL.h>
 #import "DefaultsModel.h"
 #import "WebUtil.h"
-#import "LocalyticsSession.h"
+#import "Analytics.h"
 
 static NSString * const EVENTS_FILTER_RECOMMENDED = @"recommended";
 static NSString * const EVENTS_FILTER_FREE = @"free";
@@ -517,19 +517,16 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     
     /////////////////////
     // Localytics below
-    NSMutableDictionary * localyticsDictionary = [NSMutableDictionary dictionary];
     NSString * localyticsFilterString = @"recommended";
     if (theProposedFilterString) { 
         localyticsFilterString = theProposedFilterString;
     }
-    [localyticsDictionary setValue:localyticsFilterString forKey:@"filter"]; 
     NSString * localyticsCategoryString = @"all";
     if (theProposedCategoryURI) {
         Category * category = [self.coreDataModel getCategoryWithURI:theProposedCategoryURI];
         localyticsCategoryString = category.title;
     }
-    [localyticsDictionary setValue:localyticsCategoryString forKey:@"category"];
-    [[LocalyticsSession sharedLocalyticsSession] tagEvent:@"Test - Get Events" attributes:localyticsDictionary];
+    [Analytics localyticsSendGetEventsWithFilter:localyticsFilterString category:localyticsCategoryString];
     // Localytics above
     /////////////////////
     

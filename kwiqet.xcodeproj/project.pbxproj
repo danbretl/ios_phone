@@ -184,6 +184,8 @@
 		32733E3013B0FCBA0053C44A /* SBJsonWriter.m in Sources */ = {isa = PBXBuildFile; fileRef = 32733E2A13B0FCBA0053C44A /* SBJsonWriter.m */; };
 		3278EFE413D88C1700948EE6 /* kwiqetText_120width.png in Resources */ = {isa = PBXBuildFile; fileRef = 3278EFE213D88C1700948EE6 /* kwiqetText_120width.png */; };
 		3278EFE513D88C1700948EE6 /* kwiqetText_120width@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 3278EFE313D88C1700948EE6 /* kwiqetText_120width@2x.png */; };
+		327C4DB113DA270B00DAAD51 /* BugSense-iOS.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 327C4DB013DA270B00DAAD51 /* BugSense-iOS.framework */; };
+		327C4DB613DA301D00DAAD51 /* Analytics.m in Sources */ = {isa = PBXBuildFile; fileRef = 327C4DB513DA301D00DAAD51 /* Analytics.m */; };
 		32BEE72F13BA4720009D583E /* cardbg.png in Resources */ = {isa = PBXBuildFile; fileRef = 32BEE72913BA4720009D583E /* cardbg.png */; };
 		32BEE73013BA4720009D583E /* cardbg@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 32BEE72A13BA4720009D583E /* cardbg@2x.png */; };
 		32C3A61A13CC005F00A12C12 /* ContactCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 32C3A61913CC005F00A12C12 /* ContactCell.m */; };
@@ -525,6 +527,9 @@
 		32733E2A13B0FCBA0053C44A /* SBJsonWriter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SBJsonWriter.m; path = kwiqet/classes/SBJsonWriter.m; sourceTree = SOURCE_ROOT; };
 		3278EFE213D88C1700948EE6 /* kwiqetText_120width.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = kwiqetText_120width.png; sourceTree = "<group>"; };
 		3278EFE313D88C1700948EE6 /* kwiqetText_120width@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "kwiqetText_120width@2x.png"; sourceTree = "<group>"; };
+		327C4DB013DA270B00DAAD51 /* BugSense-iOS.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = "BugSense-iOS.framework"; sourceTree = "<group>"; };
+		327C4DB413DA301D00DAAD51 /* Analytics.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Analytics.h; sourceTree = "<group>"; };
+		327C4DB513DA301D00DAAD51 /* Analytics.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Analytics.m; sourceTree = "<group>"; };
 		329CC46D13D5FEA90077C748 /* kwiqet 007.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "kwiqet 007.xcdatamodel"; sourceTree = "<group>"; };
 		32B36CD913B27DF1004C2068 /* kwiqet 002.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "kwiqet 002.xcdatamodel"; sourceTree = "<group>"; };
 		32BEE72913BA4720009D583E /* cardbg.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = cardbg.png; sourceTree = "<group>"; };
@@ -703,12 +708,13 @@
 			buildActionMask = 2147483647;
 			files = (
 				32FD38B613AFF5EB007549B6 /* libz.1.2.3.dylib in Frameworks */,
+				32FD38AA13AFF5B0007549B6 /* SystemConfiguration.framework in Frameworks */,
+				327C4DB113DA270B00DAAD51 /* BugSense-iOS.framework in Frameworks */,
 				32FD38B413AFF5DB007549B6 /* QuartzCore.framework in Frameworks */,
 				32FD38B113AFF5CE007549B6 /* EventKit.framework in Frameworks */,
 				32FD38B213AFF5CE007549B6 /* EventKitUI.framework in Frameworks */,
 				32FD38AE13AFF5C4007549B6 /* MediaPlayer.framework in Frameworks */,
 				32FD38AC13AFF5BE007549B6 /* CFNetwork.framework in Frameworks */,
-				32FD38AA13AFF5B0007549B6 /* SystemConfiguration.framework in Frameworks */,
 				32FD38A813AFF5A7007549B6 /* MobileCoreServices.framework in Frameworks */,
 				32FD38A613AFF594007549B6 /* MapKit.framework in Frameworks */,
 				32FD38A413AFF58A007549B6 /* MessageUI.framework in Frameworks */,
@@ -1165,6 +1171,8 @@
 				3211538E13B4E56500DE5163 /* FacebookManager.m */,
 				322CDFE313CF44BA005203C2 /* FacebookProfilePictureGetter.h */,
 				322CDFE413CF44BA005203C2 /* FacebookProfilePictureGetter.m */,
+				327C4DB413DA301D00DAAD51 /* Analytics.h */,
+				327C4DB513DA301D00DAAD51 /* Analytics.m */,
 			);
 			name = web;
 			sourceTree = "<group>";
@@ -1244,6 +1252,7 @@
 			isa = PBXGroup;
 			children = (
 				32FD38B513AFF5EB007549B6 /* libz.1.2.3.dylib */,
+				327C4DB013DA270B00DAAD51 /* BugSense-iOS.framework */,
 				32041B6A13AFFE330072F95C /* YAJL.framework */,
 				32FD38B313AFF5DB007549B6 /* QuartzCore.framework */,
 				32FD38AF13AFF5CE007549B6 /* EventKit.framework */,
@@ -1653,6 +1662,7 @@
 				326F6C7D13D0E2B80032CA5F /* SDImageCache.m in Sources */,
 				326F6C8C13D108260032CA5F /* UploaderThread.m in Sources */,
 				326F6C8D13D108260032CA5F /* LocalyticsSession.m in Sources */,
+				327C4DB613DA301D00DAAD51 /* Analytics.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1746,7 +1756,7 @@
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
-				COPY_PHASE_STRIP = YES;
+				COPY_PHASE_STRIP = NO;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(SRCROOT)/kwiqet\"",

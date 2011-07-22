@@ -15,6 +15,7 @@
 #import "WebUtil.h"
 #import "ActionsManagement.h"
 #import "UIImageView+WebCache.h"
+#import "Analytics.h"
 
 // "Data not available" strings
 static NSString * const FEATURED_EVENT_TITLE_NOT_AVAILABLE = @"Event";
@@ -779,6 +780,11 @@ CGFloat const FEV_DESCRIPTION_LABEL_PADDING_HORIZONTAL = 20.0;
 }
 
 - (void) pushedToShareViaEmail {
+    /////////////////////
+    // Localytics below
+    [Analytics localyticsSendShareViaEmailWithEvent:self.featuredEvent];
+    // Localytics above
+    /////////////////////
     MFMailComposeViewController * emailViewController = [ActionsManagement makeEmailViewControllerForEvent:self.featuredEvent withMailComposeDelegate:self usingWebDataTranslator:self.webDataTranslator];
     [self presentModalViewController:emailViewController animated:YES];
 }
@@ -787,6 +793,11 @@ CGFloat const FEV_DESCRIPTION_LABEL_PADDING_HORIZONTAL = 20.0;
     NSLog(@"Pushed to share via Facebook");
     [self.facebookManager pullAuthenticationInfoFromDefaults];
     if ([self.facebookManager.fb isSessionValid]) {
+        /////////////////////
+        // Localytics below
+        [Analytics localyticsSendShareViaFacebookWithEvent:self.featuredEvent];
+        // Localytics above
+        /////////////////////
         [self.facebookManager postToFacebookWallWithEvent:self.featuredEvent];
     } else {
         UIAlertView * facebookNotConnectedAlertView = [[UIAlertView alloc] initWithTitle:@"Facebook Not Connected" message:@"Please go to the 'Settings' tab and connect Facebook to your Kwiqet account." delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
@@ -796,6 +807,11 @@ CGFloat const FEV_DESCRIPTION_LABEL_PADDING_HORIZONTAL = 20.0;
 }
 
 - (void) pushedToAddToCalendar {
+    /////////////////////
+    // Localytics below
+    [Analytics localyticsSendLetsGoAddToCalendarWithEvent:self.featuredEvent];
+    // Localytics above
+    /////////////////////
     // Add to calendar
     [ActionsManagement addEventToCalendar:self.featuredEvent usingWebDataTranslator:self.webDataTranslator];
     // Show confirmation alert
@@ -809,6 +825,11 @@ CGFloat const FEV_DESCRIPTION_LABEL_PADDING_HORIZONTAL = 20.0;
     NSLog(@"Pushed to create Facebook event");
     [self.facebookManager pullAuthenticationInfoFromDefaults];
     if ([self.facebookManager.fb isSessionValid]) {
+        /////////////////////
+        // Localytics below
+        [Analytics localyticsSendLetsGoCreateFacebookEventWithEvent:self.featuredEvent];
+        // Localytics above
+        /////////////////////
         ContactsSelectViewController * contactsSelectViewController = [[ContactsSelectViewController alloc] initWithNibName:@"ContactsSelectViewController" bundle:[NSBundle mainBundle]];
         //            contactsSelectViewController.contactsAll = [self.coreDataModel getAllFacebookContacts];
         contactsSelectViewController.delegate = self;

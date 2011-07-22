@@ -15,6 +15,7 @@
 #import <QuartzCore/QuartzCore.h>
 #import "ActionsManagement.h"
 #import "LocalImagesManager.h"
+#import "Analytics.h"
 
 #define CGFLOAT_MAX_TEXT_SIZE 10000
 
@@ -818,6 +819,11 @@
 }
 
 - (void) pushedToShareViaEmail {
+    /////////////////////
+    // Localytics below
+    [Analytics localyticsSendShareViaEmailWithEvent:self.event];
+    // Localytics above
+    /////////////////////
     MFMailComposeViewController * emailViewController = [ActionsManagement makeEmailViewControllerForEvent:self.event withMailComposeDelegate:self usingWebDataTranslator:self.webDataTranslator];
     [self presentModalViewController:emailViewController animated:YES];
 }
@@ -826,6 +832,11 @@
     NSLog(@"Pushed to share via Facebook");
     [self.facebookManager pullAuthenticationInfoFromDefaults];
     if ([self.facebookManager.fb isSessionValid]) {
+        /////////////////////
+        // Localytics below
+        [Analytics localyticsSendShareViaFacebookWithEvent:self.event];
+        // Localytics above
+        /////////////////////
         [self.facebookManager postToFacebookWallWithEvent:self.event];
     } else {
         UIAlertView * facebookNotConnectedAlertView = [[UIAlertView alloc] initWithTitle:@"Facebook Not Connected" message:@"Please go to the 'Settings' tab and connect Facebook to your Kwiqet account." delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
@@ -835,6 +846,11 @@
 }
 
 - (void) pushedToAddToCalendar {
+    /////////////////////
+    // Localytics below
+    [Analytics localyticsSendLetsGoAddToCalendarWithEvent:self.event];
+    // Localytics above
+    /////////////////////
     // Add to calendar
     [ActionsManagement addEventToCalendar:self.event usingWebDataTranslator:self.webDataTranslator];
     // Show confirmation alert
@@ -848,6 +864,11 @@
     NSLog(@"Pushed to create Facebook event");
     [self.facebookManager pullAuthenticationInfoFromDefaults];
     if ([self.facebookManager.fb isSessionValid]) {
+        /////////////////////
+        // Localytics below
+        [Analytics localyticsSendLetsGoCreateFacebookEventWithEvent:self.event];
+        // Localytics above
+        /////////////////////
         ContactsSelectViewController * contactsSelectViewController = [[ContactsSelectViewController alloc] initWithNibName:@"ContactsSelectViewController" bundle:[NSBundle mainBundle]];
         //            contactsSelectViewController.contactsAll = [self.coreDataModel getAllFacebookContacts];
         contactsSelectViewController.delegate = self;

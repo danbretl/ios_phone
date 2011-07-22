@@ -13,6 +13,7 @@
 #import "WebUtil.h"
 #import "ContactsSelectViewController.h"
 #import "LocalyticsSession.h"
+#import <BugSense-iOS/BugSenseCrashController.h>
 
 @interface kwiqetAppDelegate()
 - (void) facebookAuthError:(NSNotification *)notification;
@@ -29,6 +30,10 @@
 #pragma mark Application lifecycle
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
+    
+    [[LocalyticsSession sharedLocalyticsSession] startSession:@"197b1a7c8264f82ee994c7c-0c5db5e8-af3b-11e0-037d-007f58cb3154"];
+    BugSenseCrashController * crash = [BugSenseCrashController sharedInstanceWithBugSenseAPIKey:@"9a6d3e3b"];
+    NSLog(@"Created bugSenseCrashController %@", crash);
     
     // Setup stuff
 //    // Caching...
@@ -137,8 +142,6 @@
     
     [self.window makeKeyAndVisible];
     //[self animateSplashScreen];
-    
-    [[LocalyticsSession sharedLocalyticsSession] startSession:@"197b1a7c8264f82ee994c7c-0c5db5e8-af3b-11e0-037d-007f58cb3154"];
     
     return YES;
 }
