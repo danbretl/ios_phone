@@ -392,6 +392,9 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 
 - (void)viewWillDisappear:(BOOL)animated {
     [super viewWillDisappear:animated];
+    if (isCategoriesDrawerOpen) {
+        [self toggleCategoriesDrawerAnimated];
+    }
     [self resignFirstResponder];
 }
 
@@ -832,6 +835,10 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 -(void)filterButtonPressed:(UIButton *)filterButton {
     
     [self highlightFilterButton:filterButton];
+    if (isCategoriesDrawerOpen) {
+        [self toggleCategoriesDrawerAnimated];
+    }
+    
     NSString * filterCode = [self filterCodeForFilterButton:filterButton];
     [self webConnectGetEventsListWithFilter:filterCode categoryURI:self.categoryURI];
 
@@ -966,25 +973,25 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     self.myTableView.allowsSelection = selectable;
 }
 
--(void)categoryButtonPressed:(UIButton *)categoryButton {
-    
-    // Get the category for the categoryButton pushed
-    // Do a web load with that category (and with whatever filter we're currently using)
-    
-    if (isCategoriesDrawerOpen) {
-        [self toggleCategoriesDrawerAnimated];
-    }
-    
-    int categoryButtonTag = categoryButton.tag;
-    NSString * theSelectedCategoryURI = nil;
-    if (categoryButtonTag != -1) {
-        // Specific category
-        int concreteParentCategoryIndex = categoryButtonTag;
-        NSDictionary * categoryDictionary = [self.concreteParentCategoriesArray objectAtIndex:concreteParentCategoryIndex];
-        theSelectedCategoryURI = [categoryDictionary valueForKey:@"uri"];
-    }
+- (void) categoryButtonPressed:(UIButton *)categoryButton {
 
-    [self webConnectGetEventsListWithFilter:self.filterString categoryURI:theSelectedCategoryURI];
+    if (isCategoriesDrawerOpen) {
+        // Get the category for the categoryButton pushed, and do a web load for that category (with whatever filter we're potentially using as well)
+        [self toggleCategoriesDrawerAnimated];
+        int categoryButtonTag = categoryButton.tag;
+        NSString * theSelectedCategoryURI = nil;
+        if (categoryButtonTag != -1) {
+            // Specific category
+            int concreteParentCategoryIndex = categoryButtonTag;
+            NSDictionary * categoryDictionary = [self.concreteParentCategoriesArray objectAtIndex:concreteParentCategoryIndex];
+            theSelectedCategoryURI = [categoryDictionary valueForKey:@"uri"];
+        }
+        
+        [self webConnectGetEventsListWithFilter:self.filterString categoryURI:theSelectedCategoryURI];
+        
+    } else {
+        // Ignore category button press when drawer is closed. This should never happen, and if it did, it is because of multitouching most likely, and shouldn't be respected.
+    }
     
 }
 
