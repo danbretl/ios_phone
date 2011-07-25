@@ -21,20 +21,20 @@ extern float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT;
 
 @interface EventsViewController : UIViewController <UITableViewDelegate, UITableViewDataSource, UISearchBarDelegate, UIAlertViewDelegate, CardPageViewControllerDelegate, WebConnectorDelegate> {
     
-    IBOutlet UIView * filtersContainerView;
+    IBOutlet UIView   * filtersContainerView;
     IBOutlet UIButton * filterButtonCategories;
     IBOutlet UIButton * filterButtonPrice;
     IBOutlet UIButton * filterButtonDateTime;
     IBOutlet UIButton * filterButtonLocation;
     
-    IBOutlet UIView * pushableContainerView;
-    IBOutlet UIView * secondContainerView;
-    IBOutlet UILabel * filtersSummaryLabel;
-    IBOutlet UIView * searchButtonContainerView;
+    IBOutlet UIView   * pushableContainerView;
+    IBOutlet UIView   * filtersSummaryAndSearchContainerView;
+    IBOutlet UILabel  * filtersSummaryLabel;
+    IBOutlet UIView   * searchButtonContainerView;
     IBOutlet UIButton * searchButton;
     
-    IBOutlet UIView * categoriesBackgroundView;
-	IBOutlet UITableView * myTableView;
+    IBOutlet UIView * drawerView;
+	IBOutlet UITableView * tableView_;
     
     UIView * tableFooterView;
     
