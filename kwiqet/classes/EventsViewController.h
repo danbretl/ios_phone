@@ -21,7 +21,21 @@ extern float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT;
 
 @interface EventsViewController : UIViewController <UITableViewDelegate, UITableViewDataSource, UISearchBarDelegate, UIAlertViewDelegate, CardPageViewControllerDelegate, WebConnectorDelegate> {
     
-	UITableView * myTableView;
+    IBOutlet UIView * filtersContainerView;
+    IBOutlet UIButton * filterButtonCategories;
+    IBOutlet UIButton * filterButtonPrice;
+    IBOutlet UIButton * filterButtonDateTime;
+    IBOutlet UIButton * filterButtonLocation;
+    
+    IBOutlet UIView * pushableContainerView;
+    IBOutlet UIView * secondContainerView;
+    IBOutlet UILabel * filtersSummaryLabel;
+    IBOutlet UIView * searchButtonContainerView;
+    IBOutlet UIButton * searchButton;
+    
+    IBOutlet UIView * categoriesBackgroundView;
+	IBOutlet UITableView * myTableView;
+    
     UIView * tableFooterView;
     
 	NSMutableArray * events;
@@ -32,12 +46,12 @@ extern float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT;
     NSString * filterStringProposed;
     NSString * categoryURIProposed;
     
-    UIView   * filtersBackgroundView;
-    UIButton * recommendedFilterButton;
-    UIButton * freeFilterButton;
-    UIButton * popularFilterButton;
+//    UIView   * filtersBackgroundView;
+//    UIButton * recommendedFilterButton;
+//    UIButton * freeFilterButton;
+//    UIButton * popularFilterButton;
     
-    UIButton * logoButton;
+//    UIButton * logoButton;
 	
     CoreDataModel * coreDataModel;
     
@@ -49,8 +63,7 @@ extern float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT;
     BOOL isCategoriesDrawerOpen;
 	
     WebActivityView * webActivityView;
-    UIView * categoriesBackgroundView;
-    UIView * selectedFilterView;
+//    UIView * selectedFilterView;
     
     NSArray * concreteParentCategoriesArray;
     NSDictionary * concreteParentCategoriesDictionary; // Dictionary of Category objects, with their URI's as their keys.
@@ -69,7 +82,6 @@ extern float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT;
     
     BOOL isSearchOn;
 	UISearchBar * mySearchBar;
-    UIButton * searchButton;
     
     BOOL problemViewWasShowing;
     

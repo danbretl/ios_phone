@@ -61,11 +61,26 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 - (void) highlightFilterButtonForFilter:(NSString *)filterCode;
 - (void) setTableViewScrollable:(BOOL)scrollable selectable:(BOOL)selectable;
 - (void) dataSourceEventsUpdated:(NSNotification *)notification;
-- (void) setLogoButtonImageWithImageNamed:(NSString *)imageName;
-- (void) setLogoButtonImageForCategoryURI:(NSString *)categoryURI;
-- (void) setSelectedFilterViewToFilterString:(NSString *)theFilterString animated:(BOOL)animated;
+//- (void) setLogoButtonImageWithImageNamed:(NSString *)imageName;
+//- (void) setLogoButtonImageForCategoryURI:(NSString *)categoryURI;
+//- (void) setSelectedFilterViewToFilterString:(NSString *)theFilterString animated:(BOOL)animated;
 - (void) loginActivity:(NSNotification *)notification;
 - (void) behaviorWasReset:(NSNotification *)notification;
+
+@property (retain) IBOutlet UIView * filtersContainerView;
+@property (retain) IBOutlet UIButton * filterButtonCategories;
+@property (retain) IBOutlet UIButton * filterButtonPrice;
+@property (retain) IBOutlet UIButton * filterButtonDateTime;
+@property (retain) IBOutlet UIButton * filterButtonLocation;
+
+@property (retain) IBOutlet UIView * pushableContainerView;
+@property (retain) IBOutlet UIView * secondContainerView;
+@property (retain) IBOutlet UILabel * filtersSummaryLabel;
+@property (retain) IBOutlet UIView * searchButtonContainerView;
+@property (retain) IBOutlet UIButton * searchButton;
+
+@property (retain) IBOutlet UIView * categoriesBackgroundView;
+@property (retain) IBOutlet UITableView * myTableView;
 
 @property (nonatomic, readonly) UIAlertView * connectionErrorStandardAlertView;
 @property (nonatomic, readonly) UIAlertView * connectionErrorOnDeleteAlertView;
@@ -76,9 +91,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 @property (readonly) BOOL problemViewShowing;
 @property (retain) UIView * problemView;
 @property (retain) UILabel * problemLabel;
-@property (retain) UIButton * searchButton;
-@property (retain) UIButton * logoButton;
-@property (nonatomic, retain) UITableView * myTableView;
+//@property (retain) UIButton * logoButton;
 @property (nonatomic, retain) NSIndexPath * indexPathOfRowAttemptingToDelete;
 @property (nonatomic, retain) NSIndexPath * indexPathOfSelectedRow;
 @property (nonatomic, retain) EventViewController * cardPageViewController;
@@ -87,8 +100,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 @property (nonatomic, retain) UIButton * recommendedFilterButton;
 @property (nonatomic, retain) UIButton * freeFilterButton;
 @property (nonatomic, retain) UIButton * popularFilterButton;
-@property (nonatomic, retain) UIView * categoriesBackgroundView;
-@property (nonatomic, retain) UIView * selectedFilterView;
+//@property (nonatomic, retain) UIView * selectedFilterView;
 @property (nonatomic, readonly) NSDictionary * concreteParentCategoriesDictionary;
 @property (nonatomic, readonly) NSArray * concreteParentCategoriesArray;
 @property (nonatomic, readonly) EGORefreshTableHeaderView *refreshHeaderView;
@@ -112,27 +124,39 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 @end
 
 @implementation EventsViewController
-@synthesize myTableView,mySearchBar,eventsFromSearch, events,coreDataModel,webActivityView,concreteParentCategoriesDictionary,freeFilterButton,recommendedFilterButton,popularFilterButton,categoriesBackgroundView, selectedFilterView, filtersBackgroundView;
+@synthesize filtersContainerView, filterButtonCategories, filterButtonPrice, filterButtonDateTime, filterButtonLocation, pushableContainerView, secondContainerView, filtersSummaryLabel, searchButtonContainerView, searchButton, categoriesBackgroundView, myTableView;
+@synthesize mySearchBar,eventsFromSearch, events,coreDataModel,webActivityView,concreteParentCategoriesDictionary,freeFilterButton,recommendedFilterButton,popularFilterButton, /*selectedFilterView, */filtersBackgroundView;
 @synthesize refreshHeaderView, concreteParentCategoriesArray;
 @synthesize filterString, categoryURI, filterStringProposed, categoryURIProposed;
 @synthesize isSearchOn;
 @synthesize problemView, problemLabel;
 @synthesize cardPageViewController;
-@synthesize indexPathOfRowAttemptingToDelete, indexPathOfSelectedRow, searchButton;
-@synthesize logoButton, tableFooterView;
+@synthesize indexPathOfRowAttemptingToDelete, indexPathOfSelectedRow;
+@synthesize /*logoButton,*/ tableFooterView;
 @synthesize calendarButton;
 //@synthesize facebookManager;
 
 - (void)dealloc {
-    [filtersBackgroundView release];
+    [filtersContainerView release];
+    [filterButtonCategories release];
+    [filterButtonPrice release];
+    [filterButtonDateTime release];
+    [filterButtonLocation release];
+    [pushableContainerView release];
+    [secondContainerView release];
+    [filtersSummaryLabel release];
+    [searchButtonContainerView release];
+    [searchButton release];
     [categoriesBackgroundView release];
-    [selectedFilterView release];
+    [myTableView release];
+    
+    [filtersBackgroundView release];
+//    [selectedFilterView release];
     [recommendedFilterButton release];
     [freeFilterButton release];
     [popularFilterButton release];
     [concreteParentCategoriesDictionary release];
     [concreteParentCategoriesArray release];
-	[myTableView release];
 	[mySearchBar release];
 	[eventsFromSearch release];
 	[events release];
@@ -152,11 +176,20 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     [connectionErrorOnDeleteAlertView release];
     [indexPathOfRowAttemptingToDelete release];
     [indexPathOfSelectedRow release];
-    [logoButton release];
+//    [logoButton release];
     [tableFooterView release];
     [calendarButton release];
 //    [facebookManager release];
     [super dealloc];
+}
+
+- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
+{
+    self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
+    if (self) {
+        // Custom initialization
+    }
+    return self;
 }
 
 // Implement viewDidLoad to do additional setup after loading the view, typically from a nib.
@@ -164,16 +197,16 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     [super viewDidLoad];
         
     // Create categories background view under UITableView
-    self.categoriesBackgroundView = [[[UIView alloc] initWithFrame:CGRectMake(0, 80, 320, 255)] autorelease];
+//    self.categoriesBackgroundView = [[[UIView alloc] initWithFrame:CGRectMake(0, 80, 320, 255)] autorelease];
     self.categoriesBackgroundView.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"cat_overlay.png"]];
     self.categoriesBackgroundView.userInteractionEnabled = NO;
     self.categoriesBackgroundView.layer.masksToBounds = YES;
     
     // Selected filter view
-    self.selectedFilterView = [[[UIView alloc] initWithFrame:CGRectMake(0, 0, 640, 12)] autorelease];
-    self.selectedFilterView.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"cat_overlay-sel.png"]];
-    self.selectedFilterView.opaque = NO;
-    [self.categoriesBackgroundView addSubview:self.selectedFilterView];
+//    self.selectedFilterView = [[[UIView alloc] initWithFrame:CGRectMake(0, 0, 640, 12)] autorelease];
+//    self.selectedFilterView.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"cat_overlay-sel.png"]];
+//    self.selectedFilterView.opaque = NO;
+//    [self.categoriesBackgroundView addSubview:self.selectedFilterView];
     
     // Add category buttons to categories background
     int initial_x = 10;
@@ -215,38 +248,38 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
         }
     }
     
-    [self.view addSubview:categoriesBackgroundView];
+//    [self.view addSubview:self.categoriesBackgroundView];
     
-    // Create filter buttons area - recommended (default), free, popular
-    self.filtersBackgroundView = [[[UIView alloc] initWithFrame:CGRectMake(0, 44, 320, 36)] autorelease];
-//    self.filtersBackgroundView.userInteractionEnabled = YES;
+//    // Create filter buttons area - recommended (default), free, popular
+//    self.filtersBackgroundView = [[[UIView alloc] initWithFrame:CGRectMake(0, 44, 320, 36)] autorelease];
+////    self.filtersBackgroundView.userInteractionEnabled = YES;
 
-    CGFloat filterButtonHeight = 36.0;
-    self.recommendedFilterButton = [[[UIButton alloc] initWithFrame:CGRectMake(0, 0, 107, filterButtonHeight)] autorelease];
-    self.freeFilterButton = [[[UIButton alloc] initWithFrame:CGRectMake(CGRectGetMaxX(self.recommendedFilterButton.frame), 0, 106, filterButtonHeight)] autorelease];
-    self.popularFilterButton = [[[UIButton alloc] initWithFrame:CGRectMake(CGRectGetMaxX(self.freeFilterButton.frame), 0, 107, filterButtonHeight)] autorelease];
+//    CGFloat filterButtonHeight = 36.0;
+//    self.recommendedFilterButton = [[[UIButton alloc] initWithFrame:CGRectMake(0, 0, 107, filterButtonHeight)] autorelease];
+//    self.freeFilterButton = [[[UIButton alloc] initWithFrame:CGRectMake(CGRectGetMaxX(self.recommendedFilterButton.frame), 0, 106, filterButtonHeight)] autorelease];
+//    self.popularFilterButton = [[[UIButton alloc] initWithFrame:CGRectMake(CGRectGetMaxX(self.freeFilterButton.frame), 0, 107, filterButtonHeight)] autorelease];
+//    
+//    NSArray * filterButtons = [NSArray arrayWithObjects:self.recommendedFilterButton, self.freeFilterButton, self.popularFilterButton, nil];
+//    NSArray * filterCodes = [NSArray arrayWithObjects:EVENTS_FILTER_RECOMMENDED, EVENTS_FILTER_FREE, EVENTS_FILTER_POPULAR, nil];
+//    for (int i=0; i<[filterButtons count]; i++) {
+//        [self setImagesForFilterButton:[filterButtons objectAtIndex:i] forFilterCode:[filterCodes objectAtIndex:i] selected:NO];
+//    }
+//
+//    self.recommendedFilterButton.tag = 1;
+//    self.freeFilterButton.tag = 2;
+//    self.popularFilterButton.tag = 3;
+
+//    [self.recommendedFilterButton addTarget:self action:@selector(filterButtonPressed:) forControlEvents:UIControlEventTouchUpInside];
+//    [self.freeFilterButton addTarget:self action:@selector(filterButtonPressed:) forControlEvents:UIControlEventTouchUpInside];
+//    [self.popularFilterButton addTarget:self action:@selector(filterButtonPressed:) forControlEvents:UIControlEventTouchUpInside];
     
-    NSArray * filterButtons = [NSArray arrayWithObjects:self.recommendedFilterButton, self.freeFilterButton, self.popularFilterButton, nil];
-    NSArray * filterCodes = [NSArray arrayWithObjects:EVENTS_FILTER_RECOMMENDED, EVENTS_FILTER_FREE, EVENTS_FILTER_POPULAR, nil];
-    for (int i=0; i<[filterButtons count]; i++) {
-        [self setImagesForFilterButton:[filterButtons objectAtIndex:i] forFilterCode:[filterCodes objectAtIndex:i] selected:NO];
-    }
-
-    self.recommendedFilterButton.tag = 1;
-    self.freeFilterButton.tag = 2;
-    self.popularFilterButton.tag = 3;
-
-    [self.recommendedFilterButton addTarget:self action:@selector(filterButtonPressed:) forControlEvents:UIControlEventTouchUpInside];
-    [self.freeFilterButton addTarget:self action:@selector(filterButtonPressed:) forControlEvents:UIControlEventTouchUpInside];
-    [self.popularFilterButton addTarget:self action:@selector(filterButtonPressed:) forControlEvents:UIControlEventTouchUpInside];
-    
-    [self.filtersBackgroundView addSubview:recommendedFilterButton];
-    [self.filtersBackgroundView addSubview:freeFilterButton];
-    [self.filtersBackgroundView addSubview:popularFilterButton];
-    [self.view addSubview:self.filtersBackgroundView];
+//    [self.filtersBackgroundView addSubview:recommendedFilterButton];
+//    [self.filtersBackgroundView addSubview:freeFilterButton];
+//    [self.filtersBackgroundView addSubview:popularFilterButton];
+//    [self.view addSubview:self.filtersBackgroundView];
         
 	// Create the UITableView
-    self.myTableView = [[[UITableView alloc]initWithFrame:CGRectMake(0, 80, 320, 332)] autorelease];
+//    self.myTableView = [[[UITableView alloc]initWithFrame:CGRectMake(0, 80, 320, 332)] autorelease];
 	self.myTableView.rowHeight = 76;
 	self.myTableView.separatorStyle = UITableViewCellSeparatorStyleNone;
 	//self.myTableView.separatorColor = [UIColor clearColor]; // Unnecessary, considering we set separatorStyle to UITableViewCellSeparatorStyleNone?
@@ -270,39 +303,38 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 ////    self.myTableView.tableFooterView.hidden = YES;
     	
 	//nav bar with buttons
-	UIImageView * navBar = [[UIImageView alloc]initWithImage:[UIImage imageNamed:@"navbar_blank.png"]];
-	navBar.frame = CGRectMake(0, 0, 320, 44);
+//	UIImageView * navBar = [[UIImageView alloc]initWithImage:[UIImage imageNamed:@"navbar_blank.png"]];
+//	navBar.frame = CGRectMake(0, 0, 320, 44);
 	
-	UIButton * categoriesDrawerButton = [[UIButton alloc]initWithFrame:CGRectMake(10, 5,74,32)];
-	[categoriesDrawerButton setBackgroundImage:[UIImage imageNamed:@"btn_filter.png"] forState: UIControlStateNormal];
-	[categoriesDrawerButton addTarget:self action:@selector(categoriesDrawerButtonPressed:) forControlEvents:UIControlEventTouchUpInside];
+//	filterButtonCategories = [[UIButton alloc]initWithFrame:CGRectMake(10, 5,74,32)];
+//	[self.filterButtonCategories setBackgroundImage:[UIImage imageNamed:@"btn_filter.png"] forState: UIControlStateNormal];
+	[self.filterButtonCategories addTarget:self action:@selector(categoriesDrawerButtonPressed:) forControlEvents:UIControlEventTouchUpInside];
 	
-	self.logoButton = [[[UIButton alloc]initWithFrame:CGRectMake(135,3,53,38)] autorelease];
-	[self.logoButton addTarget:self action:@selector(homeButtonPressed) forControlEvents:UIControlEventTouchUpInside];
-    [self setLogoButtonImageWithImageNamed:@"logo_btn_cat_all.png"];
+//	self.logoButton = [[[UIButton alloc]initWithFrame:CGRectMake(135,3,53,38)] autorelease];
+//	[self.logoButton addTarget:self action:@selector(homeButtonPressed) forControlEvents:UIControlEventTouchUpInside];
+//    [self setLogoButtonImageWithImageNamed:@"logo_btn_cat_all.png"];
     
-    self.calendarButton = [[[UIButton alloc] initWithFrame:CGRectMake(238,5,32,32)] autorelease];
-    [self.calendarButton setBackgroundImage:[UIImage imageNamed:@"btn_calendar.png"] forState: UIControlStateNormal];
-    self.calendarButton.hidden = YES;
-    self.calendarButton.userInteractionEnabled = NO;
+//    self.calendarButton = [[[UIButton alloc] initWithFrame:CGRectMake(238,5,32,32)] autorelease];
+//    [self.calendarButton setBackgroundImage:[UIImage imageNamed:@"btn_calendar.png"] forState: UIControlStateNormal];
+//    self.calendarButton.hidden = YES;
+//    self.calendarButton.userInteractionEnabled = NO;
 	
-	self.searchButton = [[[UIButton alloc]initWithFrame:CGRectMake(280,5,32,32)] autorelease];
+//	self.searchButton = [[[UIButton alloc]initWithFrame:CGRectMake(280,5,32,32)] autorelease];
 	[self.searchButton setBackgroundImage:[UIImage imageNamed:@"btn_search.png"] forState: UIControlStateNormal];
 	[self.searchButton addTarget:self action:@selector(searchButtonPressed:) forControlEvents:UIControlEventTouchUpInside];
 	
 	//add nav bar and table view to view
-	[self.view addSubview:myTableView];	
-	[self.view addSubview:navBar];
-	[self.view addSubview:categoriesDrawerButton];
-	[self.view addSubview:logoButton];
-	[self.view addSubview:self.searchButton];
-    [self.view addSubview:self.calendarButton];
+//	[self.view addSubview:myTableView];	
+//	[self.view addSubview:navBar];
+//	[self.view addSubview:filterButtonCategories];
+//	[self.view addSubview:logoButton];
+//	[self.view addSubview:self.searchButton];
+//    [self.view addSubview:self.calendarButton];
 	
 	//clean up
-	[categoriesDrawerButton release];
-	[logoButton release];
-	[searchButton release];
-	[navBar release];
+//	[logoButton release];
+//	[searchButton release];
+//	[navBar release];
     
     // Search bar
 	self.mySearchBar = [[[UISearchBar alloc]initWithFrame:CGRectMake(0, -44, 320, 44)] autorelease];
@@ -344,7 +376,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     self.filterString = EVENTS_FILTER_RECOMMENDED;
     [self highlightFilterButtonForFilter:EVENTS_FILTER_RECOMMENDED];
     self.categoryURI = nil;
-    [self setLogoButtonImageForCategoryURI:self.categoryURI];
+//    [self setLogoButtonImageForCategoryURI:self.categoryURI];
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(dataSourceEventsUpdated:)
                                                  name:EVENTS_UPDATED_NOTIFICATION_KEY
@@ -411,48 +443,48 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     return YES;
 }
 
-- (void)setLogoButtonImageWithImageNamed:(NSString *)imageName {
-//    NSLog(@"setlogobuttonimagewithimagenamed: %@", imageName);
-    [self.logoButton setBackgroundImage:[UIImage imageNamed:imageName] forState: UIControlStateNormal];
-}
+//- (void)setLogoButtonImageWithImageNamed:(NSString *)imageName {
+////    NSLog(@"setlogobuttonimagewithimagenamed: %@", imageName);
+//    [self.logoButton setBackgroundImage:[UIImage imageNamed:imageName] forState: UIControlStateNormal];
+//}
 
-- (void) setLogoButtonImageForCategoryURI:(NSString *)theCategoryURI {
-    NSString * logoCategoryThumbnail = @"logo_";
-    if (theCategoryURI) {
-        Category * matchedCategory = (Category *)[self.concreteParentCategoriesDictionary objectForKey:theCategoryURI];
-        NSString * normalCategoryThumbnail = matchedCategory.buttonThumb;
-        logoCategoryThumbnail = [logoCategoryThumbnail stringByAppendingString:normalCategoryThumbnail];
-    } else {
-        logoCategoryThumbnail = [logoCategoryThumbnail stringByAppendingString:@"btn_cat_all.png"];
-    }
-    [self setLogoButtonImageWithImageNamed:logoCategoryThumbnail];
-}
+//- (void) setLogoButtonImageForCategoryURI:(NSString *)theCategoryURI {
+//    NSString * logoCategoryThumbnail = @"logo_";
+//    if (theCategoryURI) {
+//        Category * matchedCategory = (Category *)[self.concreteParentCategoriesDictionary objectForKey:theCategoryURI];
+//        NSString * normalCategoryThumbnail = matchedCategory.buttonThumb;
+//        logoCategoryThumbnail = [logoCategoryThumbnail stringByAppendingString:normalCategoryThumbnail];
+//    } else {
+//        logoCategoryThumbnail = [logoCategoryThumbnail stringByAppendingString:@"btn_cat_all.png"];
+//    }
+//    [self setLogoButtonImageWithImageNamed:logoCategoryThumbnail];
+//}
 
-- (void) setSelectedFilterViewToFilterString:(NSString *)theFilterString animated:(BOOL)animated {
-    
-    void (^shiftSelectedFilterViewFrame) (void) = ^{
-        UIButton * filterButton = nil;
-        if ([theFilterString isEqualToString:EVENTS_FILTER_RECOMMENDED]) {
-            filterButton = self.recommendedFilterButton;
-        } else if ([theFilterString isEqualToString:EVENTS_FILTER_FREE]) {
-            filterButton = self.freeFilterButton;
-        } else if ([theFilterString isEqualToString:EVENTS_FILTER_POPULAR]) {
-            filterButton = self.popularFilterButton;
-        } else {
-            NSLog(@"ERROR in EventsViewController setSelectedFilterViewToFilterString - unrecognized filterString");
-        }
-        CGRect selectedFilterViewFrame = self.selectedFilterView.frame;
-        selectedFilterViewFrame.origin.x = filterButton.frame.origin.x + (filterButton.frame.size.width - self.selectedFilterView.frame.size.width) / 2.0;
-        self.selectedFilterView.frame = selectedFilterViewFrame;
-    };
-    
-    if (animated) {
-        [UIView animateWithDuration:0.25 animations:shiftSelectedFilterViewFrame];
-    } else {
-        shiftSelectedFilterViewFrame();
-    }
-
-}
+//- (void) setSelectedFilterViewToFilterString:(NSString *)theFilterString animated:(BOOL)animated {
+//    
+//    void (^shiftSelectedFilterViewFrame) (void) = ^{
+//        UIButton * filterButton = nil;
+//        if ([theFilterString isEqualToString:EVENTS_FILTER_RECOMMENDED]) {
+//            filterButton = self.recommendedFilterButton;
+//        } else if ([theFilterString isEqualToString:EVENTS_FILTER_FREE]) {
+//            filterButton = self.freeFilterButton;
+//        } else if ([theFilterString isEqualToString:EVENTS_FILTER_POPULAR]) {
+//            filterButton = self.popularFilterButton;
+//        } else {
+//            NSLog(@"ERROR in EventsViewController setSelectedFilterViewToFilterString - unrecognized filterString");
+//        }
+//        CGRect selectedFilterViewFrame = self.selectedFilterView.frame;
+//        selectedFilterViewFrame.origin.x = filterButton.frame.origin.x + (filterButton.frame.size.width - self.selectedFilterView.frame.size.width) / 2.0;
+//        self.selectedFilterView.frame = selectedFilterViewFrame;
+//    };
+//    
+//    if (animated) {
+//        [UIView animateWithDuration:0.25 animations:shiftSelectedFilterViewFrame];
+//    } else {
+//        shiftSelectedFilterViewFrame();
+//    }
+//
+//}
 
 - (NSMutableArray *)eventsForCurrentSource {
     NSMutableArray * eventsArray = self.isSearchOn ? self.eventsFromSearch : self.events;
@@ -570,7 +602,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     self.filterString = self.filterStringProposed;
     [self highlightFilterButtonForFilter:self.filterString];
     self.categoryURI = self.categoryURIProposed;
-    [self setLogoButtonImageForCategoryURI:self.categoryURI];
+//    [self setLogoButtonImageForCategoryURI:self.categoryURI];
     self.filterStringProposed = nil;
     self.categoryURIProposed = nil;
     
@@ -602,7 +634,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     self.filterString = self.filterStringProposed;
     [self highlightFilterButtonForFilter:self.filterString];
     self.categoryURI = self.categoryURIProposed;
-    [self setLogoButtonImageForCategoryURI:self.categoryURI];
+//    [self setLogoButtonImageForCategoryURI:self.categoryURI];
     self.filterStringProposed = nil;
     self.categoryURIProposed = nil;
     
@@ -899,7 +931,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
         
     }
     
-    [self setSelectedFilterViewToFilterString:filterCode animated:YES];
+//    [self setSelectedFilterViewToFilterString:filterCode animated:YES];
     
 }
 
@@ -907,12 +939,12 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 - (void)scrollViewDidEndDragging:(UIScrollView *)scrollView
 				  willDecelerate:(BOOL)decelerate {
     
-	if (!self.isSearchOn && scrollView.contentOffset.y <= -65.0f) {
+	if (!self.isSearchOn && scrollView.contentOffset.y <= -(65.0f + self.secondContainerView.frame.size.height)) {
 
         [self.refreshHeaderView setState:EGOOPullRefreshLoading];
 		[UIView beginAnimations:nil context:NULL];
 		[UIView setAnimationDuration:0.2];
-		self.myTableView.contentInset = UIEdgeInsetsMake(65.0f, 0.0f, 0.0f, 0.0f);
+		self.myTableView.contentInset = UIEdgeInsetsMake(self.myTableView.contentInset.top + 65.0f, 0.0f, 0.0f, 0.0f);
 		[UIView commitAnimations];
         
         [self webConnectGetEventsListWithCurrentFilterAndCategory];
@@ -922,7 +954,8 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 
 - (void)scrollViewDidScroll:(UIScrollView *)scrollView {
     if (!self.isSearchOn) {
-        if (scrollView.contentOffset.y <= -65.0f) {
+//        NSLog(@"%@", NSStringFromCGPoint(scrollView.contentOffset));
+        if (scrollView.contentOffset.y <= -(65.0f + self.secondContainerView.frame.size.height)) {
             [self.refreshHeaderView setState:EGOOPullRefreshPulling];
         } else {
             [self.refreshHeaderView setState:EGOOPullRefreshNormal];
@@ -948,16 +981,22 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     
     if (isCategoriesDrawerOpen == NO) {
         isCategoriesDrawerOpen = YES;
-        CGRect tableViewFrame = self.myTableView.frame;
-        tableViewFrame.origin.y += self.categoriesBackgroundView.frame.size.height;
-        self.myTableView.frame = tableViewFrame;
+        CGRect pushableContainerViewFrame = self.pushableContainerView.frame;
+        pushableContainerViewFrame.origin.y += self.categoriesBackgroundView.frame.size.height;
+        self.pushableContainerView.frame = pushableContainerViewFrame;
+//        CGRect tableViewFrame = self.myTableView.frame;
+//        tableViewFrame.origin.y += self.
+//        self.myTableView.frame = tableViewFrame;
         [self setTableViewScrollable:NO selectable:NO];
     }
     else {
         isCategoriesDrawerOpen = NO;
-        CGRect tableViewFrame = self.myTableView.frame;
-        tableViewFrame.origin.y -= self.categoriesBackgroundView.frame.size.height;
-        self.myTableView.frame = tableViewFrame;
+        CGRect pushableContainerViewFrame = self.pushableContainerView.frame;
+        pushableContainerViewFrame.origin.y -= self.categoriesBackgroundView.frame.size.height;
+        self.pushableContainerView.frame = pushableContainerViewFrame;
+//        CGRect tableViewFrame = self.myTableView.frame;
+//        tableViewFrame.origin.y -= self.categoriesBackgroundView.frame.size.height;
+//        self.myTableView.frame = tableViewFrame;
         [self setTableViewScrollable:YES selectable:YES];
     }
     self.categoriesBackgroundView.userInteractionEnabled = isCategoriesDrawerOpen;
@@ -1332,7 +1371,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     [UIView beginAnimations:nil context:NULL];
     [UIView setAnimationDuration:.3];
     UIEdgeInsets contentInset = self.myTableView.contentInset;
-    contentInset.top = 0.0f;
+    contentInset.top = self.secondContainerView.frame.size.height;
     self.myTableView.contentInset = contentInset;
     [UIView commitAnimations];
     [self.refreshHeaderView setState:EGOOPullRefreshNormal];

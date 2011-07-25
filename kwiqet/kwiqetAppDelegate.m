@@ -97,7 +97,7 @@
         [self.featuredEventViewController suggestToGetNewFeaturedEvent];
         
         // Events List View Controller
-        self.eventsViewController = [[[EventsViewController alloc] init] autorelease];
+        self.eventsViewController = [[[EventsViewController alloc] initWithNibName:@"EventsViewController" bundle:[NSBundle mainBundle]] autorelease];
         self.eventsViewController.coreDataModel = self.coreDataModel;
         UITabBarItem * eventsTabBarItem = [[[UITabBarItem alloc] initWithTitle:@"Events" image:[UIImage imageNamed:@"tab_home.png"] tag:1] autorelease];
         self.eventsViewController.tabBarItem = eventsTabBarItem;
