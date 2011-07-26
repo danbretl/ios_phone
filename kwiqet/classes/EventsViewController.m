@@ -25,11 +25,6 @@ static NSString * const EVENTS_FILTER_BUTTON_HIGHLIGHT_POSTFIX = @"_over";
 static NSString * const EVENTS_FILTER_BUTTON_EXTENSION = @".png";
 static NSString * const EVENTS_CATEGORY_BUTTON_TOUCH_POSTFIX = @"_touch";
 
-static NSString * const EVENTS_NEWFILTER_CATEGORIES = @"categories";
-static NSString * const EVENTS_NEWFILTER_PRICE = @"price";
-static NSString * const EVENTS_NEWFILTER_DATE_AND_TIME = @"date and time";
-static NSString * const EVENTS_NEWFILTER_LOCATION = @"location";
-
 static NSString * const EVENTS_UPDATED_NOTIFICATION_KEY = @"eventsUpdated";
 static NSString * const EVENTS_UPDATED_USER_INFO_KEY_RESULTS = @"results";
 static NSString * const EVENTS_UPDATED_USER_INFO_KEY_RESULTS_DETAIL = @"resultsDetail";
@@ -70,15 +65,19 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 //- (void) setLogoButtonImageWithImageNamed:(NSString *)imageName;
 //- (void) setLogoButtonImageForCategoryURI:(NSString *)categoryURI;
 //- (void) setSelectedFilterViewToFilterString:(NSString *)theFilterString animated:(BOOL)animated;
+- (void) setSelectedNewFilterViewToNewFilter:(NewEventsFilter *)newFilter animated:(BOOL)animated;
 - (void) loginActivity:(NSNotification *)notification;
 - (void) behaviorWasReset:(NSNotification *)notification;
-- (NSString *) newFilterStringForNewFilterButton:(UIButton *)newFilterButton;
+//- (NSString *) newFilterStringForNewFilterButton:(UIButton *)newFilterButton;
+
+@property (retain) NSMutableArray * newFilters;
 
 @property (retain) IBOutlet UIView * filtersContainerView;
 @property (retain) IBOutlet UIButton * filterButtonCategories;
 @property (retain) IBOutlet UIButton * filterButtonPrice;
-@property (retain) IBOutlet UIButton * filterButtonDateTime;
+@property (retain) IBOutlet UIButton * filterButtonDate;
 @property (retain) IBOutlet UIButton * filterButtonLocation;
+@property (retain) IBOutlet UIButton * filterButtonTime;
 
 @property (retain) IBOutlet UIView * pushableContainerView;
 @property (retain) IBOutlet UIView * filtersSummaryAndSearchContainerView;
@@ -86,7 +85,13 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 @property (retain) IBOutlet UIView * searchButtonContainerView;
 @property (retain) IBOutlet UIButton * searchButton;
 
-@property (retain) IBOutlet UIView * drawerView;
+@property (retain) IBOutlet UIScrollView * drawerScrollView;
+@property (retain) IBOutlet UIView * drawerViewsContainer;
+@property (retain) IBOutlet UIView * drawerViewCategories;
+@property (retain) IBOutlet UIView * drawerViewPrice;
+@property (retain) IBOutlet UIView * drawerViewDate;
+@property (retain) IBOutlet UIView * drawerViewLocation;
+@property (retain) IBOutlet UIView * drawerViewTime;
 @property (retain) IBOutlet UITableView * tableView;
 
 @property (nonatomic, readonly) UIAlertView * connectionErrorStandardAlertView;
@@ -107,7 +112,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 @property (nonatomic, retain) UIButton * recommendedFilterButton;
 @property (nonatomic, retain) UIButton * freeFilterButton;
 @property (nonatomic, retain) UIButton * popularFilterButton;
-//@property (nonatomic, retain) UIView * selectedFilterView;
+@property (retain) UIView * selectedFilterView;
 @property (nonatomic, readonly) NSDictionary * concreteParentCategoriesDictionary;
 @property (nonatomic, readonly) NSArray * concreteParentCategoriesArray;
 @property (nonatomic, readonly) EGORefreshTableHeaderView *refreshHeaderView;
@@ -128,14 +133,24 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 - (void) setImagesForFilterButton:(UIButton *)button forFilterCode:(NSString *)filterCode selected:(BOOL)selected;
 - (NSString *) filterImageBaseForFilterCode:(NSString *)filterCode;
 - (void) setControlStateNormalImageForFilterButton:(UIButton *)button forFilterCode:(NSString *)filterCode selected:(BOOL)selected;
-- (void) newFiltersSwipe:(UISwipeGestureRecognizer *)swipeGesture;
+- (void) swipeDownToShowDrawer:(UISwipeGestureRecognizer *)swipeGesture;
 - (void) swipeUpToHideDrawer:(UISwipeGestureRecognizer *)swipeGesture;
+- (void) swipeAcrossFiltersStrip:(UISwipeGestureRecognizer *)swipeGesture;
+- (NewEventsFilter *) newFilterForPositionX:(CGFloat)x;
+- (NewEventsFilter *) newFilterForDrawerScrollViewContentOffset:(CGPoint)contentOffset;
+- (void) setDrawerToShowNewFilter:(NewEventsFilter *)newFilter animated:(BOOL)animated;
+- (NewEventsFilter *) newFilterForFilterButton:(UIButton *)filterButton;
+@property (retain) NewEventsFilter * activeNewEventsFilter;
+@property BOOL isDrawerOpen;
 @end
 
 @implementation EventsViewController
-@synthesize filtersContainerView, filterButtonCategories, filterButtonPrice, filterButtonDateTime, filterButtonLocation, pushableContainerView, filtersSummaryAndSearchContainerView, filtersSummaryLabel, searchButtonContainerView, searchButton, drawerView;
+@synthesize newFilters;
+@synthesize filtersContainerView, filterButtonCategories, filterButtonPrice, filterButtonDate, filterButtonLocation, filterButtonTime, pushableContainerView, filtersSummaryAndSearchContainerView, filtersSummaryLabel, searchButtonContainerView, searchButton;
+@synthesize drawerScrollView, drawerViewsContainer, drawerViewCategories, drawerViewPrice, drawerViewDate, drawerViewLocation, drawerViewTime;
+@synthesize activeNewEventsFilter;
 @synthesize tableView=tableView_;
-@synthesize mySearchBar,eventsFromSearch, events,coreDataModel,webActivityView,concreteParentCategoriesDictionary,freeFilterButton,recommendedFilterButton,popularFilterButton, /*selectedFilterView, */filtersBackgroundView;
+@synthesize mySearchBar,eventsFromSearch, events,coreDataModel,webActivityView,concreteParentCategoriesDictionary,freeFilterButton,recommendedFilterButton,popularFilterButton, selectedFilterView, filtersBackgroundView;
 @synthesize refreshHeaderView, concreteParentCategoriesArray;
 @synthesize filterString, categoryURI, filterStringProposed, categoryURIProposed;
 @synthesize isSearchOn;
@@ -145,23 +160,33 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 @synthesize /*logoButton,*/ tableFooterView;
 @synthesize calendarButton;
 //@synthesize facebookManager;
+@synthesize isDrawerOpen;
 
 - (void)dealloc {
+    [newFilters release];
+    [activeNewEventsFilter release];
     [filtersContainerView release];
     [filterButtonCategories release];
     [filterButtonPrice release];
-    [filterButtonDateTime release];
+    [filterButtonDate release];
     [filterButtonLocation release];
+    [filterButtonTime release];
     [pushableContainerView release];
     [filtersSummaryAndSearchContainerView release];
     [filtersSummaryLabel release];
     [searchButtonContainerView release];
     [searchButton release];
-    [drawerView release];
+    [drawerScrollView release];
+    [drawerViewsContainer release];
+    [drawerViewCategories release];
+    [drawerViewPrice release];
+    [drawerViewDate release];
+    [drawerViewLocation release];
+    [drawerViewTime release];
     [tableView_ release];
     
     [filtersBackgroundView release];
-//    [selectedFilterView release];
+    [selectedFilterView release];
     [recommendedFilterButton release];
     [freeFilterButton release];
     [popularFilterButton release];
@@ -205,18 +230,38 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 // Implement viewDidLoad to do additional setup after loading the view, typically from a nib.
 - (void)viewDidLoad {
     [super viewDidLoad];
-        
+
+    // New filter "view models"
+    self.newFilters = [NSMutableArray arrayWithObjects:
+                       [NewEventsFilter newEventsFilterWithCode:EVENTS_NEWFILTER_CATEGORIES button:self.filterButtonCategories drawerView:self.drawerViewCategories],
+                       [NewEventsFilter newEventsFilterWithCode:EVENTS_NEWFILTER_PRICE button:self.filterButtonPrice drawerView:self.drawerViewPrice],
+                       [NewEventsFilter newEventsFilterWithCode:EVENTS_NEWFILTER_DATE button:self.filterButtonDate drawerView:self.drawerViewDate],
+                       [NewEventsFilter newEventsFilterWithCode:EVENTS_NEWFILTER_LOCATION button:self.filterButtonLocation drawerView:self.drawerViewLocation],
+                       [NewEventsFilter newEventsFilterWithCode:EVENTS_NEWFILTER_TIME button:self.filterButtonTime drawerView:self.drawerViewTime],
+                       nil];
+    for (NewEventsFilter * filter in self.newFilters) {
+        filter.drawerView.backgroundColor = [UIColor clearColor];//[UIColor colorWithPatternImage:[UIImage imageNamed:@"cat_overlay.png"]];
+    }
+    self.activeNewEventsFilter = [self.newFilters objectAtIndex:0];
+    [self setDrawerToShowNewFilter:self.activeNewEventsFilter animated:NO];
+    
     // Create categories background view under UITableView
 //    self.categoriesBackgroundView = [[[UIView alloc] initWithFrame:CGRectMake(0, 80, 320, 255)] autorelease];
-    self.drawerView.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"cat_overlay.png"]];
-    self.drawerView.userInteractionEnabled = NO;
-    self.drawerView.layer.masksToBounds = YES;
+    self.drawerScrollView.contentSize = self.drawerViewsContainer.bounds.size;
+    self.drawerScrollView.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"cat_overlay.png"]];
+    self.drawerScrollView.userInteractionEnabled = NO;
+    self.drawerScrollView.layer.masksToBounds = YES;
+    [self.drawerScrollView addSubview:self.drawerViewsContainer];
+    self.drawerScrollView.delegate = self;
+    //self.drawerViewsContainer.backgroundColor = [UIColor clearColor];
+    self.drawerViewsContainer.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"cat_overlay.png"]];
     
     // Selected filter view
-//    self.selectedFilterView = [[[UIView alloc] initWithFrame:CGRectMake(0, 0, 640, 12)] autorelease];
+//    selectedFilterView = [[UIView alloc] initWithFrame:CGRectMake(0, CGRectGetMaxY(self.filtersContainerView.frame), 640, 12)];
 //    self.selectedFilterView.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"cat_overlay-sel.png"]];
 //    self.selectedFilterView.opaque = NO;
-//    [self.categoriesBackgroundView addSubview:self.selectedFilterView];
+//    [self.view insertSubview:self.selectedFilterView aboveSubview:self.drawerScrollView];
+//    [self setSelectedNewFilterViewToNewFilter:self.activeNewEventsFilter animated:NO];
     
     self.filtersContainerView.layer.shadowColor = [[UIColor blackColor] CGColor];
     self.filtersContainerView.layer.shadowOffset = CGSizeMake(0, 0);
@@ -253,7 +298,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
             categoryTitleLabel.backgroundColor = [UIColor clearColor];
             [categoryBackgroundView addSubview:categoryTitleLabel];
             [categoryBackgroundView addSubview:categoryButton];
-            [self.drawerView addSubview:categoryBackgroundView];
+            [self.drawerViewCategories addSubview:categoryBackgroundView];
             [categoryTitleLabel release];
             [categoryButton release];
             [categoryBackgroundView release];
@@ -322,33 +367,28 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 	
 //	filterButtonCategories = [[UIButton alloc]initWithFrame:CGRectMake(10, 5,74,32)];
 //	[self.filterButtonCategories setBackgroundImage:[UIImage imageNamed:@"btn_filter.png"] forState: UIControlStateNormal];
-    [self.filterButtonCategories addTarget:self action:@selector(newFilterButtonPressed:) forControlEvents:UIControlEventTouchUpInside];
-    [self.filterButtonPrice addTarget:self action:@selector(newFilterButtonPressed:) forControlEvents:UIControlEventTouchUpInside];
-    [self.filterButtonDateTime addTarget:self action:@selector(newFilterButtonPressed:) forControlEvents:UIControlEventTouchUpInside];
-    [self.filterButtonLocation addTarget:self action:@selector(newFilterButtonPressed:) forControlEvents:UIControlEventTouchUpInside];
-    UISwipeGestureRecognizer * swipeDownFilterCategories = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(newFiltersSwipe:)];
-    swipeDownFilterCategories.direction = UISwipeGestureRecognizerDirectionDown;
-    [self.filterButtonCategories addGestureRecognizer:swipeDownFilterCategories];
-    [swipeDownFilterCategories release];
-    UISwipeGestureRecognizer * swipeDownFilterPrice = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(newFiltersSwipe:)];
-    swipeDownFilterPrice.direction = UISwipeGestureRecognizerDirectionDown;
-    [self.filterButtonPrice addGestureRecognizer:swipeDownFilterPrice];
-    [swipeDownFilterPrice release];
-    UISwipeGestureRecognizer * swipeDownFilterDateTime = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(newFiltersSwipe:)];
-    swipeDownFilterDateTime.direction = UISwipeGestureRecognizerDirectionDown;
-    [self.filterButtonDateTime addGestureRecognizer:swipeDownFilterDateTime];
-    [swipeDownFilterDateTime release];
-    UISwipeGestureRecognizer * swipeDownFilterLocation = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(newFiltersSwipe:)];
-    swipeDownFilterLocation.direction = UISwipeGestureRecognizerDirectionDown;
-    [self.filterButtonLocation addGestureRecognizer:swipeDownFilterLocation];
-    [swipeDownFilterLocation release];
+    for (NewEventsFilter * filter in self.newFilters) {
+        [filter.button addTarget:self action:@selector(newFilterButtonPressed:) forControlEvents:UIControlEventTouchUpInside];
+    }
+    
+    UISwipeGestureRecognizer * swipeDownFiltersGR = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(swipeDownToShowDrawer:)];
+    swipeDownFiltersGR.direction = UISwipeGestureRecognizerDirectionDown;
+    [self.filtersContainerView addGestureRecognizer:swipeDownFiltersGR];
+    [swipeDownFiltersGR release];
+    UISwipeGestureRecognizer * swipeDownFiltersGRSupplemental = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(swipeDownToShowDrawer:)];
+    swipeDownFiltersGRSupplemental.direction = UISwipeGestureRecognizerDirectionDown;
+    [self.filtersSummaryAndSearchContainerView addGestureRecognizer:swipeDownFiltersGRSupplemental];
+    [swipeDownFiltersGRSupplemental release];
     
     UISwipeGestureRecognizer * swipeUpToHideDrawerGR = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(swipeUpToHideDrawer:)];
     swipeUpToHideDrawerGR.direction = UISwipeGestureRecognizerDirectionUp;
     [self.pushableContainerView addGestureRecognizer:swipeUpToHideDrawerGR];
     [swipeUpToHideDrawerGR release];
     
-    
+    UISwipeGestureRecognizer * swipeAcrossFiltersStringGR = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(swipeAcrossFiltersStrip:)];
+    swipeAcrossFiltersStringGR.direction = UISwipeGestureRecognizerDirectionLeft | UISwipeGestureRecognizerDirectionRight;
+    [self.filtersContainerView addGestureRecognizer:swipeAcrossFiltersStringGR];
+    [swipeAcrossFiltersStringGR release];
 	
 //	self.logoButton = [[[UIButton alloc]initWithFrame:CGRectMake(135,3,53,38)] autorelease];
 //	[self.logoButton addTarget:self action:@selector(homeButtonPressed) forControlEvents:UIControlEventTouchUpInside];
@@ -464,7 +504,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 
 - (void)viewWillDisappear:(BOOL)animated {
     [super viewWillDisappear:animated];
-    if (isCategoriesDrawerOpen) {
+    if (self.isDrawerOpen) {
         [self toggleDrawerAnimated];
     }
     [self resignFirstResponder];
@@ -904,7 +944,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 -(void)filterButtonPressed:(UIButton *)filterButton {
     
     [self highlightFilterButton:filterButton];
-    if (isCategoriesDrawerOpen) {
+    if (self.isDrawerOpen) {
         [self toggleDrawerAnimated];
     }
     
@@ -976,11 +1016,13 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 }
 
 // Pulling the table down enough triggers a web reload.
-- (void)scrollViewDidEndDragging:(UIScrollView *)scrollView
-				  willDecelerate:(BOOL)decelerate {
+- (void) scrollViewDidEndDragging:(UIScrollView *)scrollView
+                   willDecelerate:(BOOL)decelerate {
     
-	if (!self.isSearchOn && scrollView.contentOffset.y <= -(65.0f + self.filtersSummaryAndSearchContainerView.frame.size.height)) {
-
+    if (scrollView == self.tableView && 
+        !self.isSearchOn && 
+        scrollView.contentOffset.y <= -(65.0f + self.filtersSummaryAndSearchContainerView.frame.size.height)) {
+        
         [self.refreshHeaderView setState:EGOOPullRefreshLoading];
 		[UIView beginAnimations:nil context:NULL];
 		[UIView setAnimationDuration:0.2];
@@ -988,30 +1030,42 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 		[UIView commitAnimations];
         
         [self webConnectGetEventsListWithCurrentFilterAndCategory];
-
+        
 	}
+    
 }
 
-- (void)scrollViewDidScroll:(UIScrollView *)scrollView {
-    if (!self.isSearchOn) {
-//        NSLog(@"%@", NSStringFromCGPoint(scrollView.contentOffset));
+- (void) scrollViewDidScroll:(UIScrollView *)scrollView {
+    if (scrollView == self.tableView && 
+        !self.isSearchOn) {
+        
+        //        NSLog(@"%@", NSStringFromCGPoint(scrollView.contentOffset));
         if (scrollView.contentOffset.y <= -(65.0f + self.filtersSummaryAndSearchContainerView.frame.size.height)) {
             [self.refreshHeaderView setState:EGOOPullRefreshPulling];
         } else {
             [self.refreshHeaderView setState:EGOOPullRefreshNormal];
         }
+        
     }
 }
 
 -(void)homeButtonPressed  {
-    if (isCategoriesDrawerOpen) {
+    if (self.isDrawerOpen) {
         [self toggleDrawerAnimated];
     }
     [self webConnectGetEventsListWithCurrentFilterAndCategory];
 }
 
 - (IBAction) newFilterButtonPressed:(id)sender {
-    [self toggleDrawerAnimated];
+    NewEventsFilter * oldActiveFilter = self.activeNewEventsFilter;
+    NewEventsFilter * newActiveFilter = [self newFilterForFilterButton:sender];
+    self.activeNewEventsFilter = newActiveFilter;
+    [self setDrawerToShowNewFilter:self.activeNewEventsFilter animated:self.isDrawerOpen];
+//    [self setSelectedNewFilterViewToNewFilter:self.activeNewEventsFilter animated:self.isDrawerOpen];
+    if (!self.isDrawerOpen ||
+        oldActiveFilter == newActiveFilter) {
+        [self toggleDrawerAnimated];
+    }
 }
 
 -(void)toggleDrawerAnimated {
@@ -1019,21 +1073,21 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 	[UIView setAnimationDuration:.5];
 	[UIView setAnimationBeginsFromCurrentState:YES];
     
-    if (isCategoriesDrawerOpen == NO) {
-        isCategoriesDrawerOpen = YES;
+    if (self.isDrawerOpen == NO) {
+        self.isDrawerOpen = YES;
         CGRect pushableContainerViewFrame = self.pushableContainerView.frame;
-        pushableContainerViewFrame.origin.y += self.drawerView.frame.size.height;
+        pushableContainerViewFrame.origin.y += self.drawerScrollView.frame.size.height;
         self.pushableContainerView.frame = pushableContainerViewFrame;
         [self setTableViewScrollable:NO selectable:NO];
     }
     else {
-        isCategoriesDrawerOpen = NO;
+        self.isDrawerOpen = NO;
         CGRect pushableContainerViewFrame = self.pushableContainerView.frame;
-        pushableContainerViewFrame.origin.y -= self.drawerView.frame.size.height;
+        pushableContainerViewFrame.origin.y -= self.drawerScrollView.frame.size.height;
         self.pushableContainerView.frame = pushableContainerViewFrame;
         [self setTableViewScrollable:YES selectable:YES];
     }
-    self.drawerView.userInteractionEnabled = isCategoriesDrawerOpen;
+    self.drawerScrollView.userInteractionEnabled = self.isDrawerOpen;
     
     [UIView commitAnimations];
 }
@@ -1045,7 +1099,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 
 - (void) categoryButtonPressed:(UIButton *)categoryButton {
 
-    if (isCategoriesDrawerOpen) {
+    if (self.isDrawerOpen) {
         // Get the category for the categoryButton pushed, and do a web load for that category (with whatever filter we're potentially using as well)
         [self toggleDrawerAnimated];
         int categoryButtonTag = categoryButton.tag;
@@ -1135,7 +1189,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 
 - (IBAction) searchButtonPressed:(id)sender  {
     
-    if (isCategoriesDrawerOpen) {
+    if (self.isDrawerOpen) {
         [self toggleDrawerAnimated];
     }
     [self toggleSearchMode];
@@ -1365,7 +1419,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     if (self.isSearchOn) {
         [self toggleSearchMode];
     }
-    if (isCategoriesDrawerOpen) {
+    if (self.isDrawerOpen) {
         [self toggleDrawerAnimated];
     }
     [self webConnectGetEventsListWithFilter:EVENTS_FILTER_RECOMMENDED categoryURI:nil];
@@ -1375,7 +1429,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     if (self.isSearchOn) {
         [self toggleSearchMode];
     }
-    if (isCategoriesDrawerOpen) {
+    if (self.isDrawerOpen) {
         [self toggleDrawerAnimated];
     }
     [self webConnectGetEventsListWithFilter:EVENTS_FILTER_RECOMMENDED categoryURI:nil];
@@ -1445,34 +1499,106 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     
 }
 
-- (NSString *) newFilterStringForNewFilterButton:(UIButton *)newFilterButton {
-    NSString * newFilterString = nil;
-    if (newFilterButton == self.filterButtonCategories) {
-        newFilterString = EVENTS_NEWFILTER_CATEGORIES;
-    } else if (newFilterButton == self.filterButtonPrice) {
-        newFilterString = EVENTS_NEWFILTER_PRICE;
-    } else if (newFilterButton == self.filterButtonDateTime) {
-        newFilterString = EVENTS_NEWFILTER_DATE_AND_TIME;
-    } else if (newFilterButton == self.filterButtonLocation) {
-        newFilterString = EVENTS_NEWFILTER_LOCATION;
-    } else {
-        NSLog(@"ERROR in EventsViewController - unrecognized newFilterButton %@", newFilterButton);
+- (NewEventsFilter *) newFilterForPositionX:(CGFloat)x {
+    NewEventsFilter * newFilter = nil;
+    x = MAX(0, MIN(x, self.drawerScrollView.contentSize.width));
+    for (NewEventsFilter * filter in self.newFilters) {
+        if (x <= CGRectGetMaxX(filter.button.frame) &&
+            x >= CGRectGetMinX(filter.button.frame)) {
+            newFilter = filter;
+            break;
+        }
     }
-    return newFilterString;
+    if (newFilter == nil) {
+        NSLog(@"ERROR in EventsViewController - can't find a matching filter button for a swipe");
+    }
+    return newFilter;
 }
 
-- (void)newFiltersSwipe:(UISwipeGestureRecognizer *)swipeGesture {
-    NSLog(@"newFiltersSwipe");
-//    UIView * newFilterButton = swipeGesture.view;
-    if (!isCategoriesDrawerOpen) {
+- (NewEventsFilter *) newFilterForFilterButton:(UIButton *)filterButton {
+    NewEventsFilter * newFilter = nil;
+    NSArray * resultsArray = [self.newFilters filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"button == %@", filterButton]];
+    if (resultsArray && [resultsArray count] > 0) {
+        newFilter = [resultsArray objectAtIndex:0];
+    }
+    if (newFilter == nil) {
+        NSLog(@"ERROR in EventsViewController - can't match a filter button to a filter");
+    }
+    return newFilter;
+}
+
+- (void)swipeDownToShowDrawer:(UISwipeGestureRecognizer *)swipeGesture {
+    NewEventsFilter * swipedOverNewFilter = [self newFilterForPositionX:[swipeGesture locationInView:swipeGesture.view].x];
+    NSLog(@"swipeDownToShowDrawer for button with title %@", self.activeNewEventsFilter.button.titleLabel.text);
+    if (!self.isDrawerOpen) {
+        self.activeNewEventsFilter = swipedOverNewFilter;
+        [self setDrawerToShowNewFilter:self.activeNewEventsFilter animated:self.isDrawerOpen];
+//        [self setSelectedNewFilterViewToNewFilter:self.activeNewEventsFilter animated:self.isDrawerOpen];
         [self toggleDrawerAnimated];
     }
 }
 
 - (void) swipeUpToHideDrawer:(UISwipeGestureRecognizer *)swipeGesture {
     NSLog(@"swipeUpToHideDrawer");
-    if (isCategoriesDrawerOpen) {
+    if (self.isDrawerOpen) {
         [self toggleDrawerAnimated];
+    }
+}
+
+- (void) swipeAcrossFiltersStrip:(UISwipeGestureRecognizer *)swipeGesture {
+    UIAlertView * resetAllFiltersAlertView = [[UIAlertView alloc] initWithTitle:@"Reset all filters?" message:@"Are you sure you'd like to reset all filters?" delegate:nil cancelButtonTitle:@"Sure" otherButtonTitles:nil];
+    [resetAllFiltersAlertView show];
+    [resetAllFiltersAlertView release];
+}
+
+- (void) setDrawerToShowNewFilter:(NewEventsFilter *)newFilter animated:(BOOL)animated {
+    
+    void (^shiftDrawerScrollViewContentOffsetBlock) (void) = ^{
+        self.drawerScrollView.contentOffset = CGPointMake(newFilter.drawerView.frame.origin.x, self.drawerScrollView.contentOffset.y);
+    };
+    
+    if (animated) {
+        [UIView animateWithDuration:0.25 animations:shiftDrawerScrollViewContentOffsetBlock];
+    } else {
+        shiftDrawerScrollViewContentOffsetBlock();
+    }
+    
+}
+
+- (void) setSelectedNewFilterViewToNewFilter:(NewEventsFilter *)newFilter animated:(BOOL)animated {
+    void (^shiftSelectedFilterViewFrame) (void) = ^{
+        CGRect selectedFilterViewFrame = self.selectedFilterView.frame;
+        selectedFilterViewFrame.origin.x = newFilter.button.frame.origin.x + (newFilter.button.frame.size.width - self.selectedFilterView.frame.size.width) / 2.0;
+        self.selectedFilterView.frame = selectedFilterViewFrame;
+    };
+    
+    if (animated) {
+        [UIView animateWithDuration:0.25 animations:shiftSelectedFilterViewFrame];
+    } else {
+        shiftSelectedFilterViewFrame();
+    }    
+}
+
+- (NewEventsFilter *) newFilterForDrawerScrollViewContentOffset:(CGPoint)contentOffset {
+    NewEventsFilter * newFilter = nil;
+    for (NewEventsFilter * filter in self.newFilters) {
+        if (contentOffset.x < CGRectGetMaxX(filter.drawerView.frame) &&
+            contentOffset.x >= CGRectGetMinX(filter.drawerView.frame)) {
+            newFilter = filter;
+            break;
+        }
+    }
+    if (newFilter == nil) {
+        NSLog(@"ERROR in EventsViewController - can't find a matching filter button for a swipe");
+    }
+    return newFilter;   
+}
+
+- (void) scrollViewDidEndDecelerating:(UIScrollView *)scrollView {
+    if (scrollView == self.drawerScrollView) {
+        NewEventsFilter * filter = [self newFilterForDrawerScrollViewContentOffset:scrollView.contentOffset];
+        self.activeNewEventsFilter = filter;
+//        [self setSelectedNewFilterViewToNewFilter:self.activeNewEventsFilter animated:YES];
     }
 }
 

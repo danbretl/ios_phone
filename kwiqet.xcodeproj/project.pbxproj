@@ -211,6 +211,7 @@
 		32CCF16813CBA4BB00DBD214 /* btn_selected_notext@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 32CCF16413CBA4BA00DBD214 /* btn_selected_notext@2x.png */; };
 		32CCF16913CBA4BB00DBD214 /* btn_selected_touch_notext.png in Resources */ = {isa = PBXBuildFile; fileRef = 32CCF16513CBA4BB00DBD214 /* btn_selected_touch_notext.png */; };
 		32CCF16A13CBA4BB00DBD214 /* btn_selected_touch_notext@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 32CCF16613CBA4BB00DBD214 /* btn_selected_touch_notext@2x.png */; };
+		32D13D6813DF4A8E00EBB192 /* NewEventsFilter.m in Sources */ = {isa = PBXBuildFile; fileRef = 32D13D6713DF4A8E00EBB192 /* NewEventsFilter.m */; };
 		32D7FEDD13B0BC43005E8406 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 32D7FEDB13B0BC43005E8406 /* InfoPlist.strings */; };
 		32D7FEE013B0BC5A005E8406 /* MainWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = 32D7FEDE13B0BC5A005E8406 /* MainWindow.xib */; };
 		32D7FF5B13B0D382005E8406 /* Reachability.m in Sources */ = {isa = PBXBuildFile; fileRef = 32D7FF5A13B0D382005E8406 /* Reachability.m */; };
@@ -559,6 +560,8 @@
 		32CCF16413CBA4BA00DBD214 /* btn_selected_notext@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "btn_selected_notext@2x.png"; sourceTree = "<group>"; };
 		32CCF16513CBA4BB00DBD214 /* btn_selected_touch_notext.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = btn_selected_touch_notext.png; sourceTree = "<group>"; };
 		32CCF16613CBA4BB00DBD214 /* btn_selected_touch_notext@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "btn_selected_touch_notext@2x.png"; sourceTree = "<group>"; };
+		32D13D6613DF4A8E00EBB192 /* NewEventsFilter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NewEventsFilter.h; sourceTree = "<group>"; };
+		32D13D6713DF4A8E00EBB192 /* NewEventsFilter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NewEventsFilter.m; sourceTree = "<group>"; };
 		32D7FEDC13B0BC43005E8406 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		32D7FEDF13B0BC5A005E8406 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/MainWindow.xib; sourceTree = "<group>"; };
 		32D7FF5913B0D382005E8406 /* Reachability.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Reachability.h; sourceTree = "<group>"; };
@@ -1073,6 +1076,18 @@
 			path = kwiqet/classes/JSON;
 			sourceTree = SOURCE_ROOT;
 		};
+		32D13D6413DF4A5E00EBB192 /* EventsViewController */ = {
+			isa = PBXGroup;
+			children = (
+				32FD383A13AFF52F007549B6 /* EventsViewController.h */,
+				32FD383B13AFF52F007549B6 /* EventsViewController.m */,
+				3288360D13DDE7320090AFE0 /* EventsViewController.xib */,
+				32D13D6613DF4A8E00EBB192 /* NewEventsFilter.h */,
+				32D13D6713DF4A8E00EBB192 /* NewEventsFilter.m */,
+			);
+			name = EventsViewController;
+			sourceTree = "<group>";
+		};
 		32D7FEE113B0BD08005E8406 /* 3rd party */ = {
 			isa = PBXGroup;
 			children = (
@@ -1090,9 +1105,7 @@
 			children = (
 				32FD383E13AFF52F007549B6 /* EventViewController.h */,
 				32FD383F13AFF52F007549B6 /* EventViewController.m */,
-				32FD383A13AFF52F007549B6 /* EventsViewController.h */,
-				32FD383B13AFF52F007549B6 /* EventsViewController.m */,
-				3288360D13DDE7320090AFE0 /* EventsViewController.xib */,
+				32D13D6413DF4A5E00EBB192 /* EventsViewController */,
 				32FD384213AFF52F007549B6 /* FeaturedEventViewController.h */,
 				32FD384313AFF52F007549B6 /* FeaturedEventViewController.m */,
 				32FD384713AFF52F007549B6 /* LoginViewController.h */,
@@ -1667,6 +1680,7 @@
 				326F6C8C13D108260032CA5F /* UploaderThread.m in Sources */,
 				326F6C8D13D108260032CA5F /* LocalyticsSession.m in Sources */,
 				327C4DB613DA301D00DAAD51 /* Analytics.m in Sources */,
+				32D13D6813DF4A8E00EBB192 /* NewEventsFilter.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

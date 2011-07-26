@@ -16,16 +16,21 @@
 #import "WebDataTranslator.h"
 #import "WebActivityView.h"
 //#import "FacebookManager.h"
+#import "NewEventsFilter.h"
 
 extern float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT;
 
-@interface EventsViewController : UIViewController <UITableViewDelegate, UITableViewDataSource, UISearchBarDelegate, UIAlertViewDelegate, CardPageViewControllerDelegate, WebConnectorDelegate> {
+@interface EventsViewController : UIViewController <UITableViewDelegate, UITableViewDataSource, UISearchBarDelegate, UIAlertViewDelegate, CardPageViewControllerDelegate, WebConnectorDelegate, UIScrollViewDelegate> {
+    
+    NSMutableArray * newFilters;
+    NewEventsFilter * activeNewEventsFilter;
     
     IBOutlet UIView   * filtersContainerView;
     IBOutlet UIButton * filterButtonCategories;
     IBOutlet UIButton * filterButtonPrice;
-    IBOutlet UIButton * filterButtonDateTime;
+    IBOutlet UIButton * filterButtonDate;
     IBOutlet UIButton * filterButtonLocation;
+    IBOutlet UIButton * filterButtonTime;
     
     IBOutlet UIView   * pushableContainerView;
     IBOutlet UIView   * filtersSummaryAndSearchContainerView;
@@ -33,7 +38,13 @@ extern float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT;
     IBOutlet UIView   * searchButtonContainerView;
     IBOutlet UIButton * searchButton;
     
-    IBOutlet UIView * drawerView;
+    IBOutlet UIScrollView * drawerScrollView;
+    IBOutlet UIView * drawerViewsContainer;
+    IBOutlet UIView * drawerViewCategories;
+    IBOutlet UIView * drawerViewPrice;
+    IBOutlet UIView * drawerViewDate;
+    IBOutlet UIView * drawerViewLocation;
+    IBOutlet UIView * drawerViewTime;
 	IBOutlet UITableView * tableView_;
     
     UIView * tableFooterView;
@@ -60,10 +71,11 @@ extern float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT;
     
 	EGORefreshTableHeaderView *refreshHeaderView;
 	
-    BOOL isCategoriesDrawerOpen;
+    BOOL isDrawerOpen;
 	
     WebActivityView * webActivityView;
-//    UIView * selectedFilterView;
+    UIView * selectedFilterView;
+    
     
     NSArray * concreteParentCategoriesArray;
     NSDictionary * concreteParentCategoriesDictionary; // Dictionary of Category objects, with their URI's as their keys.
