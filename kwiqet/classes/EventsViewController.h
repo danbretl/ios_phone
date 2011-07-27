@@ -15,29 +15,49 @@
 #import "EventTableViewCell.h"
 #import "WebDataTranslator.h"
 #import "WebActivityView.h"
-//#import "FacebookManager.h"
-#import "NewEventsFilter.h"
-
-extern float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT;
+#import "EventsFilter.h"
 
 @interface EventsViewController : UIViewController <UITableViewDelegate, UITableViewDataSource, UISearchBarDelegate, UIAlertViewDelegate, CardPageViewControllerDelegate, WebConnectorDelegate, UIScrollViewDelegate> {
     
-    NSMutableArray * newFilters;
-    NewEventsFilter * activeNewEventsFilter;
+    ///////////
+    // Models
     
+	NSMutableArray * events;
+	NSMutableArray * eventsFromSearch;
+    NSArray * concreteParentCategoriesArray;
+    NSDictionary * concreteParentCategoriesDictionary; // Dictionary of Category objects, with their URI's as their keys.
+    CoreDataModel * coreDataModel;
+    
+    //////////////////
+    // "View models"
+
+    NSMutableArray * filters;
+    EventsFilter * activeFilterInUI;
+    BOOL isDrawerOpen;
+    BOOL isSearchOn;
+    BOOL problemViewWasShowing;
+    NSString * oldFilterString;
+    NSString * categoryURI;
+    NSString * oldFilterStringProposed;
+    NSString * categoryURIProposed;
+    NSIndexPath * indexPathOfRowAttemptingToDelete;
+    NSIndexPath * indexPathOfSelectedRow;
+
+    //////////
+    // Views
+    
+	IBOutlet UITableView * tableView_;
+    IBOutlet UIView   * pushableContainerView;
+    IBOutlet UIView   * filtersSummaryAndSearchContainerView;
+    IBOutlet UILabel  * filtersSummaryLabel;
+    IBOutlet UIView   * searchButtonContainerView;
+    IBOutlet UIButton * searchButton;
     IBOutlet UIView   * filtersContainerView;
     IBOutlet UIButton * filterButtonCategories;
     IBOutlet UIButton * filterButtonPrice;
     IBOutlet UIButton * filterButtonDate;
     IBOutlet UIButton * filterButtonLocation;
     IBOutlet UIButton * filterButtonTime;
-    
-    IBOutlet UIView   * pushableContainerView;
-    IBOutlet UIView   * filtersSummaryAndSearchContainerView;
-    IBOutlet UILabel  * filtersSummaryLabel;
-    IBOutlet UIView   * searchButtonContainerView;
-    IBOutlet UIButton * searchButton;
-    
     IBOutlet UIScrollView * drawerScrollView;
     IBOutlet UIView * drawerViewsContainer;
     IBOutlet UIView * drawerViewCategories;
@@ -45,65 +65,31 @@ extern float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT;
     IBOutlet UIView * drawerViewDate;
     IBOutlet UIView * drawerViewLocation;
     IBOutlet UIView * drawerViewTime;
-	IBOutlet UITableView * tableView_;
-    
-    UIView * tableFooterView;
-    
-	NSMutableArray * events;
-	NSMutableArray * eventsFromSearch;
-    
-    NSString * filterString;
-    NSString * categoryURI;
-    NSString * filterStringProposed;
-    NSString * categoryURIProposed;
-    
-//    UIView   * filtersBackgroundView;
-//    UIButton * recommendedFilterButton;
-//    UIButton * freeFilterButton;
-//    UIButton * popularFilterButton;
-    
-//    UIButton * logoButton;
-	
-    CoreDataModel * coreDataModel;
-    
+	UISearchBar * mySearchBar;
+	EGORefreshTableHeaderView *refreshHeaderView;
+    WebActivityView * webActivityView;
     UIView * problemView;
     UILabel * problemLabel;
-    
-	EGORefreshTableHeaderView *refreshHeaderView;
-	
-    BOOL isDrawerOpen;
-	
-    WebActivityView * webActivityView;
-    UIView * selectedFilterView;
-    
-    
-    NSArray * concreteParentCategoriesArray;
-    NSDictionary * concreteParentCategoriesDictionary; // Dictionary of Category objects, with their URI's as their keys.
-    
-    WebConnector * webConnector;
+    EventViewController * cardPageViewController;
     UIAlertView * connectionErrorStandardAlertView;
     UIAlertView * connectionErrorOnDeleteAlertView;
+    
+    ////////
+    // Web
+    
+    WebConnector * webConnector;
     WebDataTranslator * webDataTranslator;
-    
-    EventViewController * cardPageViewController;
-    
-    NSIndexPath * indexPathOfRowAttemptingToDelete;
-    NSIndexPath * indexPathOfSelectedRow;
-    
-    UIButton * calendarButton;
-    
-    BOOL isSearchOn;
-	UISearchBar * mySearchBar;
-    
-    BOOL problemViewWasShowing;
-    
-//    FacebookManager * facebookManager;
 
 }
 
-//@property (nonatomic, retain) FacebookManager * facebookManager;
+//////////////////////
+// Public properties
+
 @property (nonatomic, retain) CoreDataModel *coreDataModel;
-//- (void) suggestToReloadEventsList; // This method is only a "suggestion" to the object because if the object determines it doesn't NEED to try to get a new featured event from the web, then it will simply ignore the request. (It ignores the request if the date of the last events list web-get was the same day as "today" i.e. the day of the method call.)
+
+///////////////////
+// Public methods
+
 - (void) suggestToRedrawEventsList;
 - (void) forceToReloadEventsList;
 
