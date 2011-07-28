@@ -104,6 +104,8 @@
 		322CDFEC13CF4AA6005203C2 /* btn_selectall_full_border@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 322CDFE813CF4AA6005203C2 /* btn_selectall_full_border@2x.png */; };
 		322CDFED13CF4AA6005203C2 /* btn_selectall_full_norightborder.png in Resources */ = {isa = PBXBuildFile; fileRef = 322CDFE913CF4AA6005203C2 /* btn_selectall_full_norightborder.png */; };
 		322CDFEE13CF4AA6005203C2 /* btn_selectall_full_norightborder@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 322CDFEA13CF4AA6005203C2 /* btn_selectall_full_norightborder@2x.png */; };
+		323D4B0513E1BDAC0091D8A6 /* EventsFilterOption.m in Sources */ = {isa = PBXBuildFile; fileRef = 323D4B0413E1BDAC0091D8A6 /* EventsFilterOption.m */; };
+		323D4B0913E203D50091D8A6 /* SegmentedHighlighterView.m in Sources */ = {isa = PBXBuildFile; fileRef = 323D4B0813E203D50091D8A6 /* SegmentedHighlighterView.m */; };
 		324759AA13BB8C56002A9199 /* HR.png in Resources */ = {isa = PBXBuildFile; fileRef = 324759A813BB8C56002A9199 /* HR.png */; };
 		324759AB13BB8C56002A9199 /* HR@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 324759A913BB8C56002A9199 /* HR@2x.png */; };
 		324759AF13BBB2B1002A9199 /* event_card.png in Resources */ = {isa = PBXBuildFile; fileRef = 324759AD13BBB2B1002A9199 /* event_card.png */; };
@@ -421,6 +423,10 @@
 		322CDFE813CF4AA6005203C2 /* btn_selectall_full_border@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "btn_selectall_full_border@2x.png"; sourceTree = "<group>"; };
 		322CDFE913CF4AA6005203C2 /* btn_selectall_full_norightborder.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = btn_selectall_full_norightborder.png; sourceTree = "<group>"; };
 		322CDFEA13CF4AA6005203C2 /* btn_selectall_full_norightborder@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "btn_selectall_full_norightborder@2x.png"; sourceTree = "<group>"; };
+		323D4B0313E1BDAC0091D8A6 /* EventsFilterOption.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EventsFilterOption.h; sourceTree = "<group>"; };
+		323D4B0413E1BDAC0091D8A6 /* EventsFilterOption.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EventsFilterOption.m; sourceTree = "<group>"; };
+		323D4B0713E203D50091D8A6 /* SegmentedHighlighterView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SegmentedHighlighterView.h; sourceTree = "<group>"; };
+		323D4B0813E203D50091D8A6 /* SegmentedHighlighterView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SegmentedHighlighterView.m; sourceTree = "<group>"; };
 		324759A813BB8C56002A9199 /* HR.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = HR.png; sourceTree = "<group>"; };
 		324759A913BB8C56002A9199 /* HR@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "HR@2x.png"; sourceTree = "<group>"; };
 		324759AD13BBB2B1002A9199 /* event_card.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = event_card.png; sourceTree = "<group>"; };
@@ -1084,6 +1090,8 @@
 				3288360D13DDE7320090AFE0 /* EventsViewController.xib */,
 				32D13D6613DF4A8E00EBB192 /* EventsFilter.h */,
 				32D13D6713DF4A8E00EBB192 /* EventsFilter.m */,
+				323D4B0313E1BDAC0091D8A6 /* EventsFilterOption.h */,
+				323D4B0413E1BDAC0091D8A6 /* EventsFilterOption.m */,
 			);
 			name = EventsViewController;
 			sourceTree = "<group>";
@@ -1168,6 +1176,8 @@
 				3220DFB413B23B390032C205 /* GradientView.m */,
 				3260038413B3A2B80054936A /* WebActivityView.h */,
 				3260038513B3A2B80054936A /* WebActivityView.m */,
+				323D4B0713E203D50091D8A6 /* SegmentedHighlighterView.h */,
+				323D4B0813E203D50091D8A6 /* SegmentedHighlighterView.m */,
 			);
 			name = views;
 			sourceTree = "<group>";
@@ -1681,6 +1691,8 @@
 				326F6C8D13D108260032CA5F /* LocalyticsSession.m in Sources */,
 				327C4DB613DA301D00DAAD51 /* Analytics.m in Sources */,
 				32D13D6813DF4A8E00EBB192 /* EventsFilter.m in Sources */,
+				323D4B0513E1BDAC0091D8A6 /* EventsFilterOption.m in Sources */,
+				323D4B0913E203D50091D8A6 /* SegmentedHighlighterView.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

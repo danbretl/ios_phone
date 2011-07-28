@@ -20,12 +20,15 @@ extern NSString * const EVENTS_FILTER_TIME;
     UIView * drawerView_;
     NSString * code_;
     
+    NSMutableArray * options_;
+    
 }
 
-+ (EventsFilter *) eventsFilterWithCode:(NSString *)filterCode button:(UIButton *)button drawerView:(UIView *)drawerView;
++ (EventsFilter *) eventsFilterWithCode:(NSString *)filterCode button:(UIButton *)button drawerView:(UIView *)drawerView options:(NSArray *)options;
 
 @property (copy) NSString * code;
 @property (retain) UIButton * button;
 @property (retain) UIView * drawerView;
+@property (readonly) NSMutableArray * options;
 
 @end

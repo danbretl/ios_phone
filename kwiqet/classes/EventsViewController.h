@@ -16,6 +16,8 @@
 #import "WebDataTranslator.h"
 #import "WebActivityView.h"
 #import "EventsFilter.h"
+#import "EventsFilterOption.h"
+#import "SegmentedHighlighterView.h"
 
 @interface EventsViewController : UIViewController <UITableViewDelegate, UITableViewDataSource, UISearchBarDelegate, UIAlertViewDelegate, CardPageViewControllerDelegate, WebConnectorDelegate, UIScrollViewDelegate> {
     
@@ -33,6 +35,10 @@
 
     NSMutableArray * filters;
     EventsFilter * activeFilterInUI;
+    EventsFilterOption * selectedPriceFilterOption;
+    EventsFilterOption * selectedDateFilterOption;
+    EventsFilterOption * selectedTimeFilterOption;
+    EventsFilterOption * selectedLocationFilterOption;
     BOOL isDrawerOpen;
     BOOL isSearchOn;
     BOOL problemViewWasShowing;
@@ -58,13 +64,38 @@
     IBOutlet UIButton * filterButtonDate;
     IBOutlet UIButton * filterButtonLocation;
     IBOutlet UIButton * filterButtonTime;
+    IBOutlet SegmentedHighlighterView * activeFilterHighlightsContainerView;
     IBOutlet UIScrollView * drawerScrollView;
     IBOutlet UIView * drawerViewsContainer;
-    IBOutlet UIView * drawerViewCategories;
+    // Drawer view price
     IBOutlet UIView * drawerViewPrice;
+    IBOutlet UIButton * dvPriceButtonFree;
+    IBOutlet UIButton * dvPriceButtonUnder20;
+    IBOutlet UIButton * dvPriceButtonUnder50;
+    IBOutlet UIButton * dvPriceButtonAny;
+    // Drawer view date
     IBOutlet UIView * drawerViewDate;
-    IBOutlet UIView * drawerViewLocation;
+    IBOutlet UIButton * dvDateButtonToday;
+    IBOutlet UIButton * dvDateButtonThisWeekend;
+    IBOutlet UIButton * dvDateButtonThisWeek;
+    IBOutlet UIButton * dvDateButtonThisMonth;
+    IBOutlet UIButton * dvDateButtonAny;
+    // Drawer view categories
+    IBOutlet UIView * drawerViewCategories;
+    // Drawer view time
     IBOutlet UIView * drawerViewTime;
+    IBOutlet UIButton * dvTimeButtonMorning;
+    IBOutlet UIButton * dvTimeButtonAfternoon;
+    IBOutlet UIButton * dvTimeButtonEvening;
+    IBOutlet UIButton * dvTimeButtonNight;
+    IBOutlet UIButton * dvTimeButtonAny;
+    // Drawer view location
+    IBOutlet UIView * drawerViewLocation;
+    IBOutlet UITextField * dvLocationTextField;
+    IBOutlet UIButton * dvLocationButtonWalking;
+    IBOutlet UIButton * dvLocationButtonNeighborhood;
+    IBOutlet UIButton * dvLocationButtonBorough;
+    IBOutlet UIButton * dvLocationButtonCity;
 	UISearchBar * mySearchBar;
 	EGORefreshTableHeaderView *refreshHeaderView;
     WebActivityView * webActivityView;
