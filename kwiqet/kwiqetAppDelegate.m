@@ -47,7 +47,7 @@
     // Variables...
     BOOL forceGetCategoryTree = NO;
     BOOL forceGetCategoryTreeOneTimeForce = YES;
-    BOOL forceGetCategoryTreeOneTimeForceComplete = [[NSUserDefaults standardUserDefaults] boolForKey:@"forceGetCategoryTreeOneTimeForceComplete"];
+    BOOL forceGetCategoryTreeOneTimeForceComplete = [[NSUserDefaults standardUserDefaults] boolForKey:@"forceGetCategoryTreeOneTimeForceCompleteA"];
     forceGetCategoryTreeOneTimeForce &= !forceGetCategoryTreeOneTimeForceComplete;
     
     // Order of operations:
@@ -217,7 +217,7 @@
         [DefaultsModel saveCategoryTreeHasBeenRetrieved:self.categoryTreeHasBeenRetrieved];
         [DefaultsModel saveCategoryTreeMostRecentRetrievalDate:[NSDate date]];
         [self.splashScreenViewController explodeAndFadeViewAnimated];
-        [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"forceGetCategoryTreeOneTimeForceComplete"];
+        [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"forceGetCategoryTreeOneTimeForceCompleteA"];
     } else {
         [self webConnector:theWebConnector getCategoryTreeFailure:request];
     }

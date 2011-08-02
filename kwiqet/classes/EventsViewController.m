@@ -1141,19 +1141,19 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     
     Event * event = (Event *)[self.eventsForCurrentSource objectAtIndex:indexPath.row];
     
-    NSString * title = event.title;
+    NSString * title = event.summary.title;
     Category * concreteParentCategory = event.concreteParentCategory;
-    NSString * location = event.venue;
-    NSString * address = event.summaryAddress;
-    NSString * summaryStartDateEarliestString = event.summaryStartDateEarliestString;
-    NSString * summaryStartDateLatestString = event.summaryStartDateLatestString;
-    NSNumber * summaryStartDateDistinctCount = event.summaryStartDateDistinctCount;
-    NSString * summaryStartTimeEarliestString = event.summaryStartTimeEarliestString;
-    NSString * summaryStartTimeLatestString = event.summaryStartTimeLatestString;
-    NSNumber * summaryStartTimeDistinctCount = event.summaryStartTimeDistinctCount;
-    NSNumber * summaryPlaceDistinctCount = event.summaryPlaceDistinctCount;
-    NSNumber * priceMin = event.priceMinimum;
-    NSNumber * priceMax = event.priceMaximum;
+    NSString * location = event.summary.placeTitle;
+    NSString * address = event.summary.placeAddressEtc;
+    NSDate * startDateEarliest = event.summary.startDateEarliest;
+    NSDate * startDateLatest = event.summary.startDateLatest;
+    NSNumber * startDateCount = event.summary.startDateCount;
+    NSDate * startTimeEarliest = event.summary.startTimeEarliest;
+    NSDate * startTimeLatest = event.summary.startTimeLatest;
+    NSNumber * startTimeCount = event.summary.startTimeCount;
+    NSNumber * placeCount = event.summary.placeCount;
+    NSNumber * priceMin = event.summary.priceMinimum;
+    NSNumber * priceMax = event.summary.priceMaximum;
     
     if (!title) { title = @"Title not available"; }
     cell.titleLabel.text = title;
@@ -1164,15 +1164,14 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     }
     NSString * iconThumb = concreteParentCategory.iconThumb;
     if (iconThumb) {
-//        NSLog(@"Have an icon thumb - %@", iconThumb);
         cell.iconImageView.image = [UIImage imageNamed:iconThumb];
     }
     
     if (location || address) {
         if (location) {
             cell.locationLabel.text = location;
-            if ([summaryPlaceDistinctCount intValue] > 1) {
-                cell.locationLabel.text = [cell.locationLabel.text stringByAppendingFormat:@" & %d more locations", [summaryPlaceDistinctCount intValue] - 1];
+            if ([placeCount intValue] > 1) {
+                cell.locationLabel.text = [cell.locationLabel.text stringByAppendingFormat:@" & %d more locations", [placeCount intValue] - 1];
             }
         } else {
             cell.locationLabel.text = address;
@@ -1181,11 +1180,10 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
         cell.locationLabel.text = @"Location not available";
     }
 
+    NSString * dateToDisplay = [self.webDataTranslator eventsListDateRangeStringFromEventDateEarliest:startDateEarliest eventDateLatest:startDateLatest eventDateCount:startDateCount relativeDates:YES dataUnavailableString:nil];
+    NSString * timeToDisplay = [self.webDataTranslator eventsListTimeRangeStringFromEventTimeEarliest:startTimeEarliest eventTimeLatest:startTimeLatest eventTimeCount:startTimeCount dataUnavailableString:nil];
     
-    NSString * dateToDisplay = [self.webDataTranslator eventsListDateRangeStringFromEventDateEarliest:summaryStartDateEarliestString eventDateLatest:summaryStartDateLatestString eventDateDistinctCount:summaryStartDateDistinctCount relativeDates:YES dataUnavailableString:nil];
-    NSString * timeToDisplay = [self.webDataTranslator eventsListTimeRangeStringFromEventTimeEarliest:summaryStartTimeEarliestString eventTimeLatest:summaryStartTimeLatestString eventTimeDistinctCount:summaryStartTimeDistinctCount dataUnavailableString:nil];
-    
-    NSString * divider = summaryStartDateEarliestString && summaryStartTimeEarliestString ? @" | " : @"";
+    NSString * divider = startDateEarliest && startTimeEarliest ? @" | " : @"";
     NSString * finalDatetimeString = [NSString stringWithFormat:@"%@%@%@", dateToDisplay, divider, timeToDisplay];
     cell.dateAndTimeLabel.text = finalDatetimeString;
     

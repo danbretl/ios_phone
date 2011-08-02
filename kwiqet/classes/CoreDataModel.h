@@ -8,10 +8,14 @@
 
 #import <Foundation/Foundation.h>
 #import "Event.h"
+#import "EventSummary.h"
 #import "Category.h"
 #import "Contact.h"
 #import "CategoryBreadcrumb.h"
 #import "WebDataTranslator.h"
+#import "Occurrence.h"
+#import "Place.h"
+#import "Price.h"
 
 @interface CoreDataModel : NSObject {
     
@@ -57,11 +61,13 @@
 // Regular Events
 - (void) updateEvent:(Event *)event usingEventSummaryDictionary:(NSDictionary *)eventSummaryDictionary featuredOverride:(NSNumber *)featuredOverride fromSearchOverride:(NSNumber *)fromSearchOverride;
 - (void) updateEvent:(Event *)event usingEventDictionary:(NSDictionary *)eventDictionary featuredOverride:(NSNumber *)featuredOverride fromSearchOverride:(NSNumber *)fromSearchOverride;
+- (void)updateEvent:(Event *)event withExhaustiveOccurrencesArray:(NSArray *)exhaustiveOccurrences;
 - (NSArray *) getRegularEvents;
 - (NSArray *) getRegularEventsFromSearch;
 - (void) deleteRegularEvents;
 - (void) deleteRegularEventsFromSearch;
 - (void) deleteRegularEventForURI:(NSString*)eventID;
+- (Place *) getPlaceWithURI:(NSString *)placeURI;
 
 // Featured Events
 - (Event *) getFeaturedEvent;

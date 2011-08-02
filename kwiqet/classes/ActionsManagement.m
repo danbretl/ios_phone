@@ -7,6 +7,9 @@
 //
 
 #import "ActionsManagement.h"
+#import "Occurrence.h"
+#import "Place.h"
+#import "Price.h"
 
 @interface ActionsManagement()
 @property (retain) UIActionSheet * letsGoActionSheet;
@@ -80,34 +83,45 @@
     
     NSLog(@"Email"); // Email
     
+    // Occurrences below... TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. EVERYTHING RELATED TO TEMPRANDOMOCCURRENCE NEEDS TO BE LOOKED OVER AND REWRITTEN. EVERYTHING RELATED TO TEMPRANDOMOCCURRENCE NEEDS TO BE LOOKED OVER AND REWRITTEN. EVERYTHING RELATED TO TEMPRANDOMOCCURRENCE NEEDS TO BE LOOKED OVER AND REWRITTEN. EVERYTHING RELATED TO TEMPRANDOMOCCURRENCE NEEDS TO BE LOOKED OVER AND REWRITTEN. EVERYTHING RELATED TO TEMPRANDOMOCCURRENCE NEEDS TO BE LOOKED OVER AND REWRITTEN. EVERYTHING RELATED TO TEMPRANDOMOCCURRENCE NEEDS TO BE LOOKED OVER AND REWRITTEN.
+    Occurrence * firstOccurrence = [event.occurrencesChronological objectAtIndex:0];
+    // Occurrences above... TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. EVERYTHING RELATED TO TEMPRANDOMOCCURRENCE NEEDS TO BE LOOKED OVER AND REWRITTEN. EVERYTHING RELATED TO TEMPRANDOMOCCURRENCE NEEDS TO BE LOOKED OVER AND REWRITTEN. EVERYTHING RELATED TO TEMPRANDOMOCCURRENCE NEEDS TO BE LOOKED OVER AND REWRITTEN. EVERYTHING RELATED TO TEMPRANDOMOCCURRENCE NEEDS TO BE LOOKED OVER AND REWRITTEN. EVERYTHING RELATED TO TEMPRANDOMOCCURRENCE NEEDS TO BE LOOKED OVER AND REWRITTEN.
+    
     NSString * emailLinkOpen = event.url ? [NSString stringWithFormat:@"<a href='%@'>", event.url] : @"";
     NSString * emailLinkClose = event.url ? @"</a>" : @"";
     NSString * emailTitle = event.title ? [NSString stringWithFormat:@"    <b>%@%@%@</b><br><br>", emailLinkOpen, event.title, emailLinkClose] : @"";
-    NSString * emailLocation = event.venue ? [NSString stringWithFormat:@"    Location: %@<br>", event.venue] : @"";
-    NSString * emailAddressFirst = event.address ? event.address : @"";
-    NSString * emailAddressSecond = [webDataTranslator addressSecondLineStringFromCity:event.city state:event.state zip:event.zip];
-    if (event.address && emailAddressSecond) { emailAddressFirst = [emailAddressFirst stringByAppendingString:@", "]; }
+    NSString * emailLocation = firstOccurrence.place.title ? [NSString stringWithFormat:@"    Location: %@<br>", firstOccurrence.place.title] : @"";
+    NSString * emailAddressFirst = firstOccurrence.place.address ? firstOccurrence.place.address : @"";
+    NSString * emailAddressSecond = [webDataTranslator addressSecondLineStringFromCity:firstOccurrence.place.city state:firstOccurrence.place.state zip:firstOccurrence.place.zip];
+    if (firstOccurrence.place.address && emailAddressSecond) { emailAddressFirst = [emailAddressFirst stringByAppendingString:@", "]; }
     if (!emailAddressSecond) { emailAddressSecond = @""; }
     NSString * emailAddressFull = ([emailAddressFirst isEqualToString:@""] && [emailAddressSecond isEqualToString:@""]) ? @"" : [NSString stringWithFormat:@"    Address: %@%@<br>", emailAddressFirst, emailAddressSecond];
-    NSString * emailTime = [webDataTranslator timeSpanStringFromStartDatetime:event.startTimeDatetime endDatetime:event.endTimeDatetime dataUnavailableString:@""];
+    NSString * emailTime = [webDataTranslator timeSpanStringFromStartDatetime:firstOccurrence.startTime endDatetime:firstOccurrence.endTime dataUnavailableString:@""];
     if (![emailTime length] == 0) {
         emailTime = [NSString stringWithFormat:@"    Time: %@<br>", emailTime];
     }
-    NSString * emailDate = [webDataTranslator dateSpanStringFromStartDatetime:event.startDateDatetime endDatetime:event.endDateDatetime relativeDates:YES dataUnavailableString:@""];
+    NSString * emailDate = [webDataTranslator dateSpanStringFromStartDatetime:firstOccurrence.startDate endDatetime:firstOccurrence.endDate relativeDates:YES dataUnavailableString:@""];
     if (![emailDate length] == 0) {
         emailDate = [NSString stringWithFormat:@"    Date: %@<br>", emailDate];
     }
-    NSString * emailPrice = [webDataTranslator priceRangeStringFromMinPrice:event.priceMinimum maxPrice:event.priceMaximum dataUnavailableString:@""];
+    NSArray * prices = firstOccurrence.pricesLowToHigh;
+    Price * minPrice = nil;
+    Price * maxPrice = nil;
+    if (prices && prices.count > 0) {
+        minPrice = [prices objectAtIndex:0];
+        maxPrice = prices.lastObject;
+    }
+    NSString * emailPrice = [webDataTranslator priceRangeStringFromMinPrice:minPrice.value maxPrice:maxPrice.value dataUnavailableString:@""];
     if (![emailPrice length] == 0) {
         emailPrice = [NSString stringWithFormat:@"    Price: %@", emailPrice];
     }
-    NSString * emailDescription = event.details ? event.details : @"";
+    NSString * emailDescription = event.eventDescription ? event.eventDescription : @"";
     emailDescription = !([emailDescription length] == 0) ? [NSString stringWithFormat:@"<br><br>%@", emailDescription] : @"";
     
     NSString * emailMap = @"";
-    if (event.latitude && event.longitude) {
-        NSString * mapSearchQuery = [[[NSString stringWithFormat:@"%@ %@ %@", (event.venue ? event.venue : @""), emailAddressFirst, emailAddressSecond] stringByReplacingOccurrencesOfString:@" " withString:@"+"] stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
-        NSString * urlString = [NSString stringWithFormat:@"http://maps.google.com/maps?q=%@&ll=%f,%f", mapSearchQuery, [event.latitude floatValue], [event.longitude floatValue]];
+    if (firstOccurrence.place.latitude && firstOccurrence.place.longitude) {
+        NSString * mapSearchQuery = [[[NSString stringWithFormat:@"%@ %@ %@", (firstOccurrence.place.title ? firstOccurrence.place.title : @""), emailAddressFirst, emailAddressSecond] stringByReplacingOccurrencesOfString:@" " withString:@"+"] stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+        NSString * urlString = [NSString stringWithFormat:@"http://maps.google.com/maps?q=%@&ll=%f,%f", mapSearchQuery, [firstOccurrence.place.latitude floatValue], [firstOccurrence.place.longitude floatValue]];
         emailMap = [NSString stringWithFormat:@"    <a href='%@'>Click here for map</a><br>", urlString];
     }
     
@@ -125,23 +139,27 @@
 
 + (void)addEventToCalendar:(Event *)event usingWebDataTranslator:(WebDataTranslator *)webDataTranslator {
     
+    // Occurrences below... TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. EVERYTHING RELATED TO TEMPRANDOMOCCURRENCE NEEDS TO BE LOOKED OVER AND REWRITTEN. EVERYTHING RELATED TO TEMPRANDOMOCCURRENCE NEEDS TO BE LOOKED OVER AND REWRITTEN. EVERYTHING RELATED TO TEMPRANDOMOCCURRENCE NEEDS TO BE LOOKED OVER AND REWRITTEN. EVERYTHING RELATED TO TEMPRANDOMOCCURRENCE NEEDS TO BE LOOKED OVER AND REWRITTEN. EVERYTHING RELATED TO TEMPRANDOMOCCURRENCE NEEDS TO BE LOOKED OVER AND REWRITTEN. EVERYTHING RELATED TO TEMPRANDOMOCCURRENCE NEEDS TO BE LOOKED OVER AND REWRITTEN.
+    Occurrence * firstOccurrence = [event.occurrencesChronological objectAtIndex:0];
+    // Occurrences above... TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. EVERYTHING RELATED TO TEMPRANDOMOCCURRENCE NEEDS TO BE LOOKED OVER AND REWRITTEN. EVERYTHING RELATED TO TEMPRANDOMOCCURRENCE NEEDS TO BE LOOKED OVER AND REWRITTEN. EVERYTHING RELATED TO TEMPRANDOMOCCURRENCE NEEDS TO BE LOOKED OVER AND REWRITTEN. EVERYTHING RELATED TO TEMPRANDOMOCCURRENCE NEEDS TO BE LOOKED OVER AND REWRITTEN. EVERYTHING RELATED TO TEMPRANDOMOCCURRENCE NEEDS TO BE LOOKED OVER AND REWRITTEN.
+    
     // Add event to the device's iCal
     EKEventStore * eventStore = [[EKEventStore alloc] init];
     EKEvent * newEvent = [EKEvent eventWithEventStore:eventStore];
     
     newEvent.title = event.title;
-    newEvent.startDate = event.startDatetime;
+    newEvent.startDate = firstOccurrence.startDatetimeComposite;
     NSLog(@"%@", newEvent.startDate);
-    newEvent.allDay = ![event.startTimeValid boolValue];
-    if ([event.endDateValid boolValue]) {
-        newEvent.endDate = event.endDatetime;
+    newEvent.allDay = firstOccurrence.startTime == nil;
+    if (firstOccurrence.endDate != nil) {
+        newEvent.endDate = firstOccurrence.endDatetimeComposite;
     } else {
         newEvent.endDate = [NSDate dateWithTimeInterval:3600 sinceDate:newEvent.startDate];
     }
-    newEvent.location = event.venue;
+    newEvent.location = firstOccurrence.place.title;
     NSMutableString * iCalEventNotes = [NSMutableString string];
-    NSString * addressLineFirst = event.address;
-    NSString * addressLineSecond = [webDataTranslator addressSecondLineStringFromCity:event.city state:event.state zip:event.zip];
+    NSString * addressLineFirst = firstOccurrence.place.address;
+    NSString * addressLineSecond = [webDataTranslator addressSecondLineStringFromCity:firstOccurrence.place.city state:firstOccurrence.place.state zip:firstOccurrence.place.zip];
     if (addressLineFirst) { 
         [iCalEventNotes appendFormat:@"%@\n", addressLineFirst]; 
     }
@@ -151,7 +169,7 @@
     if (addressLineFirst || addressLineSecond) {
         [iCalEventNotes appendString:@"\n"];
     }
-    [iCalEventNotes appendString:event.details];
+    [iCalEventNotes appendString:event.eventDescription];
     newEvent.notes = iCalEventNotes;
     
     [newEvent setCalendar:[eventStore defaultCalendarForNewEvents]];
@@ -169,10 +187,14 @@
     NSString * title = event.title;
     [parameters setObject:title forKey:@"name"];
     
-    NSDate * startDate = event.startDatetime;
+    // Occurrences below... TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. EVERYTHING RELATED TO TEMPRANDOMOCCURRENCE NEEDS TO BE LOOKED OVER AND REWRITTEN. EVERYTHING RELATED TO TEMPRANDOMOCCURRENCE NEEDS TO BE LOOKED OVER AND REWRITTEN. EVERYTHING RELATED TO TEMPRANDOMOCCURRENCE NEEDS TO BE LOOKED OVER AND REWRITTEN. EVERYTHING RELATED TO TEMPRANDOMOCCURRENCE NEEDS TO BE LOOKED OVER AND REWRITTEN. EVERYTHING RELATED TO TEMPRANDOMOCCURRENCE NEEDS TO BE LOOKED OVER AND REWRITTEN. EVERYTHING RELATED TO TEMPRANDOMOCCURRENCE NEEDS TO BE LOOKED OVER AND REWRITTEN.
+    Occurrence * firstOccurrence = [event.occurrencesChronological objectAtIndex:0];
+    // Occurrences above... TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. EVERYTHING RELATED TO TEMPRANDOMOCCURRENCE NEEDS TO BE LOOKED OVER AND REWRITTEN. EVERYTHING RELATED TO TEMPRANDOMOCCURRENCE NEEDS TO BE LOOKED OVER AND REWRITTEN. EVERYTHING RELATED TO TEMPRANDOMOCCURRENCE NEEDS TO BE LOOKED OVER AND REWRITTEN. EVERYTHING RELATED TO TEMPRANDOMOCCURRENCE NEEDS TO BE LOOKED OVER AND REWRITTEN. EVERYTHING RELATED TO TEMPRANDOMOCCURRENCE NEEDS TO BE LOOKED OVER AND REWRITTEN.
+    
+    NSDate * startDate = firstOccurrence.startDatetimeComposite;
     NSDate * endDate = [startDate dateByAddingTimeInterval:3600];
-    if ([event.endTimeValid boolValue]) {
-        endDate = event.endDatetime;
+    if (firstOccurrence.endTime != nil) {
+        endDate = firstOccurrence.endDatetimeComposite;
     }
     NSTimeInterval startDateTimeInterval = [startDate timeIntervalSince1970];
     NSTimeInterval endDateTimeInterval = [endDate timeIntervalSince1970];
@@ -189,33 +211,33 @@
     [parameters setObject:[NSString stringWithFormat:@"%.0f", startDateTimeInterval] forKey:@"start_time"];
     [parameters setObject:[NSString stringWithFormat:@"%.0f", endDateTimeInterval] forKey:@"end_time"];
     
-    NSString * locationName = event.venue;
+    NSString * locationName = firstOccurrence.place.title;
     if (locationName) {
         [parameters setObject:locationName forKey:@"location"];
     }
     
-    if (event.address) { 
-        [parameters setObject:event.address forKey:@"street"];
+    if (firstOccurrence.place.address) { 
+        [parameters setObject:firstOccurrence.place.address forKey:@"street"];
     }
-    if (event.city) { 
-        [parameters setObject:event.city forKey:@"city"];
+    if (firstOccurrence.place.city) { 
+        [parameters setObject:firstOccurrence.place.city forKey:@"city"];
     }
-    if (event.state) { 
-        [parameters setObject:event.state forKey:@"state"];
+    if (firstOccurrence.place.state) { 
+        [parameters setObject:firstOccurrence.place.state forKey:@"state"];
     }
-    if (event.zip) { 
-        [parameters setObject:event.zip forKey:@"zip"];
+    if (firstOccurrence.place.zip) { 
+        [parameters setObject:firstOccurrence.place.zip forKey:@"zip"];
     }
     [parameters setValue:@"USA" forKey:@"country"];
-    if (event.latitude) {
-        [parameters setObject:[NSString stringWithFormat:@"%@", event.latitude] forKey:@"latitude"];
+    if (firstOccurrence.place.latitude) {
+        [parameters setObject:[NSString stringWithFormat:@"%@", firstOccurrence.place.latitude] forKey:@"latitude"];
     }
-    if (event.longitude) {
-        [parameters setObject:[NSString stringWithFormat:@"%@", event.longitude] forKey:@"longitude"];
+    if (firstOccurrence.place.longitude) {
+        [parameters setObject:[NSString stringWithFormat:@"%@", firstOccurrence.place.longitude] forKey:@"longitude"];
     }
     NSMutableString * facebookEventDescription = [NSMutableString string];
-    if (event.details) {
-        [facebookEventDescription appendString:event.details];
+    if (event.eventDescription) {
+        [facebookEventDescription appendString:event.eventDescription];
         if (event.url) {
             [facebookEventDescription appendString:@"\n\n"];
         }

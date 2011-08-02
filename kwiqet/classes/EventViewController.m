@@ -16,6 +16,9 @@
 #import "ActionsManagement.h"
 #import "LocalImagesManager.h"
 #import "Analytics.h"
+#import "Occurrence.h"
+#import "Place.h"
+#import "Price.h"
 
 #define CGFLOAT_MAX_TEXT_SIZE 10000
 
@@ -480,6 +483,7 @@
     NSError *error = nil;
     NSDictionary * eventDictionary = [responseString yajl_JSONWithOptions:YAJLParserOptionsAllowComments error:&error];
     [self.coreDataModel updateEvent:self.event usingEventDictionary:eventDictionary featuredOverride:nil fromSearchOverride:nil];
+    [self.coreDataModel updateEvent:self.event withExhaustiveOccurrencesArray:[eventDictionary valueForKey:@"occurrences"]];
     [self updateViewsFromData];
     
 //    [[SDWebImageManager sharedManager] setDelegate:self];
@@ -522,61 +526,76 @@
     // Title
     self.titleBar.text = self.event.title;
     self.titleBar.color = concreteParentCategoryColor;
-    
-    // Date & Time
-    NSDateFormatter * dateFormatter = [[NSDateFormatter alloc] init];
-    // Month
-    [dateFormatter setDateFormat:@"MMM"];
-    NSString * month = [dateFormatter stringFromDate:self.event.startDateDatetime];
-    self.monthLabel.text = [month uppercaseString];
-    // Day number
-    [dateFormatter setDateFormat:@"d"];
-    NSString * dayNumber = [dateFormatter stringFromDate:self.event.startDateDatetime];
-    self.dayNumberLabel.text = dayNumber;
-    self.dayNumberLabel.textColor = concreteParentCategoryColor;
-    // Day name
-    [dateFormatter setDateFormat:@"EEE"];
-    NSString * dayName = [dateFormatter stringFromDate:self.event.startDateDatetime];
-    [dateFormatter release];
-    self.dayNameLabel.text = [dayName uppercaseString];
-    // Time
-    NSString * time = [self.webDataTranslator timeSpanStringFromStartDatetime:self.event.startTimeDatetime endDatetime:self.event.endTimeDatetime dataUnavailableString:EVENT_TIME_NOT_AVAILABLE];
-    self.timeLabel.text = time;
-    
-    NSString * price = [self.webDataTranslator priceRangeStringFromMinPrice:self.event.priceMinimum maxPrice:self.event.priceMaximum dataUnavailableString:nil];
-    self.priceLabel.text = [NSString stringWithFormat:@"Price: %@", price];
-    
-    // Location & Address
-    NSString * addressFirstLine = self.event.address;
-    NSString * addressSecondLine = [self.webDataTranslator addressSecondLineStringFromCity:self.event.city state:self.event.state zip:self.event.zip];
-    BOOL someLocationInfo = addressFirstLine || addressSecondLine;
-    if (!addressFirstLine) { addressFirstLine = EVENT_ADDRESS_NOT_AVAILABLE; }
-    self.addressLabel.text = addressFirstLine;
-    self.cityStateZipLabel.text = addressSecondLine;
-    
-    // Venue
-    NSString * venue = self.event.venue;
-    if (!venue) { 
-        if (someLocationInfo) {
-            venue = @"Location:";
-        } else {
-            venue = @"Location not available";
-        }
+    // Occurrences below... TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. EVERYTHING RELATED TO TEMPRANDOMOCCURRENCE NEEDS TO BE LOOKED OVER AND REWRITTEN. EVERYTHING RELATED TO TEMPRANDOMOCCURRENCE NEEDS TO BE LOOKED OVER AND REWRITTEN. EVERYTHING RELATED TO TEMPRANDOMOCCURRENCE NEEDS TO BE LOOKED OVER AND REWRITTEN. EVERYTHING RELATED TO TEMPRANDOMOCCURRENCE NEEDS TO BE LOOKED OVER AND REWRITTEN. EVERYTHING RELATED TO TEMPRANDOMOCCURRENCE NEEDS TO BE LOOKED OVER AND REWRITTEN. EVERYTHING RELATED TO TEMPRANDOMOCCURRENCE NEEDS TO BE LOOKED OVER AND REWRITTEN.
+    NSArray * occurrencesChronological = [self.event occurrencesChronological];
+    Occurrence * firstOccurrence = nil;
+    if (occurrencesChronological && occurrencesChronological.count > 0) {
+        firstOccurrence = [self.event.occurrencesChronological objectAtIndex:0];
     }
-    self.venueLabel.text = venue;
-    
-    // Map button
-    self.mapButton.enabled = self.event.latitude && self.event.longitude;
-    
-    // Phone
-    BOOL havePhoneNumber = self.event.phone != nil && [self.event.phone length] > 0;
-    NSString * phone = havePhoneNumber ? self.event.phone : EVENT_PHONE_NOT_AVAILABLE;
-    [self.phoneNumberButton setTitle:phone forState:UIControlStateNormal];
-    self.phoneNumberButton.userInteractionEnabled = havePhoneNumber;
-    self.phoneNumberButton.enabled = havePhoneNumber;
+    // Occurrences above... TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. EVERYTHING RELATED TO TEMPRANDOMOCCURRENCE NEEDS TO BE LOOKED OVER AND REWRITTEN. EVERYTHING RELATED TO TEMPRANDOMOCCURRENCE NEEDS TO BE LOOKED OVER AND REWRITTEN. EVERYTHING RELATED TO TEMPRANDOMOCCURRENCE NEEDS TO BE LOOKED OVER AND REWRITTEN. EVERYTHING RELATED TO TEMPRANDOMOCCURRENCE NEEDS TO BE LOOKED OVER AND REWRITTEN. EVERYTHING RELATED TO TEMPRANDOMOCCURRENCE NEEDS TO BE LOOKED OVER AND REWRITTEN.
+    if (firstOccurrence) {
+        // Date & Time
+        NSDateFormatter * dateFormatter = [[NSDateFormatter alloc] init];
+        // Month
+        [dateFormatter setDateFormat:@"MMM"];
+        NSString * month = [dateFormatter stringFromDate:firstOccurrence.startDate];
+        self.monthLabel.text = [month uppercaseString];
+        // Day number
+        [dateFormatter setDateFormat:@"d"];
+        NSString * dayNumber = [dateFormatter stringFromDate:firstOccurrence.startDate];
+        self.dayNumberLabel.text = dayNumber;
+        self.dayNumberLabel.textColor = concreteParentCategoryColor;
+        // Day name
+        [dateFormatter setDateFormat:@"EEE"];
+        NSString * dayName = [dateFormatter stringFromDate:firstOccurrence.startDate];
+        [dateFormatter release];
+        self.dayNameLabel.text = [dayName uppercaseString];
+        // Time
+        NSString * time = [self.webDataTranslator timeSpanStringFromStartDatetime:firstOccurrence.startTime endDatetime:firstOccurrence.endTime dataUnavailableString:EVENT_TIME_NOT_AVAILABLE];
+        self.timeLabel.text = time;
+        
+        NSArray * prices = firstOccurrence.pricesLowToHigh;
+        Price * minPrice = nil;
+        Price * maxPrice = nil;
+        if (prices && prices.count > 0) {
+            minPrice = (Price *)[prices objectAtIndex:0];
+            maxPrice = (Price *)[prices lastObject];
+        }
+        NSString * price = [self.webDataTranslator priceRangeStringFromMinPrice:minPrice.value maxPrice:maxPrice.value dataUnavailableString:nil];
+        self.priceLabel.text = [NSString stringWithFormat:@"Price: %@", price];
+        
+        // Location & Address
+        NSString * addressFirstLine = firstOccurrence.place.address;
+        NSString * addressSecondLine = [self.webDataTranslator addressSecondLineStringFromCity:firstOccurrence.place.city state:firstOccurrence.place.state zip:firstOccurrence.place.zip];
+        BOOL someLocationInfo = addressFirstLine || addressSecondLine;
+        if (!addressFirstLine) { addressFirstLine = EVENT_ADDRESS_NOT_AVAILABLE; }
+        self.addressLabel.text = addressFirstLine;
+        self.cityStateZipLabel.text = addressSecondLine;
+        
+        // Venue
+        NSString * venue = firstOccurrence.place.title;
+        if (!venue) { 
+            if (someLocationInfo) {
+                venue = @"Location:";
+            } else {
+                venue = @"Location not available";
+            }
+        }
+        self.venueLabel.text = venue;
+        
+        // Map button
+        self.mapButton.enabled = firstOccurrence.place.latitude && firstOccurrence.place.longitude;
+        
+        // Phone
+        BOOL havePhoneNumber = firstOccurrence.place.phone != nil && [firstOccurrence.place.phone length] > 0;
+        NSString * phone = havePhoneNumber ? firstOccurrence.place.phone : EVENT_PHONE_NOT_AVAILABLE;
+        [self.phoneNumberButton setTitle:phone forState:UIControlStateNormal];
+        self.phoneNumberButton.userInteractionEnabled = havePhoneNumber;
+        self.phoneNumberButton.enabled = havePhoneNumber;
+    }
     
     // Description
-    NSString * descriptionString = self.event.details ? self.event.details : EVENT_DESCRIPTION_NOT_AVAILABLE;
+    NSString * descriptionString = self.event.eventDescription ? self.event.eventDescription : EVENT_DESCRIPTION_NOT_AVAILABLE;
     self.detailsLabel.text = descriptionString;
     //set contentSize for scroll view
     CGSize detailsLabelSize = [self.detailsLabel.text sizeWithFont:self.detailsLabel.font constrainedToSize:CGSizeMake(self.detailsLabel.bounds.size.width, 10000)];
@@ -966,16 +985,22 @@
 // make Phone number clickable..
 -(void)phoneButtonTouched {
 	NSLog(@"phone call");
-    [[UIApplication sharedApplication] openURL:[NSURL URLWithString:[NSString stringWithFormat:@"tel:%@", self.event.phone]]];
+    // Occurrences below... TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. EVERYTHING RELATED TO TEMPRANDOMOCCURRENCE NEEDS TO BE LOOKED OVER AND REWRITTEN. EVERYTHING RELATED TO TEMPRANDOMOCCURRENCE NEEDS TO BE LOOKED OVER AND REWRITTEN. EVERYTHING RELATED TO TEMPRANDOMOCCURRENCE NEEDS TO BE LOOKED OVER AND REWRITTEN. EVERYTHING RELATED TO TEMPRANDOMOCCURRENCE NEEDS TO BE LOOKED OVER AND REWRITTEN. EVERYTHING RELATED TO TEMPRANDOMOCCURRENCE NEEDS TO BE LOOKED OVER AND REWRITTEN. EVERYTHING RELATED TO TEMPRANDOMOCCURRENCE NEEDS TO BE LOOKED OVER AND REWRITTEN.
+    Occurrence * firstOccurrence = [self.event.occurrencesChronological objectAtIndex:0];
+    // Occurrences above... TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. EVERYTHING RELATED TO TEMPRANDOMOCCURRENCE NEEDS TO BE LOOKED OVER AND REWRITTEN. EVERYTHING RELATED TO TEMPRANDOMOCCURRENCE NEEDS TO BE LOOKED OVER AND REWRITTEN. EVERYTHING RELATED TO TEMPRANDOMOCCURRENCE NEEDS TO BE LOOKED OVER AND REWRITTEN. EVERYTHING RELATED TO TEMPRANDOMOCCURRENCE NEEDS TO BE LOOKED OVER AND REWRITTEN. EVERYTHING RELATED TO TEMPRANDOMOCCURRENCE NEEDS TO BE LOOKED OVER AND REWRITTEN.
+    [[UIApplication sharedApplication] openURL:[NSURL URLWithString:[NSString stringWithFormat:@"tel:%@", firstOccurrence.place.phone]]];
 }
 
 -(void)mapButtonTouched {
     self.mapViewController = [[[MapViewController alloc] initWithNibName:@"MapViewController" bundle:[NSBundle mainBundle]] autorelease];
     self.mapViewController.delegate = self;
-    self.mapViewController.locationLatitude = self.event.latitude;
-    self.mapViewController.locationLongitude = self.event.longitude;
-    self.mapViewController.locationName = self.event.venue;
-    self.mapViewController.locationAddress = self.event.address;
+    // Occurrences below... TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. EVERYTHING RELATED TO TEMPRANDOMOCCURRENCE NEEDS TO BE LOOKED OVER AND REWRITTEN. EVERYTHING RELATED TO TEMPRANDOMOCCURRENCE NEEDS TO BE LOOKED OVER AND REWRITTEN. EVERYTHING RELATED TO TEMPRANDOMOCCURRENCE NEEDS TO BE LOOKED OVER AND REWRITTEN. EVERYTHING RELATED TO TEMPRANDOMOCCURRENCE NEEDS TO BE LOOKED OVER AND REWRITTEN. EVERYTHING RELATED TO TEMPRANDOMOCCURRENCE NEEDS TO BE LOOKED OVER AND REWRITTEN. EVERYTHING RELATED TO TEMPRANDOMOCCURRENCE NEEDS TO BE LOOKED OVER AND REWRITTEN.
+    Occurrence * firstOccurrence = [self.event.occurrencesChronological objectAtIndex:0];
+    // Occurrences above... TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. EVERYTHING RELATED TO TEMPRANDOMOCCURRENCE NEEDS TO BE LOOKED OVER AND REWRITTEN. EVERYTHING RELATED TO TEMPRANDOMOCCURRENCE NEEDS TO BE LOOKED OVER AND REWRITTEN. EVERYTHING RELATED TO TEMPRANDOMOCCURRENCE NEEDS TO BE LOOKED OVER AND REWRITTEN. EVERYTHING RELATED TO TEMPRANDOMOCCURRENCE NEEDS TO BE LOOKED OVER AND REWRITTEN. EVERYTHING RELATED TO TEMPRANDOMOCCURRENCE NEEDS TO BE LOOKED OVER AND REWRITTEN.
+    self.mapViewController.locationLatitude = firstOccurrence.place.latitude;
+    self.mapViewController.locationLongitude = firstOccurrence.place.longitude;
+    self.mapViewController.locationName = firstOccurrence.place.title;
+    self.mapViewController.locationAddress = firstOccurrence.place.address;
     [self presentModalViewController:self.mapViewController animated:YES];
 }
 

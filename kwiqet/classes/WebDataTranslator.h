@@ -30,6 +30,8 @@ static NSString * const WDT_PRICE_MAXIMUM_KEY = @"maximum";
 ///////////////////////////////////////////////////////
 
 - (NSDictionary *) datetimesSummaryFromStartTime:(NSString *)timeStart endTime:(NSString *)timeEnd startDate:(NSString *)dateStart endDate:(NSString *)dateEnd;
+- (NSDate *) dateDatetimeFromDateString:(NSString *)dateString;
+- (NSDate *) timeDatetimeFromTimeString:(NSString *)timeString;
 - (NSDictionary *) pricesSummaryFromPriceArray:(NSArray *)priceArray;
 
 ////////////////////////////////////
@@ -53,9 +55,9 @@ static NSString * const WDT_PRICE_MAXIMUM_KEY = @"maximum";
 // DISPLAYING events list data //
 /////////////////////////////////
 
-- (NSString *) eventsListDateRangeStringFromEventDateEarliest:(NSString *)eventDateEarliestString eventDateLatest:(NSString *)eventDateLatestString eventDateDistinctCount:(NSNumber *)eventDateDistinctCount relativeDates:(BOOL)relativeDates dataUnavailableString:(NSString *)dataUnavailableString;
-- (NSString *) eventsListTimeRangeStringFromEventTimeEarliest:(NSString *)eventTimeEarliestString eventTimeLatest:(NSString *)eventTimeLatestString eventTimeDistinctCount:(NSNumber *)eventTimeDistinctCount dataUnavailableString:(NSString *)dataUnavailableString;
-- (NSString *) eventsListDateStringFromSQLDateString:(NSString *)sqlDateString relativeDates:(BOOL)relativeDates;
-- (NSString *) eventsListTimeStringFromSQLTimeString:(NSString *)sqlTimeString;
+- (NSString *) eventsListDateRangeStringFromEventDateEarliest:(NSDate *)eventDateEarliest eventDateLatest:(NSDate *)eventDateLatest eventDateCount:(NSNumber *)eventDateCount relativeDates:(BOOL)relativeDates dataUnavailableString:(NSString *)dataUnavailableString;
+- (NSString *) eventsListTimeRangeStringFromEventTimeEarliest:(NSDate *)eventTimeEarliest eventTimeLatest:(NSDate *)eventTimeLatest eventTimeCount:(NSNumber *)eventTimeCount dataUnavailableString:(NSString *)dataUnavailableString;
+- (NSString *) eventsListDateStringFromDate:(NSDate *)date relativeDates:(BOOL)relativeDates;
+- (NSString *) eventsListTimeStringFromTime:(NSDate *)time;
 
 @end

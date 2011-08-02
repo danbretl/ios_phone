@@ -307,60 +307,67 @@
 
 - (void) updateEvent:(Event *)event usingEventSummaryDictionary:(NSDictionary *)eventSummaryDictionary featuredOverride:(NSNumber *)featuredOverride fromSearchOverride:(NSNumber *)fromSearchOverride {
     
-    // Get the rest of the raw event data
+    // Basic info
     NSString * uri = [WebUtil stringOrNil:[eventSummaryDictionary valueForKey:@"event"]];
     NSString * title = [WebUtil stringOrNil:[eventSummaryDictionary valueForKey:@"title"]];
-    NSString * venue = [WebUtil stringOrNil:[eventSummaryDictionary valueForKey:@"place_title"]];
-    NSString * summaryAddress = [WebUtil stringOrNil:[eventSummaryDictionary valueForKey:@"place_address"]];
+    NSString * concreteParentCategoryURI = [WebUtil stringOrNil:[eventSummaryDictionary valueForKey:@"concrete_parent_category"]];
+    // Locations
+    NSString * placeTitle = [WebUtil stringOrNil:[eventSummaryDictionary valueForKey:@"place_title"]];
+    NSString * placeAddressEtc = [WebUtil stringOrNil:[eventSummaryDictionary valueForKey:@"place_address"]];
+    NSNumber * placeCount = [WebUtil numberOrNil:[eventSummaryDictionary valueForKey:@"place_distinct_count"]];
+    // Prices
     NSNumber * priceMinimum = [WebUtil numberOrNil:[eventSummaryDictionary valueForKey:@"price_quantity_min"]];
     NSNumber * priceMaximum = [WebUtil numberOrNil:[eventSummaryDictionary valueForKey:@"price_quantity_max"]];
-    NSString * summaryStartDateEarliestString = [WebUtil stringOrNil:[eventSummaryDictionary valueForKey:@"start_date_earliest"]];
+    // Dates
+    NSNumber * startDateCount = [WebUtil numberOrNil:[eventSummaryDictionary valueForKey:@"start_date_distinct_count"]];
+    NSDate * startDateEarliest = [self.webDataTranslator dateDatetimeFromDateString:[WebUtil stringOrNil:[eventSummaryDictionary valueForKey:@"start_date_earliest"]]];
+    NSDate * startDateLatest = [self.webDataTranslator dateDatetimeFromDateString:[WebUtil stringOrNil:[eventSummaryDictionary valueForKey:@"start_date_latest"]]];
+    // Times
+    NSNumber * startTimeCount = [WebUtil numberOrNil:[eventSummaryDictionary valueForKey:@"start_time_distinct_count"]];
     NSString * summaryStartTimeEarliestString = [WebUtil stringOrNil:[eventSummaryDictionary valueForKey:@"start_time_earliest"]];
     // THE FOLLOWING IS A TEMPORARY HACK COVERING UP THE FACT THAT OUR SCRAPES ARE NOT DEALING WITH THE FACT THAT VILLAGE VOICE INPUTS A TIME OF 00:00:00 WHEN THEY DON'T HAVE A VALID TIME. THUS, WE ARE CURRENTLY HACKISHLY ASSUMING THAT ANY TIME OF 00:00:00 MEANS AN INVALID UNKNOWN TIME.
     if ([summaryStartTimeEarliestString isEqualToString:@"00:00:00"]) {
         summaryStartTimeEarliestString = nil;
     }
-    NSString * summaryStartDateLatestString = [WebUtil stringOrNil:[eventSummaryDictionary valueForKey:@"start_date_latest"]];
+    NSDate * startTimeEarliest = [self.webDataTranslator timeDatetimeFromTimeString:summaryStartTimeEarliestString];
     NSString * summaryStartTimeLatestString = [WebUtil stringOrNil:[eventSummaryDictionary valueForKey:@"start_time_latest"]];
     // THE FOLLOWING IS A TEMPORARY HACK COVERING UP THE FACT THAT OUR SCRAPES ARE NOT DEALING WITH THE FACT THAT VILLAGE VOICE INPUTS A TIME OF 00:00:00 WHEN THEY DON'T HAVE A VALID TIME. THUS, WE ARE CURRENTLY HACKISHLY ASSUMING THAT ANY TIME OF 00:00:00 MEANS AN INVALID UNKNOWN TIME.
     if ([summaryStartTimeLatestString isEqualToString:@"00:00:00"]) {
         summaryStartTimeLatestString = nil;
     }
-    NSNumber * summaryStartDateDistinctCount = [WebUtil numberOrNil:[eventSummaryDictionary valueForKey:@"start_date_distinct_count"]];
-    NSNumber * summaryStartTimeDistinctCount = [WebUtil numberOrNil:[eventSummaryDictionary valueForKey:@"start_time_distinct_count"]];
-    NSNumber * summaryPlaceDistinctCount = [WebUtil numberOrNil:[eventSummaryDictionary valueForKey:@"place_distinct_count"]];
-    NSString * concreteParentCategoryURI = [WebUtil stringOrNil:[eventSummaryDictionary valueForKey:@"concrete_parent_category"]];
-    
+    NSDate * startTimeLatest = [self.webDataTranslator timeDatetimeFromTimeString:summaryStartTimeLatestString];
+
+    // Set the URI
     event.uri = uri ? uri : event.uri;
-    event.title = title ? title : event.title;
-    event.venue = venue ? venue : event.venue;
-    event.summaryAddress = summaryAddress ? summaryAddress : event.summaryAddress;
-    event.priceMinimum = title ? priceMinimum : event.priceMinimum;
-    event.priceMaximum = title ? priceMaximum : event.priceMaximum;
-    event.summaryStartDateEarliestString = summaryStartDateEarliestString ? summaryStartDateEarliestString : event.summaryStartDateEarliestString;
-    event.summaryStartTimeEarliestString = summaryStartTimeEarliestString ? summaryStartTimeEarliestString : event.summaryStartTimeEarliestString;
-    event.summaryStartDateLatestString = summaryStartDateLatestString ? summaryStartDateLatestString : event.summaryStartDateLatestString;
-    event.summaryStartTimeLatestString = summaryStartTimeLatestString ? summaryStartTimeLatestString : event.summaryStartTimeLatestString;
-    
-    event.summaryStartDateDistinctCount = summaryStartDateDistinctCount ? summaryStartDateDistinctCount : event.summaryStartDateDistinctCount;
-    event.summaryStartTimeDistinctCount = summaryStartTimeDistinctCount ? summaryStartTimeDistinctCount : event.summaryStartTimeDistinctCount;
-    event.summaryPlaceDistinctCount = summaryPlaceDistinctCount ? summaryPlaceDistinctCount : event.summaryPlaceDistinctCount;
-    
+    // Set the category
     if (concreteParentCategoryURI) {
-        event.concreteParentCategoryURI = concreteParentCategoryURI;
         Category * concreteParentCategory = [self getCategoryWithURI:concreteParentCategoryURI];
         event.concreteParentCategory = concreteParentCategory;
     }
-
+    // Create the summary if necessary
+    if (event.summary == nil) {
+        event.summary = [NSEntityDescription insertNewObjectForEntityForName:@"EventSummary" inManagedObjectContext:self.managedObjectContext];
+    }
+    // Set summary info
+    event.summary.title = title;
+    event.summary.placeTitle = placeTitle;
+    event.summary.placeAddressEtc = placeAddressEtc;
+    event.summary.placeCount = placeCount;
+    event.summary.priceMinimum = priceMinimum;
+    event.summary.priceMaximum = priceMaximum;
+    event.summary.startDateCount = startDateCount;
+    event.summary.startDateEarliest = startDateEarliest;
+    event.summary.startDateLatest = startDateLatest;
+    event.summary.startTimeCount = startTimeCount;
+    event.summary.startTimeEarliest = startTimeEarliest;
+    event.summary.startTimeLatest = startTimeLatest;
+    // Internal stuff
     if (featuredOverride)   { event.featured = featuredOverride; }
     if (fromSearchOverride) { event.fromSearch = fromSearchOverride; }
     
 }
 
 - (void)updateEvent:(Event *)event usingEventDictionary:(NSDictionary *)eventDictionary featuredOverride:(NSNumber *)featuredOverride fromSearchOverride:(NSNumber *)fromSearchOverride {
-    
-    // Setup
-    NSDictionary * firstOccurrenceDictionary = [[eventDictionary valueForKey:@"occurrences"] objectAtIndex:0];
     
     // Basic
     NSString * uri = [WebUtil stringOrNil:[eventDictionary objectForKey:@"resource_uri"]];
@@ -369,54 +376,7 @@
     
     // Web
     NSString * url = [WebUtil stringOrNil:[eventDictionary objectForKey:@"url"]];
-    
-    // Date and time
-    NSString * startDate = [WebUtil stringOrNil:[firstOccurrenceDictionary objectForKey:@"start_date"]];
-//    NSLog(@"startDate:%@", startDate);
-    NSString * endDate = [WebUtil stringOrNil:[firstOccurrenceDictionary objectForKey:@"end_date"]];
-//    NSLog(@"endDate:%@", endDate);
-    NSString * startTime = [WebUtil stringOrNil:[firstOccurrenceDictionary objectForKey:@"start_time"]];
-//    NSLog(@"startTime:%@", startTime);
-    // THE FOLLOWING IS A TEMPORARY HACK COVERING UP THE FACT THAT OUR SCRAPES ARE NOT DEALING WITH THE FACT THAT VILLAGE VOICE INPUTS A TIME OF 00:00:00 WHEN THEY DON'T HAVE A VALID TIME. THUS, WE ARE CURRENTLY HACKISHLY ASSUMING THAT ANY TIME OF 00:00:00 MEANS AN INVALID UNKNOWN TIME.
-    if ([startTime isEqualToString:@"00:00:00"]) {
-        startTime = nil;
-    }
-    NSString * endTime = [WebUtil stringOrNil:[firstOccurrenceDictionary objectForKey:@"end_time"]];
-//    NSLog(@"endTime:%@", endTime);
-    // Date and time (continued)
-    NSDictionary * startAndEndDatetimesDictionary = [self.webDataTranslator datetimesSummaryFromStartTime:startTime endTime:endTime startDate:startDate endDate:endDate];
-//    NSLog(@"%@", startAndEndDatetimesDictionary);
-    NSDate * startDatetime = (NSDate *)[startAndEndDatetimesDictionary objectForKey:WDT_START_DATETIME_KEY];
-    NSDate * endDatetime = (NSDate *)[startAndEndDatetimesDictionary objectForKey:WDT_END_DATETIME_KEY];
-    NSNumber * startDateValid = [startAndEndDatetimesDictionary valueForKey:WDT_START_DATE_VALID_KEY];
-    NSNumber * startTimeValid = [startAndEndDatetimesDictionary valueForKey:WDT_START_TIME_VALID_KEY];
-    NSNumber * endDateValid = [startAndEndDatetimesDictionary valueForKey:WDT_END_DATE_VALID_KEY];
-    NSNumber * endTimeValid = [startAndEndDatetimesDictionary valueForKey:WDT_END_TIME_VALID_KEY];
-    
-    // Price
-    NSArray * priceArray = [firstOccurrenceDictionary objectForKey:@"prices"];
-    NSDictionary * pricesMinMaxDictionary = [self.webDataTranslator pricesSummaryFromPriceArray:priceArray];
-    NSNumber * priceMinimum = [pricesMinMaxDictionary objectForKey:@"minimum"];
-    NSNumber * priceMaximum = [pricesMinMaxDictionary objectForKey:@"maximum"];
-    
-    // Address first line
-    NSString * addressLineFirst = [WebUtil stringOrNil:[[[firstOccurrenceDictionary valueForKey:@"place"] valueForKey:@"point"] valueForKey:@"address"]];
-    
-    // Address second line
-    NSString * cityString = [WebUtil stringOrNil:[[[[firstOccurrenceDictionary valueForKey:@"place"] valueForKey:@"point"] valueForKey:@"city"] valueForKey:@"city"]];
-    NSString * stateString = [WebUtil stringOrNil:[[[[firstOccurrenceDictionary valueForKey:@"place"]valueForKey:@"point"] valueForKey:@"city"] valueForKey:@"state"]];
-    NSString * zipCodeString = [WebUtil stringOrNil:[[[firstOccurrenceDictionary valueForKey:@"place"] valueForKey:@"point"] valueForKey:@"zip"]];
-    
-    // Latitude & Longitude
-    NSNumber * latitudeValue  = [WebUtil numberOrNil:[[[[[eventDictionary valueForKey:@"occurrences"] objectAtIndex:0]valueForKey:@"place"] valueForKey:@"point"] valueForKey:@"latitude"]];
-    NSNumber * longitudeValue = [WebUtil numberOrNil:[[[[[eventDictionary valueForKey:@"occurrences"] objectAtIndex:0] valueForKey:@"place"] valueForKey:@"point"] valueForKey:@"longitude"]];
-    
-    // Phone Number
-    NSString * eventPhoneString = [WebUtil stringOrNil:[[firstOccurrenceDictionary valueForKey:@"place"] valueForKey:@"phone"]];
-    
-    // Venue
-    NSString * venueString = [WebUtil stringOrNil:[[firstOccurrenceDictionary valueForKey:@"place"]valueForKey:@"title"]];
-    
+        
     // Image location
     NSString * imageLocation = [WebUtil stringOrNil:[eventDictionary valueForKey:@"thumbnail_detail"]];
     if (!imageLocation) { imageLocation = @""; }
@@ -444,34 +404,115 @@
     
     event.uri = uri ? uri : event.uri;
     if (concreteParentCategoryURI) {
-        event.concreteParentCategoryURI = concreteParentCategoryURI;
+//        event.concreteParentCategoryURI = concreteParentCategoryURI;
         Category * concreteParentCategory = [self getCategoryWithURI:concreteParentCategoryURI];
         event.concreteParentCategory = concreteParentCategory;
     }
     event.title = titleText;// ? titleText : event.title;
     event.url = url;// ? url : event.url;
-    event.startDatetime = startDatetime;// ? startDatetime : event.startDatetime;
-    event.endDatetime = endDatetime;// ? endDatetime : event.endDatetime;
-    event.startDateValid = startDateValid;// ? startDateValid : event.startDateValid;
-    event.startTimeValid = startTimeValid;// ? startTimeValid : event.startTimeValid;
-    event.endDateValid = endDateValid;// ? endDateValid : event.endDateValid;
-    event.endTimeValid = endTimeValid;// ? endTimeValid : event.endTimeValid;
-    event.venue = venueString;// ? venueString : event.venue;
-    event.address = addressLineFirst;// ? addressLineFirst : event.address;
-    event.city = cityString;// ? cityString : event.city;
-    event.state = stateString;// ? stateString : event.state;
-    event.zip = zipCodeString;// ? zipCodeString : event.zip;
-    event.latitude = latitudeValue;// ? latitudeValue : event.latitude;
-    event.longitude = longitudeValue;// ? longitudeValue : event.longitude;
-    event.priceMinimum = priceMinimum;// ? priceMinimum : event.priceMinimum;
-    event.priceMaximum = priceMaximum;// ? priceMaximum : event.priceMaximum;
-    event.phone = eventPhoneString;// ? eventPhoneString : event.phone;
-    event.details = descriptionText;// ? descriptionText : event.details;
+    event.eventDescription = descriptionText;// ? descriptionText : event.eventDescription;
     event.imageLocation = imageLocation;// ? imageLocation : event.imageLocation;
     if (featuredOverride)   { event.featured = featuredOverride; }
     if (fromSearchOverride) { event.fromSearch = fromSearchOverride; }
     
     [self coreDataSave];
+    
+}
+
+- (void)updateEvent:(Event *)event withExhaustiveOccurrencesArray:(NSArray *)exhaustiveOccurrences {
+    
+    NSLog(@"Update event %@ with occurrences %@", event, exhaustiveOccurrences);
+    
+    [event removeOccurrences:event.occurrences]; // Does this suffice? Do we need to delete them more directly instead? This must take care of it.
+    
+    for (NSDictionary * occurrenceDictionary in exhaustiveOccurrences) {
+        
+        // Create the occurrence object
+        Occurrence * occurrence = [NSEntityDescription insertNewObjectForEntityForName:@"Occurrence" inManagedObjectContext:self.managedObjectContext];
+        
+        // Date and time - getting
+        NSDate * startDate = [self.webDataTranslator dateDatetimeFromDateString:
+                              [WebUtil stringOrNil:[occurrenceDictionary objectForKey:@"start_date"]]];
+        NSString * startTimeString = [WebUtil stringOrNil:[occurrenceDictionary objectForKey:@"start_time"]];
+        // THE FOLLOWING IS A TEMPORARY HACK COVERING UP THE FACT THAT OUR SCRAPES ARE NOT DEALING WITH THE FACT THAT VILLAGE VOICE INPUTS A TIME OF 00:00:00 WHEN THEY DON'T HAVE A VALID TIME. THUS, WE ARE CURRENTLY HACKISHLY ASSUMING THAT ANY TIME OF 00:00:00 MEANS AN INVALID UNKNOWN TIME.
+        if ([startTimeString isEqualToString:@"00:00:00"]) {
+            startTimeString = nil;
+        }
+        NSDate * startTime = [self.webDataTranslator timeDatetimeFromTimeString:startTimeString];
+        NSDate * endDate = [self.webDataTranslator dateDatetimeFromDateString:
+                            [WebUtil stringOrNil:[occurrenceDictionary objectForKey:@"end_date"]]];
+        NSDate * endTime = [self.webDataTranslator timeDatetimeFromTimeString:
+                            [WebUtil stringOrNil:[occurrenceDictionary objectForKey:@"end_time"]]];
+        // NEED TO GET AND SET (and use in various places later) 'is_all_day' - NEED TO GET AND SET (and use in various places later) 'is_all_day' - NEED TO GET AND SET (and use in various places later) 'is_all_day' - NEED TO GET AND SET (and use in various places later) 'is_all_day' - NEED TO GET AND SET (and use in various places later) 'is_all_day' - NEED TO GET AND SET (and use in various places later) 'is_all_day' - NEED TO GET AND SET (and use in various places later) 'is_all_day' - NEED TO GET AND SET (and use in various places later) 'is_all_day' - NEED TO GET AND SET (and use in various places later) 'is_all_day' - NEED TO GET AND SET (and use in various places later) 'is_all_day' - NEED TO GET AND SET (and use in various places later) 'is_all_day' - NEED TO GET AND SET (and use in various places later) 'is_all_day'
+        // Date and time - setting
+        occurrence.startDate = startDate;
+        occurrence.startTime = startTime;
+        occurrence.endDate = endDate;
+        occurrence.endTime = endTime;
+
+        // Price - getting & setting
+        NSArray * priceArray = [occurrenceDictionary objectForKey:@"prices"];
+        for (NSDictionary * priceDictionary in priceArray) {
+            Price * price = [NSEntityDescription insertNewObjectForEntityForName:@"Price" inManagedObjectContext:self.managedObjectContext];
+            price.value = [WebUtil numberOrNil:[priceDictionary valueForKey:@"quantity"]];
+            [occurrence addPricesObject:price];
+        }
+        
+        // Location - getting
+        // NEED TO GET AND SET (and use in various places later) 'one_off_place' - NEED TO GET AND SET (and use in various places later) 'one_off_place' - NEED TO GET AND SET (and use in various places later) 'one_off_place' - NEED TO GET AND SET (and use in various places later) 'one_off_place' - NEED TO GET AND SET (and use in various places later) 'one_off_place' - NEED TO GET AND SET (and use in various places later) 'one_off_place' - NEED TO GET AND SET (and use in various places later) 'one_off_place' - NEED TO GET AND SET (and use in various places later) 'one_off_place' - NEED TO GET AND SET (and use in various places later) 'one_off_place' - NEED TO GET AND SET (and use in various places later) 'one_off_place' - NEED TO GET AND SET (and use in various places later) 'one_off_place' - NEED TO GET AND SET (and use in various places later) 'one_off_place'
+        // Address first line
+        NSString * placeURI = [WebUtil stringOrNil:[[occurrence valueForKey:@"place"] valueForKey:@"resource_uri"]];
+        NSString * placeDescription = [WebUtil stringOrNil:[[occurrence valueForKey:@"place"] valueForKey:@"description"]];
+        NSString * placeEmail = [WebUtil stringOrNil:[[occurrence valueForKey:@"place"] valueForKey:@"email"]];
+        NSString * placeUnit = [WebUtil stringOrNil:[[occurrence valueForKey:@"place"] valueForKey:@"unit"]];
+        NSString * placeURL = [WebUtil stringOrNil:[[occurrence valueForKey:@"place"] valueForKey:@"url"]];
+        // Address second line
+        NSString * addressLineFirst = [WebUtil stringOrNil:[[[occurrenceDictionary valueForKey:@"place"] valueForKey:@"point"] valueForKey:@"address"]];
+        NSString * cityString = [WebUtil stringOrNil:[[[[occurrenceDictionary valueForKey:@"place"] valueForKey:@"point"] valueForKey:@"city"] valueForKey:@"city"]];
+        NSString * stateString = [WebUtil stringOrNil:[[[[occurrenceDictionary valueForKey:@"place"]valueForKey:@"point"] valueForKey:@"city"] valueForKey:@"state"]];
+        NSString * zipCodeString = [WebUtil stringOrNil:[[[occurrenceDictionary valueForKey:@"place"] valueForKey:@"point"] valueForKey:@"zip"]];
+        // Latitude & Longitude
+        NSNumber * latitudeValue  = [WebUtil numberOrNil:[[[occurrenceDictionary valueForKey:@"place"] valueForKey:@"point"] valueForKey:@"latitude"]];
+        NSNumber * longitudeValue = [WebUtil numberOrNil:[[[occurrenceDictionary valueForKey:@"place"] valueForKey:@"point"] valueForKey:@"longitude"]];
+        // Phone Number
+        NSString * eventPhoneString = [WebUtil stringOrNil:[[occurrenceDictionary valueForKey:@"place"] valueForKey:@"phone"]];
+        // Venue
+        NSString * venueString = [WebUtil stringOrNil:[[occurrenceDictionary valueForKey:@"place"]valueForKey:@"title"]];
+        // Location - setting
+        Place * place = [self getPlaceWithURI:placeURI];
+        if (place == nil) {
+            place = [NSEntityDescription insertNewObjectForEntityForName:@"Place" inManagedObjectContext:self.managedObjectContext];
+        }
+        occurrence.place = place;
+        occurrence.place.title = venueString;// ? venueString : event.venue;
+        occurrence.place.placeDescription = placeDescription;
+        occurrence.place.email = placeEmail;
+        occurrence.place.url = placeURL;
+        occurrence.place.address = addressLineFirst;// ? addressLineFirst : event.address;
+        occurrence.place.city = cityString;// ? cityString : event.city;
+        occurrence.place.state = stateString;// ? stateString : event.state;
+        occurrence.place.zip = zipCodeString;// ? zipCodeString : event.zip;
+        occurrence.place.unit = placeUnit;
+        occurrence.place.latitude = latitudeValue;// ? latitudeValue : event.latitude;
+        occurrence.place.longitude = longitudeValue;// ? longitudeValue : event.longitude;
+        occurrence.place.phone = eventPhoneString;// ? eventPhoneString : event.phone;
+        
+        // Add the occurrence object
+        [event addOccurrencesObject:occurrence];
+
+    }
+    
+}
+
+- (Place *)getPlaceWithURI:(NSString *)placeURI {
+    
+    NSPredicate * predicate = [NSPredicate predicateWithFormat:@"uri == %@", placeURI];
+    NSArray * matchingPlaces = [self getAllObjectsForEntityName:@"Place" predicate:predicate sortDescriptors:nil];
+    Place * place = nil;
+    if (matchingPlaces && matchingPlaces.count > 0) {
+        place = (Place *)[matchingPlaces objectAtIndex:0];
+    }
+    return place;
     
 }
 

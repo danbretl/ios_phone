@@ -71,6 +71,36 @@ static NSString * const WDT_DATA_UNAVAILABLE_EVENT_LIST_TIME  = @"";
     
 }
 
+- (NSDate *) dateDatetimeFromDateString:(NSString *)dateString {
+    
+    NSDate * dateDatetime = nil;
+
+    if (dateString && dateString.length > 0) {
+        
+        [self.dateFormatter setDateFormat:@"YYYY-MM-dd"];
+        dateDatetime = [self.dateFormatter dateFromString:dateString];
+        
+    }
+    
+    return dateDatetime;
+    
+}
+
+- (NSDate *) timeDatetimeFromTimeString:(NSString *)timeString {
+    
+    NSDate * timeDatetime = nil;
+    
+    if (timeString && timeString.length > 0) {
+        
+        [self.dateFormatter setDateFormat:@"HH:mm:ss"];
+        timeDatetime = [self.dateFormatter dateFromString:timeString];
+        
+    }
+    
+    return timeDatetime;
+    
+}
+
 - (NSDictionary *) pricesSummaryFromPriceArray:(NSArray *)priceArray {
     
     NSNumber * minPriceValue = nil;
@@ -310,18 +340,18 @@ static NSString * const WDT_DATA_UNAVAILABLE_EVENT_LIST_TIME  = @"";
 // DISPLAYING events list data //
 /////////////////////////////////
 
-- (NSString *) eventsListDateRangeStringFromEventDateEarliest:(NSString *)eventDateEarliestString eventDateLatest:(NSString *)eventDateLatestString eventDateDistinctCount:(NSNumber *)eventDateDistinctCount relativeDates:(BOOL)relativeDates dataUnavailableString:(NSString *)dataUnavailableString {
-    
+- (NSString *)eventsListDateRangeStringFromEventDateEarliest:(NSDate *)eventDateEarliest eventDateLatest:(NSDate *)eventDateLatest eventDateCount:(NSNumber *)eventDateCount relativeDates:(BOOL)relativeDates dataUnavailableString:(NSString *)dataUnavailableString {
+ 
     NSString * returnDateString = nil;
     
-    if (eventDateEarliestString) {
+    if (eventDateEarliest) {
         
-        returnDateString = [self eventsListDateStringFromSQLDateString:eventDateEarliestString relativeDates:relativeDates];
+        returnDateString = [self eventsListDateStringFromDate:eventDateEarliest relativeDates:relativeDates];
         
-        if (eventDateDistinctCount && 
-            [eventDateDistinctCount intValue] > 1 && 
-            eventDateLatestString) {
-            returnDateString = [returnDateString stringByAppendingFormat:@" - %@", [self eventsListDateStringFromSQLDateString:eventDateLatestString relativeDates:relativeDates]];
+        if (eventDateCount && 
+            [eventDateCount intValue] > 1 && 
+            eventDateLatest) {
+            returnDateString = [returnDateString stringByAppendingFormat:@" - %@", [self eventsListDateStringFromDate:eventDateLatest relativeDates:relativeDates]];
         }
         
     }
@@ -334,13 +364,13 @@ static NSString * const WDT_DATA_UNAVAILABLE_EVENT_LIST_TIME  = @"";
     
 }
 
-- (NSString *) eventsListTimeRangeStringFromEventTimeEarliest:(NSString *)eventTimeEarliestString eventTimeLatest:(NSString *)eventTimeLatestString eventTimeDistinctCount:(NSNumber *)eventTimeDistinctCount dataUnavailableString:(NSString *)dataUnavailableString {
-    
+- (NSString *)eventsListTimeRangeStringFromEventTimeEarliest:(NSDate *)eventTimeEarliest eventTimeLatest:(NSDate *)eventTimeLatest eventTimeCount:(NSNumber *)eventTimeCount dataUnavailableString:(NSString *)dataUnavailableString {
+ 
     NSString * returnTimeString = nil;
     
-    if (eventTimeEarliestString) {
-        returnTimeString = [self eventsListTimeStringFromSQLTimeString:eventTimeEarliestString];
-        if ([eventTimeDistinctCount intValue] > 1) {
+    if (eventTimeEarliest) {
+        returnTimeString = [self eventsListTimeStringFromTime:eventTimeEarliest];
+        if ([eventTimeCount intValue] > 1) {
             returnTimeString = @"Various times";
         }
     }
@@ -353,20 +383,21 @@ static NSString * const WDT_DATA_UNAVAILABLE_EVENT_LIST_TIME  = @"";
     
 }
 
-- (NSString *) eventsListDateStringFromSQLDateString:(NSString *)sqlDateString relativeDates:(BOOL)relativeDates {
+- (NSString *) eventsListDateStringFromDate:(NSDate *)date relativeDates:(BOOL)relativeDates {
     
     [self.dateFormatter setDateFormat:@"YYYY-MM-dd"];
-    NSDate * eventDate = [self.dateFormatter dateFromString:sqlDateString];
+    NSString * dateString = [self.dateFormatter stringFromDate:date];
+    
     NSString * todayDateString = [self.dateFormatter stringFromDate:[NSDate date]];
     NSString * tomorrowDateString = [self.dateFormatter stringFromDate:[NSDate dateWithTimeInterval:86400 sinceDate:[NSDate date]]];
     
     [self.dateFormatter setDateFormat:@"MMM d"];
-    NSString * returnDateString = [self.dateFormatter stringFromDate:eventDate];
+    NSString * returnDateString = [self.dateFormatter stringFromDate:date];
     
     if (relativeDates) {
-        if ([sqlDateString isEqualToString:todayDateString]) {
+        if ([dateString isEqualToString:todayDateString]) {
             returnDateString = @"Today";
-        } else if ([sqlDateString isEqualToString:tomorrowDateString]) {
+        } else if ([dateString isEqualToString:tomorrowDateString]) {
             returnDateString = @"Tomorrow";
         }
     }
@@ -375,10 +406,8 @@ static NSString * const WDT_DATA_UNAVAILABLE_EVENT_LIST_TIME  = @"";
     
 }
 
-- (NSString *) eventsListTimeStringFromSQLTimeString:(NSString *)sqlTimeString {
-    
-    return [self timeSpanStringFromStartTimeString:sqlTimeString endTimeString:nil dataUnavailableString:WDT_DATA_UNAVAILABLE_EVENT_LIST_TIME];
-    
+- (NSString *) eventsListTimeStringFromTime:(NSDate *)time {
+    return [self timeSpanStringFromStartDatetime:time endDatetime:nil dataUnavailableString:WDT_DATA_UNAVAILABLE_EVENT_LIST_TIME];
 }
 
 @end

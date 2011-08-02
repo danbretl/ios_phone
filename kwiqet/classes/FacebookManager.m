@@ -11,6 +11,8 @@
 #import "Contact.h"
 #import "URLBuilder.h"
 #import "WebDataTranslator.h"
+#import "Occurrence.h"
+#import "Place.h"
 
 static NSString * const FB_FACEBOOK_APP_ID = @"210861478950952";
 static NSString * const FB_FACEBOOK_ACCESS_TOKEN_KEY = @"FBAccessTokenKey";
@@ -134,11 +136,14 @@ static NSString * const FBM_REQUEST_PROFILE_PICTURE = @"FBM_REQUEST_PROFILE_PICT
     [parameters setValue:event.title forKey:@"name"];
     NSURL * url = [URLBuilder imageURLForImageLocation:event.imageLocation];
     [parameters setValue:[url absoluteString] forKey:@"picture"];
-    NSString * captionString = event.venue ? event.venue : [WebDataTranslator fullLocationStringFromAddress:event.address city:event.city state:event.state zip:event.zip];
+    // Occurrences below... TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. EVERYTHING RELATED TO TEMPRANDOMOCCURRENCE NEEDS TO BE LOOKED OVER AND REWRITTEN. EVERYTHING RELATED TO TEMPRANDOMOCCURRENCE NEEDS TO BE LOOKED OVER AND REWRITTEN. EVERYTHING RELATED TO TEMPRANDOMOCCURRENCE NEEDS TO BE LOOKED OVER AND REWRITTEN. EVERYTHING RELATED TO TEMPRANDOMOCCURRENCE NEEDS TO BE LOOKED OVER AND REWRITTEN. EVERYTHING RELATED TO TEMPRANDOMOCCURRENCE NEEDS TO BE LOOKED OVER AND REWRITTEN. EVERYTHING RELATED TO TEMPRANDOMOCCURRENCE NEEDS TO BE LOOKED OVER AND REWRITTEN.
+    Occurrence * firstOccurrence = [event.occurrencesChronological objectAtIndex:0];
+    // Occurrences above... TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. EVERYTHING RELATED TO TEMPRANDOMOCCURRENCE NEEDS TO BE LOOKED OVER AND REWRITTEN. EVERYTHING RELATED TO TEMPRANDOMOCCURRENCE NEEDS TO BE LOOKED OVER AND REWRITTEN. EVERYTHING RELATED TO TEMPRANDOMOCCURRENCE NEEDS TO BE LOOKED OVER AND REWRITTEN. EVERYTHING RELATED TO TEMPRANDOMOCCURRENCE NEEDS TO BE LOOKED OVER AND REWRITTEN. EVERYTHING RELATED TO TEMPRANDOMOCCURRENCE NEEDS TO BE LOOKED OVER AND REWRITTEN.
+    NSString * captionString = firstOccurrence.place.title ? firstOccurrence.place.title : [WebDataTranslator fullLocationStringFromAddress:firstOccurrence.place.address city:firstOccurrence.place.city state:firstOccurrence.place.state zip:firstOccurrence.place.zip];
     if (captionString) {
         [parameters setValue:captionString forKey:@"caption"];
     }
-    [parameters setValue:event.details forKey:@"description"];
+    [parameters setValue:event.eventDescription forKey:@"description"];
     [self.fb dialog:@"feed" andParams:parameters andDelegate:self];
 }
 

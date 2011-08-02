@@ -99,6 +99,11 @@
 		32253F4413C36884004FBDD6 /* FacebookViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 32253F4213C36884004FBDD6 /* FacebookViewController.m */; };
 		32253F4513C36884004FBDD6 /* FacebookViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 32253F4313C36884004FBDD6 /* FacebookViewController.xib */; };
 		32253F4913C39EF1004FBDD6 /* ActionsManagement.m in Sources */ = {isa = PBXBuildFile; fileRef = 32253F4813C39EF1004FBDD6 /* ActionsManagement.m */; };
+		322C95D113E757B000FF51BD /* Occurrence.m in Sources */ = {isa = PBXBuildFile; fileRef = 322C95D013E757B000FF51BD /* Occurrence.m */; };
+		322C95D413E757B100FF51BD /* EventSummary.m in Sources */ = {isa = PBXBuildFile; fileRef = 322C95D313E757B100FF51BD /* EventSummary.m */; };
+		322C95D713E757B100FF51BD /* Price.m in Sources */ = {isa = PBXBuildFile; fileRef = 322C95D613E757B100FF51BD /* Price.m */; };
+		322C95DA13E757B100FF51BD /* Place.m in Sources */ = {isa = PBXBuildFile; fileRef = 322C95D913E757B100FF51BD /* Place.m */; };
+		322C95DD13E757B100FF51BD /* Event.m in Sources */ = {isa = PBXBuildFile; fileRef = 322C95DC13E757B100FF51BD /* Event.m */; };
 		322CDFE513CF44BA005203C2 /* FacebookProfilePictureGetter.m in Sources */ = {isa = PBXBuildFile; fileRef = 322CDFE413CF44BA005203C2 /* FacebookProfilePictureGetter.m */; };
 		322CDFEB13CF4AA6005203C2 /* btn_selectall_full_border.png in Resources */ = {isa = PBXBuildFile; fileRef = 322CDFE713CF4AA6005203C2 /* btn_selectall_full_border.png */; };
 		322CDFEC13CF4AA6005203C2 /* btn_selectall_full_border@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 322CDFE813CF4AA6005203C2 /* btn_selectall_full_border@2x.png */; };
@@ -274,7 +279,6 @@
 		32FD387D13AFF52F007549B6 /* CoreDataModel.m in Sources */ = {isa = PBXBuildFile; fileRef = 32FD383113AFF52F007549B6 /* CoreDataModel.m */; };
 		32FD387E13AFF52F007549B6 /* DefaultsModel.m in Sources */ = {isa = PBXBuildFile; fileRef = 32FD383313AFF52F007549B6 /* DefaultsModel.m */; };
 		32FD387F13AFF52F007549B6 /* EGORefreshTableHeaderView.m in Sources */ = {isa = PBXBuildFile; fileRef = 32FD383513AFF52F007549B6 /* EGORefreshTableHeaderView.m */; };
-		32FD388013AFF52F007549B6 /* Event.m in Sources */ = {isa = PBXBuildFile; fileRef = 32FD383713AFF52F007549B6 /* Event.m */; };
 		32FD388113AFF52F007549B6 /* EventLocationAnnotation.m in Sources */ = {isa = PBXBuildFile; fileRef = 32FD383913AFF52F007549B6 /* EventLocationAnnotation.m */; };
 		32FD388213AFF52F007549B6 /* EventsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 32FD383B13AFF52F007549B6 /* EventsViewController.m */; };
 		32FD388313AFF52F007549B6 /* EventTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 32FD383D13AFF52F007549B6 /* EventTableViewCell.m */; };
@@ -417,6 +421,16 @@
 		32253F4313C36884004FBDD6 /* FacebookViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = FacebookViewController.xib; sourceTree = "<group>"; };
 		32253F4713C39EF1004FBDD6 /* ActionsManagement.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ActionsManagement.h; sourceTree = "<group>"; };
 		32253F4813C39EF1004FBDD6 /* ActionsManagement.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ActionsManagement.m; sourceTree = "<group>"; };
+		322C95CF13E757B000FF51BD /* Occurrence.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Occurrence.h; path = classes/Occurrence.h; sourceTree = "<group>"; };
+		322C95D013E757B000FF51BD /* Occurrence.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Occurrence.m; path = classes/Occurrence.m; sourceTree = "<group>"; };
+		322C95D213E757B100FF51BD /* EventSummary.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = EventSummary.h; path = classes/EventSummary.h; sourceTree = "<group>"; };
+		322C95D313E757B100FF51BD /* EventSummary.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = EventSummary.m; path = classes/EventSummary.m; sourceTree = "<group>"; };
+		322C95D513E757B100FF51BD /* Price.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Price.h; path = classes/Price.h; sourceTree = "<group>"; };
+		322C95D613E757B100FF51BD /* Price.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Price.m; path = classes/Price.m; sourceTree = "<group>"; };
+		322C95D813E757B100FF51BD /* Place.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Place.h; path = classes/Place.h; sourceTree = "<group>"; };
+		322C95D913E757B100FF51BD /* Place.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Place.m; path = classes/Place.m; sourceTree = "<group>"; };
+		322C95DB13E757B100FF51BD /* Event.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Event.h; path = classes/Event.h; sourceTree = "<group>"; };
+		322C95DC13E757B100FF51BD /* Event.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Event.m; path = classes/Event.m; sourceTree = "<group>"; };
 		322CDFE313CF44BA005203C2 /* FacebookProfilePictureGetter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FacebookProfilePictureGetter.h; sourceTree = "<group>"; };
 		322CDFE413CF44BA005203C2 /* FacebookProfilePictureGetter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FacebookProfilePictureGetter.m; sourceTree = "<group>"; };
 		322CDFE713CF4AA6005203C2 /* btn_selectall_full_border.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = btn_selectall_full_border.png; sourceTree = "<group>"; };
@@ -540,6 +554,7 @@
 		327C4DB513DA301D00DAAD51 /* Analytics.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Analytics.m; sourceTree = "<group>"; };
 		3288360D13DDE7320090AFE0 /* EventsViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = EventsViewController.xib; sourceTree = "<group>"; };
 		329CC46D13D5FEA90077C748 /* kwiqet 007.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "kwiqet 007.xcdatamodel"; sourceTree = "<group>"; };
+		32A0C8A913E353C300F5DDDC /* kwiqet 008.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "kwiqet 008.xcdatamodel"; sourceTree = "<group>"; };
 		32B36CD913B27DF1004C2068 /* kwiqet 002.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "kwiqet 002.xcdatamodel"; sourceTree = "<group>"; };
 		32BEE72913BA4720009D583E /* cardbg.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = cardbg.png; sourceTree = "<group>"; };
 		32BEE72A13BA4720009D583E /* cardbg@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "cardbg@2x.png"; sourceTree = "<group>"; };
@@ -652,8 +667,6 @@
 		32FD383313AFF52F007549B6 /* DefaultsModel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DefaultsModel.m; sourceTree = "<group>"; };
 		32FD383413AFF52F007549B6 /* EGORefreshTableHeaderView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EGORefreshTableHeaderView.h; sourceTree = "<group>"; };
 		32FD383513AFF52F007549B6 /* EGORefreshTableHeaderView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EGORefreshTableHeaderView.m; sourceTree = "<group>"; };
-		32FD383613AFF52F007549B6 /* Event.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Event.h; path = classes/Event.h; sourceTree = "<group>"; };
-		32FD383713AFF52F007549B6 /* Event.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Event.m; path = classes/Event.m; sourceTree = "<group>"; };
 		32FD383813AFF52F007549B6 /* EventLocationAnnotation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EventLocationAnnotation.h; sourceTree = "<group>"; };
 		32FD383913AFF52F007549B6 /* EventLocationAnnotation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EventLocationAnnotation.m; sourceTree = "<group>"; };
 		32FD383A13AFF52F007549B6 /* EventsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EventsViewController.h; sourceTree = "<group>"; };
@@ -1151,10 +1164,18 @@
 				32FD382F13AFF52F007549B6 /* Category.m */,
 				32EE74BB13B907D20002E11F /* CategoryBreadcrumb.h */,
 				32EE74BC13B907D30002E11F /* CategoryBreadcrumb.m */,
-				32FD383613AFF52F007549B6 /* Event.h */,
-				32FD383713AFF52F007549B6 /* Event.m */,
 				3211539013B5252600DE5163 /* Contact.h */,
 				3211539113B5252600DE5163 /* Contact.m */,
+				322C95DB13E757B100FF51BD /* Event.h */,
+				322C95DC13E757B100FF51BD /* Event.m */,
+				322C95D213E757B100FF51BD /* EventSummary.h */,
+				322C95D313E757B100FF51BD /* EventSummary.m */,
+				322C95CF13E757B000FF51BD /* Occurrence.h */,
+				322C95D013E757B000FF51BD /* Occurrence.m */,
+				322C95D813E757B100FF51BD /* Place.h */,
+				322C95D913E757B100FF51BD /* Place.m */,
+				322C95D513E757B100FF51BD /* Price.h */,
+				322C95D613E757B100FF51BD /* Price.m */,
 			);
 			name = "core data";
 			sourceTree = "<group>";
@@ -1641,7 +1662,6 @@
 				32FD387D13AFF52F007549B6 /* CoreDataModel.m in Sources */,
 				32FD387E13AFF52F007549B6 /* DefaultsModel.m in Sources */,
 				32FD387F13AFF52F007549B6 /* EGORefreshTableHeaderView.m in Sources */,
-				32FD388013AFF52F007549B6 /* Event.m in Sources */,
 				32FD388113AFF52F007549B6 /* EventLocationAnnotation.m in Sources */,
 				32FD388213AFF52F007549B6 /* EventsViewController.m in Sources */,
 				32FD388313AFF52F007549B6 /* EventTableViewCell.m in Sources */,
@@ -1693,6 +1713,11 @@
 				32D13D6813DF4A8E00EBB192 /* EventsFilter.m in Sources */,
 				323D4B0513E1BDAC0091D8A6 /* EventsFilterOption.m in Sources */,
 				323D4B0913E203D50091D8A6 /* SegmentedHighlighterView.m in Sources */,
+				322C95D113E757B000FF51BD /* Occurrence.m in Sources */,
+				322C95D413E757B100FF51BD /* EventSummary.m in Sources */,
+				322C95D713E757B100FF51BD /* Price.m in Sources */,
+				322C95DA13E757B100FF51BD /* Place.m in Sources */,
+				322C95DD13E757B100FF51BD /* Event.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1887,9 +1912,10 @@
 				325FE11F13BCD103005BEF4B /* kwiqet 005.xcdatamodel */,
 				32E2C1B013CDEE67001B7EA5 /* kwiqet 006.xcdatamodel */,
 				329CC46D13D5FEA90077C748 /* kwiqet 007.xcdatamodel */,
+				32A0C8A913E353C300F5DDDC /* kwiqet 008.xcdatamodel */,
 				32FD364E13AFF3B6007549B6 /* kwiqet 001.xcdatamodel */,
 			);
-			currentVersion = 329CC46D13D5FEA90077C748 /* kwiqet 007.xcdatamodel */;
+			currentVersion = 32A0C8A913E353C300F5DDDC /* kwiqet 008.xcdatamodel */;
 			path = kwiqet.xcdatamodeld;
 			sourceTree = "<group>";
 			versionGroupType = wrapper.xcdatamodel;

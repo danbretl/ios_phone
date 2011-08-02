@@ -16,6 +16,9 @@
 #import "ActionsManagement.h"
 #import "UIImageView+WebCache.h"
 #import "Analytics.h"
+#import "Occurrence.h"
+#import "Price.h"
+#import "Place.h"
 
 // "Data not available" strings
 static NSString * const FEATURED_EVENT_TITLE_NOT_AVAILABLE = @"Event";
@@ -455,6 +458,7 @@ CGFloat const FEV_DESCRIPTION_LABEL_PADDING_HORIZONTAL = 20.0;
     Event * currentFeatured = [self.coreDataModel getOrCreateFeaturedEvent]; // Could be an old featured event, or it could be an empty event (if we had never before successfully retrieved a featured event from the web).
     NSString * oldFeaturedImageLocation = [[currentFeatured.imageLocation copy] autorelease];
     [self.coreDataModel updateEvent:currentFeatured usingEventDictionary:featuredEventJSONDictionary featuredOverride:[NSNumber numberWithBool:YES] fromSearchOverride:[NSNumber numberWithBool:NO]];
+    [self.coreDataModel updateEvent:currentFeatured withExhaustiveOccurrencesArray:[featuredEventJSONDictionary valueForKey:@"occurrences"]];
     self.featuredEvent = currentFeatured;
     
     [DefaultsModel saveLastFeaturedEventGetDate:[NSDate date]];
@@ -521,24 +525,35 @@ CGFloat const FEV_DESCRIPTION_LABEL_PADDING_HORIZONTAL = 20.0;
         // Title
         NSString * title = theFeaturedEvent.title;
         if (!title) { title = FEATURED_EVENT_TITLE_NOT_AVAILABLE; }
+        
+        // Occurrences below... TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. EVERYTHING RELATED TO TEMPRANDOMOCCURRENCE NEEDS TO BE LOOKED OVER AND REWRITTEN. EVERYTHING RELATED TO TEMPRANDOMOCCURRENCE NEEDS TO BE LOOKED OVER AND REWRITTEN. EVERYTHING RELATED TO TEMPRANDOMOCCURRENCE NEEDS TO BE LOOKED OVER AND REWRITTEN. EVERYTHING RELATED TO TEMPRANDOMOCCURRENCE NEEDS TO BE LOOKED OVER AND REWRITTEN. EVERYTHING RELATED TO TEMPRANDOMOCCURRENCE NEEDS TO BE LOOKED OVER AND REWRITTEN. EVERYTHING RELATED TO TEMPRANDOMOCCURRENCE NEEDS TO BE LOOKED OVER AND REWRITTEN.
+        Occurrence * firstOccurrence = [theFeaturedEvent.occurrencesChronological objectAtIndex:0];
+        // Occurrences above... TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. EVERYTHING RELATED TO TEMPRANDOMOCCURRENCE NEEDS TO BE LOOKED OVER AND REWRITTEN. EVERYTHING RELATED TO TEMPRANDOMOCCURRENCE NEEDS TO BE LOOKED OVER AND REWRITTEN. EVERYTHING RELATED TO TEMPRANDOMOCCURRENCE NEEDS TO BE LOOKED OVER AND REWRITTEN. EVERYTHING RELATED TO TEMPRANDOMOCCURRENCE NEEDS TO BE LOOKED OVER AND REWRITTEN. EVERYTHING RELATED TO TEMPRANDOMOCCURRENCE NEEDS TO BE LOOKED OVER AND REWRITTEN.
 
         // Date & Time
-        NSString * time = [self.webDataTranslator timeSpanStringFromStartDatetime:theFeaturedEvent.startTimeDatetime endDatetime:theFeaturedEvent.endTimeDatetime dataUnavailableString:FEATURED_EVENT_TIME_NOT_AVAILABLE];
-        NSString * date = [self.webDataTranslator dateSpanStringFromStartDatetime:theFeaturedEvent.startDateDatetime endDatetime:theFeaturedEvent.endDateDatetime relativeDates:YES dataUnavailableString:FEATURED_EVENT_DATE_NOT_AVAILABLE];
+        NSString * time = [self.webDataTranslator timeSpanStringFromStartDatetime:firstOccurrence.startTime endDatetime:firstOccurrence.endTime dataUnavailableString:FEATURED_EVENT_TIME_NOT_AVAILABLE];
+        NSString * date = [self.webDataTranslator dateSpanStringFromStartDatetime:firstOccurrence.startDate endDatetime:firstOccurrence.endDate relativeDates:YES dataUnavailableString:FEATURED_EVENT_DATE_NOT_AVAILABLE];
                 
         // Price
-        NSString * price = [self.webDataTranslator priceRangeStringFromMinPrice:theFeaturedEvent.priceMinimum maxPrice:theFeaturedEvent.priceMaximum dataUnavailableString:FEATURED_EVENT_COST_NOT_AVAILABLE];
+        NSArray * prices = firstOccurrence.pricesLowToHigh;
+        Price * priceMinimum = nil;
+        Price * priceMaximum = nil;
+        if (prices && prices.count > 0) {
+            priceMinimum = [prices objectAtIndex:0];
+            priceMaximum = [prices lastObject];
+        }
+        NSString * price = [self.webDataTranslator priceRangeStringFromMinPrice:priceMinimum.value maxPrice:priceMaximum.value dataUnavailableString:FEATURED_EVENT_COST_NOT_AVAILABLE];
         price = [NSString stringWithFormat:@"Price: %@", price];
         
         // Location & Address
-        NSString * addressFirstLine = theFeaturedEvent.address;
-        NSString * addressSecondLine = [self.webDataTranslator addressSecondLineStringFromCity:theFeaturedEvent.city state:theFeaturedEvent.state zip:theFeaturedEvent.zip];
+        NSString * addressFirstLine = firstOccurrence.place.address;
+        NSString * addressSecondLine = [self.webDataTranslator addressSecondLineStringFromCity:firstOccurrence.place.city state:firstOccurrence.place.state zip:firstOccurrence.place.zip];
         BOOL someLocationInfo = addressFirstLine || addressSecondLine;
         if (!addressFirstLine) { addressFirstLine = FEATURED_EVENT_ADDRESS_NOT_AVAILABLE; }
-        BOOL mapButtonActive = theFeaturedEvent.latitude && theFeaturedEvent.longitude;
+        BOOL mapButtonActive = firstOccurrence.place.latitude && firstOccurrence.place.longitude;
         
         // Venue
-        NSString * theVenue = theFeaturedEvent.venue;
+        NSString * theVenue = firstOccurrence.place.title;
         if (!theVenue) { 
             if (someLocationInfo) {
                 theVenue = @"Location:";
@@ -548,11 +563,11 @@ CGFloat const FEV_DESCRIPTION_LABEL_PADDING_HORIZONTAL = 20.0;
         }
         
         // Phone number
-        NSString * phoneNumber = theFeaturedEvent.phone;
+        NSString * phoneNumber = firstOccurrence.place.phone;
         if (!phoneNumber) { phoneNumber = FEATURED_EVENT_PHONE_NUMBER_NOT_AVAILABLE; }
         
         // Description
-        NSString * theDescription = theFeaturedEvent.details;
+        NSString * theDescription = theFeaturedEvent.eventDescription;
         if (!theDescription) { theDescription = FEATURED_EVENT_DESCRIPTION_NOT_AVAILABLE; }
         
         // "Category" display color
@@ -584,8 +599,8 @@ CGFloat const FEV_DESCRIPTION_LABEL_PADDING_HORIZONTAL = 20.0;
         // Price
         self.priceLabel.text = price;
         // Phone number
-        self.phoneNumberButton.enabled = (theFeaturedEvent.phone != nil);
-        self.phoneNumberButton.userInteractionEnabled = (theFeaturedEvent.phone != nil);
+        self.phoneNumberButton.enabled = (firstOccurrence.place.phone != nil);
+        self.phoneNumberButton.userInteractionEnabled = (firstOccurrence.place.phone != nil);
         [self.phoneNumberButton setTitle:phoneNumber forState:UIControlStateNormal];
         [self.phoneNumberButton sizeToFit];
         CGRect phoneNumberButtonFrame = self.phoneNumberButton.frame;
@@ -673,7 +688,10 @@ CGFloat const FEV_DESCRIPTION_LABEL_PADDING_HORIZONTAL = 20.0;
 
 -(IBAction)phoneCall:(id)sender  {
 	NSLog(@"phone call");
-    [[UIApplication sharedApplication] openURL:[NSURL URLWithString:[NSString stringWithFormat:@"tel:%@", self.featuredEvent.phone]]];
+    // Occurrences below... TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. EVERYTHING RELATED TO TEMPRANDOMOCCURRENCE NEEDS TO BE LOOKED OVER AND REWRITTEN. EVERYTHING RELATED TO TEMPRANDOMOCCURRENCE NEEDS TO BE LOOKED OVER AND REWRITTEN. EVERYTHING RELATED TO TEMPRANDOMOCCURRENCE NEEDS TO BE LOOKED OVER AND REWRITTEN. EVERYTHING RELATED TO TEMPRANDOMOCCURRENCE NEEDS TO BE LOOKED OVER AND REWRITTEN. EVERYTHING RELATED TO TEMPRANDOMOCCURRENCE NEEDS TO BE LOOKED OVER AND REWRITTEN. EVERYTHING RELATED TO TEMPRANDOMOCCURRENCE NEEDS TO BE LOOKED OVER AND REWRITTEN.
+    Occurrence * firstOccurrence = [self.featuredEvent.occurrencesChronological objectAtIndex:0];
+    // Occurrences above... TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. EVERYTHING RELATED TO TEMPRANDOMOCCURRENCE NEEDS TO BE LOOKED OVER AND REWRITTEN. EVERYTHING RELATED TO TEMPRANDOMOCCURRENCE NEEDS TO BE LOOKED OVER AND REWRITTEN. EVERYTHING RELATED TO TEMPRANDOMOCCURRENCE NEEDS TO BE LOOKED OVER AND REWRITTEN. EVERYTHING RELATED TO TEMPRANDOMOCCURRENCE NEEDS TO BE LOOKED OVER AND REWRITTEN. EVERYTHING RELATED TO TEMPRANDOMOCCURRENCE NEEDS TO BE LOOKED OVER AND REWRITTEN.
+    [[UIApplication sharedApplication] openURL:[NSURL URLWithString:[NSString stringWithFormat:@"tel:%@", firstOccurrence.place.phone]]];
 }
 
 - (FacebookManager *)facebookManager {
@@ -909,10 +927,13 @@ CGFloat const FEV_DESCRIPTION_LABEL_PADDING_HORIZONTAL = 20.0;
 - (void) mapButtonTouched {
     self.mapViewController = [[[MapViewController alloc] initWithNibName:@"MapViewController" bundle:[NSBundle mainBundle]] autorelease];
     self.mapViewController.delegate = self;
-    self.mapViewController.locationLatitude = self.featuredEvent.latitude;
-    self.mapViewController.locationLongitude = self.featuredEvent.longitude;
-    self.mapViewController.locationName = self.featuredEvent.venue;
-    self.mapViewController.locationAddress = self.featuredEvent.address;
+    // Occurrences below... TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. EVERYTHING RELATED TO TEMPRANDOMOCCURRENCE NEEDS TO BE LOOKED OVER AND REWRITTEN. EVERYTHING RELATED TO TEMPRANDOMOCCURRENCE NEEDS TO BE LOOKED OVER AND REWRITTEN. EVERYTHING RELATED TO TEMPRANDOMOCCURRENCE NEEDS TO BE LOOKED OVER AND REWRITTEN. EVERYTHING RELATED TO TEMPRANDOMOCCURRENCE NEEDS TO BE LOOKED OVER AND REWRITTEN. EVERYTHING RELATED TO TEMPRANDOMOCCURRENCE NEEDS TO BE LOOKED OVER AND REWRITTEN. EVERYTHING RELATED TO TEMPRANDOMOCCURRENCE NEEDS TO BE LOOKED OVER AND REWRITTEN.
+    Occurrence * firstOccurrence = [self.featuredEvent.occurrencesChronological objectAtIndex:0];
+    // Occurrences above... TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. EVERYTHING RELATED TO TEMPRANDOMOCCURRENCE NEEDS TO BE LOOKED OVER AND REWRITTEN. EVERYTHING RELATED TO TEMPRANDOMOCCURRENCE NEEDS TO BE LOOKED OVER AND REWRITTEN. EVERYTHING RELATED TO TEMPRANDOMOCCURRENCE NEEDS TO BE LOOKED OVER AND REWRITTEN. EVERYTHING RELATED TO TEMPRANDOMOCCURRENCE NEEDS TO BE LOOKED OVER AND REWRITTEN. EVERYTHING RELATED TO TEMPRANDOMOCCURRENCE NEEDS TO BE LOOKED OVER AND REWRITTEN.
+    self.mapViewController.locationLatitude = firstOccurrence.place.latitude;
+    self.mapViewController.locationLongitude = firstOccurrence.place.longitude;
+    self.mapViewController.locationName = firstOccurrence.place.title;
+    self.mapViewController.locationAddress = firstOccurrence.place.address;
     [self presentModalViewController:self.mapViewController animated:YES];
 }
 
