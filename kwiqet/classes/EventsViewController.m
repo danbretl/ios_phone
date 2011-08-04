@@ -288,6 +288,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     
     // Create categories background view under UITableView
 //    self.categoriesBackgroundView = [[[UIView alloc] initWithFrame:CGRectMake(0, 80, 320, 255)] autorelease];
+    self.drawerScrollView.showsHorizontalScrollIndicator = NO;
     self.drawerScrollView.contentSize = self.drawerViewsContainer.bounds.size;
     self.drawerScrollView.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"cat_overlay.png"]];
     self.drawerScrollView.userInteractionEnabled = NO;
@@ -298,23 +299,27 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     self.drawerViewsContainer.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"cat_overlay.png"]];
     
     // Shadows
-    self.filtersContainerShadowCheatView.layer.shadowColor = [[UIColor blackColor] CGColor];
+    self.filtersContainerShadowCheatView.layer.shadowColor = [UIColor blackColor].CGColor;
     self.filtersContainerShadowCheatView.layer.shadowOffset = CGSizeMake(0, 0);
-    self.filtersContainerShadowCheatView.layer.shadowOpacity = 1.0;
-    self.filtersContainerShadowCheatWayBelowView.layer.shadowColor = self.filtersContainerShadowCheatView.layer.shadowColor;
-    self.filtersContainerShadowCheatWayBelowView.layer.shadowOffset = self.filtersContainerShadowCheatView.layer.shadowOffset;
-    self.filtersContainerShadowCheatWayBelowView.layer.shadowOpacity = self.filtersContainerShadowCheatView.layer.shadowOpacity;
+    self.filtersContainerShadowCheatView.layer.shadowOpacity = 0.5;
+    self.filtersContainerShadowCheatView.layer.shadowPath = [UIBezierPath bezierPathWithRect:self.filtersContainerShadowCheatView.bounds].CGPath;
+    // More shadows
+    self.filtersContainerShadowCheatWayBelowView.layer.shadowColor = [UIColor blackColor].CGColor;
+    self.filtersContainerShadowCheatWayBelowView.layer.shadowOffset = CGSizeMake(0, 0);
+    self.filtersContainerShadowCheatWayBelowView.layer.shadowOpacity = 0.5;
+    self.filtersContainerShadowCheatWayBelowView.layer.shadowPath = [UIBezierPath bezierPathWithRect:self.filtersContainerShadowCheatWayBelowView.bounds].CGPath;
     self.filtersContainerShadowCheatWayBelowView.alpha = 0.0;
     // More shadows
-    self.pushableContainerShadowCheatView.layer.shadowColor = self.filtersContainerShadowCheatView.layer.shadowColor;
-    self.pushableContainerShadowCheatView.layer.shadowOffset = self.filtersContainerShadowCheatView.layer.shadowOffset;
-    self.pushableContainerShadowCheatView.layer.shadowOpacity = self.filtersContainerShadowCheatView.layer.shadowOpacity;
+    self.pushableContainerShadowCheatView.layer.shadowColor = [UIColor blackColor].CGColor;
+    self.pushableContainerShadowCheatView.layer.shadowOffset = CGSizeMake(0, 0);
+    self.pushableContainerShadowCheatView.layer.shadowOpacity = 0.5;
+    self.pushableContainerShadowCheatView.layer.shadowPath = [UIBezierPath bezierPathWithRect:self.pushableContainerShadowCheatView.bounds].CGPath;
     self.pushableContainerShadowCheatView.layer.shouldRasterize = YES;
     // More shadows
-    self.filtersSummaryAndSearchContainerView.layer.shadowColor = self.filtersContainerShadowCheatView.layer.shadowColor;
-    self.filtersSummaryAndSearchContainerView.layer.shadowOffset = self.filtersContainerShadowCheatView.layer.shadowOffset;
-    self.filtersSummaryAndSearchContainerView.layer.shadowOpacity = self.filtersContainerShadowCheatView.layer.shadowOpacity;
-    self.filtersSummaryAndSearchContainerView.layer.shadowPath = [[UIBezierPath bezierPathWithRect:CGRectMake(0, 10, self.filtersSummaryAndSearchContainerView.bounds.size.width, self.filtersSummaryAndSearchContainerView.bounds.size.height - 10)] CGPath];
+    self.filtersSummaryAndSearchContainerView.layer.shadowColor = [UIColor blackColor].CGColor;
+    self.filtersSummaryAndSearchContainerView.layer.shadowOffset = CGSizeMake(0, 0);
+    self.filtersSummaryAndSearchContainerView.layer.shadowOpacity = 0.5;
+    self.filtersSummaryAndSearchContainerView.layer.shadowPath = [UIBezierPath bezierPathWithRect:CGRectMake(0, 10, self.filtersSummaryAndSearchContainerView.bounds.size.width, self.filtersSummaryAndSearchContainerView.bounds.size.height - 10)].CGPath;
     
     // Add category buttons to categories background
     int initial_x = 10;
@@ -432,66 +437,102 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     [self.view addSubview:self.webActivityView];
     
     NSArray * priceOptions = [NSArray arrayWithObjects:
-                              [EventsFilterOption eventsFilterOptionWithCode:@"free" 
-                                                              readableString:@"Free" 
-                                                                  buttonView:self.dvPriceButtonFree],
-                              [EventsFilterOption eventsFilterOptionWithCode:@"under20" 
-                                                              readableString:@"Under $20" 
-                                                                  buttonView:self.dvPriceButtonUnder20],
-                              [EventsFilterOption eventsFilterOptionWithCode:@"under50" 
-                                                              readableString:@"Under $50" 
-                                                                  buttonView:self.dvPriceButtonUnder50],
-                              [EventsFilterOption eventsFilterOptionWithCode:@"anyprice" 
-                                                              readableString:nil 
-                                                                  buttonView:self.dvPriceButtonAny],
+                              [EventsFilterOption 
+                               eventsFilterOptionWithCode: @"free" 
+                               readableString: @"Free" 
+                               buttonText: @"Free"
+                               buttonView: self.dvPriceButtonFree],
+                              [EventsFilterOption 
+                               eventsFilterOptionWithCode: @"under20" 
+                               readableString: @"Under $20" 
+                               buttonText: @"Under $20"
+                               buttonView: self.dvPriceButtonUnder20],
+                              [EventsFilterOption 
+                               eventsFilterOptionWithCode: @"under50" 
+                               readableString: @"Under $50" 
+                               buttonText: @"Under $50"
+                               buttonView: self.dvPriceButtonUnder50],
+                              [EventsFilterOption 
+                               eventsFilterOptionWithCode: @"anyprice" 
+                               readableString: nil 
+                               buttonText: @"All Prices"
+                               buttonView: self.dvPriceButtonAny],
                               nil];
     NSArray * dateOptions = [NSArray arrayWithObjects:
-                             [EventsFilterOption eventsFilterOptionWithCode:@"today" 
-                                                             readableString:@"Today" 
-                                                                 buttonView:self.dvDateButtonToday],
-                             [EventsFilterOption eventsFilterOptionWithCode:@"thisweekend" 
-                                                             readableString:@"This Weekend" 
-                                                                 buttonView:self.dvDateButtonThisWeekend],
-                             [EventsFilterOption eventsFilterOptionWithCode:@"thisweek" 
-                                                             readableString:@"This Week" 
-                                                                 buttonView:self.dvDateButtonThisWeek],
-                             [EventsFilterOption eventsFilterOptionWithCode:@"thismonth" 
-                                                             readableString:@"This Month" 
-                                                                 buttonView:self.dvDateButtonThisMonth],
-                             [EventsFilterOption eventsFilterOptionWithCode:@"anydate" 
-                                                             readableString:nil
-                                                                 buttonView:self.dvDateButtonAny],
+                             [EventsFilterOption 
+                              eventsFilterOptionWithCode: @"today"
+                              readableString: @"Today" 
+                              buttonText: @"Today"
+                              buttonView: self.dvDateButtonToday],
+                             [EventsFilterOption 
+                              eventsFilterOptionWithCode: @"weekend" 
+                              readableString: @"This Weekend" 
+                              buttonText: @"This Weekend"
+                              buttonView: self.dvDateButtonThisWeekend],
+                             [EventsFilterOption 
+                              eventsFilterOptionWithCode: @"next7days" 
+                              readableString: @"In the next 7 Days" 
+                              buttonText: @"Next 7 Days"
+                              buttonView: self.dvDateButtonThisWeek],
+                             [EventsFilterOption 
+                              eventsFilterOptionWithCode: @"next30days" 
+                              readableString: @"In the next 30 Days" 
+                              buttonText: @"Next 30 Days"
+                              buttonView: self.dvDateButtonThisMonth],
+                             [EventsFilterOption 
+                              eventsFilterOptionWithCode: @"anydate" 
+                              readableString: nil 
+                              buttonText: @"All Dates" 
+                              buttonView: self.dvDateButtonAny],
                              nil];
     NSArray * timeOptions = [NSArray arrayWithObjects:
-                             [EventsFilterOption eventsFilterOptionWithCode:@"morning" 
-                                                             readableString:@"In the Morning" 
-                                                                 buttonView:self.dvTimeButtonMorning],
-                             [EventsFilterOption eventsFilterOptionWithCode:@"afternoon" 
-                                                             readableString:@"In the Afternoon" 
-                                                                 buttonView:self.dvTimeButtonAfternoon],
-                             [EventsFilterOption eventsFilterOptionWithCode:@"evening" 
-                                                             readableString:@"In the Evening" 
-                                                                 buttonView:self.dvTimeButtonEvening],
-                             [EventsFilterOption eventsFilterOptionWithCode:@"night" 
-                                                             readableString:@"At Night" 
-                                                                 buttonView:self.dvTimeButtonNight],
-                             [EventsFilterOption eventsFilterOptionWithCode:@"anytime" 
-                                                             readableString:nil
-                                                                 buttonView:self.dvTimeButtonAny],
+                             [EventsFilterOption 
+                              eventsFilterOptionWithCode: @"morning" 
+                              readableString: @"In the Morning" 
+                              buttonText: @"Morning" 
+                              buttonView: self.dvTimeButtonMorning],
+                             [EventsFilterOption 
+                              eventsFilterOptionWithCode: @"afternoon" 
+                              readableString: @"In the Afternoon" 
+                              buttonText: @"Afternoon" 
+                              buttonView: self.dvTimeButtonAfternoon],
+                             [EventsFilterOption 
+                              eventsFilterOptionWithCode: @"evening" 
+                              readableString: @"In the Evening" 
+                              buttonText: @"Evening" 
+                              buttonView: self.dvTimeButtonEvening],
+                             [EventsFilterOption 
+                              eventsFilterOptionWithCode: @"night" 
+                              readableString: @"At Night" 
+                              buttonText: @"Late Night" 
+                              buttonView: self.dvTimeButtonNight],
+                             [EventsFilterOption 
+                              eventsFilterOptionWithCode: @"anytime" 
+                              readableString: nil 
+                              buttonText: @"Any Time of Day" 
+                              buttonView: self.dvTimeButtonAny],
                              nil];
     NSArray * locationOptions = [NSArray arrayWithObjects:
-                                 [EventsFilterOption eventsFilterOptionWithCode:@"walkingdistance" 
-                                                                 readableString:@"Within Walking Distance of" 
-                                                                     buttonView:self.dvLocationButtonWalking],
-                                 [EventsFilterOption eventsFilterOptionWithCode:@"neighborhood" 
-                                                                 readableString:@"In the Same Neighborhood as" 
-                                                                     buttonView:self.dvLocationButtonNeighborhood],
-                                 [EventsFilterOption eventsFilterOptionWithCode:@"borough" 
-                                                                 readableString:@"In the Same Borough as" 
-                                                                     buttonView:self.dvLocationButtonBorough],
-                                 [EventsFilterOption eventsFilterOptionWithCode:@"city" 
-                                                                 readableString:nil
-                                                                     buttonView:self.dvLocationButtonCity],
+                                 [EventsFilterOption 
+                                  eventsFilterOptionWithCode: @"walking" 
+                                  readableString: @"Within Walking Distance of" 
+                                  buttonText: @"Within Walking Distance"
+                                  buttonView: self.dvLocationButtonWalking],
+                                 [EventsFilterOption 
+                                  eventsFilterOptionWithCode: @"neighborhood" 
+                                  readableString: @"In the Same Neighborhood as" 
+                                  buttonText: @"In the Neighborhood"
+                                  buttonView: self.dvLocationButtonNeighborhood],
+                                 [EventsFilterOption 
+                                  eventsFilterOptionWithCode: @"borough" 
+                                  readableString: @"In the Same Borough as" 
+                                  buttonText: @"In the Borough"
+                                  buttonView: self.dvLocationButtonBorough],
+                                 [EventsFilterOption 
+                                  eventsFilterOptionWithCode: @"city" 
+                                  readableString: nil
+                                  buttonText: @"In the City"
+                                  buttonView: self.dvLocationButtonCity],
                                  nil];
     
     // New filter "view models"
@@ -515,17 +556,20 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
                                                   nil];
     
     for (EventsFilter * filter in self.filters) {
-        filter.drawerView.backgroundColor = [UIColor clearColor];//[UIColor colorWithPatternImage:[UIImage imageNamed:@"cat_overlay.png"]];
+        filter.drawerView.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"cat_overlay.png"]];
         filter.button.titleLabel.font = [UIFont fontWithName:@"HelveticaNeueLTStd-MdCn" size:9.0];
         [filter.button setTitleColor:[UIColor colorWithWhite:53.0/255.0 alpha:1.0] forState:UIControlStateNormal];
         [filter.button setTitleColor:[UIColor colorWithWhite:53.0/255.0 alpha:1.0] forState:UIControlStateHighlighted];
         SEL filterOptionButtonSelector = [[filterOptionButtonSelectors objectForKey:filter.code] pointerValue];
         for (EventsFilterOption * filterOption in filter.options) {
             [filterOption.buttonView.button addTarget:self action:filterOptionButtonSelector forControlEvents:UIControlEventTouchUpInside];
-            filterOption.buttonView.cornerRadius = 5.0;
-            filterOption.buttonView.layer.shadowRadius = 1.0;
+            filterOption.buttonView.buttonText = filterOption.buttonText;
             [filterOption.buttonView.button setBackgroundImage:[UIImage imageNamed:@"btn_filter_option_unselected.png"] forState:UIControlStateNormal];
             [filterOption.buttonView.button setBackgroundImage:[UIImage imageNamed:@"btn_filter_option_unselected_touch.png"] forState:UIControlStateHighlighted];
+            [filterOption.buttonView.button setBackgroundImage:[UIImage imageNamed:@"btn_filter_option_selected.png"] forState:UIControlStateSelected];
+            filterOption.buttonView.overlay.image = [UIImage imageNamed:@"btn_filter_option_shine.png"];
+            filterOption.buttonView.cornerRadius = 5.0;
+            filterOption.buttonView.buttonIconImage = [UIImage imageNamed:[EventsFilterOption eventsFilterOptionIconFilenameForCode:filterOption.code grayscale:NO]];
         }
     }
     self.activeFilterHighlightsContainerView.highlightColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"filter_select_glow.png"]];
@@ -993,7 +1037,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
         
     } else if (scrollView == self.drawerScrollView) {
         
-        [self updateActiveFilterHighlights];
+//        [self updateActiveFilterHighlights]; // This is killing performance.
         
     }
 }
@@ -1010,6 +1054,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     EventsFilter * newActiveFilterInUI = [self filterForFilterButton:sender];
     self.activeFilterInUI = newActiveFilterInUI;
     [self setDrawerToShowFilter:self.activeFilterInUI animated:self.isDrawerOpen];
+    [self updateActiveFilterHighlights];
     if (!self.isDrawerOpen ||
         oldActiveFilterInUI == newActiveFilterInUI) {
         [self toggleDrawerAnimated];
@@ -1476,10 +1521,11 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 
 - (void)swipeDownToShowDrawer:(UISwipeGestureRecognizer *)swipeGesture {
     EventsFilter * swipedOverFilter = [self filterForPositionX:[swipeGesture locationInView:swipeGesture.view].x];
-    NSLog(@"swipeDownToShowDrawer for button with title %@", self.activeFilterInUI.button.titleLabel.text);
     if (!self.isDrawerOpen) {
         self.activeFilterInUI = swipedOverFilter;
+        NSLog(@"swipeDownToShowDrawer for button with title %@", self.activeFilterInUI.button.titleLabel.text);
         [self setDrawerToShowFilter:self.activeFilterInUI animated:self.isDrawerOpen];
+        [self updateActiveFilterHighlights];
         [self toggleDrawerAnimated];
     }
 }
@@ -1530,6 +1576,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     if (scrollView == self.drawerScrollView) {
         EventsFilter * filter = [self filterForDrawerScrollViewContentOffset:scrollView.contentOffset];
         self.activeFilterInUI = filter;
+        [self updateActiveFilterHighlights]; // Moved this here from scrollViewDidScroll for performance reasons.
     }
 }
 

@@ -9,8 +9,9 @@
 #import <UIKit/UIKit.h>
 
 @interface SegmentedHighlighterView : UIView {
-    NSMutableArray * segmentHighlightAmounts;
     UIColor * highlightColor;
+    int numberOfSegments_;
+    float * highlightAmounts;
 }
 
 @property (nonatomic) int numberOfSegments;

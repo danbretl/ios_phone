@@ -9,20 +9,19 @@
 #import "SegmentedHighlighterView.h"
 
 @interface SegmentedHighlighterView()
-@property (retain) NSMutableArray * segmentHighlightAmounts;
 - (void) drawHighlightAmount:(float)amount atIndex:(int)index inContext:(CGContextRef)context;
 - (void) drawHighlightAmount:(float)amount inFrame:(CGRect)frame inContext:(CGContextRef)context;
 - (void) initFromFrameOrCoder;
+- (CGRect) frameForSegmentIndex:(int)index;
 @end
 
 @implementation SegmentedHighlighterView
 
-@synthesize segmentHighlightAmounts;
-@synthesize highlightColor;
+@synthesize numberOfSegments=numberOfSegments_, highlightColor;
 
 - (void)dealloc {
-    [segmentHighlightAmounts release];
     [highlightColor release];
+    free(highlightAmounts);
     [super dealloc];
 }
 
@@ -42,8 +41,8 @@
 
 - (void) initFromFrameOrCoder {
     self.backgroundColor = [UIColor clearColor];
-    self.segmentHighlightAmounts = [NSMutableArray array];
     self.highlightColor = [UIColor redColor];
+    self.numberOfSegments = 2;
 }
 
 // Only override drawRect: if you perform custom drawing.
@@ -52,16 +51,14 @@
 {
     CGContextRef graphicsContext = UIGraphicsGetCurrentContext();
     for (int i=0; i<self.numberOfSegments; i++) {
-        NSNumber * highlightAmount = (NSNumber *)[self.segmentHighlightAmounts objectAtIndex:i];
-        [self drawHighlightAmount:highlightAmount.floatValue atIndex:i inContext:graphicsContext];
+        float highlightAmount = highlightAmounts[i];
+        [self drawHighlightAmount:highlightAmount atIndex:i inContext:graphicsContext];
     }
     
 }
 
 - (void) drawHighlightAmount:(float)amount atIndex:(int)index inContext:(CGContextRef)context {
-    CGFloat highlightWidth = self.bounds.size.width / (float)self.numberOfSegments;
-    CGRect highlightFrame = CGRectMake(index * highlightWidth, 0, highlightWidth, self.bounds.size.height);
-    [self drawHighlightAmount:amount inFrame:highlightFrame inContext:context];
+    [self drawHighlightAmount:amount inFrame:[self frameForSegmentIndex:index] inContext:context];
 }
 
 - (void) drawHighlightAmount:(float)amount inFrame:(CGRect)frame inContext:(CGContextRef)context {
@@ -69,21 +66,28 @@
     CGContextFillRect(context, frame);
 }
 
-- (void) setNumberOfSegments:(int)count {
-    [self.segmentHighlightAmounts removeAllObjects];
-    for (int i=0; i<count; i++) {
-        NSNumber * highlightAmount = [NSNumber numberWithFloat:0.0];
-        [self.segmentHighlightAmounts addObject:highlightAmount];
+- (void)setNumberOfSegments:(int)numberOfSegments {
+    if (numberOfSegments_ != numberOfSegments) {
+        numberOfSegments_ = numberOfSegments;
+        free(highlightAmounts);
+        highlightAmounts = malloc(sizeof(float)*self.numberOfSegments);
     }
 }
 
-- (int) numberOfSegments {
-    return [self.segmentHighlightAmounts count];
+- (void)setHighlightAmount:(float)highlightAmount forSegmentAtIndex:(int)index {
+    if (highlightAmounts[index] != highlightAmount) {
+        highlightAmounts[index] = highlightAmount;
+        [self setNeedsDisplayInRect:[self frameForSegmentIndex:index]];
+    }
 }
 
-- (void)setHighlightAmount:(float)highlightAmount forSegmentAtIndex:(int)index {
-    [self.segmentHighlightAmounts replaceObjectAtIndex:index withObject:[NSNumber numberWithFloat:highlightAmount]];
-    [self setNeedsDisplay];
+- (CGRect) frameForSegmentIndex:(int)index {
+    CGFloat segmentWidth = self.bounds.size.width / (float)self.numberOfSegments;
+    CGRect segmentFrame = CGRectMake(index * segmentWidth, 
+                                     0, 
+                                     segmentWidth, 
+                                     self.bounds.size.height);
+    return segmentFrame;
 }
 
 @end
