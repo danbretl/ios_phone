@@ -7,19 +7,20 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "UIButtonWithOverlayView.h"
 
 @interface EventsFilterOption : NSObject {
  
     NSString * code_;
     NSString * readable_;
-    UIButton * button_;
+    UIButtonWithOverlayView * buttonView_;
     
 }
 
 @property (copy) NSString * code;
 @property (copy) NSString * readable;
-@property (retain) UIButton * button;
+@property (retain) UIButtonWithOverlayView * buttonView;
 
-+ (EventsFilterOption *) eventsFilterOptionWithCode:(NSString *)code readableString:(NSString *)readable button:(UIButton *)button;
++ (EventsFilterOption *) eventsFilterOptionWithCode:(NSString *)code readableString:(NSString *)readable buttonView:(UIButtonWithOverlayView *)buttonView;
 
 @end

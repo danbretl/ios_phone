@@ -66,12 +66,15 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 // Views properties
 
 @property (retain) IBOutlet UITableView * tableView;
-@property (retain) IBOutlet UIView * pushableContainerView;
-@property (retain) IBOutlet UIView * filtersSummaryAndSearchContainerView;
-@property (retain) IBOutlet UILabel * filtersSummaryLabel;
-@property (retain) IBOutlet UIView * searchButtonContainerView;
+@property (retain) IBOutlet UIView   * pushableContainerView;
+@property (retain) IBOutlet UIView   * pushableContainerShadowCheatView;
+@property (retain) IBOutlet UIView   * filtersSummaryAndSearchContainerView;
+@property (retain) IBOutlet UILabel  * filtersSummaryLabel;
+@property (retain) IBOutlet UIView   * searchButtonContainerView;
 @property (retain) IBOutlet UIButton * searchButton;
-@property (retain) IBOutlet UIView * filtersContainerView;
+@property (retain) IBOutlet UIView   * filtersContainerView;
+@property (retain) IBOutlet UIView   * filtersContainerShadowCheatView;
+@property (retain) IBOutlet UIView   * filtersContainerShadowCheatWayBelowView;
 @property (retain) IBOutlet UIButton * filterButtonCategories;
 @property (retain) IBOutlet UIButton * filterButtonPrice;
 @property (retain) IBOutlet UIButton * filterButtonDate;
@@ -82,33 +85,33 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 @property (retain) IBOutlet UIView * drawerViewsContainer;
 // Drawer view price
 @property (retain) IBOutlet UIView * drawerViewPrice;
-@property (retain) IBOutlet UIButton * dvPriceButtonFree;
-@property (retain) IBOutlet UIButton * dvPriceButtonUnder20;
-@property (retain) IBOutlet UIButton * dvPriceButtonUnder50;
-@property (retain) IBOutlet UIButton * dvPriceButtonAny;
+@property (retain) IBOutlet UIButtonWithOverlayView * dvPriceButtonFree;
+@property (retain) IBOutlet UIButtonWithOverlayView * dvPriceButtonUnder20;
+@property (retain) IBOutlet UIButtonWithOverlayView * dvPriceButtonUnder50;
+@property (retain) IBOutlet UIButtonWithOverlayView * dvPriceButtonAny;
 // Drawer view date
 @property (retain) IBOutlet UIView * drawerViewDate;
-@property (retain) IBOutlet UIButton * dvDateButtonToday;
-@property (retain) IBOutlet UIButton * dvDateButtonThisWeekend;
-@property (retain) IBOutlet UIButton * dvDateButtonThisWeek;
-@property (retain) IBOutlet UIButton * dvDateButtonThisMonth;
-@property (retain) IBOutlet UIButton * dvDateButtonAny;
+@property (retain) IBOutlet UIButtonWithOverlayView * dvDateButtonToday;
+@property (retain) IBOutlet UIButtonWithOverlayView * dvDateButtonThisWeekend;
+@property (retain) IBOutlet UIButtonWithOverlayView * dvDateButtonThisWeek;
+@property (retain) IBOutlet UIButtonWithOverlayView * dvDateButtonThisMonth;
+@property (retain) IBOutlet UIButtonWithOverlayView * dvDateButtonAny;
 // Drawer view categories
 @property (retain) IBOutlet UIView * drawerViewCategories;
 // Drawer view time
 @property (retain) IBOutlet UIView * drawerViewTime;
-@property (retain) IBOutlet UIButton * dvTimeButtonMorning;
-@property (retain) IBOutlet UIButton * dvTimeButtonAfternoon;
-@property (retain) IBOutlet UIButton * dvTimeButtonEvening;
-@property (retain) IBOutlet UIButton * dvTimeButtonNight;
-@property (retain) IBOutlet UIButton * dvTimeButtonAny;
+@property (retain) IBOutlet UIButtonWithOverlayView * dvTimeButtonMorning;
+@property (retain) IBOutlet UIButtonWithOverlayView * dvTimeButtonAfternoon;
+@property (retain) IBOutlet UIButtonWithOverlayView * dvTimeButtonEvening;
+@property (retain) IBOutlet UIButtonWithOverlayView * dvTimeButtonNight;
+@property (retain) IBOutlet UIButtonWithOverlayView * dvTimeButtonAny;
 // Drawer view location
 @property (retain) IBOutlet UIView * drawerViewLocation;
 @property (retain) IBOutlet UITextField * dvLocationTextField;
-@property (retain) IBOutlet UIButton * dvLocationButtonWalking;
-@property (retain) IBOutlet UIButton * dvLocationButtonNeighborhood;
-@property (retain) IBOutlet UIButton * dvLocationButtonBorough;
-@property (retain) IBOutlet UIButton * dvLocationButtonCity;
+@property (retain) IBOutlet UIButtonWithOverlayView * dvLocationButtonWalking;
+@property (retain) IBOutlet UIButtonWithOverlayView * dvLocationButtonNeighborhood;
+@property (retain) IBOutlet UIButtonWithOverlayView * dvLocationButtonBorough;
+@property (retain) IBOutlet UIButtonWithOverlayView * dvLocationButtonCity;
 @property (retain) UISearchBar * mySearchBar;
 @property (nonatomic, readonly) EGORefreshTableHeaderView *refreshHeaderView;
 @property (nonatomic, retain) WebActivityView * webActivityView;
@@ -170,8 +173,8 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 
 @implementation EventsViewController
 @synthesize filters;
-@synthesize filtersContainerView, filterButtonCategories, filterButtonPrice, filterButtonDate, filterButtonLocation, filterButtonTime;
-@synthesize pushableContainerView, filtersSummaryAndSearchContainerView, filtersSummaryLabel, searchButtonContainerView, searchButton;
+@synthesize filtersContainerView, filtersContainerShadowCheatView, filtersContainerShadowCheatWayBelowView, filterButtonCategories, filterButtonPrice, filterButtonDate, filterButtonLocation, filterButtonTime;
+@synthesize pushableContainerView, pushableContainerShadowCheatView, filtersSummaryAndSearchContainerView, filtersSummaryLabel, searchButtonContainerView, searchButton;
 @synthesize drawerScrollView, activeFilterHighlightsContainerView, drawerViewsContainer;
 @synthesize drawerViewPrice, dvPriceButtonAny, dvPriceButtonFree, dvPriceButtonUnder20, dvPriceButtonUnder50;
 @synthesize drawerViewDate, dvDateButtonAny, dvDateButtonToday, dvDateButtonThisWeekend, dvDateButtonThisWeek, dvDateButtonThisMonth;
@@ -200,12 +203,15 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     [selectedTimeFilterOption release];
     [filters release];
     [filtersContainerView release];
+    [filtersContainerShadowCheatView release];
+    [filtersContainerShadowCheatWayBelowView release];
     [filterButtonCategories release];
     [filterButtonPrice release];
     [filterButtonDate release];
     [filterButtonLocation release];
     [filterButtonTime release];
     [pushableContainerView release];
+    [pushableContainerShadowCheatView release];
     [filtersSummaryAndSearchContainerView release];
     [filtersSummaryLabel release];
     [searchButtonContainerView release];
@@ -263,6 +269,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     [connectionErrorOnDeleteAlertView release];
     [indexPathOfRowAttemptingToDelete release];
     [indexPathOfSelectedRow release];
+    [dvLocationButtonCity release];
     [super dealloc];
 }
 
@@ -290,9 +297,24 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     //self.drawerViewsContainer.backgroundColor = [UIColor clearColor];
     self.drawerViewsContainer.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"cat_overlay.png"]];
     
-    self.filtersContainerView.layer.shadowColor = [[UIColor blackColor] CGColor];
-    self.filtersContainerView.layer.shadowOffset = CGSizeMake(0, 0);
-    self.filtersContainerView.layer.shadowOpacity = 1.0;
+    // Shadows
+    self.filtersContainerShadowCheatView.layer.shadowColor = [[UIColor blackColor] CGColor];
+    self.filtersContainerShadowCheatView.layer.shadowOffset = CGSizeMake(0, 0);
+    self.filtersContainerShadowCheatView.layer.shadowOpacity = 1.0;
+    self.filtersContainerShadowCheatWayBelowView.layer.shadowColor = self.filtersContainerShadowCheatView.layer.shadowColor;
+    self.filtersContainerShadowCheatWayBelowView.layer.shadowOffset = self.filtersContainerShadowCheatView.layer.shadowOffset;
+    self.filtersContainerShadowCheatWayBelowView.layer.shadowOpacity = self.filtersContainerShadowCheatView.layer.shadowOpacity;
+    self.filtersContainerShadowCheatWayBelowView.alpha = 0.0;
+    // More shadows
+    self.pushableContainerShadowCheatView.layer.shadowColor = self.filtersContainerShadowCheatView.layer.shadowColor;
+    self.pushableContainerShadowCheatView.layer.shadowOffset = self.filtersContainerShadowCheatView.layer.shadowOffset;
+    self.pushableContainerShadowCheatView.layer.shadowOpacity = self.filtersContainerShadowCheatView.layer.shadowOpacity;
+    self.pushableContainerShadowCheatView.layer.shouldRasterize = YES;
+    // More shadows
+    self.filtersSummaryAndSearchContainerView.layer.shadowColor = self.filtersContainerShadowCheatView.layer.shadowColor;
+    self.filtersSummaryAndSearchContainerView.layer.shadowOffset = self.filtersContainerShadowCheatView.layer.shadowOffset;
+    self.filtersSummaryAndSearchContainerView.layer.shadowOpacity = self.filtersContainerShadowCheatView.layer.shadowOpacity;
+    self.filtersSummaryAndSearchContainerView.layer.shadowPath = [[UIBezierPath bezierPathWithRect:CGRectMake(0, 10, self.filtersSummaryAndSearchContainerView.bounds.size.width, self.filtersSummaryAndSearchContainerView.bounds.size.height - 10)] CGPath];
     
     // Add category buttons to categories background
     int initial_x = 10;
@@ -412,64 +434,64 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     NSArray * priceOptions = [NSArray arrayWithObjects:
                               [EventsFilterOption eventsFilterOptionWithCode:@"free" 
                                                               readableString:@"Free" 
-                                                                      button:self.dvPriceButtonFree],
+                                                                  buttonView:self.dvPriceButtonFree],
                               [EventsFilterOption eventsFilterOptionWithCode:@"under20" 
                                                               readableString:@"Under $20" 
-                                                                      button:self.dvPriceButtonUnder20],
+                                                                  buttonView:self.dvPriceButtonUnder20],
                               [EventsFilterOption eventsFilterOptionWithCode:@"under50" 
                                                               readableString:@"Under $50" 
-                                                                      button:self.dvPriceButtonUnder50],
+                                                                  buttonView:self.dvPriceButtonUnder50],
                               [EventsFilterOption eventsFilterOptionWithCode:@"anyprice" 
                                                               readableString:nil 
-                                                                      button:self.dvPriceButtonAny],
+                                                                  buttonView:self.dvPriceButtonAny],
                               nil];
     NSArray * dateOptions = [NSArray arrayWithObjects:
                              [EventsFilterOption eventsFilterOptionWithCode:@"today" 
                                                              readableString:@"Today" 
-                                                                     button:self.dvDateButtonToday],
+                                                                 buttonView:self.dvDateButtonToday],
                              [EventsFilterOption eventsFilterOptionWithCode:@"thisweekend" 
                                                              readableString:@"This Weekend" 
-                                                                     button:self.dvDateButtonThisWeekend],
+                                                                 buttonView:self.dvDateButtonThisWeekend],
                              [EventsFilterOption eventsFilterOptionWithCode:@"thisweek" 
                                                              readableString:@"This Week" 
-                                                                     button:self.dvDateButtonThisWeek],
+                                                                 buttonView:self.dvDateButtonThisWeek],
                              [EventsFilterOption eventsFilterOptionWithCode:@"thismonth" 
                                                              readableString:@"This Month" 
-                                                                     button:self.dvDateButtonThisMonth],
+                                                                 buttonView:self.dvDateButtonThisMonth],
                              [EventsFilterOption eventsFilterOptionWithCode:@"anydate" 
                                                              readableString:nil
-                                                                     button:self.dvDateButtonAny],
+                                                                 buttonView:self.dvDateButtonAny],
                              nil];
     NSArray * timeOptions = [NSArray arrayWithObjects:
                              [EventsFilterOption eventsFilterOptionWithCode:@"morning" 
                                                              readableString:@"In the Morning" 
-                                                                     button:self.dvTimeButtonMorning],
+                                                                 buttonView:self.dvTimeButtonMorning],
                              [EventsFilterOption eventsFilterOptionWithCode:@"afternoon" 
                                                              readableString:@"In the Afternoon" 
-                                                                     button:self.dvTimeButtonAfternoon],
+                                                                 buttonView:self.dvTimeButtonAfternoon],
                              [EventsFilterOption eventsFilterOptionWithCode:@"evening" 
                                                              readableString:@"In the Evening" 
-                                                                     button:self.dvTimeButtonEvening],
+                                                                 buttonView:self.dvTimeButtonEvening],
                              [EventsFilterOption eventsFilterOptionWithCode:@"night" 
                                                              readableString:@"At Night" 
-                                                                     button:self.dvTimeButtonNight],
+                                                                 buttonView:self.dvTimeButtonNight],
                              [EventsFilterOption eventsFilterOptionWithCode:@"anytime" 
                                                              readableString:nil
-                                                                     button:self.dvTimeButtonAny],
+                                                                 buttonView:self.dvTimeButtonAny],
                              nil];
     NSArray * locationOptions = [NSArray arrayWithObjects:
                                  [EventsFilterOption eventsFilterOptionWithCode:@"walkingdistance" 
                                                                  readableString:@"Within Walking Distance of" 
-                                                                         button:self.dvLocationButtonWalking],
+                                                                     buttonView:self.dvLocationButtonWalking],
                                  [EventsFilterOption eventsFilterOptionWithCode:@"neighborhood" 
                                                                  readableString:@"In the Same Neighborhood as" 
-                                                                         button:self.dvLocationButtonNeighborhood],
+                                                                     buttonView:self.dvLocationButtonNeighborhood],
                                  [EventsFilterOption eventsFilterOptionWithCode:@"borough" 
                                                                  readableString:@"In the Same Borough as" 
-                                                                         button:self.dvLocationButtonBorough],
+                                                                     buttonView:self.dvLocationButtonBorough],
                                  [EventsFilterOption eventsFilterOptionWithCode:@"city" 
                                                                  readableString:nil
-                                                                         button:self.dvLocationButtonCity],
+                                                                     buttonView:self.dvLocationButtonCity],
                                  nil];
     
     // New filter "view models"
@@ -480,9 +502,33 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
                     [EventsFilter eventsFilterWithCode:EVENTS_FILTER_TIME button:self.filterButtonTime drawerView:self.drawerViewTime options:timeOptions],
                     [EventsFilter eventsFilterWithCode:EVENTS_FILTER_LOCATION button:self.filterButtonLocation drawerView:self.drawerViewLocation options:locationOptions],
                     nil];
+    
+    NSDictionary * filterOptionButtonSelectors = [NSDictionary dictionaryWithObjectsAndKeys:
+                                                  [NSValue valueWithPointer:@selector(priceFilterOptionButtonTouched:)],
+                                                  EVENTS_FILTER_PRICE,
+                                                  [NSValue valueWithPointer:@selector(dateFilterOptionButtonTouched:)],
+                                                  EVENTS_FILTER_DATE,
+                                                  [NSValue valueWithPointer:@selector(timeFilterOptionButtonTouched:)],
+                                                  EVENTS_FILTER_TIME,
+                                                  [NSValue valueWithPointer:@selector(locationFilterOptionButtonTouched:)],
+                                                  EVENTS_FILTER_LOCATION,
+                                                  nil];
+    
     for (EventsFilter * filter in self.filters) {
         filter.drawerView.backgroundColor = [UIColor clearColor];//[UIColor colorWithPatternImage:[UIImage imageNamed:@"cat_overlay.png"]];
+        filter.button.titleLabel.font = [UIFont fontWithName:@"HelveticaNeueLTStd-MdCn" size:9.0];
+        [filter.button setTitleColor:[UIColor colorWithWhite:53.0/255.0 alpha:1.0] forState:UIControlStateNormal];
+        [filter.button setTitleColor:[UIColor colorWithWhite:53.0/255.0 alpha:1.0] forState:UIControlStateHighlighted];
+        SEL filterOptionButtonSelector = [[filterOptionButtonSelectors objectForKey:filter.code] pointerValue];
+        for (EventsFilterOption * filterOption in filter.options) {
+            [filterOption.buttonView.button addTarget:self action:filterOptionButtonSelector forControlEvents:UIControlEventTouchUpInside];
+            filterOption.buttonView.cornerRadius = 5.0;
+            filterOption.buttonView.layer.shadowRadius = 1.0;
+            [filterOption.buttonView.button setBackgroundImage:[UIImage imageNamed:@"btn_filter_option_unselected.png"] forState:UIControlStateNormal];
+            [filterOption.buttonView.button setBackgroundImage:[UIImage imageNamed:@"btn_filter_option_unselected_touch.png"] forState:UIControlStateHighlighted];
+        }
     }
+    self.activeFilterHighlightsContainerView.highlightColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"filter_select_glow.png"]];
     self.activeFilterHighlightsContainerView.numberOfSegments = self.filters.count;
     self.activeFilterInUI = [self.filters objectAtIndex:0];
     [self setDrawerToShowFilter:self.activeFilterInUI animated:NO];
@@ -980,14 +1026,20 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
         CGRect pushableContainerViewFrame = self.pushableContainerView.frame;
         pushableContainerViewFrame.origin.y += self.drawerScrollView.frame.size.height;
         self.pushableContainerView.frame = pushableContainerViewFrame;
+        self.pushableContainerShadowCheatView.frame = self.pushableContainerView.frame;
         [self setTableViewScrollable:NO selectable:NO];
+        self.filtersContainerShadowCheatView.alpha = 0.0;
+        self.filtersContainerShadowCheatWayBelowView.alpha = 1.0;
     }
     else {
         self.isDrawerOpen = NO;
         CGRect pushableContainerViewFrame = self.pushableContainerView.frame;
         pushableContainerViewFrame.origin.y -= self.drawerScrollView.frame.size.height;
         self.pushableContainerView.frame = pushableContainerViewFrame;
+        self.pushableContainerShadowCheatView.frame = self.pushableContainerView.frame;
         [self setTableViewScrollable:YES selectable:YES];
+        self.filtersContainerShadowCheatView.alpha = 1.0;
+        self.filtersContainerShadowCheatWayBelowView.alpha = 0.0;
     }
     self.drawerScrollView.userInteractionEnabled = self.isDrawerOpen;
     
@@ -1412,7 +1464,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 - (EventsFilterOption *) filterOptionForFilterOptionButton:(UIButton *)filterOptionButton 
                                       inFilterOptionsArray:(NSArray *)filterOptions {
     EventsFilterOption * filterOption = nil;
-    NSArray * resultsArray = [filterOptions filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"button == %@", filterOptionButton]];
+    NSArray * resultsArray = [filterOptions filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"buttonView.button == %@", filterOptionButton]];
     if (resultsArray && [resultsArray count] > 0) {
         filterOption = [resultsArray objectAtIndex:0];
     }
@@ -1549,7 +1601,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     for (int i=0; i<self.filters.count; i++) {
         EventsFilter * filter = (EventsFilter *)[self.filters objectAtIndex:i];
         CGFloat filterMidX = CGRectGetMidX(filter.drawerView.frame);
-        float highlightAmount = fabsf(filterMidX - scrollMidX)/self.drawerScrollView.bounds.size.width;
+        float highlightAmount = 1 - (fabsf(filterMidX - scrollMidX)/self.drawerScrollView.bounds.size.width);
         [self.activeFilterHighlightsContainerView setHighlightAmount:highlightAmount forSegmentAtIndex:i];
     }
 }
@@ -1565,6 +1617,8 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 }
 
 - (void)viewDidUnload {
+    [dvLocationButtonCity release];
+    dvLocationButtonCity = nil;
 	// Release any retained subviews of the main view.
 	// e.g. self.myOutlet = nil;
 }

@@ -12,7 +12,7 @@
 
 @synthesize code = code_;
 @synthesize readable = readable_;
-@synthesize button = button_;
+@synthesize buttonView = buttonView_;
 
 - (id)init
 {
@@ -24,14 +24,21 @@
     return self;
 }
 
-+ (EventsFilterOption *) eventsFilterOptionWithCode:(NSString *)code readableString:(NSString *)readable button:(UIButton *)button {
++ (EventsFilterOption *) eventsFilterOptionWithCode:(NSString *)code readableString:(NSString *)readable buttonView:(UIButtonWithOverlayView *)buttonView {
     EventsFilterOption * option = [[EventsFilterOption alloc] init];
     option.code = code;
     if (readable) {
         option.readable = readable;
     }
-    option.button = button;
+    option.buttonView = buttonView;
     return [option autorelease];
+}
+
+- (void)dealloc {
+    [code_ release];
+    [readable_ release];
+    [buttonView_ release];
+    [super dealloc];
 }
 
 @end

@@ -10,9 +10,11 @@
 
 @interface SegmentedHighlighterView : UIView {
     NSMutableArray * segmentHighlightAmounts;
+    UIColor * highlightColor;
 }
 
 @property (nonatomic) int numberOfSegments;
+@property (retain) UIColor * highlightColor;
 
 - (void) setHighlightAmount:(float)highlightAmount forSegmentAtIndex:(int)index;
 

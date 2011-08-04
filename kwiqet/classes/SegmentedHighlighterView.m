@@ -11,15 +11,18 @@
 @interface SegmentedHighlighterView()
 @property (retain) NSMutableArray * segmentHighlightAmounts;
 - (void) drawHighlightAmount:(float)amount atIndex:(int)index inContext:(CGContextRef)context;
+- (void) drawHighlightAmount:(float)amount inFrame:(CGRect)frame inContext:(CGContextRef)context;
 - (void) initFromFrameOrCoder;
 @end
 
 @implementation SegmentedHighlighterView
 
 @synthesize segmentHighlightAmounts;
+@synthesize highlightColor;
 
 - (void)dealloc {
     [segmentHighlightAmounts release];
+    [highlightColor release];
     [super dealloc];
 }
 
@@ -38,8 +41,9 @@
 }
 
 - (void) initFromFrameOrCoder {
-    self.backgroundColor = [UIColor blackColor];
+    self.backgroundColor = [UIColor clearColor];
     self.segmentHighlightAmounts = [NSMutableArray array];
+    self.highlightColor = [UIColor redColor];
 }
 
 // Only override drawRect: if you perform custom drawing.
@@ -57,8 +61,12 @@
 - (void) drawHighlightAmount:(float)amount atIndex:(int)index inContext:(CGContextRef)context {
     CGFloat highlightWidth = self.bounds.size.width / (float)self.numberOfSegments;
     CGRect highlightFrame = CGRectMake(index * highlightWidth, 0, highlightWidth, self.bounds.size.height);
-    CGContextSetRGBFillColor(context, 1.0, 1.0, 1.0, amount);
-    CGContextFillRect(context, highlightFrame);
+    [self drawHighlightAmount:amount inFrame:highlightFrame inContext:context];
+}
+
+- (void) drawHighlightAmount:(float)amount inFrame:(CGRect)frame inContext:(CGContextRef)context {
+    CGContextSetFillColorWithColor(context, [[self.highlightColor colorWithAlphaComponent:amount] CGColor]);
+    CGContextFillRect(context, frame);
 }
 
 - (void) setNumberOfSegments:(int)count {

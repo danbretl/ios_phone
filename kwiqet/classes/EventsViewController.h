@@ -18,6 +18,7 @@
 #import "EventsFilter.h"
 #import "EventsFilterOption.h"
 #import "SegmentedHighlighterView.h"
+#import "UIButtonWithOverlayView.h"
 
 @interface EventsViewController : UIViewController <UITableViewDelegate, UITableViewDataSource, UISearchBarDelegate, UIAlertViewDelegate, CardPageViewControllerDelegate, WebConnectorDelegate, UIScrollViewDelegate> {
     
@@ -54,11 +55,14 @@
     
 	IBOutlet UITableView * tableView_;
     IBOutlet UIView   * pushableContainerView;
+    IBOutlet UIView   * pushableContainerShadowCheatView;
     IBOutlet UIView   * filtersSummaryAndSearchContainerView;
     IBOutlet UILabel  * filtersSummaryLabel;
     IBOutlet UIView   * searchButtonContainerView;
     IBOutlet UIButton * searchButton;
     IBOutlet UIView   * filtersContainerView;
+    IBOutlet UIView   * filtersContainerShadowCheatView;
+    IBOutlet UIView   * filtersContainerShadowCheatWayBelowView;
     IBOutlet UIButton * filterButtonCategories;
     IBOutlet UIButton * filterButtonPrice;
     IBOutlet UIButton * filterButtonDate;
@@ -69,33 +73,33 @@
     IBOutlet UIView * drawerViewsContainer;
     // Drawer view price
     IBOutlet UIView * drawerViewPrice;
-    IBOutlet UIButton * dvPriceButtonFree;
-    IBOutlet UIButton * dvPriceButtonUnder20;
-    IBOutlet UIButton * dvPriceButtonUnder50;
-    IBOutlet UIButton * dvPriceButtonAny;
+    IBOutlet UIButtonWithOverlayView * dvPriceButtonFree;
+    IBOutlet UIButtonWithOverlayView * dvPriceButtonUnder20;
+    IBOutlet UIButtonWithOverlayView * dvPriceButtonUnder50;
+    IBOutlet UIButtonWithOverlayView * dvPriceButtonAny;
     // Drawer view date
     IBOutlet UIView * drawerViewDate;
-    IBOutlet UIButton * dvDateButtonToday;
-    IBOutlet UIButton * dvDateButtonThisWeekend;
-    IBOutlet UIButton * dvDateButtonThisWeek;
-    IBOutlet UIButton * dvDateButtonThisMonth;
-    IBOutlet UIButton * dvDateButtonAny;
+    IBOutlet UIButtonWithOverlayView * dvDateButtonToday;
+    IBOutlet UIButtonWithOverlayView * dvDateButtonThisWeekend;
+    IBOutlet UIButtonWithOverlayView * dvDateButtonThisWeek;
+    IBOutlet UIButtonWithOverlayView * dvDateButtonThisMonth;
+    IBOutlet UIButtonWithOverlayView * dvDateButtonAny;
     // Drawer view categories
     IBOutlet UIView * drawerViewCategories;
     // Drawer view time
     IBOutlet UIView * drawerViewTime;
-    IBOutlet UIButton * dvTimeButtonMorning;
-    IBOutlet UIButton * dvTimeButtonAfternoon;
-    IBOutlet UIButton * dvTimeButtonEvening;
-    IBOutlet UIButton * dvTimeButtonNight;
-    IBOutlet UIButton * dvTimeButtonAny;
+    IBOutlet UIButtonWithOverlayView * dvTimeButtonMorning;
+    IBOutlet UIButtonWithOverlayView * dvTimeButtonAfternoon;
+    IBOutlet UIButtonWithOverlayView * dvTimeButtonEvening;
+    IBOutlet UIButtonWithOverlayView * dvTimeButtonNight;
+    IBOutlet UIButtonWithOverlayView * dvTimeButtonAny;
     // Drawer view location
     IBOutlet UIView * drawerViewLocation;
     IBOutlet UITextField * dvLocationTextField;
-    IBOutlet UIButton * dvLocationButtonWalking;
-    IBOutlet UIButton * dvLocationButtonNeighborhood;
-    IBOutlet UIButton * dvLocationButtonBorough;
-    IBOutlet UIButton * dvLocationButtonCity;
+    IBOutlet UIButtonWithOverlayView * dvLocationButtonWalking;
+    IBOutlet UIButtonWithOverlayView * dvLocationButtonNeighborhood;
+    IBOutlet UIButtonWithOverlayView * dvLocationButtonBorough;
+    IBOutlet UIButtonWithOverlayView * dvLocationButtonCity;
 	UISearchBar * mySearchBar;
 	EGORefreshTableHeaderView *refreshHeaderView;
     WebActivityView * webActivityView;
