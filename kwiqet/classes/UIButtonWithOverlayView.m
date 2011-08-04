@@ -129,7 +129,7 @@
 }
 
 - (void) buttonTouchEnded {
-    self.shadowPrivate.layer.shadowOpacity = 0.5;
+    self.shadowPrivate.layer.shadowOpacity = self.isShadowVisibleWhenButtonNormal ? 0.5 : 0.0;
 }
 
 - (void)dealloc {

@@ -57,8 +57,6 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 @property (readonly) BOOL problemViewIsShowing;
 @property (copy) NSString * oldFilterString;
 @property (copy) NSString * categoryURI;
-@property (copy) NSString * oldFilterStringProposed;
-@property (copy) NSString * categoryURIProposed;
 @property (retain) NSIndexPath * indexPathOfRowAttemptingToDelete;
 @property (retain) NSIndexPath * indexPathOfSelectedRow;
 
@@ -186,7 +184,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 @synthesize tableView=tableView_;
 @synthesize mySearchBar,eventsFromSearch, events,coreDataModel,webActivityView,concreteParentCategoriesDictionary;
 @synthesize refreshHeaderView, concreteParentCategoriesArray;
-@synthesize oldFilterString, categoryURI, oldFilterStringProposed, categoryURIProposed;
+@synthesize oldFilterString, categoryURI;
 @synthesize isSearchOn;
 @synthesize problemView, problemLabel;
 @synthesize cardPageViewController;
@@ -258,8 +256,6 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 	[webActivityView release];
     [oldFilterString release];
     [categoryURI release];
-    [oldFilterStringProposed release];
-    [categoryURIProposed release];
     [problemView release];
     [problemLabel release];
     [cardPageViewController release];
@@ -581,6 +577,10 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     self.selectedDateFilterOption = dateOptions.lastObject;
     self.selectedTimeFilterOption = timeOptions.lastObject;
     self.selectedLocationFilterOption = locationOptions.lastObject;
+    self.selectedPriceFilterOption.buttonView.button.selected = YES;
+    self.selectedDateFilterOption.buttonView.button.selected = YES;
+    self.selectedTimeFilterOption.buttonView.button.selected = YES;
+    self.selectedLocationFilterOption.buttonView.button.selected = YES;
     self.oldFilterString = EVENTS_OLDFILTER_RECOMMENDED;
     self.categoryURI = nil;
     [self updateFiltersSummaryLabelWithCurrentSelectedFilterOptions];
@@ -706,10 +706,10 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 
 - (void) webConnectGetEventsListWithOldFilter:(NSString *)theProposedOldFilterString categoryURI:(NSString *)theProposedCategoryURI {
 //    NSLog(@"EventsViewController webConnectGetEventsListWithFilter");
-    self.oldFilterStringProposed = theProposedOldFilterString;
-    self.categoryURIProposed = theProposedCategoryURI;
+    self.oldFilterString = theProposedOldFilterString;
+    self.categoryURI = theProposedCategoryURI;
     [self showWebLoadingViews];
-    [self.webConnector getEventsListWithFilter:self.oldFilterStringProposed categoryURI:self.categoryURIProposed];
+    [self.webConnector getEventsListWithFilter:self.oldFilterString categoryURI:self.categoryURI];
     
     /////////////////////
     // Localytics below
@@ -761,13 +761,6 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 
     // Save our core data changes
     [self.coreDataModel coreDataSave];
-        
-    // Make sure filterString and categoryURI are updated
-    self.oldFilterString = self.oldFilterStringProposed;
-
-    self.categoryURI = self.categoryURIProposed;
-    self.oldFilterStringProposed = nil;
-    self.categoryURIProposed = nil;
     
     // Send out a notification that the events in Core Data have been flushed, and there is (maybe) a new set of retrieved events available.
     NSMutableDictionary * eventsUpdatedInfo = [NSMutableDictionary dictionary];
@@ -792,13 +785,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 	NSLog(@"%@",error);
     
     [self.coreDataModel deleteRegularEvents];
-    
-    // Make sure filterString and categoryURI are updated
-    self.oldFilterString = self.oldFilterStringProposed;
-    self.categoryURI = self.categoryURIProposed;
-    self.oldFilterStringProposed = nil;
-    self.categoryURIProposed = nil;
-    
+        
     // Send out a notification that the events in Core Data have been flushed, and there is (maybe) a new set of retrieved events available.
     NSString * results = EVENTS_UPDATED_USER_INFO_RESULTS_EMPTY;
     NSString * resultsDetail = EVENTS_UPDATED_USER_INFO_RESULTS_DETAIL_CONNECTION_ERROR;
@@ -880,6 +867,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     } else {
         self.eventsFromSearch = [[[self.coreDataModel getRegularEventsFromSearch] mutableCopy] autorelease];
     }
+    
     
     [self updateFiltersSummaryLabelWithCurrentSelectedFilterOptions];
     [self.tableView reloadData];
@@ -1582,22 +1570,30 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 
 - (IBAction) priceFilterOptionButtonTouched:(id)sender {
     EventsFilterOption * filterOption = [self filterOptionForFilterOptionButton:sender inFilterOptionsArray:[self filterForFilterButton:self.filterButtonPrice].options];
+    self.selectedPriceFilterOption.buttonView.button.selected = NO; // Old
     self.selectedPriceFilterOption = filterOption;
+    self.selectedPriceFilterOption.buttonView.button.selected = YES; // New
     [self updateFiltersSummaryLabelWithCurrentSelectedFilterOptions];
 }
 - (IBAction) dateFilterOptionButtonTouched:(id)sender {
     EventsFilterOption * filterOption = [self filterOptionForFilterOptionButton:sender inFilterOptionsArray:[self filterForFilterButton:self.filterButtonDate].options];
+    self.selectedDateFilterOption.buttonView.button.selected = NO; // Old
     self.selectedDateFilterOption = filterOption;
+    self.selectedDateFilterOption.buttonView.button.selected = YES; // New
     [self updateFiltersSummaryLabelWithCurrentSelectedFilterOptions];
 }
 - (IBAction) timeFilterOptionButtonTouched:(id)sender {
     EventsFilterOption * filterOption = [self filterOptionForFilterOptionButton:sender inFilterOptionsArray:[self filterForFilterButton:self.filterButtonTime].options];
+    self.selectedTimeFilterOption.buttonView.button.selected = NO; // Old
     self.selectedTimeFilterOption = filterOption;
+    self.selectedTimeFilterOption.buttonView.button.selected = YES; // New
     [self updateFiltersSummaryLabelWithCurrentSelectedFilterOptions];
 }
 - (IBAction) locationFilterOptionButtonTouched:(id)sender {
     EventsFilterOption * filterOption = [self filterOptionForFilterOptionButton:sender inFilterOptionsArray:[self filterForFilterButton:self.filterButtonLocation].options];
+    self.selectedLocationFilterOption.buttonView.button.selected = NO; // Old
     self.selectedLocationFilterOption = filterOption;
+    self.selectedLocationFilterOption.buttonView.button.selected = YES; // New
     [self updateFiltersSummaryLabelWithCurrentSelectedFilterOptions];
 }
 

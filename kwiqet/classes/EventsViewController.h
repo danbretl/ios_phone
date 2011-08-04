@@ -45,8 +45,6 @@
     BOOL problemViewWasShowing;
     NSString * oldFilterString;
     NSString * categoryURI;
-    NSString * oldFilterStringProposed;
-    NSString * categoryURIProposed;
     NSIndexPath * indexPathOfRowAttemptingToDelete;
     NSIndexPath * indexPathOfSelectedRow;
 
