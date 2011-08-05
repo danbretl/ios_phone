@@ -106,6 +106,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 // Drawer view location
 @property (retain) IBOutlet UIView * drawerViewLocation;
 @property (retain) IBOutlet UITextField * dvLocationTextField;
+@property (retain) UIButton * dvLocationCurrentLocationButton;
 @property (retain) IBOutlet UIButtonWithOverlayView * dvLocationButtonWalking;
 @property (retain) IBOutlet UIButtonWithOverlayView * dvLocationButtonNeighborhood;
 @property (retain) IBOutlet UIButtonWithOverlayView * dvLocationButtonBorough;
@@ -181,7 +182,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 @synthesize drawerViewDate, dvDateButtonAny, dvDateButtonToday, dvDateButtonThisWeekend, dvDateButtonThisWeek, dvDateButtonThisMonth;
 @synthesize drawerViewCategories;
 @synthesize drawerViewTime, dvTimeButtonAny, dvTimeButtonMorning, dvTimeButtonAfternoon, dvTimeButtonEvening, dvTimeButtonNight;
-@synthesize drawerViewLocation, dvLocationTextField, dvLocationButtonWalking, dvLocationButtonNeighborhood, dvLocationButtonBorough, dvLocationButtonCity;
+@synthesize drawerViewLocation, dvLocationTextField, dvLocationCurrentLocationButton, dvLocationButtonWalking, dvLocationButtonNeighborhood, dvLocationButtonBorough, dvLocationButtonCity;
 @synthesize activeFilterInUI;
 @synthesize selectedPriceFilterOption, selectedDateFilterOption, selectedTimeFilterOption, selectedLocationFilterOption;
 @synthesize tableView=tableView_;
@@ -244,6 +245,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     // Drawer view location
     [drawerViewLocation release];
     [dvLocationTextField release];
+    [dvLocationCurrentLocationButton release];
     [dvLocationButtonWalking release];
     [dvLocationButtonNeighborhood release];
     [dvLocationButtonBorough release];
@@ -614,6 +616,13 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
             filterOption.buttonView.button.adjustsImageWhenHighlighted = NO;
         }
     }
+    self.dvLocationCurrentLocationButton = [UIButton buttonWithType:UIButtonTypeCustom];
+    self.dvLocationCurrentLocationButton.frame = CGRectMake(0, 0, 23, 15);
+    self.dvLocationCurrentLocationButton.contentHorizontalAlignment = UIControlContentHorizontalAlignmentRight;
+    [self.dvLocationCurrentLocationButton setImage:[UIImage imageNamed:@"ico_locationsearch.png"] forState:UIControlStateNormal];
+    [self.dvLocationCurrentLocationButton addTarget:self action:@selector(locationFilterCurrentLocationButtonTouched) forControlEvents:UIControlEventTouchUpInside];
+    self.dvLocationTextField.leftView = self.dvLocationCurrentLocationButton;
+    self.dvLocationTextField.leftViewMode = UITextFieldViewModeAlways;
     self.activeFilterHighlightsContainerView.highlightColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"filter_select_glow.png"]];
     self.activeFilterHighlightsContainerView.numberOfSegments = self.filters.count;
     self.activeFilterInUI = [self.filters objectAtIndex:0];

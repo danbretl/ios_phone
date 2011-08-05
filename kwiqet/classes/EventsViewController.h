@@ -94,7 +94,7 @@
     // Drawer view location
     IBOutlet UIView * drawerViewLocation;
     IBOutlet UITextField * dvLocationTextField;
-    IBOutlet UIButton * dvLocationCurrentLocationButton;
+    UIButton * dvLocationCurrentLocationButton;
     IBOutlet UIButtonWithOverlayView * dvLocationButtonWalking;
     IBOutlet UIButtonWithOverlayView * dvLocationButtonNeighborhood;
     IBOutlet UIButtonWithOverlayView * dvLocationButtonBorough;
