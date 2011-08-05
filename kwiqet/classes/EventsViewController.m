@@ -137,6 +137,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 - (IBAction) dateFilterOptionButtonTouched:(id)sender;
 - (IBAction) timeFilterOptionButtonTouched:(id)sender;
 - (IBAction) locationFilterOptionButtonTouched:(id)sender;
+- (IBAction) locationFilterCurrentLocationButtonTouched;
 - (EventsFilter *) filterForDrawerScrollViewContentOffset:(CGPoint)contentOffset;
 - (EventsFilter *) filterForFilterButton:(UIButton *)filterButton;
 - (EventsFilter *) filterForPositionX:(CGFloat)x;
@@ -163,6 +164,8 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 - (void) toggleDrawerAnimated;
 - (void) toggleSearchMode;
 - (void) updateActiveFilterHighlights;
+- (void) updateFilter:(EventsFilter *)filter buttonImageForFilterOption:(EventsFilterOption *)filterOption;
+- (void) updateFilterOptionButtonStatesOldSelected:(EventsFilterOption *)oldSelectedOption newSelected:(EventsFilterOption *)newSelectedOption;
 - (void) updateFiltersSummaryLabelWithCurrentSelectedFilterOptions;
 - (void) webConnectGetEventsListWithCurrentOldFilterAndCategory;
 - (void) webConnectGetEventsListWithOldFilter:(NSString *)theProposedOldFilterString categoryURI:(NSString *)theProposedCategoryURI;
@@ -317,43 +320,46 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     self.filtersSummaryAndSearchContainerView.layer.shadowOpacity = 0.5;
     self.filtersSummaryAndSearchContainerView.layer.shadowPath = [UIBezierPath bezierPathWithRect:CGRectMake(0, 10, self.filtersSummaryAndSearchContainerView.bounds.size.width, self.filtersSummaryAndSearchContainerView.bounds.size.height - 10)].CGPath;
     
-    // Add category buttons to categories background
-    int initial_x = 10;
-    int initial_y = 20;
+    // Category buttons
+    CGSize categoryButtonImageSize = CGSizeMake(51, 51);
+    CGSize categoryButtonContainerSize = CGSizeMake(99, 81);
+    CGFloat categoryButtonsContainerLeftEdge = 11;
+    CGFloat categoryButtonsContainerTopEdge = 0;
+    CGFloat categoryTitleLabelTopSpacing = 3;
     int index = 0;
+    UIView * categoryButtonsContainer = [[UIView alloc] initWithFrame:CGRectMake(categoryButtonsContainerLeftEdge, categoryButtonsContainerTopEdge, categoryButtonContainerSize.width * 3, categoryButtonContainerSize.height * 3)];
+    [self.drawerViewCategories addSubview:categoryButtonsContainer];
     for (int y = 0; y < 3; y++) {
         for (int x = 0; x < 3; x++) {
-            UIView * categoryBackgroundView = [[UIImageView alloc]initWithFrame:CGRectMake(initial_x + x*100, initial_y + y*80, 100, 100)];
-            categoryBackgroundView.userInteractionEnabled = YES;
-//            categoryBackgroundView.userInteractionEnabled = YES;
-            UIButton * categoryButton = [[UIButton alloc]initWithFrame:CGRectMake(25, 0, 50, 50)];
-            categoryButton.enabled = YES;
-            UILabel * categoryTitleLabel = [[UILabel alloc]initWithFrame:CGRectMake(0, 50, 100, 25)];
-            //if 1st column in 1st row, make all view
+            // Container
+            UIView * categoryButtonContainer = [[[UIView alloc] initWithFrame:CGRectMake(x * categoryButtonContainerSize.width, y * categoryButtonContainerSize.height, categoryButtonContainerSize.width, categoryButtonContainerSize.height)] autorelease];
+            // Button
+            UIButtonWithOverlayView * categoryButton = [[[UIButtonWithOverlayView alloc] initWithFrame:CGRectMake((categoryButtonContainerSize.width - categoryButtonImageSize.width) / 2.0, (categoryButtonContainerSize.height - categoryButtonImageSize.height) / 2.0, categoryButtonImageSize.width, categoryButtonImageSize.height)] autorelease];
+            categoryButton.cornerRadius = 10.0;
+            categoryButton.isShadowVisibleWhenButtonHighlighted = YES;
+            // Label
+            UILabel * categoryTitleLabel = [[[UILabel alloc]initWithFrame:CGRectMake(0, CGRectGetMaxY(categoryButton.frame) + categoryTitleLabelTopSpacing, categoryButtonContainer.bounds.size.width, 25)] autorelease];
+            categoryTitleLabel.font = [UIFont fontWithName:@"HelveticaNeueLTStd-Cn" size:13];
+            categoryTitleLabel.textAlignment = UITextAlignmentCenter;
+            categoryTitleLabel.backgroundColor = [UIColor clearColor];
+            // Values from category object
             Category * category = nil;
             if (y == 0 && x == 0) {
                 categoryButton.tag = -1;
                 categoryTitleLabel.text = @"All Categories";
-                category = nil;
             } else {
                 //set icon image here
                 category = (Category *)[self.concreteParentCategoriesArray objectAtIndex:index-1];
                 categoryTitleLabel.text = category.title;
                 categoryButton.tag = index-1;
             }
-            [self setImagesForCategoryButton:categoryButton forCategory:category];
-            [categoryButton addTarget:self action:@selector(categoryButtonPressed:) forControlEvents:UIControlEventTouchUpInside];
-            categoryTitleLabel.font = [UIFont fontWithName:@"HelveticaNeueLTStd-Cn" size:13];
-            categoryTitleLabel.textAlignment = UITextAlignmentCenter;
-            categoryTitleLabel.backgroundColor = [UIColor clearColor];
-            [categoryBackgroundView addSubview:categoryTitleLabel];
-            [categoryBackgroundView addSubview:categoryButton];
-            [self.drawerViewCategories addSubview:categoryBackgroundView];
-            [categoryTitleLabel release];
-            [categoryButton release];
-            [categoryBackgroundView release];
-            
-            index = index + 1;
+            [self setImagesForCategoryButton:categoryButton.button forCategory:category];
+            [categoryButton.button addTarget:self action:@selector(categoryButtonPressed:) forControlEvents:UIControlEventTouchUpInside];
+            [categoryButtonContainer addSubview:categoryButton];
+            [categoryButtonContainer addSubview:categoryTitleLabel];
+            [categoryButtonsContainer addSubview:categoryButtonContainer];
+            // Increment
+            index++;
         }
     }
         
@@ -533,11 +539,36 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     
     // New filter "view models"
     self.filters = [NSMutableArray arrayWithObjects:
-                    [EventsFilter eventsFilterWithCode:EVENTS_FILTER_PRICE button:self.filterButtonPrice drawerView:self.drawerViewPrice options:priceOptions],
-                    [EventsFilter eventsFilterWithCode:EVENTS_FILTER_DATE button:self.filterButtonDate drawerView:self.drawerViewDate options:dateOptions],
-                    [EventsFilter eventsFilterWithCode:EVENTS_FILTER_CATEGORIES button:self.filterButtonCategories drawerView:self.drawerViewCategories options:nil],
-                    [EventsFilter eventsFilterWithCode:EVENTS_FILTER_TIME button:self.filterButtonTime drawerView:self.drawerViewTime options:timeOptions],
-                    [EventsFilter eventsFilterWithCode:EVENTS_FILTER_LOCATION button:self.filterButtonLocation drawerView:self.drawerViewLocation options:locationOptions],
+                    [EventsFilter 
+                     eventsFilterWithCode:EVENTS_FILTER_PRICE 
+                     buttonText:@"Price"
+                     button:self.filterButtonPrice 
+                     drawerView:self.drawerViewPrice 
+                     options:priceOptions],
+                    [EventsFilter 
+                     eventsFilterWithCode:EVENTS_FILTER_DATE 
+                     buttonText:@"Date"
+                     button:self.filterButtonDate 
+                     drawerView:self.drawerViewDate 
+                     options:dateOptions],
+                    [EventsFilter 
+                     eventsFilterWithCode:EVENTS_FILTER_CATEGORIES 
+                     buttonText:nil
+                     button:self.filterButtonCategories 
+                     drawerView:self.drawerViewCategories 
+                     options:nil],
+                    [EventsFilter 
+                     eventsFilterWithCode:EVENTS_FILTER_TIME 
+                     buttonText:@"Time"
+                     button:self.filterButtonTime 
+                     drawerView:self.drawerViewTime 
+                     options:timeOptions],
+                    [EventsFilter 
+                     eventsFilterWithCode:EVENTS_FILTER_LOCATION 
+                     buttonText:@"Location"
+                     button:self.filterButtonLocation 
+                     drawerView:self.drawerViewLocation 
+                     options:locationOptions],
                     nil];
     
     NSDictionary * filterOptionButtonSelectors = [NSDictionary dictionaryWithObjectsAndKeys:
@@ -553,7 +584,14 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     
     for (EventsFilter * filter in self.filters) {
         filter.drawerView.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"cat_overlay.png"]];
-        filter.button.titleLabel.font = [UIFont fontWithName:@"HelveticaNeueLTStd-MdCn" size:9.0];
+        [filter.button setTitle:[filter.buttonText uppercaseString] forState:UIControlStateNormal];
+        filter.button.titleLabel.font = [UIFont fontWithName:@"HelveticaNeueLTStd-MdCn" size:12.0];
+        filter.button.adjustsImageWhenHighlighted = NO;
+        if (![filter.code isEqualToString:EVENTS_FILTER_CATEGORIES]) {
+            filter.button.contentVerticalAlignment = UIControlContentVerticalAlignmentBottom;
+            filter.button.titleEdgeInsets = UIEdgeInsetsMake(0, 0, 12, 0);
+            filter.button.imageEdgeInsets = UIEdgeInsetsMake(0, 0, 16, 0);
+        }
         [filter.button setTitleColor:[UIColor colorWithWhite:53.0/255.0 alpha:1.0] forState:UIControlStateNormal];
         [filter.button setTitleColor:[UIColor colorWithWhite:53.0/255.0 alpha:1.0] forState:UIControlStateHighlighted];
         SEL filterOptionButtonSelector = [[filterOptionButtonSelectors objectForKey:filter.code] pointerValue];
@@ -563,9 +601,17 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
             [filterOption.buttonView.button setBackgroundImage:[UIImage imageNamed:@"btn_filter_option_unselected.png"] forState:UIControlStateNormal];
             [filterOption.buttonView.button setBackgroundImage:[UIImage imageNamed:@"btn_filter_option_unselected_touch.png"] forState:UIControlStateHighlighted];
             [filterOption.buttonView.button setBackgroundImage:[UIImage imageNamed:@"btn_filter_option_selected.png"] forState:UIControlStateSelected];
+            [filterOption.buttonView.button setBackgroundImage:[UIImage imageNamed:@"btn_filter_option_selected.png"] forState:UIControlStateSelected | UIControlStateHighlighted];
+            UIColor * darkTextColor = [UIColor colorWithWhite:53.0/255.0 alpha:1.0];
+            UIColor * lightTextColor = [UIColor colorWithWhite:251.0/255.0 alpha:1.0];
+            [filterOption.buttonView.button setTitleColor:darkTextColor forState:UIControlStateNormal];
+            [filterOption.buttonView.button setTitleColor:darkTextColor forState:UIControlStateHighlighted];
+            [filterOption.buttonView.button setTitleColor:lightTextColor forState:UIControlStateSelected];
+            [filterOption.buttonView.button setTitleColor:lightTextColor forState:UIControlStateSelected | UIControlStateHighlighted];
             filterOption.buttonView.overlay.image = [UIImage imageNamed:@"btn_filter_option_shine.png"];
             filterOption.buttonView.cornerRadius = 5.0;
             filterOption.buttonView.buttonIconImage = [UIImage imageNamed:[EventsFilterOption eventsFilterOptionIconFilenameForCode:filterOption.code grayscale:NO]];
+            filterOption.buttonView.button.adjustsImageWhenHighlighted = NO;
         }
     }
     self.activeFilterHighlightsContainerView.highlightColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"filter_select_glow.png"]];
@@ -577,10 +623,11 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     self.selectedDateFilterOption = dateOptions.lastObject;
     self.selectedTimeFilterOption = timeOptions.lastObject;
     self.selectedLocationFilterOption = locationOptions.lastObject;
-    self.selectedPriceFilterOption.buttonView.button.selected = YES;
-    self.selectedDateFilterOption.buttonView.button.selected = YES;
-    self.selectedTimeFilterOption.buttonView.button.selected = YES;
-    self.selectedLocationFilterOption.buttonView.button.selected = YES;
+    // Update filter option button states
+    [self updateFilterOptionButtonStatesOldSelected:nil newSelected:self.selectedPriceFilterOption];
+    [self updateFilterOptionButtonStatesOldSelected:nil newSelected:self.selectedDateFilterOption];
+    [self updateFilterOptionButtonStatesOldSelected:nil newSelected:self.selectedTimeFilterOption];
+    [self updateFilterOptionButtonStatesOldSelected:nil newSelected:self.selectedLocationFilterOption];
     self.oldFilterString = EVENTS_OLDFILTER_RECOMMENDED;
     self.categoryURI = nil;
     [self updateFiltersSummaryLabelWithCurrentSelectedFilterOptions];
@@ -1073,6 +1120,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
         [self setTableViewScrollable:YES selectable:YES];
         self.filtersContainerShadowCheatView.alpha = 1.0;
         self.filtersContainerShadowCheatWayBelowView.alpha = 0.0;
+        [self.dvLocationTextField resignFirstResponder];
     }
     self.drawerScrollView.userInteractionEnabled = self.isDrawerOpen;
     
@@ -1570,30 +1618,34 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 
 - (IBAction) priceFilterOptionButtonTouched:(id)sender {
     EventsFilterOption * filterOption = [self filterOptionForFilterOptionButton:sender inFilterOptionsArray:[self filterForFilterButton:self.filterButtonPrice].options];
-    self.selectedPriceFilterOption.buttonView.button.selected = NO; // Old
+    EventsFilterOption * oldSelected = self.selectedPriceFilterOption;
     self.selectedPriceFilterOption = filterOption;
-    self.selectedPriceFilterOption.buttonView.button.selected = YES; // New
+    [self updateFilterOptionButtonStatesOldSelected:oldSelected newSelected:self.selectedPriceFilterOption];
+    [self updateFilter:[self filterForFilterButton:self.filterButtonPrice] buttonImageForFilterOption:self.selectedPriceFilterOption];
     [self updateFiltersSummaryLabelWithCurrentSelectedFilterOptions];
 }
 - (IBAction) dateFilterOptionButtonTouched:(id)sender {
     EventsFilterOption * filterOption = [self filterOptionForFilterOptionButton:sender inFilterOptionsArray:[self filterForFilterButton:self.filterButtonDate].options];
-    self.selectedDateFilterOption.buttonView.button.selected = NO; // Old
+    EventsFilterOption * oldSelected = self.selectedDateFilterOption;
     self.selectedDateFilterOption = filterOption;
-    self.selectedDateFilterOption.buttonView.button.selected = YES; // New
+    [self updateFilterOptionButtonStatesOldSelected:oldSelected newSelected:self.selectedDateFilterOption];
+    [self updateFilter:[self filterForFilterButton:self.filterButtonDate] buttonImageForFilterOption:self.selectedDateFilterOption];
     [self updateFiltersSummaryLabelWithCurrentSelectedFilterOptions];
 }
 - (IBAction) timeFilterOptionButtonTouched:(id)sender {
     EventsFilterOption * filterOption = [self filterOptionForFilterOptionButton:sender inFilterOptionsArray:[self filterForFilterButton:self.filterButtonTime].options];
-    self.selectedTimeFilterOption.buttonView.button.selected = NO; // Old
+    EventsFilterOption * oldSelected = self.selectedTimeFilterOption;
     self.selectedTimeFilterOption = filterOption;
-    self.selectedTimeFilterOption.buttonView.button.selected = YES; // New
+    [self updateFilterOptionButtonStatesOldSelected:oldSelected newSelected:self.selectedTimeFilterOption];
+    [self updateFilter:[self filterForFilterButton:self.filterButtonTime] buttonImageForFilterOption:self.selectedTimeFilterOption];
     [self updateFiltersSummaryLabelWithCurrentSelectedFilterOptions];
 }
 - (IBAction) locationFilterOptionButtonTouched:(id)sender {
     EventsFilterOption * filterOption = [self filterOptionForFilterOptionButton:sender inFilterOptionsArray:[self filterForFilterButton:self.filterButtonLocation].options];
-    self.selectedLocationFilterOption.buttonView.button.selected = NO; // Old
+    EventsFilterOption * oldSelected = self.selectedLocationFilterOption;
     self.selectedLocationFilterOption = filterOption;
-    self.selectedLocationFilterOption.buttonView.button.selected = YES; // New
+    [self updateFilterOptionButtonStatesOldSelected:oldSelected newSelected:self.selectedLocationFilterOption];
+    [self updateFilter:[self filterForFilterButton:self.filterButtonLocation] buttonImageForFilterOption:self.selectedLocationFilterOption];
     [self updateFiltersSummaryLabelWithCurrentSelectedFilterOptions];
 }
 
@@ -1639,6 +1691,23 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     
 }
 
+- (void) updateFilter:(EventsFilter *)filter buttonImageForFilterOption:(EventsFilterOption *)filterOption {
+    NSString * bwIconFilename = [EventsFilterOption eventsFilterOptionIconFilenameForCode:filterOption.code grayscale:YES];
+    UIImage * bwIconImage = [UIImage imageNamed:bwIconFilename];
+    [filter.button setImage:bwIconImage forState:UIControlStateNormal];
+    if (bwIconImage == nil) {
+        [filter.button setTitle:[filter.buttonText uppercaseString] forState:UIControlStateNormal];
+    } else {
+        [filter.button setTitle:nil forState:UIControlStateNormal];
+    }
+}
+
+- (void) updateFilterOptionButtonStatesOldSelected:(EventsFilterOption *)oldSelectedOption newSelected:(EventsFilterOption *)newSelectedOption {
+    oldSelectedOption.buttonView.button.selected = NO;
+    newSelectedOption.buttonView.button.selected = YES;
+}
+
+
 - (void) updateActiveFilterHighlights {
     CGFloat scrollMidX = CGRectGetMidX(self.drawerScrollView.bounds);
     for (int i=0; i<self.filters.count; i++) {
@@ -1647,6 +1716,21 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
         float highlightAmount = 1 - (fabsf(filterMidX - scrollMidX)/self.drawerScrollView.bounds.size.width);
         [self.activeFilterHighlightsContainerView setHighlightAmount:highlightAmount forSegmentAtIndex:i];
     }
+}
+
+- (BOOL)textFieldShouldReturn:(UITextField *)textField {
+    BOOL shouldReturn = YES;
+    if (textField == self.dvLocationTextField) {
+        [self.dvLocationTextField resignFirstResponder];
+        shouldReturn = NO;
+    }
+    return YES;
+}
+
+- (void)locationFilterCurrentLocationButtonTouched {
+    [self.dvLocationTextField resignFirstResponder];
+    self.dvLocationTextField.text = @"";
+    self.dvLocationTextField.placeholder = @"Current Location";
 }
 
 #pragma mark -

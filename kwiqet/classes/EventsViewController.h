@@ -20,7 +20,7 @@
 #import "SegmentedHighlighterView.h"
 #import "UIButtonWithOverlayView.h"
 
-@interface EventsViewController : UIViewController <UITableViewDelegate, UITableViewDataSource, UISearchBarDelegate, UIAlertViewDelegate, CardPageViewControllerDelegate, WebConnectorDelegate, UIScrollViewDelegate> {
+@interface EventsViewController : UIViewController <UITableViewDelegate, UITableViewDataSource, UISearchBarDelegate, UIAlertViewDelegate, CardPageViewControllerDelegate, WebConnectorDelegate, UIScrollViewDelegate, UITextFieldDelegate> {
     
     ///////////
     // Models
@@ -94,6 +94,7 @@
     // Drawer view location
     IBOutlet UIView * drawerViewLocation;
     IBOutlet UITextField * dvLocationTextField;
+    IBOutlet UIButton * dvLocationCurrentLocationButton;
     IBOutlet UIButtonWithOverlayView * dvLocationButtonWalking;
     IBOutlet UIButtonWithOverlayView * dvLocationButtonNeighborhood;
     IBOutlet UIButtonWithOverlayView * dvLocationButtonBorough;

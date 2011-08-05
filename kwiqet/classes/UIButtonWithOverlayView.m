@@ -53,11 +53,6 @@
     self.buttonPrivate.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     [self.buttonPrivate addTarget:self action:@selector(buttonTouchEvent) forControlEvents:UIControlEventAllTouchEvents];
     [self.buttonPrivate addTarget:self action:@selector(buttonTouchEnded) forControlEvents:UIControlEventTouchUpInside | UIControlEventTouchUpOutside | UIControlEventTouchCancel];
-    UIColor * darkTextColor = [UIColor colorWithWhite:53.0/255.0 alpha:1.0];
-    UIColor * lightTextColor = [UIColor colorWithWhite:251.0/255.0 alpha:1.0];
-    [self.buttonPrivate setTitleColor:darkTextColor forState:UIControlStateNormal];
-    [self.buttonPrivate setTitleColor:darkTextColor forState:UIControlStateHighlighted];
-    [self.buttonPrivate setTitleColor:lightTextColor forState:UIControlStateSelected];
     self.buttonPrivate.titleLabel.font = [UIFont fontWithName:@"HelveticaNeueLTStd-MdCn" size:18.0];
     self.buttonPrivate.titleEdgeInsets = UIEdgeInsetsMake(10.0, 0, 0, 0);
     [self addSubview:self.buttonPrivate];

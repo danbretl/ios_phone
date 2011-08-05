@@ -19,13 +19,14 @@ NSString * const EVENTS_FILTER_TIME = @"time";
 @end
 
 @implementation EventsFilter
-@synthesize button=button_, drawerView=drawerView_, code=code_;
+@synthesize button=button_, drawerView=drawerView_, code=code_, buttonText=buttonText_;
 @synthesize optionsPrivate=options_;
 
-+ (EventsFilter *) eventsFilterWithCode:(NSString *)filterCode button:(UIButton *)button drawerView:(UIView *)drawerView options:(NSArray *)options {
++ (EventsFilter *) eventsFilterWithCode:(NSString *)filterCode buttonText:(NSString *)buttonText button:(UIButton *)button drawerView:(UIView *)drawerView options:(NSArray *)options {
     EventsFilter * filter = [[EventsFilter alloc] init];
     filter.code = filterCode;
     filter.button = button;
+    filter.buttonText = buttonText;
     filter.drawerView = drawerView;
     if (options) {
         NSMutableArray * optionsMutable = [options mutableCopy];
@@ -51,6 +52,7 @@ NSString * const EVENTS_FILTER_TIME = @"time";
 
 - (void)dealloc {
     [button_ release];
+    [buttonText_ release];
     [drawerView_ release];
     [code_ release];
     [options_ release];
