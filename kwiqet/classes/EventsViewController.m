@@ -1591,6 +1591,8 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
         shiftDrawerScrollViewContentOffsetBlock();
     }
     
+    [self.dvLocationTextField resignFirstResponder];
+    
 }
 
 - (EventsFilter *) filterForDrawerScrollViewContentOffset:(CGPoint)contentOffset {
