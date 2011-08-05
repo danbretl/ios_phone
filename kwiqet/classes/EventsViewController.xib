@@ -186,7 +186,6 @@
 												<string key="NSFrame">{{2, 2}, {32, 32}}</string>
 												<reference key="NSSuperview" ref="344802868"/>
 												<reference key="NSWindow"/>
-												<reference key="NSNextKeyView"/>
 												<string key="NSReuseIdentifierKey">_NS:222</string>
 												<bool key="IBUIOpaque">NO</bool>
 												<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
@@ -942,10 +941,10 @@
 								</object>
 								<object class="NSFont" key="IBUIFont">
 									<string key="NSName">Helvetica</string>
-									<double key="NSSize">14</double>
+									<double key="NSSize">16</double>
 									<int key="NSfFlags">16</int>
 								</object>
-								<float key="IBUIMinimumFontSize">14</float>
+								<float key="IBUIMinimumFontSize">16</float>
 								<object class="IBUITextInputTraits" key="IBUITextInputTraits">
 									<int key="IBUIReturnKeyType">9</int>
 									<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
@@ -1080,7 +1079,6 @@
 										<string key="NSFrame">{{0, 10}, {250, 15}}</string>
 										<reference key="NSSuperview" ref="990260503"/>
 										<reference key="NSWindow"/>
-										<reference key="NSNextKeyView"/>
 										<string key="NSReuseIdentifierKey">_NS:311</string>
 										<bool key="IBUIOpaque">NO</bool>
 										<bool key="IBUIClipsSubviews">YES</bool>
@@ -1112,7 +1110,6 @@
 						<string key="NSFrame">{{1280, 0}, {320, 255}}</string>
 						<reference key="NSSuperview" ref="918147613"/>
 						<reference key="NSWindow"/>
-						<reference key="NSNextKeyView"/>
 						<string key="NSReuseIdentifierKey">_NS:180</string>
 						<reference key="IBUIBackgroundColor" ref="580520201"/>
 						<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
@@ -2468,7 +2465,6 @@
 							<string>dvLocationButtonCity</string>
 							<string>dvLocationButtonNeighborhood</string>
 							<string>dvLocationButtonWalking</string>
-							<string>dvLocationCurrentLocationButton</string>
 							<string>dvLocationTextField</string>
 							<string>dvPriceButtonAny</string>
 							<string>dvPriceButtonFree</string>
@@ -2514,7 +2510,6 @@
 							<string>UIButtonWithOverlayView</string>
 							<string>UIButtonWithOverlayView</string>
 							<string>UIButtonWithOverlayView</string>
-							<string>UIButton</string>
 							<string>UITextField</string>
 							<string>UIButtonWithOverlayView</string>
 							<string>UIButtonWithOverlayView</string>
@@ -2563,7 +2558,6 @@
 							<string>dvLocationButtonCity</string>
 							<string>dvLocationButtonNeighborhood</string>
 							<string>dvLocationButtonWalking</string>
-							<string>dvLocationCurrentLocationButton</string>
 							<string>dvLocationTextField</string>
 							<string>dvPriceButtonAny</string>
 							<string>dvPriceButtonFree</string>
@@ -2659,10 +2653,6 @@
 							<object class="IBToOneOutletInfo">
 								<string key="name">dvLocationButtonWalking</string>
 								<string key="candidateClassName">UIButtonWithOverlayView</string>
-							</object>
-							<object class="IBToOneOutletInfo">
-								<string key="name">dvLocationCurrentLocationButton</string>
-								<string key="candidateClassName">UIButton</string>
 							</object>
 							<object class="IBToOneOutletInfo">
 								<string key="name">dvLocationTextField</string>
