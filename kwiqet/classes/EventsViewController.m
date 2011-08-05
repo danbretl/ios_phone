@@ -153,6 +153,8 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 - (IBAction) searchButtonPressed:(id)sender;
 - (void) setDrawerToShowFilter:(EventsFilter *)filter animated:(BOOL)animated;
 - (void) setImagesForCategoryButton:(UIButton *)button forCategory:(Category *)category;
+- (void) setLogoButtonImageForCategoryURI:(NSString *)theCategoryURI;
+- (void) setLogoButtonImageWithImageNamed:(NSString *)imageName;
 - (void) setProblemViewVisible:(BOOL)showView withMessage:(NSString *)message animated:(BOOL)animated;
 - (void) setTableViewScrollable:(BOOL)scrollable selectable:(BOOL)selectable;
 - (void) showProblemViewAnimated:(BOOL)animated;
@@ -347,13 +349,13 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
             // Values from category object
             Category * category = nil;
             if (y == 0 && x == 0) {
-                categoryButton.tag = -1;
+                categoryButton.button.tag = -1;
                 categoryTitleLabel.text = @"All Categories";
             } else {
                 //set icon image here
                 category = (Category *)[self.concreteParentCategoriesArray objectAtIndex:index-1];
                 categoryTitleLabel.text = category.title;
-                categoryButton.tag = index-1;
+                categoryButton.button.tag = index-1;
             }
             [self setImagesForCategoryButton:categoryButton.button forCategory:category];
             [categoryButton.button addTarget:self action:@selector(categoryButtonPressed:) forControlEvents:UIControlEventTouchUpInside];
@@ -639,6 +641,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     [self updateFilterOptionButtonStatesOldSelected:nil newSelected:self.selectedLocationFilterOption];
     self.oldFilterString = EVENTS_OLDFILTER_RECOMMENDED;
     self.categoryURI = nil;
+    [self setLogoButtonImageForCategoryURI:self.categoryURI];
     [self updateFiltersSummaryLabelWithCurrentSelectedFilterOptions];
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(dataSourceEventsUpdated:)
@@ -764,6 +767,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 //    NSLog(@"EventsViewController webConnectGetEventsListWithFilter");
     self.oldFilterString = theProposedOldFilterString;
     self.categoryURI = theProposedCategoryURI;
+    [self setLogoButtonImageForCategoryURI:self.categoryURI];
     [self showWebLoadingViews];
     [self.webConnector getEventsListWithFilter:self.oldFilterString categoryURI:self.categoryURI];
     
@@ -1727,6 +1731,22 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
         float highlightAmount = 1 - (fabsf(filterMidX - scrollMidX)/self.drawerScrollView.bounds.size.width);
         [self.activeFilterHighlightsContainerView setHighlightAmount:highlightAmount forSegmentAtIndex:i];
     }
+}
+
+- (void)setLogoButtonImageWithImageNamed:(NSString *)imageName {
+    [self.filterButtonCategories setImage:[UIImage imageNamed:imageName] forState:UIControlStateNormal];
+}
+
+- (void) setLogoButtonImageForCategoryURI:(NSString *)theCategoryURI {
+    NSString * logoCategoryThumbnail = @"logo_";
+    if (theCategoryURI) {
+        Category * matchedCategory = (Category *)[self.concreteParentCategoriesDictionary objectForKey:theCategoryURI];
+        NSString * normalCategoryThumbnail = matchedCategory.buttonThumb;
+        logoCategoryThumbnail = [logoCategoryThumbnail stringByAppendingString:normalCategoryThumbnail];
+    } else {
+        logoCategoryThumbnail = [logoCategoryThumbnail stringByAppendingString:@"btn_cat_all.png"];
+    }
+    [self setLogoButtonImageWithImageNamed:logoCategoryThumbnail];
 }
 
 - (BOOL)textFieldShouldReturn:(UITextField *)textField {
