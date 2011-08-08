@@ -196,6 +196,7 @@
 		327C4DB113DA270B00DAAD51 /* BugSense-iOS.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 327C4DB013DA270B00DAAD51 /* BugSense-iOS.framework */; };
 		327C4DB613DA301D00DAAD51 /* Analytics.m in Sources */ = {isa = PBXBuildFile; fileRef = 327C4DB513DA301D00DAAD51 /* Analytics.m */; };
 		3288360E13DDE7320090AFE0 /* EventsViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 3288360D13DDE7320090AFE0 /* EventsViewController.xib */; };
+		3288427E13F07DC900C06DDE /* EventViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 3288427D13F07DC900C06DDE /* EventViewController.xib */; };
 		32929C4213E9C02E001D0FE7 /* UIButtonWithOverlayView.m in Sources */ = {isa = PBXBuildFile; fileRef = 32929C4113E9C02E001D0FE7 /* UIButtonWithOverlayView.m */; };
 		32929C5013EA0103001D0FE7 /* btn_filter_option_selected_touch.png in Resources */ = {isa = PBXBuildFile; fileRef = 32929C4813EA0103001D0FE7 /* btn_filter_option_selected_touch.png */; };
 		32929C5113EA0103001D0FE7 /* btn_filter_option_selected_touch@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 32929C4913EA0103001D0FE7 /* btn_filter_option_selected_touch@2x.png */; };
@@ -646,6 +647,7 @@
 		327C4DB413DA301D00DAAD51 /* Analytics.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Analytics.h; sourceTree = "<group>"; };
 		327C4DB513DA301D00DAAD51 /* Analytics.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Analytics.m; sourceTree = "<group>"; };
 		3288360D13DDE7320090AFE0 /* EventsViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = EventsViewController.xib; sourceTree = "<group>"; };
+		3288427D13F07DC900C06DDE /* EventViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = EventViewController.xib; sourceTree = "<group>"; };
 		32929C4013E9C02E001D0FE7 /* UIButtonWithOverlayView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UIButtonWithOverlayView.h; sourceTree = "<group>"; };
 		32929C4113E9C02E001D0FE7 /* UIButtonWithOverlayView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UIButtonWithOverlayView.m; sourceTree = "<group>"; };
 		32929C4813EA0103001D0FE7 /* btn_filter_option_selected_touch.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = btn_filter_option_selected_touch.png; sourceTree = "<group>"; };
@@ -1356,6 +1358,7 @@
 			children = (
 				32FD383E13AFF52F007549B6 /* EventViewController.h */,
 				32FD383F13AFF52F007549B6 /* EventViewController.m */,
+				3288427D13F07DC900C06DDE /* EventViewController.xib */,
 				32D13D6413DF4A5E00EBB192 /* EventsViewController */,
 				32FD384213AFF52F007549B6 /* FeaturedEventViewController.h */,
 				32FD384313AFF52F007549B6 /* FeaturedEventViewController.m */,
@@ -2044,6 +2047,7 @@
 				327274FD13EC764600E085B4 /* btn_cat_yellow_touch@2x.png in Resources */,
 				3272750013EC89CD00E085B4 /* ico_locationsearch.png in Resources */,
 				3272750113EC89CD00E085B4 /* ico_locationsearch@2x.png in Resources */,
+				3288427E13F07DC900C06DDE /* EventViewController.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
