@@ -21,10 +21,13 @@ extern CGFloat const ELASTICUILABEL_GRADIENT_VIEW_WIDTH;
     NSString * text;
     UIColor * color;
     
+    UIView * overlayView_;
+    
 }
 
 @property (nonatomic, copy) NSString * text;
 @property (nonatomic, retain) UIColor * color;
+@property (nonatomic, retain) UIView * overlayView;
 //- (void) wiggleLabel;
 //- (void) flashScrollBar;
 - (void) scrollTextToOriginAnimated:(BOOL)animated;

@@ -14,12 +14,14 @@ CGFloat const ELASTICUILABEL_GRADIENT_VIEW_WIDTH = 45.0;
 @property (nonatomic, retain) GradientView * gradientView;
 @property (nonatomic, retain) UIScrollView * scrollView;
 @property (nonatomic, retain) UILabel * label;
+- (void) initWithFrameOrCoder;
 @end
 
 @implementation ElasticUILabel
 
 @synthesize gradientView, scrollView, label;
 @synthesize text, color;
+@synthesize overlayView = overlayView_;
 
 - (void)dealloc {
     [gradientView release];
@@ -27,6 +29,7 @@ CGFloat const ELASTICUILABEL_GRADIENT_VIEW_WIDTH = 45.0;
     [label release];
     [text release];
     [color release];
+    [overlayView_ release];
     [super dealloc];
 }
 
@@ -34,32 +37,52 @@ CGFloat const ELASTICUILABEL_GRADIENT_VIEW_WIDTH = 45.0;
 {
     self = [super initWithFrame:frame];
     if (self) {
-        
-        self.scrollView = [[UIScrollView alloc] initWithFrame:CGRectMake(0, 0, frame.size.width, frame.size.height)];
-        self.scrollView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-        self.scrollView.showsHorizontalScrollIndicator = NO;
-        self.scrollView.delegate = self;
-        [self addSubview:self.scrollView];
-
-        self.label = [[UILabel alloc] initWithFrame:CGRectMake(5, 6, frame.size.width - 5, frame.size.height)];
-        //self.label.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-        self.label.font = [UIFont fontWithName:@"HelveticaNeueLTStd-BdCn" size:25];
-        self.label.backgroundColor = [UIColor clearColor];
-        self.label.textColor = [UIColor whiteColor];
-        self.label.textAlignment = UITextAlignmentLeft;
-        [self.scrollView addSubview:self.label];
-        
-        self.gradientView = [[GradientView alloc] initWithFrame:CGRectMake(frame.size.width - ELASTICUILABEL_GRADIENT_VIEW_WIDTH, 0, ELASTICUILABEL_GRADIENT_VIEW_WIDTH, frame.size.height)];
-        self.gradientView.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin;
-        self.gradientView.userInteractionEnabled = NO;
-        [self addSubview:self.gradientView];
-        [self bringSubviewToFront:self.gradientView];
-        
-        self.color = [UIColor blackColor];
-        self.text = @"";
-
+        [self initWithFrameOrCoder];
     }
     return self;
+}
+
+- (id)initWithCoder:(NSCoder *)aDecoder {
+	if (self = [super initWithCoder:aDecoder]) {
+		[self initWithFrameOrCoder];
+    }
+    return self;
+}
+
+- (void) initWithFrameOrCoder {
+    
+    self.scrollView = [[UIScrollView alloc] initWithFrame:CGRectMake(0, 0, self.frame.size.width, self.frame.size.height)];
+    self.scrollView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+    self.scrollView.showsHorizontalScrollIndicator = NO;
+    self.scrollView.delegate = self;
+    [self addSubview:self.scrollView];
+    
+    self.label = [[UILabel alloc] initWithFrame:CGRectMake(5, 6, self.frame.size.width - 5, self.frame.size.height)];
+    //self.label.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+    self.label.font = [UIFont fontWithName:@"HelveticaNeueLTStd-BdCn" size:25];
+    self.label.backgroundColor = [UIColor clearColor];
+    self.label.textColor = [UIColor whiteColor];
+    self.label.textAlignment = UITextAlignmentLeft;
+    [self.scrollView addSubview:self.label];
+    
+    self.gradientView = [[GradientView alloc] initWithFrame:CGRectMake(self.frame.size.width - ELASTICUILABEL_GRADIENT_VIEW_WIDTH, 0, ELASTICUILABEL_GRADIENT_VIEW_WIDTH, self.frame.size.height)];
+    self.gradientView.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin;
+    self.gradientView.userInteractionEnabled = NO;
+    [self insertSubview:self.gradientView aboveSubview:self.label];
+    
+    self.color = [UIColor blackColor];
+    self.text = @"";
+    
+}
+
+- (void)setOverlayView:(UIView *)overlayView {
+    if (overlayView_ != overlayView) {
+        [self.overlayView removeFromSuperview];
+        [overlayView_ release];
+        overlayView_ = [overlayView retain];
+        [self addSubview:self.overlayView];
+        [self bringSubviewToFront:self.overlayView];
+    }
 }
 
 - (void)scrollViewDidEndDragging:(UIScrollView *)theScrollView willDecelerate:(BOOL)decelerate {

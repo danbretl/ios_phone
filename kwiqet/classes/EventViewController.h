@@ -27,42 +27,43 @@
 
 @interface EventViewController : UIViewController <MFMailComposeViewControllerDelegate, WebConnectorDelegate, MapViewControllerDelegate, UIScrollViewDelegate, UIActionSheetDelegate, ContactsSelectViewControllerDelegate, SDWebImageManagerDelegate> {
     
-    UIView * backgroundColorView;
-    UIView * navigationBar;
-    UIButton * backButton;
-    UIButton * logoButton;
+    IBOutlet UIView   * backgroundColorView;
+
+    IBOutlet UIView   * navigationBar;
+    IBOutlet UIButton * backButton;
+    IBOutlet UIButton * logoButton;
     
-    UIView * actionBar;
-    UIButton * letsGoButton;
-    UIButton * shareButton;
-    UIButton * deleteButton;
+    IBOutlet UIView   * actionBar;
+    IBOutlet UIButton * letsGoButton;
+    IBOutlet UIButton * shareButton;
+    IBOutlet UIButton * deleteButton;
     
-    ElasticUILabel * titleBar;
-    UIView * titleBarBorderCheatView;
+	IBOutlet UIScrollView * scrollView;
+    IBOutlet ElasticUILabel * titleBar;
+	IBOutlet UIImageView * imageView;
+    IBOutlet UIView * breadcrumbsBar;
+    IBOutlet UILabel * breadcrumbsLabel;
     
-	UIScrollView * scrollView;
-	UIImageView * imageView;
-    UIView * breadcrumbsBar;
-    UILabel * breadcrumbsLabel;
+    IBOutlet UIView   * occurrenceInfoContainer;
+    IBOutlet UIView   * dateContainer;
+    IBOutlet UILabel  * monthLabel;
+    IBOutlet UILabel  * dayNumberLabel;
+    IBOutlet UILabel  * dayNameLabel;
+    IBOutlet UIView   * timeContainer;
+    IBOutlet UILabel  * timeLabel;
+    IBOutlet UIView   * priceContainer;
+    IBOutlet UILabel  * priceLabel;
+    IBOutlet UIView   * locationContainer;
+    IBOutlet UILabel  * venueLabel;
+    IBOutlet UILabel  * addressLabel;
+    IBOutlet UILabel  * cityStateZipLabel;
+    IBOutlet UIButton * phoneNumberButton;
+    IBOutlet UIButton * mapButton;
     
-    UIView * eventInfoDividerView;
-    UILabel * monthLabel;
-    UILabel * dayNumberLabel;
-    UILabel * dayNameLabel;
-    
-    UILabel * priceLabel;
-    UILabel * timeLabel;
-    
-    UILabel * venueLabel;
-    UILabel * addressLabel;
-    UILabel * cityStateZipLabel;
-    UIButton * phoneNumberButton;
-    UIButton * mapButton;
-    
-    UIView * detailsContainer;
-    UIView * detailsContainerShadowCheat;
-    UIView * detailsBackgroundColorView;
-    UILabel * detailsLabel;
+    IBOutlet UIView   * descriptionContainer;
+    IBOutlet UIView   * descriptionBackgroundColorView;
+    IBOutlet UILabel  * descriptionLabel;
+    UIView * shadowDescriptionContainer;
     
     WebActivityView * webActivityView;
     
@@ -80,9 +81,9 @@
     NSURLConnection * loadImageURLConnection;
     NSMutableData * loadImageData;
     
-    UIActionSheet * letsGoChoiceActionSheet;
+    UIActionSheet  * letsGoChoiceActionSheet;
     NSMutableArray * letsGoChoiceActionSheetSelectors;
-    UIActionSheet * shareChoiceActionSheet;
+    UIActionSheet  * shareChoiceActionSheet;
     NSMutableArray * shareChoiceActionSheetSelectors;
 
 }

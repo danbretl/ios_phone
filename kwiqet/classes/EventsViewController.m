@@ -1343,7 +1343,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     
-    self.cardPageViewController = [[[EventViewController alloc] init] autorelease];
+    self.cardPageViewController = [[[EventViewController alloc] initWithNibName:@"EventViewController" bundle:[NSBundle mainBundle]] autorelease];
     self.cardPageViewController.coreDataModel = self.coreDataModel;
     self.cardPageViewController.delegate = self;
     self.cardPageViewController.hidesBottomBarWhenPushed = YES;
