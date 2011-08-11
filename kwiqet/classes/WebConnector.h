@@ -21,19 +21,21 @@ extern BOOL const WEB_CONNECTOR_ALLOW_SIMULTANEOUS_CONNECTIONS_DEFAULT;
     URLBuilder * urlBuilder;
     int timeoutLength;
     id<WebConnectorDelegate> delegate;
-    BOOL connectionInProgress;
     BOOL allowSimultaneousConnections;
+    NSMutableArray * connectionsInProgress;
+    
 }
 
 @property (nonatomic, readonly) URLBuilder * urlBuilder;
 @property int timeoutLength;
 @property (assign) id<WebConnectorDelegate> delegate;
-@property (readonly) BOOL connectionInProgress;
 @property BOOL allowSimultaneousConnection;
 @property (nonatomic, readonly) BOOL availableToMakeWebConnection;
+@property (nonatomic, readonly) BOOL connectionInProgress;
 
 - (void) getCategoryTree;
 - (void) getEventWithURI:(NSString *)eventURI;
+- (void) getAllOccurrencesForEventWithURI:(NSString *)eventURI;
 - (void) getFeaturedEvent;
 - (void) getEventsListWithFilter:(NSString *)filterString categoryURI:(NSString *)categoryURI;
 - (void) getEventsListForSearchString:(NSString *)searchString;
@@ -47,6 +49,8 @@ extern BOOL const WEB_CONNECTOR_ALLOW_SIMULTANEOUS_CONNECTIONS_DEFAULT;
 - (void) webConnector:(WebConnector *)webConnector getCategoryTreeFailure:(ASIHTTPRequest *)request;
 - (void) webConnector:(WebConnector *)webConnector getEventSuccess:(ASIHTTPRequest *)request forEventURI:(NSString *)eventURI;
 - (void) webConnector:(WebConnector *)webConnector getEventFailure:(ASIHTTPRequest *)request forEventURI:(NSString *)eventURI;
+- (void) webConnector:(WebConnector *)webConnector getAllOccurrencesSuccess:(ASIHTTPRequest *)request forEventURI:(NSString *)eventURI;
+- (void) webConnector:(WebConnector *)webConnector getAllOccurrencesFailure:(ASIHTTPRequest *)request forEventURI:(NSString *)eventURI;
 - (void) webConnector:(WebConnector *)webConnector getFeaturedEventSuccess:(ASIHTTPRequest *)request;
 - (void) webConnector:(WebConnector *)webConnector getFeaturedEventFailure:(ASIHTTPRequest *)request;
 - (void) webConnector:(WebConnector *)webConnector getEventsListSuccess:(ASIHTTPRequest *)request withFilter:(NSString *)filterString categoryURI:(NSString *)categoryURI;

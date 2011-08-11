@@ -34,5 +34,7 @@
 	<string>http://testsv.abextratech.com:8000/api/search/</string>
 	<key>teaching_uri</key>
 	<string>/api/v1/eventaction/?</string>
+	<key>occurrence_uri</key>
+	<string>/api/v1/occurrence_full/?</string>
 </dict>
 </plist>

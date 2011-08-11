@@ -45,6 +45,10 @@
     IBOutlet UILabel * breadcrumbsLabel;
     
     IBOutlet UIView   * occurrenceInfoContainer;
+    CGFloat occurrenceInfoContainerRegularHeight;
+    CGFloat occurrenceInfoContainerCollapsedHeight;
+    IBOutlet UIView   * occurrenceInfoPlaceholderView;
+    IBOutlet UIButton * occurrenceInfoPlaceholderRetryButton;
     IBOutlet UIView   * dateContainer;
     IBOutlet UILabel  * monthLabel;
     IBOutlet UILabel  * dayNumberLabel;
@@ -94,7 +98,7 @@
 @property (nonatomic, readonly) FacebookManager * facebookManager;
 
 - (void) viewControllerIsFinished;
-- (void) updateViewsFromData;
+- (void) updateViewsFromDataAnimated:(BOOL)animated;
 - (void) showWebLoadingViews;
 - (void) hideWebLoadingViews;
 

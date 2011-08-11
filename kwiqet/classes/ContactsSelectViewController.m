@@ -207,7 +207,9 @@ float const CSVC_TAB_BUTTON_ANIMATION_DURATION = .25;
     self.contactsAll = [self.coreDataModel getAllFacebookContacts];
     [self.friendsTableView reloadData];
     [self hideWebActivityView];
-    [self.friendsTableView scrollToRowAtIndexPath:[NSIndexPath indexPathForRow:0 inSection:0] atScrollPosition:UITableViewScrollPositionTop animated:YES];   
+    if ([self.friendsTableView numberOfRowsInSection:0]) {
+        [self.friendsTableView scrollToRowAtIndexPath:[NSIndexPath indexPathForRow:0 inSection:0] atScrollPosition:UITableViewScrollPositionTop animated:NO];
+    }
 }
 
 - (void) showWebActivityView  {

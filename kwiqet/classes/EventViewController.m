@@ -22,6 +22,9 @@
 
 #define CGFLOAT_MAX_TEXT_SIZE 10000
 
+static NSString * const EVC_OCCURRENCE_INFO_LOADING_STRING = @"Loading event details...";
+static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to load event details.\nTouch here to retry.";
+
 @interface EventViewController()
 
 @property (retain) IBOutlet UIView   * backgroundColorView;
@@ -38,6 +41,10 @@
 @property (retain) IBOutlet UIView * breadcrumbsBar;
 @property (retain) IBOutlet UILabel * breadcrumbsLabel;
 @property (retain) IBOutlet UIView   * occurrenceInfoContainer;
+@property CGFloat occurrenceInfoContainerRegularHeight;
+@property CGFloat occurrenceInfoContainerCollapsedHeight;
+@property (retain) IBOutlet UIView   * occurrenceInfoPlaceholderView;
+@property (retain) IBOutlet UIButton * occurrenceInfoPlaceholderRetryButton;
 @property (retain) IBOutlet UIView   * dateContainer;
 @property (retain) IBOutlet UILabel  * monthLabel;
 @property (retain) IBOutlet UILabel  * dayNumberLabel;
@@ -64,6 +71,7 @@
 - (IBAction) deleteButtonTouched;
 - (IBAction) phoneButtonTouched;
 - (IBAction) mapButtonTouched;
+- (IBAction) occurrenceInfoRetryButtonTouched;
 
 @property (nonatomic, retain) WebActivityView * webActivityView;
 @property (retain) MapViewController * mapViewController;
@@ -75,14 +83,15 @@
 @property (retain) NSMutableData * loadImageData;
 - (void) displayImage:(UIImage *)image;
 
-@property (retain) UIActionSheet * letsGoChoiceActionSheet;
+@property (retain) UIActionSheet  * letsGoChoiceActionSheet;
 @property (retain) NSMutableArray * letsGoChoiceActionSheetSelectors;
-@property (retain) UIActionSheet * shareChoiceActionSheet;
+@property (retain) UIActionSheet  * shareChoiceActionSheet;
 @property (retain) NSMutableArray * shareChoiceActionSheetSelectors;
 - (void) pushedToAddToCalendar;
 - (void) pushedToCreateFacebookEvent;
 - (void) pushedToShareViaEmail;
 - (void) pushedToShareViaFacebook;
+- (void) setOccurrenceInfoContainerIsVisible:(BOOL)isVisible animated:(BOOL)animated;
 
 //- (void) loadImage;
 
@@ -96,7 +105,7 @@
 
 @implementation EventViewController
 
-@synthesize backgroundColorView, navigationBar, backButton, logoButton, actionBar, letsGoButton, shareButton, deleteButton, scrollView, titleBar, imageView, breadcrumbsBar, breadcrumbsLabel, occurrenceInfoContainer, dateContainer, monthLabel, dayNumberLabel, dayNameLabel, timeContainer, timeLabel, priceContainer, priceLabel, locationContainer, venueLabel, addressLabel, cityStateZipLabel, phoneNumberButton, mapButton, descriptionContainer, descriptionBackgroundColorView, descriptionLabel, shadowDescriptionContainer;
+@synthesize backgroundColorView, navigationBar, backButton, logoButton, actionBar, letsGoButton, shareButton, deleteButton, scrollView, titleBar, imageView, breadcrumbsBar, breadcrumbsLabel, occurrenceInfoContainer, occurrenceInfoContainerRegularHeight, occurrenceInfoContainerCollapsedHeight, occurrenceInfoPlaceholderView, occurrenceInfoPlaceholderRetryButton, dateContainer, monthLabel, dayNumberLabel, dayNameLabel, timeContainer, timeLabel, priceContainer, priceLabel, locationContainer, venueLabel, addressLabel, cityStateZipLabel, phoneNumberButton, mapButton, descriptionContainer, descriptionBackgroundColorView, descriptionLabel, shadowDescriptionContainer;
 
 @synthesize event;
 @synthesize webActivityView;
@@ -123,6 +132,8 @@
     [breadcrumbsBar release];
     [breadcrumbsLabel release];
     [occurrenceInfoContainer release];
+    [occurrenceInfoPlaceholderView release];
+    [occurrenceInfoPlaceholderRetryButton release];
     [dateContainer release];
     [monthLabel release];
     [dayNumberLabel release];
@@ -228,6 +239,16 @@
     [self.imageView addGestureRecognizer:swipeToGoBack];
     [swipeToGoBack release];
     
+    // Occurrence info container
+    self.occurrenceInfoContainerRegularHeight = self.occurrenceInfoContainer.frame.size.height;
+    self.occurrenceInfoContainerCollapsedHeight = self.dateContainer.frame.size.height;
+    [self.occurrenceInfoContainer addSubview:self.occurrenceInfoPlaceholderView];
+    self.occurrenceInfoPlaceholderView.alpha = 0.0;
+    self.occurrenceInfoPlaceholderView.userInteractionEnabled = NO;
+    self.occurrenceInfoPlaceholderRetryButton.imageView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+    self.occurrenceInfoPlaceholderRetryButton.titleLabel.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+//    [self.occurrenceInfoPlaceholderRetryButton setTitle:EVC_OCCURRENCE_INFO_LOADING_STRING forState:UIControlStateNormal];
+    
     // Date views
     self.monthLabel.font= [UIFont fontWithName:@"HelveticaNeue" size:12];
     self.dayNumberLabel.font= [UIFont fontWithName:@"HelveticaNeueLTStd-BdCn" size:33];
@@ -248,12 +269,12 @@
     self.phoneNumberButton.titleLabel.font = [UIFont fontWithName:@"HelveticaNeueLTStd-BdCn" size:12];
     
     // Event description views
-    
-    // Details text view
     self.descriptionLabel.font = [UIFont fontWithName:@"HelveticaNeueLTStd-MdCn" size:18];
-    
-    // Details shadow
-    shadowDescriptionContainer = [[UIView alloc] initWithFrame:self.descriptionContainer.frame];
+    shadowDescriptionContainer = [[UIView alloc] initWithFrame:
+                                  CGRectMake(self.descriptionContainer.frame.origin.x, 
+                                             self.descriptionContainer.frame.origin.y, 
+                                             self.descriptionContainer.frame.size.width, 
+                                             self.descriptionContainer.frame.size.height-1)];
     self.shadowDescriptionContainer.backgroundColor = [UIColor blackColor];
     self.shadowDescriptionContainer.layer.shadowColor = [UIColor blackColor].CGColor;
     self.shadowDescriptionContainer.layer.shadowOffset = CGSizeMake(0, 0);
@@ -267,7 +288,7 @@
     [self.view bringSubviewToFront:self.webActivityView];
     
     if (self.event) {
-        [self updateViewsFromData];
+        [self updateViewsFromDataAnimated:NO];
     }
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(facebookEventCreateSuccess:) name:FBM_CREATE_EVENT_SUCCESS_KEY object:nil];
@@ -308,41 +329,33 @@
     if (event != theEvent) {
         [event release];
         event = [theEvent retain];
-        [self.webConnector getEventWithURI:self.event.uri];
-        NSLog(@"%@", theEvent);
-        [self showWebLoadingViews];
     }
+    [self updateViewsFromDataAnimated:NO];
+    [self.webConnector getAllOccurrencesForEventWithURI:event.uri]; // TURNING THIS OFF FOR TESTING
+    [self.occurrenceInfoPlaceholderRetryButton setTitle:EVC_OCCURRENCE_INFO_LOADING_STRING forState:UIControlStateNormal]; // TURNING THIS OFF FOR TESTING
+//    [self showWebLoadingViews]; // This is unnecessary.
 }
 
-- (void)webConnector:(WebConnector *)webConnector getEventSuccess:(ASIHTTPRequest *)request forEventURI:(NSString *)eventURI {
-    [self hideWebLoadingViews];
+- (void) webConnector:(WebConnector *)webConnector getAllOccurrencesSuccess:(ASIHTTPRequest *)request forEventURI:(NSString *)eventURI {
+
     NSString * responseString = [request responseString];
     NSError *error = nil;
-    NSDictionary * eventDictionary = [responseString yajl_JSONWithOptions:YAJLParserOptionsAllowComments error:&error];
-    [self.coreDataModel updateEvent:self.event usingEventDictionary:eventDictionary featuredOverride:nil fromSearchOverride:nil];
-    [self.coreDataModel updateEvent:self.event withExhaustiveOccurrencesArray:[eventDictionary valueForKey:@"occurrences"]];
-    [self updateViewsFromData];
-    
-//    [[SDWebImageManager sharedManager] setDelegate:self];
-//    [self loadImage];
-}
-
-- (void)webConnector:(WebConnector *)webConnector getEventFailure:(ASIHTTPRequest *)request forEventURI:(NSString *)eventURI {
+    NSDictionary * responseDictionary = [responseString yajl_JSONWithOptions:YAJLParserOptionsAllowComments error:&error];
+    [self.coreDataModel updateEvent:self.event withExhaustiveOccurrencesArray:[responseDictionary valueForKey:@"objects"]];
+    [self updateViewsFromDataAnimated:YES];
     [self hideWebLoadingViews];
-	NSString * statusMessage = [request responseStatusMessage];
-	NSLog(@"%@", statusMessage);
-	NSError *error = [request error];
-	NSLog(@"%@", error);
-    NSLog(@"EventViewController getEventFailure");
-    if (self.view.window) {
-        UIAlertView * alertView = [[UIAlertView alloc] initWithTitle:@"Connection Error" message:WEB_CONNECTION_ERROR_MESSAGE_STANDARD delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil];
-        [alertView show];
-        [alertView release];
-    }
-    [self viewControllerIsFinished];
+    
 }
 
--(void) updateViewsFromData {
+- (void) webConnector:(WebConnector *)webConnector getAllOccurrencesFailure:(ASIHTTPRequest *)request forEventURI:(NSString *)eventURI {
+    
+    NSLog(@"getAllOccurrencesFailure - need to deal with this!");
+    [self.occurrenceInfoPlaceholderRetryButton setTitle:EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING forState:UIControlStateNormal];
+    [self hideWebLoadingViews];
+    
+}
+
+-(void) updateViewsFromDataAnimated:(BOOL)animated {
     
     NSString * EVENT_TIME_NOT_AVAILABLE = @"Time not available";
     NSString * EVENT_DESCRIPTION_NOT_AVAILABLE = @"Description not available";
@@ -370,7 +383,9 @@
         firstOccurrence = [self.event.occurrencesChronological objectAtIndex:0];
     }
     // Occurrences above... TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. EVERYTHING RELATED TO TEMPRANDOMOCCURRENCE NEEDS TO BE LOOKED OVER AND REWRITTEN. EVERYTHING RELATED TO TEMPRANDOMOCCURRENCE NEEDS TO BE LOOKED OVER AND REWRITTEN. EVERYTHING RELATED TO TEMPRANDOMOCCURRENCE NEEDS TO BE LOOKED OVER AND REWRITTEN. EVERYTHING RELATED TO TEMPRANDOMOCCURRENCE NEEDS TO BE LOOKED OVER AND REWRITTEN. EVERYTHING RELATED TO TEMPRANDOMOCCURRENCE NEEDS TO BE LOOKED OVER AND REWRITTEN.
+    
     if (firstOccurrence) {
+        
         // Date & Time
         NSDateFormatter * dateFormatter = [[NSDateFormatter alloc] init];
         // Month
@@ -421,6 +436,7 @@
         self.venueLabel.text = venue;
         
         // Map button
+        self.mapButton.alpha = 1.0;
         self.mapButton.enabled = firstOccurrence.place.latitude && firstOccurrence.place.longitude;
         
         // Phone
@@ -428,6 +444,22 @@
         NSString * phone = havePhoneNumber ? firstOccurrence.place.phone : EVENT_PHONE_NOT_AVAILABLE;
         [self.phoneNumberButton setTitle:phone forState:UIControlStateNormal];
         self.phoneNumberButton.enabled = havePhoneNumber;
+        
+    } else {
+        
+        self.monthLabel.text = @"";
+        self.dayNumberLabel.text = @"";
+        self.dayNameLabel.text = @"";
+        self.timeLabel.text = @"";
+        self.priceLabel.text = @"";
+        self.venueLabel.text = @"";
+        self.addressLabel.text = @"";
+        self.cityStateZipLabel.text = @"";
+        [self.phoneNumberButton setTitle:@"" forState:UIControlStateNormal];
+        self.phoneNumberButton.enabled = NO;
+        self.mapButton.enabled = NO;
+        self.mapButton.alpha = 0.0;
+        
     }
     
     // Description
@@ -442,9 +474,11 @@
     CGRect detailsContainerFrame = self.descriptionContainer.frame;
     detailsContainerFrame.size.height = CGRectGetMaxY(self.descriptionLabel.frame) + self.descriptionLabel.frame.origin.y - 6; // TEMPORARY HACK, INFERRING THAT THE ORIGIN Y OF THE DETAILS LABEL IS EQUAL TO THE VERTICAL PADDING WE SHOULD GIVE UNDER THAT LABEL. // EVEN WORSE TEMPORARY HACK, HARDCODING AN OFFSET BECAUSE PUTTING EQUAL PADDING AFTER AS BEFORE DOES NOT LOOK EVEN.
     self.descriptionContainer.frame = detailsContainerFrame;
-    self.shadowDescriptionContainer.frame = self.descriptionContainer.frame;
+    self.shadowDescriptionContainer.frame = CGRectMake(self.descriptionContainer.frame.origin.x, self.descriptionContainer.frame.origin.y, self.descriptionContainer.frame.size.width, self.descriptionContainer.frame.size.height-1);
+    
+    [self setOccurrenceInfoContainerIsVisible:(firstOccurrence != nil) animated:animated];
+    
     [self.scrollView setContentSize:CGSizeMake(self.scrollView.bounds.size.width, CGRectGetMaxY(self.descriptionContainer.frame))];
-//    NSLog(@"%@", NSStringFromCGSize(self.scrollView.contentSize));
     
     // Breadcrumbs
     NSMutableString * breadcrumbsString = [self.event.concreteParentCategory.title mutableCopy];
@@ -455,6 +489,49 @@
     self.breadcrumbsLabel.text = breadcrumbsString;
     
     [self.imageView setImageWithURL:[URLBuilder imageURLForImageLocation:self.event.imageLocation] placeholderImage:[UIImage imageNamed:@"event_img_placeholder.png"]];
+    
+}
+
+- (void) setOccurrenceInfoContainerIsVisible:(BOOL)isVisible animated:(BOOL)animated {
+
+    void (^occurrenceInfoContainerChangesBlock)(void) = ^{
+        
+        // Calculating frame values
+        CGFloat newOccurrenceInfoContainerHeight = 0.0;
+        if (isVisible) {
+            newOccurrenceInfoContainerHeight = self.occurrenceInfoContainerRegularHeight;
+        } else {
+            CGFloat minOccurrenceInfoContainerHeight = self.scrollView.frame.size.height - self.descriptionContainer.frame.size.height - self.occurrenceInfoContainer.frame.origin.y;
+            newOccurrenceInfoContainerHeight = MAX(self.occurrenceInfoContainerCollapsedHeight, minOccurrenceInfoContainerHeight);
+        }
+        
+        // Setting frame values
+        CGRect occurrenceInfoContainerFrame = self.occurrenceInfoContainer.frame;
+        occurrenceInfoContainerFrame.size.height = newOccurrenceInfoContainerHeight;
+        self.occurrenceInfoContainer.frame = occurrenceInfoContainerFrame;
+        CGRect descriptionContainerFrame = self.descriptionContainer.frame;
+        descriptionContainerFrame.origin.y = CGRectGetMaxY(self.occurrenceInfoContainer.frame);
+        self.descriptionContainer.frame = descriptionContainerFrame;
+        CGRect shadowDescriptionContainerFrame = self.shadowDescriptionContainer.frame;
+        shadowDescriptionContainerFrame.origin.y = self.descriptionContainer.frame.origin.y;
+        self.shadowDescriptionContainer.frame = shadowDescriptionContainerFrame;
+        
+        // Showing / hiding views
+        self.occurrenceInfoPlaceholderView.alpha = isVisible ? 0.0 : 1.0;
+        
+    };
+    
+    if (animated) {
+        [UIView animateWithDuration:0.25 animations:occurrenceInfoContainerChangesBlock];
+    } else {
+        occurrenceInfoContainerChangesBlock();
+    }
+    
+    self.occurrenceInfoPlaceholderView.userInteractionEnabled = !isVisible;
+    
+}
+
+- (void) set {
     
 }
 
@@ -854,6 +931,11 @@
 
 - (void) viewControllerIsFinished {
     [self.delegate cardPageViewControllerDidFinish:self withEventDeletion:deletedEventDueToGoingToEvent eventURI:self.event.uri];
+}
+
+- (void) occurrenceInfoRetryButtonTouched {
+    [self.webConnector getAllOccurrencesForEventWithURI:self.event.uri];
+    [self.occurrenceInfoPlaceholderRetryButton setTitle:EVC_OCCURRENCE_INFO_LOADING_STRING forState:UIControlStateNormal];
 }
 
 - (UIAlertView *)connectionErrorOnUserActionRequestAlertView {

@@ -48,6 +48,7 @@
 
 // Event
 -(NSURL*)buildCardURLWithID:(NSString*)eventID;
+- (NSURL *) buildOccurrencesURLForEventID:(NSString *)eventID;
 
 // Featured Event
 -(NSURL*)buildGetFeaturedEventURL;

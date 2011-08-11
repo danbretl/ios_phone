@@ -64,6 +64,8 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 // Views properties
 
 @property (retain) IBOutlet UITableView * tableView;
+@property (retain) IBOutlet UIView   * searchContainerView;
+@property (retain) IBOutlet UIView   * tableReloadContainerView;
 @property (retain) IBOutlet UIView   * pushableContainerView;
 @property (retain) IBOutlet UIView   * pushableContainerShadowCheatView;
 @property (retain) IBOutlet UIView   * filtersSummaryAndSearchContainerView;
@@ -112,7 +114,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 @property (retain) IBOutlet UIButtonWithOverlayView * dvLocationButtonBorough;
 @property (retain) IBOutlet UIButtonWithOverlayView * dvLocationButtonCity;
 @property (retain) UISearchBar * mySearchBar;
-@property (nonatomic, readonly) EGORefreshTableHeaderView *refreshHeaderView;
+//@property (nonatomic, readonly) EGORefreshTableHeaderView *refreshHeaderView;
 @property (nonatomic, retain) WebActivityView * webActivityView;
 @property (retain) UIView * problemView;
 @property (retain) UILabel * problemLabel;
@@ -129,16 +131,19 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 /////////////////////
 // Assorted methods
 
-- (void) behaviorWasReset:(NSNotification *)notification;
-- (void) categoryButtonPressed:(UIButton *)categoryButton;
-- (void) configureCell:(EventTableViewCell *)cell forRowAtIndexPath:(NSIndexPath *)indexPath;
-- (void) dataSourceEventsUpdated:(NSNotification *)notification;
 - (IBAction) filterButtonPressed:(id)sender;
 - (IBAction) priceFilterOptionButtonTouched:(id)sender;
 - (IBAction) dateFilterOptionButtonTouched:(id)sender;
 - (IBAction) timeFilterOptionButtonTouched:(id)sender;
 - (IBAction) locationFilterOptionButtonTouched:(id)sender;
 - (IBAction) locationFilterCurrentLocationButtonTouched;
+- (IBAction) searchButtonPressed:(id)sender;
+- (IBAction) reloadEventsListButtonTouched:(id)sender;
+
+- (void) behaviorWasReset:(NSNotification *)notification;
+- (void) categoryButtonPressed:(UIButton *)categoryButton;
+- (void) configureCell:(EventTableViewCell *)cell forRowAtIndexPath:(NSIndexPath *)indexPath;
+- (void) dataSourceEventsUpdated:(NSNotification *)notification;
 - (EventsFilter *) filterForDrawerScrollViewContentOffset:(CGPoint)contentOffset;
 - (EventsFilter *) filterForFilterButton:(UIButton *)filterButton;
 - (EventsFilter *) filterForPositionX:(CGFloat)x;
@@ -150,7 +155,6 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 - (void) keyboardWillHide:(NSNotification *)notification;
 - (void) keyboardWillShow:(NSNotification *)notification;
 - (void) loginActivity:(NSNotification *)notification;
-- (IBAction) searchButtonPressed:(id)sender;
 - (void) setDrawerToShowFilter:(EventsFilter *)filter animated:(BOOL)animated;
 - (void) setImagesForCategoryButton:(UIButton *)button forCategory:(Category *)category;
 - (void) setLogoButtonImageForCategoryURI:(NSString *)theCategoryURI;
@@ -188,8 +192,12 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 @synthesize activeFilterInUI;
 @synthesize selectedPriceFilterOption, selectedDateFilterOption, selectedTimeFilterOption, selectedLocationFilterOption;
 @synthesize tableView=tableView_;
+@synthesize searchContainerView;
+@synthesize tableReloadContainerView;
+
 @synthesize mySearchBar,eventsFromSearch, events,coreDataModel,webActivityView,concreteParentCategoriesDictionary;
-@synthesize refreshHeaderView, concreteParentCategoriesArray;
+//@synthesize refreshHeaderView;
+@synthesize concreteParentCategoriesArray;
 @synthesize oldFilterString, categoryURI;
 @synthesize isSearchOn;
 @synthesize problemView, problemLabel;
@@ -253,13 +261,16 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     [dvLocationButtonBorough release];
     [dvLocationButtonCity release];
     [tableView_ release];
+    [searchContainerView release];
+    [tableReloadContainerView release];
+
     [concreteParentCategoriesDictionary release];
     [concreteParentCategoriesArray release];
 	[mySearchBar release];
 	[eventsFromSearch release];
 	[events release];
     [coreDataModel release];
-	[refreshHeaderView release];
+//	[refreshHeaderView release];
 	[webActivityView release];
     [oldFilterString release];
     [categoryURI release];
@@ -304,7 +315,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     // Shadows
     self.filtersContainerShadowCheatView.layer.shadowColor = [UIColor blackColor].CGColor;
     self.filtersContainerShadowCheatView.layer.shadowOffset = CGSizeMake(0, 0);
-    self.filtersContainerShadowCheatView.layer.shadowOpacity = 0.5;
+    self.filtersContainerShadowCheatView.layer.shadowOpacity = 0.25;
     self.filtersContainerShadowCheatView.layer.shadowPath = [UIBezierPath bezierPathWithRect:self.filtersContainerShadowCheatView.bounds].CGPath;
     // More shadows
     self.filtersContainerShadowCheatWayBelowView.layer.shadowColor = [UIColor blackColor].CGColor;
@@ -377,6 +388,11 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     self.tableView.backgroundColor = [UIColor colorWithWhite:EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT alpha:1.0];
     self.tableView.showsVerticalScrollIndicator = YES;
     
+    // Table header & footer
+    self.tableView.tableHeaderView = self.searchContainerView;
+    self.tableView.tableFooterView = self.tableReloadContainerView;
+    self.tableView.tableFooterView.alpha = 0.0;
+    
     UISwipeGestureRecognizer * swipeDownFiltersGR = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(swipeDownToShowDrawer:)];
     swipeDownFiltersGR.direction = UISwipeGestureRecognizerDirectionDown;
     [self.filtersContainerView addGestureRecognizer:swipeDownFiltersGR];
@@ -413,12 +429,12 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 	[self.view addSubview:mySearchBar];
 	
 	// Pull table initialization
-    refreshHeaderView = [[EGORefreshTableHeaderView alloc] initWithFrame:CGRectMake(0.0f, 0.0f - self.tableView.bounds.size.height, 320.0f, self.tableView.bounds.size.height)];
-//    self.refreshHeaderView.backgroundColor = [UIColor colorWithRed:226.0/255.0 green:231.0/255.0 blue:237.0/255.0 alpha:1.0];
-    self.refreshHeaderView.backgroundColor = [UIColor colorWithRed:248.0/255.0 green:248.0/255.0 blue:248.0/255.0 alpha:1.0];
-    self.refreshHeaderView.bottomBorderThickness = 0.0;
-    [self.refreshHeaderView setLastRefreshDate:[DefaultsModel loadLastEventsListGetDate]];
-    [self.tableView addSubview:self.refreshHeaderView];
+//    refreshHeaderView = [[EGORefreshTableHeaderView alloc] initWithFrame:CGRectMake(0.0f, 0.0f - self.tableView.bounds.size.height, 320.0f, self.tableView.bounds.size.height)];
+////    self.refreshHeaderView.backgroundColor = [UIColor colorWithRed:226.0/255.0 green:231.0/255.0 blue:237.0/255.0 alpha:1.0];
+//    self.refreshHeaderView.backgroundColor = [UIColor colorWithRed:248.0/255.0 green:248.0/255.0 blue:248.0/255.0 alpha:1.0];
+//    self.refreshHeaderView.bottomBorderThickness = 0.0;
+//    [self.refreshHeaderView setLastRefreshDate:[DefaultsModel loadLastEventsListGetDate]];
+//    [self.tableView addSubview:self.refreshHeaderView];
     
     // Create the "no results" view
     self.problemView = [[UIView alloc] initWithFrame:CGRectMake(/*self.myTableView.frame.origin.x + */20.0, /*self.myTableView.frame.origin.y + */70.0, self.tableView.frame.size.width - 40.0, 100.0)];
@@ -732,7 +748,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     if (webConnector == nil) {
         webConnector = [[WebConnector alloc] init];
         webConnector.delegate = self;
-        webConnector.allowSimultaneousConnection = NO;
+//        webConnector.allowSimultaneousConnection = YES;
     }
     return webConnector;
 }
@@ -815,7 +831,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
         // Save the current timestamp as the last time we retrieved events (regardless of filter/category)
         NSDate * now = [NSDate date];
         [DefaultsModel saveLastEventsListGetDate:now];
-        [self.refreshHeaderView setLastRefreshDate:now];
+//        [self.refreshHeaderView setLastRefreshDate:now];
         
     }
 
@@ -930,10 +946,13 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     
     
     [self updateFiltersSummaryLabelWithCurrentSelectedFilterOptions];
-    [self.tableView reloadData];
-    [self.tableView scrollRectToVisible:CGRectMake(0, 0, 1, 1) animated:YES];
+    [self.tableView reloadSections:[NSIndexSet indexSetWithIndex:0] withRowAnimation:UITableViewRowAnimationFade];
+//    [self.tableView reloadData];
+//    [self.tableView scrollRectToVisible:CGRectMake(0, 0, 1, 1) animated:YES];
     
-    if (self.eventsForCurrentSource && [self.eventsForCurrentSource count] > 0) {
+    BOOL eventsRetrieved = self.eventsForCurrentSource && self.eventsForCurrentSource.count > 0;
+    self.tableView.tableFooterView.alpha = eventsRetrieved ? 1.0 : 0.0;
+    if (eventsRetrieved) {
         // Events were retrieved... They will be displayed.
         [self hideProblemViewAnimated:NO];
     } else {
@@ -962,6 +981,8 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     }
     
     [self hideWebLoadingViews];
+    
+    [self.tableView setContentOffset:CGPointMake(0, 0) animated:YES];
     
 }
 
@@ -1044,6 +1065,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     if (!lastReloadDateWasToday) {
         NSLog(@"Redrawing events list");
         [self.tableView reloadData];
+        NSLog(@"EventsViewController tableView reloadData");
     }
 
 }
@@ -1052,42 +1074,52 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     [self webConnectGetEventsListWithCurrentOldFilterAndCategory];
 }
 
-// Pulling the table down enough triggers a web reload.
-- (void) scrollViewDidEndDragging:(UIScrollView *)scrollView
-                   willDecelerate:(BOOL)decelerate {
-    
-    if (scrollView == self.tableView && 
-        !self.isSearchOn && 
-        scrollView.contentOffset.y <= -(65.0f + self.filtersSummaryAndSearchContainerView.frame.size.height)) {
-        
-        [self.refreshHeaderView setState:EGOOPullRefreshLoading];
-		[UIView beginAnimations:nil context:NULL];
-		[UIView setAnimationDuration:0.2];
-		self.tableView.contentInset = UIEdgeInsetsMake(self.tableView.contentInset.top + 65.0f, 0.0f, 0.0f, 0.0f);
-		[UIView commitAnimations];
-        
-        [self webConnectGetEventsListWithCurrentOldFilterAndCategory];
-        
-	}
-    
-}
+//// Pulling the table down enough triggers a web reload.
+//- (void) scrollViewDidEndDragging:(UIScrollView *)scrollView
+//                   willDecelerate:(BOOL)decelerate {
+//    
+//    NSLog(@"ffffffffffffff -- %f", self.refreshHeaderView.bounds.size.height);
+//    
+//    if (scrollView == self.tableView && 
+//        !self.isSearchOn && 
+//        scrollView.contentOffset.y <= -(self.refreshHeaderView.bounds.size.height + self.filtersSummaryAndSearchContainerView.frame.size.height)) {
+//        
+//        [self.refreshHeaderView setState:EGOOPullRefreshLoading];
+//		[UIView beginAnimations:nil context:NULL];
+//		[UIView setAnimationDuration:0.2];
+//        UIEdgeInsets tableViewContentInset = self.tableView.contentInset;
+//        NSLog(@"inc");
+//        tableViewContentInset.top += self.refreshHeaderView.bounds.size.height;
+//        self.tableView.contentInset = tableViewContentInset;
+//		[UIView commitAnimations];
+//        
+//        [self webConnectGetEventsListWithCurrentOldFilterAndCategory];
+//        
+//	}
+//    
+//}
 
 - (void) scrollViewDidScroll:(UIScrollView *)scrollView {
+    
+//    NSLog(@"%@", NSStringFromCGPoint(self.tableView.contentOffset));
+
     if (scrollView == self.tableView && 
         !self.isSearchOn) {
         
-        //        NSLog(@"%@", NSStringFromCGPoint(scrollView.contentOffset));
-        if (scrollView.contentOffset.y <= -(65.0f + self.filtersSummaryAndSearchContainerView.frame.size.height)) {
-            [self.refreshHeaderView setState:EGOOPullRefreshPulling];
-        } else {
-            [self.refreshHeaderView setState:EGOOPullRefreshNormal];
-        }
+//        //        NSLog(@"%@", NSStringFromCGPoint(scrollView.contentOffset));
+//        if (scrollView.contentOffset.y <= -(self.refreshHeaderView.bounds.size.height + self.filtersSummaryAndSearchContainerView.frame.size.height)) {
+//            [self.refreshHeaderView setState:EGOOPullRefreshPulling];
+//        } else {
+//            [self.refreshHeaderView setState:EGOOPullRefreshNormal];
+//        }
+//        
         
     } else if (scrollView == self.drawerScrollView) {
         
 //        [self updateActiveFilterHighlights]; // This is killing performance.
         
     }
+    
 }
 
 -(void)homeButtonPressed  {
@@ -1109,6 +1141,10 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     }
 }
 
+- (IBAction) reloadEventsListButtonTouched:(id)sender {
+    [self webConnectGetEventsListWithCurrentOldFilterAndCategory];
+}
+
 -(void)toggleDrawerAnimated {
     [UIView beginAnimations:nil context:NULL];
 	[UIView setAnimationDuration:.5];
@@ -1123,6 +1159,9 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
         [self setTableViewScrollable:NO selectable:NO];
         self.filtersContainerShadowCheatView.alpha = 0.0;
         self.filtersContainerShadowCheatWayBelowView.alpha = 1.0;
+        if (self.tableView.contentOffset.y < 0) {
+            [self.tableView setContentOffset:CGPointMake(0, 0) animated:YES];
+        }
     }
     else {
         self.isDrawerOpen = NO;
@@ -1176,7 +1215,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     self.isSearchOn = !self.isSearchOn;
     // Is new mode search on, or search off
     self.searchButton.enabled = !self.isSearchOn;
-    self.refreshHeaderView.hidden = self.isSearchOn;
+//    self.refreshHeaderView.hidden = self.isSearchOn;
     [self forceSearchBarCancelButtonToBeEnabled];
     if (self.isSearchOn) {
         // New mode is search on
@@ -1221,6 +1260,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
         if (problemViewWasShowing) { [self showProblemViewAnimated:NO]; }
     }
     [self.tableView reloadData];
+    NSLog(@"EventsViewController tableView reloadData");
 }
 
 - (void) forceSearchBarCancelButtonToBeEnabled {
@@ -1317,7 +1357,9 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
         if (location) {
             cell.locationLabel.text = location;
             if ([placeCount intValue] > 1) {
-                cell.locationLabel.text = [cell.locationLabel.text stringByAppendingFormat:@" & %d more locations", [placeCount intValue] - 1];
+                int moreCount = placeCount.intValue - 1;
+                NSString * locationWord = moreCount > 1 ? @"locations" : @"location";
+                cell.locationLabel.text = [cell.locationLabel.text stringByAppendingFormat:@" & %d more %@", moreCount, locationWord];
             }
         } else {
             cell.locationLabel.text = address;
@@ -1343,25 +1385,27 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     
+    self.indexPathOfSelectedRow = indexPath;
+        
+    Event * event = (Event *)[self.eventsForCurrentSource objectAtIndex:indexPath.row];
+    
     self.cardPageViewController = [[[EventViewController alloc] initWithNibName:@"EventViewController" bundle:[NSBundle mainBundle]] autorelease];
     self.cardPageViewController.coreDataModel = self.coreDataModel;
     self.cardPageViewController.delegate = self;
     self.cardPageViewController.hidesBottomBarWhenPushed = YES;
     
-    Event * event = (Event *)[self.eventsForCurrentSource objectAtIndex:indexPath.row];
-    
-    self.cardPageViewController.event = event;
-    
-    self.indexPathOfSelectedRow = indexPath;
-    [self.webConnector sendLearnedDataAboutEvent:event.uri withUserAction:@"V"]; // Going to wait on this until we know that we have an internet connection. Honestly, there's no point in displaying a blank CardPageViewController, showing an internet error message, and then popping the user back out. So, for now, I am just going to use the response from the learned data web send to know whether we have an internet connection or not. This is sort of a hack. Change / come back to this later.
+    [self.webConnector sendLearnedDataAboutEvent:event.uri withUserAction:@"V"]; // Attempt to send the learning to our server.
+    [self.webConnector getEventWithURI:event.uri]; // Attempt to get the full event info
+    [self showWebLoadingViews];
     
 }
 
 - (void)webConnector:(WebConnector *)webConnector sendLearnedDataSuccess:(ASIHTTPRequest *)request aboutEvent:(NSString *)eventURI userAction:(NSString *)userAction {
     
     if ([userAction isEqualToString:@"V"] && self.cardPageViewController) {
-        [self.navigationController pushViewController:self.cardPageViewController animated:YES];
-        //[self presentModalViewController:self.cardPageViewController animated:YES];
+        
+        NSLog(@"EventsViewController successfully sent 'view' learning to server for event with URI %@.", eventURI);
+        
     } else if ([userAction isEqualToString:@"X"]) {
         
         // Delete event from core data
@@ -1376,7 +1420,9 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
         
     }
     
-    [self hideWebLoadingViews];
+    if (!self.webConnector.connectionInProgress) {
+        [self hideWebLoadingViews];
+    }
     
 }
 
@@ -1384,17 +1430,44 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     
     // Display an internet connection error message
     if ([userAction isEqualToString:@"V"] && self.cardPageViewController) {
-        NSLog(@"foo");
-        if (![self.connectionErrorStandardAlertView isVisible]) {
-            NSLog(@"foospecial");
-            [self.connectionErrorStandardAlertView show];            
-        }
-        //[self presentModalViewController:self.cardPageViewController animated:YES];
+        
+        NSLog(@"EventsViewController failed to send 'view' learning to server for event with URI %@. We should be remembering this, and trying to send the learning again later! This is crucial!", eventURI);
+        
     } else if ([userAction isEqualToString:@"X"]) {
         [self.connectionErrorOnDeleteAlertView show];
     }
     
-    [self hideWebLoadingViews];
+    if (!self.webConnector.connectionInProgress) {
+        [self hideWebLoadingViews];
+    }
+    
+}
+
+- (void)webConnector:(WebConnector *)webConnector getEventSuccess:(ASIHTTPRequest *)request forEventURI:(NSString *)eventURI {
+
+    NSString * responseString = [request responseString];
+    NSError *error = nil;
+    NSDictionary * eventDictionary = [responseString yajl_JSONWithOptions:YAJLParserOptionsAllowComments error:&error];
+    
+    Event * event = [self.eventsForCurrentSource objectAtIndex:self.indexPathOfSelectedRow.row];
+    
+    [self.coreDataModel updateEvent:event usingEventDictionary:eventDictionary featuredOverride:nil fromSearchOverride:nil];
+    
+    self.cardPageViewController.event = event;
+    [self.navigationController pushViewController:self.cardPageViewController animated:YES];
+    
+    if (!self.webConnector.connectionInProgress) {
+        [self hideWebLoadingViews];
+    }
+    
+}
+
+- (void)webConnector:(WebConnector *)webConnector getEventFailure:(ASIHTTPRequest *)request forEventURI:(NSString *)eventURI {
+    
+    [self.connectionErrorStandardAlertView show];
+    if (!self.webConnector.connectionInProgress) {
+        [self hideWebLoadingViews];
+    }
     
 }
 
@@ -1499,15 +1572,16 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     // ACTIVITY VIEWS
     [self.webActivityView hideAnimated:NO];
 
-    // REFRESH HEADER VIEW
-    // It shouldn't be a problem if the refresh header view was not being used before, but we still call this code. Don't worry about it for now.
-    [UIView beginAnimations:nil context:NULL];
-    [UIView setAnimationDuration:.3];
-    UIEdgeInsets contentInset = self.tableView.contentInset;
-    contentInset.top = self.filtersSummaryAndSearchContainerView.frame.size.height;
-    self.tableView.contentInset = contentInset;
-    [UIView commitAnimations];
-    [self.refreshHeaderView setState:EGOOPullRefreshNormal];
+//    // REFRESH HEADER VIEW
+//    if (self.refreshHeaderView.state == EGOOPullRefreshLoading) {
+//        [self.refreshHeaderView setState:EGOOPullRefreshNormal];
+//        [UIView beginAnimations:nil context:NULL];
+//        [UIView setAnimationDuration:.3];
+//        UIEdgeInsets contentInset = self.tableView.contentInset;
+//        contentInset.top -= self.refreshHeaderView.bounds.size.height;
+//        self.tableView.contentInset = contentInset;
+//        [UIView commitAnimations];
+//    }
     
     // USER INTERACTION
     self.tableView.userInteractionEnabled = YES; // Enable user interaction
@@ -1700,7 +1774,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     }
     [compositeString deleteCharactersInRange:NSMakeRange(compositeString.length-1, 1)];
     [compositeString appendFormat:@"."];
-    [compositeString replaceOccurrencesOfString:@"You are looking at events." withString:@"Use the filters above to narrow in on the type of events you're interested in." options:0 range:NSMakeRange(0, compositeString.length)];
+    [compositeString replaceOccurrencesOfString:@"You are looking at events." withString:@"Looking for something specific? Use the filters above to narrow in on the type of events you're interested in." options:0 range:NSMakeRange(0, compositeString.length)];
 
     self.filtersSummaryLabel.text = compositeString;
     

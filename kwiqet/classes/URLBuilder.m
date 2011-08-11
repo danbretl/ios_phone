@@ -323,6 +323,22 @@ static NSString * const URL_BUILDER_GET_EVENTS_LIST_FILTER_POPULAR = @"popular";
     return url;
 }
 
+- (NSURL *) buildOccurrencesURLForEventID:(NSString *)eventID {
+    
+    NSString * urlplist = [[NSBundle mainBundle] pathForResource:@"urls" ofType:@"plist"];
+    NSDictionary * urlDictionary = [NSDictionary dictionaryWithContentsOfFile:urlplist];
+
+    NSString * baseURL = [urlDictionary valueForKey:self.baseURLKey];
+    NSString * URI = [urlDictionary valueForKey:@"occurrence_uri"];
+    NSString * credentials = [self buildCredentialString];
+
+    NSString * urlString = [NSString stringWithFormat:@"%@%@event=%@&%@", baseURL, URI, eventID, credentials];
+	NSURL *url = [NSURL URLWithString:urlString];
+    
+    return url;
+    
+}
+
 ///////////////////
 // FEATURED EVENT
 

@@ -52,6 +52,8 @@
     // Views
     
 	IBOutlet UITableView * tableView_;
+    IBOutlet UIView   * searchContainerView;
+    IBOutlet UIView   * tableReloadContainerView;
     IBOutlet UIView   * pushableContainerView;
     IBOutlet UIView   * pushableContainerShadowCheatView;
     IBOutlet UIView   * filtersSummaryAndSearchContainerView;
@@ -100,7 +102,7 @@
     IBOutlet UIButtonWithOverlayView * dvLocationButtonBorough;
     IBOutlet UIButtonWithOverlayView * dvLocationButtonCity;
 	UISearchBar * mySearchBar;
-	EGORefreshTableHeaderView *refreshHeaderView;
+//	EGORefreshTableHeaderView *refreshHeaderView;
     WebActivityView * webActivityView;
     UIView * problemView;
     UILabel * problemLabel;
