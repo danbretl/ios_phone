@@ -247,7 +247,7 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
     self.occurrenceInfoPlaceholderView.userInteractionEnabled = NO;
     self.occurrenceInfoPlaceholderRetryButton.imageView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     self.occurrenceInfoPlaceholderRetryButton.titleLabel.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-//    [self.occurrenceInfoPlaceholderRetryButton setTitle:EVC_OCCURRENCE_INFO_LOADING_STRING forState:UIControlStateNormal];
+    [self.occurrenceInfoPlaceholderRetryButton setTitle:EVC_OCCURRENCE_INFO_LOADING_STRING forState:UIControlStateNormal];
     
     // Date views
     self.monthLabel.font= [UIFont fontWithName:@"HelveticaNeue" size:12];
@@ -343,6 +343,9 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
     NSDictionary * responseDictionary = [responseString yajl_JSONWithOptions:YAJLParserOptionsAllowComments error:&error];
     [self.coreDataModel updateEvent:self.event withExhaustiveOccurrencesArray:[responseDictionary valueForKey:@"objects"]];
     [self updateViewsFromDataAnimated:YES];
+    if ([[[responseDictionary objectForKey:@"meta"] valueForKey:@"total_count"] isEqualToNumber:[NSNumber numberWithInt:0]]) {
+        [self.occurrenceInfoPlaceholderRetryButton setTitle:@"There are no occurrences for this event!" forState:UIControlStateNormal];
+    }
     [self hideWebLoadingViews];
     
 }

@@ -696,6 +696,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
         if (self.isSearchOn) {
             // Not going to do anything on this path for now... Just leave the list blank?
         } else {
+            NSLog(@"No events for current source, going to web-get events. No events for current source, going to web-get events. No events for current source, going to web-get events. No events for current source, going to web-get events. No events for current source, going to web-get events. No events for current source, going to web-get events. No events for current source, going to web-get events. No events for current source, going to web-get events. No events for current source, going to web-get events. No events for current source, going to web-get events.");
             [self webConnectGetEventsListWithCurrentOldFilterAndCategory];
         }
     } else {
