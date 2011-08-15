@@ -20,7 +20,7 @@
 #import "SegmentedHighlighterView.h"
 #import "UIButtonWithOverlayView.h"
 
-@interface EventsViewController : UIViewController <UITableViewDelegate, UITableViewDataSource, UISearchBarDelegate, UIAlertViewDelegate, CardPageViewControllerDelegate, WebConnectorDelegate, UIScrollViewDelegate, UITextFieldDelegate> {
+@interface EventsViewController : UIViewController <UITableViewDelegate, UITableViewDataSource, UIAlertViewDelegate, CardPageViewControllerDelegate, WebConnectorDelegate, UIScrollViewDelegate, UITextFieldDelegate> {
     
     ///////////
     // Models
@@ -52,14 +52,17 @@
     // Views
     
 	IBOutlet UITableView * tableView_;
+    UIView * tableViewCoverView;
     IBOutlet UIView   * searchContainerView;
+    IBOutlet UIButton * searchButton;
+    IBOutlet UIButton * searchCancelButton;
+    IBOutlet UIButton * searchGoButton;
+    IBOutlet UITextField * searchTextField;
     IBOutlet UIView   * tableReloadContainerView;
     IBOutlet UIView   * pushableContainerView;
     IBOutlet UIView   * pushableContainerShadowCheatView;
-    IBOutlet UIView   * filtersSummaryAndSearchContainerView;
+    IBOutlet UIView   * filtersSummaryContainerView;
     IBOutlet UILabel  * filtersSummaryLabel;
-    IBOutlet UIView   * searchButtonContainerView;
-    IBOutlet UIButton * searchButton;
     IBOutlet UIView   * filtersContainerView;
     IBOutlet UIView   * filtersContainerShadowCheatView;
     IBOutlet UIView   * filtersContainerShadowCheatWayBelowView;
@@ -101,7 +104,6 @@
     IBOutlet UIButtonWithOverlayView * dvLocationButtonNeighborhood;
     IBOutlet UIButtonWithOverlayView * dvLocationButtonBorough;
     IBOutlet UIButtonWithOverlayView * dvLocationButtonCity;
-	UISearchBar * mySearchBar;
 //	EGORefreshTableHeaderView *refreshHeaderView;
     WebActivityView * webActivityView;
     UIView * problemView;

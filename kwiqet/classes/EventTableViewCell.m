@@ -44,7 +44,7 @@ static NSString * const EVENT_TABLE_VIEW_CELL_FILLER_PRICE = @"Price";
         [selectedBackgroundViewWithImage release];
         
         // Category color view
-        categoryColorView = [[UINeverClearView alloc] initWithFrame:CGRectMake(0, 1, 20, 75)];
+        categoryColorView = [[UINeverClearView alloc] initWithFrame:CGRectMake(0, 0, 20, 75)];
         [self setCategoryColor:[UIColor redColor]];
         [self.contentView addSubview:self.categoryColorView];
         
