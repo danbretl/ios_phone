@@ -24,6 +24,6 @@
 @property (retain) UIButtonWithOverlayView * buttonView;
 
 + (EventsFilterOption *) eventsFilterOptionWithCode:(NSString *)code readableString:(NSString *)readable buttonText:(NSString *)buttonText buttonView:(UIButtonWithOverlayView *)buttonView;
-+ (NSString *) eventsFilterOptionIconFilenameForCode:(NSString *)code grayscale:(BOOL)grayscale;
++ (NSString *)eventsFilterOptionIconFilenameForCode:(NSString *)code grayscale:(BOOL)grayscale larger:(BOOL)larger;
 
 @end

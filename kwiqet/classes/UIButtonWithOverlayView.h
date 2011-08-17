@@ -20,6 +20,7 @@
 
     BOOL isShadowVisibleWhenButtonNormal;
     BOOL isShadowVisibleWhenButtonHighlighted;
+    
 }
 
 @property (nonatomic, copy)   NSString * buttonText;

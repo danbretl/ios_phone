@@ -9,6 +9,7 @@
 #import "EventsFilterOption.h"
 
 static NSString * const EFO_ICON_PREFIX = @"ico_";
+static NSString * const EFO_ICON_LARGER_PREFIX = @"larger_";
 static NSString * const EFO_ICON_BW_PREFIX = @"bw_";
 static NSString * const EFO_ICON_EXT = @".png";
 
@@ -42,10 +43,11 @@ static NSString * const EFO_ICON_EXT = @".png";
     
 }
 
-+ (NSString *)eventsFilterOptionIconFilenameForCode:(NSString *)code grayscale:(BOOL)grayscale {
++ (NSString *)eventsFilterOptionIconFilenameForCode:(NSString *)code grayscale:(BOOL)grayscale larger:(BOOL)larger {
     
-    return [NSString stringWithFormat:@"%@%@%@%@", 
+    return [NSString stringWithFormat:@"%@%@%@%@%@", 
             EFO_ICON_PREFIX,
+            larger ? EFO_ICON_LARGER_PREFIX : @"",
             grayscale ? EFO_ICON_BW_PREFIX : @"",
             code,
             EFO_ICON_EXT];

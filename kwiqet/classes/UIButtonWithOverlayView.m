@@ -13,6 +13,7 @@
 - (void) initWithFrameOrCoder;
 - (void) buttonTouchEvent;
 - (void) buttonTouchEnded;
+- (void) guessAndSetAppropriateTitleAndImageInsetsAndAlignment;
 @property (retain) UIButton * buttonPrivate;
 @property (retain) UIImageView * overlayPrivate;
 @property (retain) UIView * shadowPrivate;
@@ -84,6 +85,7 @@
         [self.buttonPrivate setTitle:self.buttonText forState:UIControlStateNormal];
         [self.buttonPrivate setTitle:self.buttonText forState:UIControlStateHighlighted];
         [self.buttonPrivate setTitle:self.buttonText forState:UIControlStateSelected];
+        [self guessAndSetAppropriateTitleAndImageInsetsAndAlignment];
     }
 }
 
@@ -94,20 +96,33 @@
         [self.buttonPrivate setImage:self.buttonIconImage forState:UIControlStateNormal];
         [self.buttonPrivate setImage:self.buttonIconImage forState:UIControlStateHighlighted];
         [self.buttonPrivate setImage:self.buttonIconImage forState:UIControlStateSelected];
-        UIControlContentHorizontalAlignment buttonHorizontalAlignment;
-        UIEdgeInsets titleInsets = self.buttonPrivate.titleEdgeInsets;
-        if (buttonIconImage != nil) {
-            buttonHorizontalAlignment = UIControlContentHorizontalAlignmentLeft;
-            CGFloat imageLeftInset = 10 + (30.0 - buttonIconImage.size.width) / 2.0;
-            self.buttonPrivate.imageEdgeInsets = UIEdgeInsetsMake(0, imageLeftInset, 0, 0);
-            titleInsets.left = 80.0 - (imageLeftInset + buttonIconImage.size.width + buttonIconImage.size.width / 2.0);
-        } else {
-            buttonHorizontalAlignment = UIControlContentHorizontalAlignmentCenter;
-            titleInsets.left = 0;
-        }
-        self.buttonPrivate.contentHorizontalAlignment = buttonHorizontalAlignment;
-        self.buttonPrivate.titleEdgeInsets = titleInsets;
+        [self guessAndSetAppropriateTitleAndImageInsetsAndAlignment];
     }
+}
+
+- (void) guessAndSetAppropriateTitleAndImageInsetsAndAlignment {
+    
+    UIControlContentHorizontalAlignment buttonHorizontalAlignment;
+    UIEdgeInsets titleInsets = self.buttonPrivate.titleEdgeInsets;
+    UIEdgeInsets imageInsets = self.buttonPrivate.imageEdgeInsets;
+    
+    BOOL haveText = self.buttonText && self.buttonText.length > 0;
+    BOOL haveImage = self.buttonIconImage != nil;
+    
+    if (haveText && haveImage) {
+        buttonHorizontalAlignment = UIControlContentHorizontalAlignmentLeft;
+        imageInsets.left = 10 + (30.0 - self.buttonIconImage.size.width) / 2.0;
+        titleInsets.left = 80.0 - (imageInsets.left + self.buttonIconImage.size.width + self.buttonIconImage.size.width / 2.0);
+    } else {
+        buttonHorizontalAlignment = UIControlContentHorizontalAlignmentCenter;        
+        imageInsets.left = 0;
+        titleInsets.left = 0;
+    }
+    
+    self.buttonPrivate.contentHorizontalAlignment = buttonHorizontalAlignment;
+    self.buttonPrivate.titleEdgeInsets = titleInsets;
+    self.buttonPrivate.imageEdgeInsets = imageInsets;
+    
 }
 
 - (void)setCornerRadius:(CGFloat)cornerRadius {

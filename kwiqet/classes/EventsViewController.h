@@ -40,6 +40,11 @@
     EventsFilterOption * selectedDateFilterOption;
     EventsFilterOption * selectedTimeFilterOption;
     EventsFilterOption * selectedLocationFilterOption;
+    NSMutableArray * filtersSearch;
+    EventsFilter * activeSearchFilterInUI;
+    EventsFilterOption * selectedDateSearchFilterOption;
+    EventsFilterOption * selectedTimeSearchFilterOption;
+    EventsFilterOption * selectedLocationSearchFilterOption;
     BOOL isDrawerOpen;
     BOOL isSearchOn;
     BOOL problemViewWasShowing;
@@ -61,19 +66,32 @@
     IBOutlet UIView   * tableReloadContainerView;
     IBOutlet UIView   * pushableContainerView;
     IBOutlet UIView   * pushableContainerShadowCheatView;
+    //
     IBOutlet UIView   * filtersSummaryContainerView;
     IBOutlet UILabel  * filtersSummaryLabel;
+    IBOutlet NSString * filtersSummaryStringBrowse;
+    IBOutlet NSString * filtersSummaryStringSearch;
+    //
     IBOutlet UIView   * filtersContainerView;
     IBOutlet UIView   * filtersContainerShadowCheatView;
     IBOutlet UIView   * filtersContainerShadowCheatWayBelowView;
+    IBOutlet SegmentedHighlighterView * activeFilterHighlightsContainerView;
+    IBOutlet UIScrollView * drawerScrollView;
+    //
+    IBOutlet UIView   * filtersBarBrowse;
     IBOutlet UIButton * filterButtonCategories;
     IBOutlet UIButton * filterButtonPrice;
     IBOutlet UIButton * filterButtonDate;
     IBOutlet UIButton * filterButtonLocation;
     IBOutlet UIButton * filterButtonTime;
-    IBOutlet SegmentedHighlighterView * activeFilterHighlightsContainerView;
-    IBOutlet UIScrollView * drawerScrollView;
-    IBOutlet UIView * drawerViewsContainer;
+    //
+    IBOutlet UIView   * filtersBarSearch;
+    IBOutlet UIButton * filterSearchButtonDate;
+    IBOutlet UIButton * filterSearchButtonLocation;
+    IBOutlet UIButton * filterSearchButtonTime;
+    //
+    IBOutlet UIView * drawerViewsBrowseContainer;
+    IBOutlet UIView * drawerViewsSearchContainer;
     // Drawer view price
     IBOutlet UIView * drawerViewPrice;
     IBOutlet UIButtonWithOverlayView * dvPriceButtonFree;
@@ -87,6 +105,13 @@
     IBOutlet UIButtonWithOverlayView * dvDateButtonThisWeek;
     IBOutlet UIButtonWithOverlayView * dvDateButtonThisMonth;
     IBOutlet UIButtonWithOverlayView * dvDateButtonAny;
+    // Drawer view date search
+    IBOutlet UIView * drawerViewDateSearch;
+    IBOutlet UIButtonWithOverlayView * dvDateSearchButtonToday;
+    IBOutlet UIButtonWithOverlayView * dvDateSearchButtonThisWeekend;
+    IBOutlet UIButtonWithOverlayView * dvDateSearchButtonThisWeek;
+    IBOutlet UIButtonWithOverlayView * dvDateSearchButtonThisMonth;
+    IBOutlet UIButtonWithOverlayView * dvDateSearchButtonAny;
     // Drawer view categories
     IBOutlet UIView * drawerViewCategories;
     // Drawer view time
@@ -96,6 +121,13 @@
     IBOutlet UIButtonWithOverlayView * dvTimeButtonEvening;
     IBOutlet UIButtonWithOverlayView * dvTimeButtonNight;
     IBOutlet UIButtonWithOverlayView * dvTimeButtonAny;
+    // Drawer view time search
+    IBOutlet UIView * drawerViewTimeSearch;
+    IBOutlet UIButtonWithOverlayView * dvTimeSearchButtonMorning;
+    IBOutlet UIButtonWithOverlayView * dvTimeSearchButtonAfternoon;
+    IBOutlet UIButtonWithOverlayView * dvTimeSearchButtonEvening;
+    IBOutlet UIButtonWithOverlayView * dvTimeSearchButtonNight;
+    IBOutlet UIButtonWithOverlayView * dvTimeSearchButtonAny;
     // Drawer view location
     IBOutlet UIView * drawerViewLocation;
     IBOutlet UITextField * dvLocationTextField;
@@ -104,7 +136,15 @@
     IBOutlet UIButtonWithOverlayView * dvLocationButtonNeighborhood;
     IBOutlet UIButtonWithOverlayView * dvLocationButtonBorough;
     IBOutlet UIButtonWithOverlayView * dvLocationButtonCity;
-//	EGORefreshTableHeaderView *refreshHeaderView;
+    // Drawer view location search
+    IBOutlet UIView * drawerViewLocationSearch;
+    IBOutlet UITextField * dvLocationSearchTextField;
+    UIButton * dvLocationSearchCurrentLocationButton;
+    IBOutlet UIButtonWithOverlayView * dvLocationSearchButtonWalking;
+    IBOutlet UIButtonWithOverlayView * dvLocationSearchButtonNeighborhood;
+    IBOutlet UIButtonWithOverlayView * dvLocationSearchButtonBorough;
+    IBOutlet UIButtonWithOverlayView * dvLocationSearchButtonCity;
+    // Assorted views
     WebActivityView * webActivityView;
     UIView * problemView;
     UILabel * problemLabel;
