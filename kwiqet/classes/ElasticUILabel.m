@@ -51,13 +51,13 @@ CGFloat const ELASTICUILABEL_GRADIENT_VIEW_WIDTH = 45.0;
 
 - (void) initWithFrameOrCoder {
     
-    self.scrollView = [[UIScrollView alloc] initWithFrame:CGRectMake(0, 0, self.frame.size.width, self.frame.size.height)];
+    scrollView = [[UIScrollView alloc] initWithFrame:CGRectMake(0, 0, self.frame.size.width, self.frame.size.height)];
     self.scrollView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     self.scrollView.showsHorizontalScrollIndicator = NO;
     self.scrollView.delegate = self;
     [self addSubview:self.scrollView];
     
-    self.label = [[UILabel alloc] initWithFrame:CGRectMake(5, 6, self.frame.size.width - 5, self.frame.size.height)];
+    label = [[UILabel alloc] initWithFrame:CGRectMake(5, 6, self.frame.size.width - 5, self.frame.size.height)];
     //self.label.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     self.label.font = [UIFont fontWithName:@"HelveticaNeueLTStd-BdCn" size:25];
     self.label.backgroundColor = [UIColor clearColor];
@@ -65,7 +65,7 @@ CGFloat const ELASTICUILABEL_GRADIENT_VIEW_WIDTH = 45.0;
     self.label.textAlignment = UITextAlignmentLeft;
     [self.scrollView addSubview:self.label];
     
-    self.gradientView = [[GradientView alloc] initWithFrame:CGRectMake(self.frame.size.width - ELASTICUILABEL_GRADIENT_VIEW_WIDTH, 0, ELASTICUILABEL_GRADIENT_VIEW_WIDTH, self.frame.size.height)];
+    gradientView = [[GradientView alloc] initWithFrame:CGRectMake(self.frame.size.width - ELASTICUILABEL_GRADIENT_VIEW_WIDTH, 0, ELASTICUILABEL_GRADIENT_VIEW_WIDTH, self.frame.size.height)];
     self.gradientView.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin;
     self.gradientView.userInteractionEnabled = NO;
     [self insertSubview:self.gradientView aboveSubview:self.label];

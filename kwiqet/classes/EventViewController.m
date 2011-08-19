@@ -484,7 +484,7 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
     [self.scrollView setContentSize:CGSizeMake(self.scrollView.bounds.size.width, CGRectGetMaxY(self.descriptionContainer.frame))];
     
     // Breadcrumbs
-    NSMutableString * breadcrumbsString = [self.event.concreteParentCategory.title mutableCopy];
+    NSMutableString * breadcrumbsString = [[self.event.concreteParentCategory.title mutableCopy] autorelease];
     NSArray * orderedConcreteCategoryBreadcrumbs = [self.event.concreteCategoryBreadcrumbs sortedArrayUsingDescriptors:[NSArray arrayWithObject:[NSSortDescriptor sortDescriptorWithKey:@"order" ascending:NO]]];
     for (CategoryBreadcrumb * breadcrumb in orderedConcreteCategoryBreadcrumbs) {
         [breadcrumbsString appendFormat:@", %@", breadcrumb.category.title];

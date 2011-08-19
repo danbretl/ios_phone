@@ -49,7 +49,7 @@
     
     self.backgroundColor = [UIColor clearColor];
     
-    self.buttonPrivate = [[UIButton buttonWithType:UIButtonTypeCustom] retain];
+    self.buttonPrivate = [UIButton buttonWithType:UIButtonTypeCustom];
     self.buttonPrivate.frame = self.bounds;
     self.buttonPrivate.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     [self.buttonPrivate addTarget:self action:@selector(buttonTouchEvent) forControlEvents:UIControlEventAllTouchEvents];

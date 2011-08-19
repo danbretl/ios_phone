@@ -216,7 +216,7 @@ CGFloat const FEV_DESCRIPTION_LABEL_PADDING_HORIZONTAL = 20.0;
     [self.view addSubview:self.scrollView];
     {
         // Image view
-        self.imageView = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, self.scrollView.bounds.size.width, FEV_IMAGE_VIEW_HEIGHT)];
+        imageView = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, self.scrollView.bounds.size.width, FEV_IMAGE_VIEW_HEIGHT)];
         self.imageView.backgroundColor = [UIColor blackColor];
         self.imageView.contentMode = UIViewContentModeScaleAspectFill;
         [self.scrollView addSubview:self.imageView];
@@ -227,7 +227,7 @@ CGFloat const FEV_DESCRIPTION_LABEL_PADDING_HORIZONTAL = 20.0;
         [self.scrollView addSubview:self.titleBar];
         
         // Event details view
-        self.detailsView = [[UIView alloc] initWithFrame:CGRectMake(0, CGRectGetMaxY(self.titleBar.frame), self.scrollView.bounds.size.width, FEV_DETAILS_VIEW_HEIGHT)];
+        detailsView = [[UIView alloc] initWithFrame:CGRectMake(0, CGRectGetMaxY(self.titleBar.frame), self.scrollView.bounds.size.width, FEV_DETAILS_VIEW_HEIGHT)];
         self.detailsView.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"eotd_card.png"]];
         [self.scrollView addSubview:self.detailsView];
         {
