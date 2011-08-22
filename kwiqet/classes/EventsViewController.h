@@ -42,6 +42,7 @@
     EventsFilterOption * selectedLocationFilterOption;
     NSMutableArray * filtersSearch;
     EventsFilter * activeSearchFilterInUI;
+    NSMutableArray * adjustedSearchFiltersOrdered; // Ordered most recently adjusted to least recently adjusted. If a filter does not exist in this array, then it has not been adjusted from its "most general" option.
     EventsFilterOption * selectedDateSearchFilterOption;
     EventsFilterOption * selectedTimeSearchFilterOption;
     EventsFilterOption * selectedLocationSearchFilterOption;
@@ -151,6 +152,8 @@
     EventViewController * cardPageViewController;
     UIAlertView * connectionErrorStandardAlertView;
     UIAlertView * connectionErrorOnDeleteAlertView;
+    // Gesture Recognizers
+    UITapGestureRecognizer * tapToHideDrawerGR;
     
     ////////
     // Web

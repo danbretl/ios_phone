@@ -20,9 +20,10 @@ NSString * const EVENTS_FILTER_TIME = @"time";
 
 @implementation EventsFilter
 @synthesize button=button_, drawerView=drawerView_, code=code_, buttonText=buttonText_;
-@synthesize optionsPrivate=options_;
+@synthesize optionsPrivate=options_, mostGeneralOption=mostGeneralOption_;
 
-+ (EventsFilter *) eventsFilterWithCode:(NSString *)filterCode buttonText:(NSString *)buttonText button:(UIButton *)button drawerView:(UIView *)drawerView options:(NSArray *)options {
++ (EventsFilter *) eventsFilterWithCode:(NSString *)filterCode buttonText:(NSString *)buttonText button:(UIButton *)button drawerView:(UIView *)drawerView options:(NSArray *)options mostGeneralOption:(EventsFilterOption *)mostGeneralOption {
+    
     EventsFilter * filter = [[EventsFilter alloc] init];
     filter.code = filterCode;
     filter.button = button;
@@ -33,11 +34,23 @@ NSString * const EVENTS_FILTER_TIME = @"time";
         filter.optionsPrivate = optionsMutable;
         [optionsMutable release];
     }
+    filter.mostGeneralOption = mostGeneralOption;
+    
     return [filter autorelease];
 }
 
 - (NSMutableArray *) options {
     return self.optionsPrivate;
+}
+
+- (EventsFilterOption *)mostGeneralOption {
+    EventsFilterOption * returnOption = mostGeneralOption_;
+    if (returnOption == nil &&
+        self.options &&
+        self.options.count > 0) {
+        returnOption = self.options.lastObject;
+    }
+    return returnOption;
 }
 
 - (id)init
@@ -56,6 +69,7 @@ NSString * const EVENTS_FILTER_TIME = @"time";
     [drawerView_ release];
     [code_ release];
     [options_ release];
+    [mostGeneralOption_ release];
     [super dealloc];
 }
 

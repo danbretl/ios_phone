@@ -19,6 +19,7 @@ static NSString * const EFO_ICON_EXT = @".png";
 @synthesize readable = readable_;
 @synthesize buttonText = buttonText_;
 @synthesize buttonView = buttonView_;
+@synthesize isMostGeneralOption = isMostGeneralOption_;
 
 - (id)init
 {
@@ -39,6 +40,10 @@ static NSString * const EFO_ICON_EXT = @".png";
     }
     option.buttonText = buttonText;
     option.buttonView = buttonView;
+    option.isMostGeneralOption = ([code isEqualToString:EFO_CODE_PRICE_ANY] ||
+                                  [code isEqualToString:EFO_CODE_DATE_ANY] ||
+                                  [code isEqualToString:EFO_CODE_LOCATION_CITY] ||
+                                  [code isEqualToString:EFO_CODE_TIME_ANY]);
     return [option autorelease];
     
 }
