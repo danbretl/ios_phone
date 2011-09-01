@@ -59,6 +59,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 @property (retain) EventsFilterOption * selectedTimeSearchFilterOption;
 @property (retain) EventsFilterOption * selectedLocationSearchFilterOption;
 @property BOOL isDrawerOpen;
+@property BOOL shouldReloadOnDrawerClose;
 @property BOOL isSearchOn;
 @property BOOL problemViewWasShowing;
 @property (readonly) BOOL problemViewIsShowing;
@@ -276,7 +277,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 @synthesize problemView, problemLabel;
 @synthesize cardPageViewController;
 @synthesize indexPathOfRowAttemptingToDelete, indexPathOfSelectedRow;
-@synthesize isDrawerOpen;
+@synthesize isDrawerOpen, shouldReloadOnDrawerClose;
 @synthesize problemViewWasShowing;
 
 - (void)dealloc {
@@ -416,10 +417,13 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 //    self.categoriesBackgroundView = [[[UIView alloc] initWithFrame:CGRectMake(0, 80, 320, 255)] autorelease];
     self.drawerScrollView.showsHorizontalScrollIndicator = NO;
     self.drawerScrollView.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"cat_overlay.png"]];
+//    self.drawerScrollView.backgroundColor = [UIColor groupTableViewBackgroundColor]; // TESTING PERFORMANCE HIT TESTING PERFORMANCE HIT TESTING PERFORMANCE HIT TESTING PERFORMANCE HIT TESTING PERFORMANCE HIT TESTING PERFORMANCE HIT TESTING PERFORMANCE HIT TESTING PERFORMANCE HIT TESTING PERFORMANCE HIT TESTING PERFORMANCE HIT TESTING PERFORMANCE HIT TESTING PERFORMANCE HIT TESTING PERFORMANCE HIT TESTING PERFORMANCE HIT TESTING PERFORMANCE HIT
     self.drawerScrollView.userInteractionEnabled = NO;
     self.drawerScrollView.layer.masksToBounds = YES;
     self.drawerScrollView.delegate = self;
     self.drawerViewsBrowseContainer.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"cat_overlay.png"]];
+//    self.drawerViewsBrowseContainer.backgroundColor = [UIColor clearColor]; // TESTING PERFORMANCE HIT TESTING PERFORMANCE HIT TESTING PERFORMANCE HIT TESTING PERFORMANCE HIT TESTING PERFORMANCE HIT TESTING PERFORMANCE HIT TESTING PERFORMANCE HIT TESTING PERFORMANCE HIT TESTING PERFORMANCE HIT TESTING PERFORMANCE HIT TESTING PERFORMANCE HIT TESTING PERFORMANCE HIT TESTING PERFORMANCE HIT TESTING PERFORMANCE HIT TESTING PERFORMANCE HIT
+//    self.drawerViewsBrowseContainer.backgroundColor = [UIColor redColor]; // TESTING PERFORMANCE HIT TESTING PERFORMANCE HIT TESTING PERFORMANCE HIT TESTING PERFORMANCE HIT TESTING PERFORMANCE HIT TESTING PERFORMANCE HIT TESTING PERFORMANCE HIT TESTING PERFORMANCE HIT TESTING PERFORMANCE HIT TESTING PERFORMANCE HIT TESTING PERFORMANCE HIT TESTING PERFORMANCE HIT TESTING PERFORMANCE HIT TESTING PERFORMANCE HIT TESTING PERFORMANCE HIT
     self.drawerViewsSearchContainer.backgroundColor = self.drawerViewsBrowseContainer.backgroundColor;
     
     // Shadows
@@ -503,6 +507,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     self.tableView.tableFooterView = self.tableReloadContainerView;
     self.tableView.tableFooterView.alpha = 0.0;
     self.tableView.tableFooterView.userInteractionEnabled = NO;
+    self.tableView.tableFooterView.backgroundColor = [UIColor colorWithWhite:EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT alpha:1.0];
     
     UISwipeGestureRecognizer * swipeDownFiltersGR = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(swipeDownToShowDrawer:)];
     swipeDownFiltersGR.direction = UISwipeGestureRecognizerDirectionDown;
@@ -882,6 +887,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     
     for (EventsFilter * filter in arrayOfEventsFilters) {
         filter.drawerView.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"cat_overlay.png"]];
+        filter.drawerView.backgroundColor = [UIColor clearColor]; // TESTING PERFORMANCE HIT TESTING PERFORMANCE HIT TESTING PERFORMANCE HIT TESTING PERFORMANCE HIT TESTING PERFORMANCE HIT TESTING PERFORMANCE HIT TESTING PERFORMANCE HIT TESTING PERFORMANCE HIT TESTING PERFORMANCE HIT TESTING PERFORMANCE HIT TESTING PERFORMANCE HIT TESTING PERFORMANCE HIT TESTING PERFORMANCE HIT TESTING PERFORMANCE HIT TESTING PERFORMANCE HIT
         [filter.button setTitle:[filter.buttonText uppercaseString] forState:UIControlStateNormal];
         filter.button.titleLabel.font = [UIFont fontWithName:@"HelveticaNeueLTStd-MdCn" size:12.0];
         filter.button.adjustsImageWhenHighlighted = NO;
@@ -985,9 +991,9 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 
 - (void)viewWillDisappear:(BOOL)animated {
     [super viewWillDisappear:animated];
-    if (self.isDrawerOpen) {
-        [self toggleDrawerAnimated];
-    }
+//    if (self.isDrawerOpen) {
+//        [self toggleDrawerAnimated];
+//    } // I like this behavior less and less, especially when closing the drawer is what a user does to initiate an events reload (with newly adjusted filters).
     [self resignFirstResponder];
 }
 
@@ -1233,9 +1239,10 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     
 //    [self.tableView reloadSections:[NSIndexSet indexSetWithIndex:0] withRowAnimation:UITableViewRowAnimationFade];
     [self.tableView reloadData];
-//    [self.tableView scrollRectToVisible:CGRectMake(0, 0, 1, 1) animated:YES];
     if (!self.isSearchOn) {
         [self.tableView setContentOffset:CGPointMake(0, self.searchContainerView.bounds.size.height) animated:YES];        
+    } else {
+        [self.tableView scrollRectToVisible:CGRectMake(0, 0, 1, 1) animated:YES];
     }
     
     BOOL eventsRetrieved = self.eventsForCurrentSource && self.eventsForCurrentSource.count > 0;
@@ -1338,6 +1345,24 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     
     self.problemView.userInteractionEnabled = showView;
 //    [self setTableViewScrollable:!showView selectable:!showView];
+    
+}
+
+- (void) setDrawerReloadIndicatorViewIsVisible:(BOOL)isVisible animated:(BOOL)animated { // This method actually can't animate currently, given our new reload indicator style. We could update this later, although I'm not even sure we want to. A hard transition is fine for now.
+
+    void (^reloadIndicatorChangeBlock)(void) = ^{
+        [self.activeFilterHighlightsContainerView setHighlightImage:
+         (isVisible ? 
+          [UIImage imageNamed:@"filter_select_glow_green.png"] :
+          [UIImage imageNamed:@"filter_select_glow.png"])];
+//        self.drawerReloadIndicatorView.alpha = isVisible ? 0.75 : 0.0;
+    };
+    
+    if (animated) {
+        [UIView animateWithDuration:0.15 animations:reloadIndicatorChangeBlock];
+    } else {
+        reloadIndicatorChangeBlock();
+    }
     
 }
 
@@ -1468,6 +1493,8 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
         if (!self.isSearchOn && self.tableView.contentOffset.y < self.searchContainerView.bounds.size.height) {
             [self.tableView setContentOffset:CGPointMake(0, self.searchContainerView.bounds.size.height) animated:YES];
         }
+        self.shouldReloadOnDrawerClose = NO;
+        [self setDrawerReloadIndicatorViewIsVisible:self.shouldReloadOnDrawerClose animated:NO];
     } else {
         self.isDrawerOpen = NO;
         self.tapToHideDrawerGR.enabled = NO;
@@ -1480,6 +1507,15 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
         self.filtersContainerShadowCheatWayBelowView.alpha = 0.0;
         [self.dvLocationTextField resignFirstResponder];
         [self.dvLocationSearchTextField resignFirstResponder];
+        if (self.shouldReloadOnDrawerClose) {
+            if (!self.isSearchOn) {
+                // Browse mode, should reload...
+                [self webConnectGetEventsListWithCurrentOldFilterAndCategory];
+            } else {
+                // Search mode, should re-search...
+                [self searchExecutionRequestedByUser];
+            }
+        }
     }
     self.drawerScrollView.userInteractionEnabled = self.isDrawerOpen;
     
@@ -1934,6 +1970,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     self.cardPageViewController.coreDataModel = self.coreDataModel;
     self.cardPageViewController.delegate = self;
     self.cardPageViewController.hidesBottomBarWhenPushed = YES;
+    self.cardPageViewController.deleteAllowed = !self.isSearchOn;
     
     [self.webConnector sendLearnedDataAboutEvent:event.uri withUserAction:@"V"]; // Attempt to send the learning to our server.
     [self.webConnector getEventWithURI:event.uri]; // Attempt to get the full event info
@@ -2041,6 +2078,14 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     
     [self.navigationController popViewControllerAnimated:YES];
     
+}
+
+- (BOOL)tableView:(UITableView *)tableView canEditRowAtIndexPath:(NSIndexPath *)indexPath {
+    BOOL canEdit = YES;
+    if (tableView == self.tableView) {
+        canEdit = !(self.isSearchOn || self.isDrawerOpen);
+    }
+    return canEdit;
 }
 
 - (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath {
@@ -2335,6 +2380,9 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
         [self updateAdjustedSearchFiltersOrderedWithAdjustedFilter:filter selectedFilterOption:newSelectedOption];
     }
     
+    self.shouldReloadOnDrawerClose = YES;
+    [self setDrawerReloadIndicatorViewIsVisible:self.shouldReloadOnDrawerClose animated:self.isDrawerOpen];
+    
     if (!self.isSearchOn) {
         self.filtersSummaryStringBrowse = [self filtersSummaryStringForSource:EVENTS_SOURCE_BROWSE];
         [self updateFiltersSummaryLabelWithString:self.filtersSummaryStringBrowse];
@@ -2473,10 +2521,15 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     [UIView animateWithDuration:0.25 animations:^{
         self.filtersSummaryLabel.frame = filtersSummaryLabelFrame;
         self.filtersSummaryContainerView.frame = CGRectMake(self.filtersSummaryContainerView.frame.origin.x, self.view.bounds.size.height - filtersSummaryContainerViewHeight, self.filtersSummaryContainerView.frame.size.width, filtersSummaryContainerViewHeight);
-        UIEdgeInsets tableViewInset = self.tableView.contentInset;
-        tableViewInset.bottom = self.filtersSummaryContainerView.bounds.size.height;
-        self.tableView.contentInset = tableViewInset;
+
     }];
+    CGPoint tableViewContentOffset = self.tableView.contentOffset;
+    UIEdgeInsets tableViewInset = self.tableView.contentInset;
+    tableViewInset.bottom = self.filtersSummaryContainerView.bounds.size.height;
+    self.tableView.contentInset = tableViewInset;
+    if (!self.eventsForCurrentSource || self.eventsForCurrentSource.count == 0) {
+        self.tableView.contentOffset = tableViewContentOffset; // Fixing a very slight bug, which would result in the search bar being scrolled into view when there were no results in the table.
+    }
 
 }
 

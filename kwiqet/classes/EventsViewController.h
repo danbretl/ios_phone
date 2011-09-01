@@ -47,6 +47,7 @@
     EventsFilterOption * selectedTimeSearchFilterOption;
     EventsFilterOption * selectedLocationSearchFilterOption;
     BOOL isDrawerOpen;
+    BOOL shouldReloadOnDrawerClose;
     BOOL isSearchOn;
     BOOL problemViewWasShowing;
     NSString * oldFilterString;

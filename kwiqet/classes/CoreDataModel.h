@@ -69,6 +69,11 @@
 - (void) deleteRegularEventForURI:(NSString*)eventID;
 - (Place *) getPlaceWithURI:(NSString *)placeURI;
 
+// Events continued - Occurrences & the like
+- (NSArray *) getDistinctOccurrenceDatesForEvent:(Event *)event;
+- (NSArray *) getDistinctOccurrencePlacesForEvent:(Event *)event onDate:(NSDate *)date;
+- (NSArray *) getDistinctOccurrenceTimesForEvent:(Event *)event onDate:(NSDate *)date atPlace:(Place *)place;
+
 // Featured Events
 - (Event *) getFeaturedEvent;
 - (Event *) getOrCreateFeaturedEvent;

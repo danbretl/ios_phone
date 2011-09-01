@@ -459,6 +459,7 @@ CGFloat const FEV_DESCRIPTION_LABEL_PADDING_HORIZONTAL = 20.0;
     NSString * oldFeaturedImageLocation = [[currentFeatured.imageLocation copy] autorelease];
     [self.coreDataModel updateEvent:currentFeatured usingEventDictionary:featuredEventJSONDictionary featuredOverride:[NSNumber numberWithBool:YES] fromSearchOverride:[NSNumber numberWithBool:NO]];
     [self.coreDataModel updateEvent:currentFeatured withExhaustiveOccurrencesArray:[featuredEventJSONDictionary valueForKey:@"occurrences"]];
+    [self.coreDataModel coreDataSave];
     self.featuredEvent = currentFeatured;
     
     [DefaultsModel saveLastFeaturedEventGetDate:[NSDate date]];

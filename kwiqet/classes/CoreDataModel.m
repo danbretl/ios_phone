@@ -421,7 +421,7 @@
 
 - (void)updateEvent:(Event *)event withExhaustiveOccurrencesArray:(NSArray *)exhaustiveOccurrences {
     
-    NSLog(@"Update event %@ with occurrences %@", event, exhaustiveOccurrences);
+    NSLog(@"Update event withExhaustiveOccurrencesArray");
     
     [event removeOccurrences:event.occurrences]; // Does this suffice? Do we need to delete them more directly instead? This must take care of it.
     
@@ -461,11 +461,11 @@
         // Location - getting
         // NEED TO GET AND SET (and use in various places later) 'one_off_place' - NEED TO GET AND SET (and use in various places later) 'one_off_place' - NEED TO GET AND SET (and use in various places later) 'one_off_place' - NEED TO GET AND SET (and use in various places later) 'one_off_place' - NEED TO GET AND SET (and use in various places later) 'one_off_place' - NEED TO GET AND SET (and use in various places later) 'one_off_place' - NEED TO GET AND SET (and use in various places later) 'one_off_place' - NEED TO GET AND SET (and use in various places later) 'one_off_place' - NEED TO GET AND SET (and use in various places later) 'one_off_place' - NEED TO GET AND SET (and use in various places later) 'one_off_place' - NEED TO GET AND SET (and use in various places later) 'one_off_place' - NEED TO GET AND SET (and use in various places later) 'one_off_place'
         // Address first line
-        NSString * placeURI = [WebUtil stringOrNil:[[occurrence valueForKey:@"place"] valueForKey:@"resource_uri"]];
-        NSString * placeDescription = [WebUtil stringOrNil:[[occurrence valueForKey:@"place"] valueForKey:@"description"]];
-        NSString * placeEmail = [WebUtil stringOrNil:[[occurrence valueForKey:@"place"] valueForKey:@"email"]];
-        NSString * placeUnit = [WebUtil stringOrNil:[[occurrence valueForKey:@"place"] valueForKey:@"unit"]];
-        NSString * placeURL = [WebUtil stringOrNil:[[occurrence valueForKey:@"place"] valueForKey:@"url"]];
+        NSString * placeURI = [WebUtil stringOrNil:[[occurrenceDictionary valueForKey:@"place"] valueForKey:@"resource_uri"]];// NSLog(@"Place URI is %@", placeURI);
+        NSString * placeDescription = [WebUtil stringOrNil:[[occurrenceDictionary valueForKey:@"place"] valueForKey:@"description"]];
+        NSString * placeEmail = [WebUtil stringOrNil:[[occurrenceDictionary valueForKey:@"place"] valueForKey:@"email"]];
+        NSString * placeUnit = [WebUtil stringOrNil:[[occurrenceDictionary valueForKey:@"place"] valueForKey:@"unit"]];
+        NSString * placeURL = [WebUtil stringOrNil:[[occurrenceDictionary valueForKey:@"place"] valueForKey:@"url"]];
         // Address second line
         NSString * addressLineFirst = [WebUtil stringOrNil:[[[occurrenceDictionary valueForKey:@"place"] valueForKey:@"point"] valueForKey:@"address"]];
         NSString * cityString = [WebUtil stringOrNil:[[[[occurrenceDictionary valueForKey:@"place"] valueForKey:@"point"] valueForKey:@"city"] valueForKey:@"city"]];
@@ -477,30 +477,39 @@
         // Phone Number
         NSString * eventPhoneString = [WebUtil stringOrNil:[[occurrenceDictionary valueForKey:@"place"] valueForKey:@"phone"]];
         // Venue
-        NSString * venueString = [WebUtil stringOrNil:[[occurrenceDictionary valueForKey:@"place"]valueForKey:@"title"]];
+        NSString * venueString = [WebUtil stringOrNil:[[occurrenceDictionary valueForKey:@"place"] valueForKey:@"title"]];// NSLog(@"Place title is %@", venueString);
         // Location - setting
         Place * place = [self getPlaceWithURI:placeURI];
         if (place == nil) {
             place = [NSEntityDescription insertNewObjectForEntityForName:@"Place" inManagedObjectContext:self.managedObjectContext];
         }
-        occurrence.place = place;
-        occurrence.place.title = venueString;// ? venueString : event.venue;
-        occurrence.place.placeDescription = placeDescription;
-        occurrence.place.email = placeEmail;
-        occurrence.place.url = placeURL;
-        occurrence.place.address = addressLineFirst;// ? addressLineFirst : event.address;
-        occurrence.place.city = cityString;// ? cityString : event.city;
-        occurrence.place.state = stateString;// ? stateString : event.state;
-        occurrence.place.zip = zipCodeString;// ? zipCodeString : event.zip;
-        occurrence.place.unit = placeUnit;
-        occurrence.place.latitude = latitudeValue;// ? latitudeValue : event.latitude;
-        occurrence.place.longitude = longitudeValue;// ? longitudeValue : event.longitude;
-        occurrence.place.phone = eventPhoneString;// ? eventPhoneString : event.phone;
+        place.uri = placeURI;
+        place.title = venueString;
+        place.placeDescription = placeDescription;
+        place.email = placeEmail;
+        place.url = placeURL;
+        place.address = addressLineFirst;
+        place.city = cityString;
+        place.state = stateString;
+        place.zip = zipCodeString;
+        place.unit = placeUnit;
+        place.latitude = latitudeValue;
+        place.longitude = longitudeValue;
+        place.phone = eventPhoneString;
         
-        // Add the occurrence object
-        [event addOccurrencesObject:occurrence];
+        occurrence.place = place;
+        occurrence.event = event;
+        
+//        NSLog(@"Just set event %@ place to %@", event.title, occurrence.place.title);
 
     }
+    
+//    NSLog(@"Checking occurrences...");
+//    NSMutableString * occurrencesDebugString = [NSMutableString string];
+//    for (Occurrence * occurrence in event.occurrencesChronological) {
+//        [occurrencesDebugString appendFormat:@"\n(%@, %@, %@)", occurrence.startDate, occurrence.place.title, occurrence.startTime];
+//    }
+//    NSLog(@"Occurrences: %@", occurrencesDebugString);
     
 }
 
@@ -549,6 +558,33 @@
     NSPredicate * predicate = [NSPredicate predicateWithFormat:@"uri == %@ && featured == %@", eventID, self.coreDataNo];
     [self deleteEventsForPredicate:predicate];
     
+}
+
+// Events continued - Occurrences & the like
+- (NSArray *) getDistinctOccurrenceDatesForEvent:(Event *)event {
+    NSFetchRequest * fetchRequest = [[NSFetchRequest alloc] init];
+    NSEntityDescription * occurrenceEntity = [NSEntityDescription entityForName:@"Occurrence" inManagedObjectContext:self.managedObjectContext];
+    fetchRequest.entity = occurrenceEntity;
+    NSPropertyDescription * startDateProperty = [occurrenceEntity.attributesByName objectForKey:@"startDate"];
+    fetchRequest.propertiesToFetch = [NSArray arrayWithObject:startDateProperty];
+    fetchRequest.returnsDistinctResults = YES;
+    fetchRequest.sortDescriptors = [NSArray arrayWithObjects:
+                                    [NSSortDescriptor sortDescriptorWithKey:@"startDate" ascending:YES],
+                                    [NSSortDescriptor sortDescriptorWithKey:@"endDate" ascending:YES],
+                                    nil];
+    fetchRequest.predicate = [NSPredicate predicateWithFormat:@"event == %@", event];
+	NSError * error;
+	NSArray * fetchedObjects = [self.managedObjectContext executeFetchRequest:fetchRequest error:&error];
+    [fetchRequest release];
+    return fetchedObjects;
+}
+
+- (NSArray *) getDistinctOccurrencePlacesForEvent:(Event *)event onDate:(NSDate *)date {
+    return nil;
+}
+
+- (NSArray *) getDistinctOccurrenceTimesForEvent:(Event *)event onDate:(NSDate *)date atPlace:(Place *)place {
+    return nil;
 }
 
 /////////////////////

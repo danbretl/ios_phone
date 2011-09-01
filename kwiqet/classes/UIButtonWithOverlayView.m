@@ -45,7 +45,7 @@
 - (void) initWithFrameOrCoder {
     
     self.isShadowVisibleWhenButtonNormal = YES;
-    self.isShadowVisibleWhenButtonHighlighted = NO;
+    self.isShadowVisibleWhenButtonHighlighted = YES;
     
     self.backgroundColor = [UIColor clearColor];
     
@@ -131,6 +131,7 @@
 }
 
 - (void)buttonTouchEvent {
+//    NSLog(@"UIButtonWithOverlayView buttonTouchEvent");
     if (self.button.highlighted) {
         self.shadowPrivate.layer.shadowOpacity = self.isShadowVisibleWhenButtonHighlighted ? 0.5 : 0.0;
     } else {

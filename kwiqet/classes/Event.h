@@ -9,7 +9,7 @@
 #import <Foundation/Foundation.h>
 #import <CoreData/CoreData.h>
 
-@class Category, CategoryBreadcrumb, EventSummary, Occurrence;
+@class Category, CategoryBreadcrumb, EventSummary, Occurrence, Place;
 
 @interface Event : NSManagedObject {
 @private
@@ -27,6 +27,9 @@
 @property (nonatomic, retain) NSSet * concreteCategoryBreadcrumbs;
 
 @property (nonatomic, readonly) NSArray * occurrencesChronological;
+- (NSSet *) occurrencesNotOnDate:(NSDate *)dateNotToMatch;
+- (NSSet *) occurrencesOnDate:(NSDate *)dateToMatch notAtPlace:(Place *)placeNotToMatch;
+- (NSSet *) occurrencesOnDate:(NSDate *)dateToMatch atPlace:(Place *)placeToMatch notAtTime:(NSDate *)timeNotToMatch;
 
 @end
 

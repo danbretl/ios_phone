@@ -19,6 +19,7 @@
 #import "Occurrence.h"
 #import "Place.h"
 #import "Price.h"
+#import "OccurrenceDateCell.h"
 
 #define CGFLOAT_MAX_TEXT_SIZE 10000
 
@@ -37,6 +38,7 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
 @property (retain) IBOutlet UIButton * deleteButton;
 @property (retain) IBOutlet UIScrollView * scrollView;
 @property (retain) IBOutlet ElasticUILabel * titleBar;
+@property (retain) UIView * shadowTitleBar;
 @property (retain) IBOutlet UIImageView * imageView;
 @property (retain) IBOutlet UIView * breadcrumbsBar;
 @property (retain) IBOutlet UILabel * breadcrumbsLabel;
@@ -46,14 +48,18 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
 @property (retain) IBOutlet UIView   * occurrenceInfoPlaceholderView;
 @property (retain) IBOutlet UIButton * occurrenceInfoPlaceholderRetryButton;
 @property (retain) IBOutlet UIView   * dateContainer;
+@property (retain) IBOutlet UIButton * dateOccurrenceInfoButton;
 @property (retain) IBOutlet UILabel  * monthLabel;
 @property (retain) IBOutlet UILabel  * dayNumberLabel;
 @property (retain) IBOutlet UILabel  * dayNameLabel;
 @property (retain) IBOutlet UIView   * timeContainer;
 @property (retain) IBOutlet UILabel  * timeLabel;
+@property (retain) IBOutlet UIButton * timeOccurrenceInfoButton;
 @property (retain) IBOutlet UIView   * priceContainer;
+@property (retain) IBOutlet UIButton * priceOccurrenceInfoButton;
 @property (retain) IBOutlet UILabel  * priceLabel;
 @property (retain) IBOutlet UIView   * locationContainer;
+@property (retain) IBOutlet UIButton * locationOccurrenceInfoButton;
 @property (retain) IBOutlet UILabel  * venueLabel;
 @property (retain) IBOutlet UILabel  * addressLabel;
 @property (retain) IBOutlet UILabel  * cityStateZipLabel;
@@ -63,6 +69,30 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
 @property (retain) IBOutlet UIView   * descriptionBackgroundColorView;
 @property (retain) IBOutlet UILabel  * descriptionLabel;
 @property (retain) UIView * shadowDescriptionContainer;
+@property (retain) UIView * darkOverlayViewForMainView;
+@property (retain) UIView * darkOverlayViewForScrollView;
+@property (retain) UISwipeGestureRecognizer * swipeToPullInOccurrencesControls;
+@property (retain) UISwipeGestureRecognizer * swipeToPushOutOccurrencesControls;
+@property (retain) UITapGestureRecognizer * tapToPullInOccurrencesControls;
+@property BOOL occurrencesControlsVisible;
+@property (retain) IBOutlet UIView * occurrencesControlsContainer;
+@property (retain) IBOutlet UIView * occurrencesControlsNavBar;
+@property (retain) IBOutlet UIView * occurrencesControlsTableViewContainer;
+@property (retain) IBOutlet UIView * occurrencesControlsTableViewOverlay;
+@property (retain) IBOutlet UIView * occurrencesControlsDatesVenuesTableViewContainer;
+@property (retain) IBOutlet UITableView * occurrencesControlsDatesTableView;
+@property (retain) IBOutlet UITableView * occurrencesControlsVenuesTableView;
+@property (retain) IBOutlet UIView * occurrencesControlsTimesTableViewContainer;
+@property (retain) IBOutlet UITableView * occurrencesControlsTimesTableView;
+@property (nonatomic, retain) WebActivityView * webActivityView;
+@property (retain) MapViewController * mapViewController;
+@property (nonatomic, readonly) WebConnector * webConnector;
+@property (nonatomic, readonly) WebDataTranslator * webDataTranslator;
+@property (nonatomic, readonly) UIAlertView * connectionErrorOnUserActionRequestAlertView;
+@property (retain) UIActionSheet  * letsGoChoiceActionSheet;
+@property (retain) NSMutableArray * letsGoChoiceActionSheetSelectors;
+@property (retain) UIActionSheet  * shareChoiceActionSheet;
+@property (retain) NSMutableArray * shareChoiceActionSheetSelectors;
 
 - (IBAction) backButtonTouched;
 - (IBAction) logoButtonTouched;
@@ -72,29 +102,19 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
 - (IBAction) phoneButtonTouched;
 - (IBAction) mapButtonTouched;
 - (IBAction) occurrenceInfoRetryButtonTouched;
-
-@property (nonatomic, retain) WebActivityView * webActivityView;
-@property (retain) MapViewController * mapViewController;
-@property (nonatomic, readonly) WebConnector * webConnector;
-@property (nonatomic, readonly) WebDataTranslator * webDataTranslator;
-@property (nonatomic, readonly) UIAlertView * connectionErrorOnUserActionRequestAlertView;
-//@property (retain) UIImage * imageFull;
-@property (retain) NSURLConnection * loadImageURLConnection;
-@property (retain) NSMutableData * loadImageData;
+- (IBAction) occurrenceInfoButtonTouched:(UIButton *)occurrenceInfoButton;
+- (void) swipedToGoBack:(UISwipeGestureRecognizer *)swipeGesture;
+- (void) swipedToPullInOccurrencesControls:(UISwipeGestureRecognizer *)swipeGesture;
+- (void) tappedToPullInOccurrencesControls:(UITapGestureRecognizer *)tapGesture;
+- (void) userActionOccurredToPullInOccurrencesControls:(UIGestureRecognizer *)gesture horizontalForgiveness:(CGFloat)horizontalForgiveness;
+- (void) swipedToPushOutOccurrencesControls:(UISwipeGestureRecognizer *)swipeGesture;
+- (void) toggleOccurrencesControls;
 - (void) displayImage:(UIImage *)image;
-
-@property (retain) UIActionSheet  * letsGoChoiceActionSheet;
-@property (retain) NSMutableArray * letsGoChoiceActionSheetSelectors;
-@property (retain) UIActionSheet  * shareChoiceActionSheet;
-@property (retain) NSMutableArray * shareChoiceActionSheetSelectors;
 - (void) pushedToAddToCalendar;
 - (void) pushedToCreateFacebookEvent;
 - (void) pushedToShareViaEmail;
 - (void) pushedToShareViaFacebook;
 - (void) setOccurrenceInfoContainerIsVisible:(BOOL)isVisible animated:(BOOL)animated;
-
-//- (void) loadImage;
-
 - (void) facebookEventCreateSuccess:(NSNotification *)notification;
 - (void) facebookEventCreateFailure:(NSNotification *)notification;
 - (void) facebookEventInviteSuccess:(NSNotification *)notification;
@@ -105,7 +125,11 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
 
 @implementation EventViewController
 
-@synthesize backgroundColorView, navigationBar, backButton, logoButton, actionBar, letsGoButton, shareButton, deleteButton, scrollView, titleBar, imageView, breadcrumbsBar, breadcrumbsLabel, occurrenceInfoContainer, occurrenceInfoContainerRegularHeight, occurrenceInfoContainerCollapsedHeight, occurrenceInfoPlaceholderView, occurrenceInfoPlaceholderRetryButton, dateContainer, monthLabel, dayNumberLabel, dayNameLabel, timeContainer, timeLabel, priceContainer, priceLabel, locationContainer, venueLabel, addressLabel, cityStateZipLabel, phoneNumberButton, mapButton, descriptionContainer, descriptionBackgroundColorView, descriptionLabel, shadowDescriptionContainer;
+@synthesize backgroundColorView, navigationBar, backButton, logoButton, actionBar, letsGoButton, shareButton, deleteButton, scrollView, titleBar, shadowTitleBar, imageView, breadcrumbsBar, breadcrumbsLabel, occurrenceInfoContainer, occurrenceInfoContainerRegularHeight, occurrenceInfoContainerCollapsedHeight, occurrenceInfoPlaceholderView, occurrenceInfoPlaceholderRetryButton, dateContainer, dateOccurrenceInfoButton, monthLabel, dayNumberLabel, dayNameLabel, timeContainer, timeOccurrenceInfoButton, timeLabel, priceContainer, priceOccurrenceInfoButton, priceLabel, locationContainer, locationOccurrenceInfoButton, venueLabel, addressLabel, cityStateZipLabel, phoneNumberButton, mapButton, descriptionContainer, descriptionBackgroundColorView, descriptionLabel, shadowDescriptionContainer;
+@synthesize darkOverlayViewForMainView, darkOverlayViewForScrollView;
+@synthesize swipeToPullInOccurrencesControls, swipeToPushOutOccurrencesControls, tapToPullInOccurrencesControls;
+@synthesize occurrencesControlsVisible;
+@synthesize occurrencesControlsContainer, occurrencesControlsNavBar, occurrencesControlsTableViewContainer, occurrencesControlsTableViewOverlay, occurrencesControlsDatesVenuesTableViewContainer, occurrencesControlsDatesTableView, occurrencesControlsVenuesTableView, occurrencesControlsTimesTableViewContainer, occurrencesControlsTimesTableView;
 
 @synthesize event;
 @synthesize webActivityView;
@@ -113,9 +137,8 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
 @synthesize coreDataModel;
 @synthesize mapViewController;
 @synthesize facebookManager;
-//@synthesize imageFull;
-@synthesize loadImageURLConnection, loadImageData;
 @synthesize letsGoChoiceActionSheet, letsGoChoiceActionSheetSelectors, shareChoiceActionSheet, shareChoiceActionSheetSelectors;
+@synthesize deleteAllowed=deleteAllowed_;
 
 - (void)dealloc {
     [backgroundColorView release];
@@ -128,6 +151,7 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
     [deleteButton release];
     [scrollView release];
     [titleBar release];
+    [shadowTitleBar release];
     [imageView release];
     [breadcrumbsBar release];
     [breadcrumbsLabel release];
@@ -135,14 +159,18 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
     [occurrenceInfoPlaceholderView release];
     [occurrenceInfoPlaceholderRetryButton release];
     [dateContainer release];
+    [dateOccurrenceInfoButton release];
     [monthLabel release];
     [dayNumberLabel release];
     [dayNameLabel release];
     [timeContainer release];
+    [timeOccurrenceInfoButton release];
     [timeLabel release];
     [priceContainer release];
+    [priceOccurrenceInfoButton release];
     [priceLabel release];
     [locationContainer release];
+    [locationOccurrenceInfoButton release];
     [venueLabel release];
     [addressLabel release];
     [cityStateZipLabel release];
@@ -152,22 +180,31 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
     [descriptionBackgroundColorView release];
     [descriptionLabel release];
     [shadowDescriptionContainer release];
-    
+    [darkOverlayViewForMainView release];
+    [darkOverlayViewForScrollView release];
+    [occurrencesControlsContainer release];
+    [occurrencesControlsNavBar release];
+    [occurrencesControlsTableViewContainer release]; 
+    [occurrencesControlsTableViewOverlay release];
+    [occurrencesControlsDatesVenuesTableViewContainer release];
+    [occurrencesControlsDatesTableView release];
+    [occurrencesControlsVenuesTableView release];
+    [occurrencesControlsTimesTableViewContainer release];
+    [occurrencesControlsTimesTableView release];
+    [swipeToPullInOccurrencesControls release];
+    [swipeToPushOutOccurrencesControls release];
+    [tapToPullInOccurrencesControls release];
     [event release];
     [webActivityView release];
     [connectionErrorOnUserActionRequestAlertView release];
     [mapViewController release];
-    [webConnector release]; // ---?
+    [webConnector release];
     [webDataTranslator release];
     [facebookManager release];
-//    [imageFull release];
-    [loadImageURLConnection release];
-    [loadImageData release];
     [letsGoChoiceActionSheet release];
     [letsGoChoiceActionSheetSelectors release];
     [shareChoiceActionSheet release];
     [shareChoiceActionSheetSelectors release];
-
     [super dealloc];
 	
 }
@@ -177,6 +214,7 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
     if (self) {
         // Custom initialization
+        self.deleteAllowed = YES;
     }
     return self;
 }
@@ -207,22 +245,22 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
     shadowActionBar.layer.shouldRasterize = YES;
     [self.view insertSubview:shadowActionBar aboveSubview:self.backgroundColorView];
     [shadowActionBar release];
+    // Delete button
+    self.deleteButton.enabled = self.deleteAllowed;
     
     // Title bar shadow
-    UIView * shadowTitleBar = [[UIView alloc] initWithFrame:
-                               CGRectMake(self.titleBar.frame.origin.x, 
-                                          self.titleBar.frame.origin.y+1, 
-                                          self.titleBar.frame.size.width, 
-                                          self.titleBar.frame.size.height-1)];
-    shadowTitleBar.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleBottomMargin;
-    shadowTitleBar.backgroundColor = [UIColor blackColor];
-    shadowTitleBar.layer.shadowColor = [UIColor blackColor].CGColor;
-    shadowTitleBar.layer.shadowOffset = CGSizeMake(0, 0);
-    shadowTitleBar.layer.shadowOpacity = 0.55;
-    shadowTitleBar.layer.shouldRasterize = YES;
-    [self.scrollView addSubview:shadowTitleBar];
-    [self.scrollView sendSubviewToBack:shadowTitleBar];
-    [shadowTitleBar release];
+    shadowTitleBar = [[UIView alloc] initWithFrame:
+                      CGRectMake(self.titleBar.frame.origin.x, 
+                                 self.titleBar.frame.origin.y+1, 
+                                 self.titleBar.frame.size.width, 
+                                 self.titleBar.frame.size.height-2)];
+    self.shadowTitleBar.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleBottomMargin;
+    self.shadowTitleBar.backgroundColor = [UIColor blackColor];
+    self.shadowTitleBar.layer.shadowColor = [UIColor blackColor].CGColor;
+    self.shadowTitleBar.layer.shadowOffset = CGSizeMake(0, 0);
+    self.shadowTitleBar.layer.shadowOpacity = 0.55;
+    self.shadowTitleBar.layer.shouldRasterize = YES;
+    [self.scrollView insertSubview:self.shadowTitleBar belowSubview:self.titleBar];
     
     // Title bar bottom border
     // - Currently disabled... I think we need to revisit this (very minor) design element.
@@ -236,6 +274,7 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
     
     // Image view gesture recognizer
     UISwipeGestureRecognizer * swipeToGoBack = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(swipedToGoBack:)];
+    swipeToGoBack.direction = UISwipeGestureRecognizerDirectionRight;
     [self.imageView addGestureRecognizer:swipeToGoBack];
     [swipeToGoBack release];
     
@@ -258,6 +297,7 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
     self.timeLabel.font= [UIFont fontWithName:@"HelveticaNeue" size:16];
     
     // Price views
+    self.priceOccurrenceInfoButton.enabled = NO;
     self.priceLabel.font= [UIFont fontWithName:@"HelveticaNeue" size:14];
                 
     // Location views
@@ -267,6 +307,48 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
     
     // Phone number button
     self.phoneNumberButton.titleLabel.font = [UIFont fontWithName:@"HelveticaNeueLTStd-BdCn" size:12];
+    
+    // Occurrences controls
+    [self.scrollView insertSubview:self.occurrencesControlsContainer belowSubview:self.titleBar];
+    self.occurrencesControlsContainer.frame = CGRectMake(self.scrollView.bounds.size.width - 16, CGRectGetMaxY(self.occurrenceInfoContainer.frame) - self.occurrencesControlsContainer.frame.size.height, self.occurrencesControlsContainer.frame.size.width, self.occurrencesControlsContainer.frame.size.height);
+    self.occurrencesControlsContainer.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"occurrences_mockup_shape.png"]];
+    self.occurrencesControlsContainer.opaque = NO;
+    self.occurrencesControlsContainer.layer.opaque = NO;
+    self.occurrencesControlsTableViewOverlay.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"occurrences_controls_table_view_overlay.png"]];
+    self.occurrencesControlsTableViewOverlay.opaque = NO;
+    self.occurrencesControlsTableViewOverlay.layer.opaque = NO;
+    [self.occurrencesControlsTableViewContainer insertSubview:self.occurrencesControlsDatesVenuesTableViewContainer belowSubview:self.occurrencesControlsTableViewOverlay];
+    self.occurrencesControlsDatesVenuesTableViewContainer.frame = self.occurrencesControlsTableViewContainer.bounds;
+    [self.occurrencesControlsDatesTableView selectRowAtIndexPath:[NSIndexPath indexPathForRow:0 inSection:0] animated:NO scrollPosition:UITableViewScrollPositionMiddle];
+    [self.occurrencesControlsVenuesTableView selectRowAtIndexPath:[NSIndexPath indexPathForRow:0 inSection:0] animated:NO scrollPosition:UITableViewScrollPositionMiddle];
+    
+    // Occurrences controls gesture recognizers
+    // Swipe to pull in
+    swipeToPullInOccurrencesControls = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(swipedToPullInOccurrencesControls:)];
+    self.swipeToPullInOccurrencesControls.direction = UISwipeGestureRecognizerDirectionLeft;
+    [self.scrollView addGestureRecognizer:self.swipeToPullInOccurrencesControls];
+    // Swipe to push out
+    swipeToPushOutOccurrencesControls = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(swipedToPushOutOccurrencesControls:)];
+    self.swipeToPushOutOccurrencesControls.direction = UISwipeGestureRecognizerDirectionRight;
+    [self.occurrencesControlsContainer addGestureRecognizer:self.swipeToPushOutOccurrencesControls];
+    // Tap to pull in
+    tapToPullInOccurrencesControls = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(tappedToPullInOccurrencesControls:)];
+    self.tapToPullInOccurrencesControls.cancelsTouchesInView = NO;
+    [self.scrollView addGestureRecognizer:self.tapToPullInOccurrencesControls];
+    
+    // Dark overlay views for when occurrence controls are showing
+    // To be subview of main view (above everything else)
+    darkOverlayViewForMainView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, self.view.bounds.size.width, CGRectGetMaxY(self.actionBar.frame) + self.titleBar.bounds.size.height)];
+    self.darkOverlayViewForMainView.backgroundColor = [UIColor colorWithWhite:0.0 alpha:0.8];
+    self.darkOverlayViewForMainView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleBottomMargin;
+    self.darkOverlayViewForMainView.alpha = 0.0;
+    [self.view insertSubview:self.darkOverlayViewForMainView aboveSubview:self.scrollView];
+    // To be subview of scroll view (just below occurrencesControlsContainer)
+    darkOverlayViewForScrollView = [[UIView alloc] initWithFrame:self.scrollView.bounds];
+    self.darkOverlayViewForScrollView.backgroundColor = self.darkOverlayViewForMainView.backgroundColor;
+    self.darkOverlayViewForScrollView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+    self.darkOverlayViewForScrollView.alpha = 0.0;
+    [self.scrollView insertSubview:self.darkOverlayViewForScrollView belowSubview:self.occurrencesControlsContainer];
     
     // Event description views
     self.descriptionLabel.font = [UIFont fontWithName:@"HelveticaNeueLTStd-MdCn" size:18];
@@ -298,6 +380,10 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(facebookAuthFailure:) name:FBM_AUTH_ERROR_KEY object:nil];
     
 }
+
+//- (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
+//    NSLog(@"touches");
+//}
 
 - (void) viewDidDisappear:(BOOL)animated {
     [super viewDidDisappear:animated];
@@ -336,12 +422,18 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
 //    [self showWebLoadingViews]; // This is unnecessary.
 }
 
+- (void)setDeleteAllowed:(BOOL)deleteAllowed {
+    deleteAllowed_ = deleteAllowed;
+    self.deleteButton.enabled = self.deleteAllowed;
+}
+
 - (void) webConnector:(WebConnector *)webConnector getAllOccurrencesSuccess:(ASIHTTPRequest *)request forEventURI:(NSString *)eventURI {
 
     NSString * responseString = [request responseString];
     NSError *error = nil;
     NSDictionary * responseDictionary = [responseString yajl_JSONWithOptions:YAJLParserOptionsAllowComments error:&error];
     [self.coreDataModel updateEvent:self.event withExhaustiveOccurrencesArray:[responseDictionary valueForKey:@"objects"]];
+    [self.coreDataModel coreDataSave];
     [self updateViewsFromDataAnimated:YES];
     if ([[[responseDictionary objectForKey:@"meta"] valueForKey:@"total_count"] isEqualToNumber:[NSNumber numberWithInt:0]]) {
         [self.occurrenceInfoPlaceholderRetryButton setTitle:@"There are no occurrences for this event!" forState:UIControlStateNormal];
@@ -448,6 +540,17 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
         [self.phoneNumberButton setTitle:phone forState:UIControlStateNormal];
         self.phoneNumberButton.enabled = havePhoneNumber;
         
+        self.dateOccurrenceInfoButton.enabled = [self.event occurrencesNotOnDate:firstOccurrence.startDate].count > 0;
+        self.locationOccurrenceInfoButton.enabled = [self.event occurrencesOnDate:firstOccurrence.startDate notAtPlace:firstOccurrence.place].count > 0;
+        self.timeOccurrenceInfoButton.enabled = [self.event occurrencesOnDate:firstOccurrence.startDate atPlace:firstOccurrence.place notAtTime:firstOccurrence.startTime].count > 0;
+        self.occurrencesControlsContainer.hidden = !(self.dateOccurrenceInfoButton.enabled || self.locationOccurrenceInfoButton.enabled || self.timeOccurrenceInfoButton.enabled);
+        self.swipeToPullInOccurrencesControls.enabled = !self.occurrencesControlsContainer.hidden;
+        self.swipeToPushOutOccurrencesControls.enabled = self.swipeToPullInOccurrencesControls.enabled;
+        self.tapToPullInOccurrencesControls.enabled = self.swipeToPullInOccurrencesControls.enabled && !self.occurrencesControlsVisible;
+        [self.occurrencesControlsDatesTableView reloadData];
+        [self.occurrencesControlsVenuesTableView reloadData];
+        [self.occurrencesControlsTimesTableView reloadData];
+        
     } else {
         
         self.monthLabel.text = @"";
@@ -463,7 +566,17 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
         self.mapButton.enabled = NO;
         self.mapButton.alpha = 0.0;
         
+        self.dateOccurrenceInfoButton.enabled = NO;
+        self.locationOccurrenceInfoButton.enabled = NO;
+        self.timeOccurrenceInfoButton.enabled = NO;
+        self.occurrencesControlsContainer.hidden = YES;
+        
     }
+    
+    // Adjust the scroll view scroll indicator insets for the occurrences controls
+    UIEdgeInsets scrollViewScrollIndicatorInsets = self.scrollView.scrollIndicatorInsets;
+    scrollViewScrollIndicatorInsets.bottom = self.occurrencesControlsContainer.hidden ? 0 : self.occurrencesControlsContainer.frame.size.height + (self.scrollView.bounds.size.height - CGRectGetMaxY(self.occurrencesControlsContainer.frame)) - 40;// * 2;
+    self.scrollView.scrollIndicatorInsets = scrollViewScrollIndicatorInsets;
     
     // Description
     NSString * descriptionString = self.event.eventDescription ? self.event.eventDescription : EVENT_DESCRIPTION_NOT_AVAILABLE;
@@ -480,8 +593,8 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
     self.shadowDescriptionContainer.frame = CGRectMake(self.descriptionContainer.frame.origin.x, self.descriptionContainer.frame.origin.y, self.descriptionContainer.frame.size.width, self.descriptionContainer.frame.size.height-1);
     
     [self setOccurrenceInfoContainerIsVisible:(firstOccurrence != nil) animated:animated];
-    
-    [self.scrollView setContentSize:CGSizeMake(self.scrollView.bounds.size.width, CGRectGetMaxY(self.descriptionContainer.frame))];
+
+    self.scrollView.contentSize = CGSizeMake(self.scrollView.bounds.size.width, CGRectGetMaxY(self.descriptionContainer.frame));
     
     // Breadcrumbs
     NSMutableString * breadcrumbsString = [[self.event.concreteParentCategory.title mutableCopy] autorelease];
@@ -534,88 +647,11 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
     
 }
 
-- (void) set {
-    
-}
-
-//- (void)loadImage {
-//    
-//    NSString * imageLocation = self.event.imageLocation;
-//    
-//    if (imageLocation != nil) {
-////        // First, check to see if the image has been saved locally
-////        BOOL imageExistsLocally = [LocalImagesManager eventImageExistsFromSourceLocation:imageLocation];
-////        if (imageExistsLocally) {
-////            self.imageFull = [LocalImagesManager loadEventImageDataFromSourceLocation:imageLocation];
-////            NSLog(@"EventViewController about to displayImage from loadImage when image is saved locally");
-////            [self displayImage:self.imageFull];
-////        } else {
-//        NSLog(@"current disk usage = %d", [[NSURLCache sharedURLCache] currentMemoryUsage]);
-//            NSURL * imageURL = [URLBuilder imageURLForImageLocation:self.event.imageLocation];
-//            NSURLRequest * request = [NSURLRequest requestWithURL:imageURL];
-//            self.loadImageURLConnection = [[[NSURLConnection alloc] initWithRequest:request delegate:self] autorelease];
-//            if (self.loadImageURLConnection) {
-//                self.loadImageData = [NSMutableData data];
-//                // Wait for response...
-//            } else {
-//                // Error
-//                self.imageFull = [UIImage imageNamed:@"event_img_placeholder.png"];
-//                NSLog(@"EventViewController about to displayImage from loadImage when there was an error making NSURLConnection");
-//                [self displayImage:self.imageFull];
-//            }
-////        }
-//    } else {
-//        self.imageFull = [UIImage imageNamed:@"event_img_placeholder.png"];
-//        NSLog(@"EventViewController about to displayImage from loadImage when imageLocation is nil");
-//        [self displayImage:self.imageFull];
-//    }
-//
-//}
-
-//- (void)connection:(NSURLConnection *)connection didReceiveResponse:(NSURLResponse *)response {
-//    if (connection == self.loadImageURLConnection) {
-//        NSLog(@"EventViewController connection...didReceiveResponse");
-//        // This method is called when the server has determined that it has enough information to create the NSURLResponse.
-//        // It can be called multiple times, for example in the case of a redirect, so each time we reset the data.
-//        [self.loadImageData setLength:0];
-//    }
-//}
-//
-//- (NSCachedURLResponse *)connection:(NSURLConnection *)connection willCacheResponse:(NSCachedURLResponse *)cachedResponse {
-//    NSLog(@"EventViewController connection...willCacheResponse");
-//    if (connection == self.loadImageURLConnection) {
-//        NSLog(@"EventViewController connection...willCacheResponse (and it's the NSURLConnection we care about)");
-//    }
-//    return cachedResponse;
-//}
-//
-//- (void)connection:(NSURLConnection *)connection didReceiveData:(NSData *)data {
-//    if (connection == self.loadImageURLConnection) {
-//        [self.loadImageData appendData:data];
-//    }
-//}
-//
-//- (void)connectionDidFinishLoading:(NSURLConnection *)connection {
-//    NSLog(@"EventViewController connectionDidFinishLoading:%@", connection);
-//    self.imageFull = [UIImage imageWithData:self.loadImageData];
-////    [LocalImagesManager saveEventImageData:self.loadImageData sourceLocation:self.event.imageLocation];
-//    NSLog(@"EventViewController about to displayImage from connectionDidFinishLoading");
-//    [self displayImage:self.imageFull];
-//}
-//
-//- (void)connection:(NSURLConnection *)connection didFailWithError:(NSError *)error {
-//    if (connection == self.loadImageURLConnection) {
-//        self.imageFull = [UIImage imageNamed:@"event_img_placeholder.png"];
-//        NSLog(@"EventViewController about to displayImage from connection...didFailWithError, using placeholder image");
-//        [self displayImage:self.imageFull];
-//    }
-//}
-
 - (void)displayImage:(UIImage *)image {
     //NSLog(@"image is %f by %f", image.size.width, image.size.height);
     NSLog(@"EventViewController displayImage:%@ (%fx%f)", image, image.size.width, image.size.height);
 	[self.imageView setImage:image];
-    [self.scrollView bringSubviewToFront:self.titleBar];
+//    [self.scrollView bringSubviewToFront:self.titleBar];
 }
 
 - (WebConnector *) webConnector {
@@ -634,10 +670,64 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
 }
 
 - (void) swipedToGoBack:(UISwipeGestureRecognizer *)swipeGesture {
-//    NSLog(@"foo");
-    if (swipeGesture.direction == UISwipeGestureRecognizerDirectionRight) {
-        [self viewControllerIsFinished];
+    [self viewControllerIsFinished];
+}
+
+- (void) swipedToPullInOccurrencesControls:(UISwipeGestureRecognizer *)swipeGesture {
+    NSLog(@"swipedToPullInOccurrencesControls");
+    [self userActionOccurredToPullInOccurrencesControls:swipeGesture horizontalForgiveness:30];
+}
+
+- (void) tappedToPullInOccurrencesControls:(UITapGestureRecognizer *)tapGesture {
+    NSLog(@"tappedToPullInOccurrencesControls");
+    CGRect mapButtonFrameInScrollView = [self.scrollView convertRect:self.mapButton.frame fromView:self.mapButton.superview]; // THIS ASSUMES THAT THE MAP BUTTON IS THE RIGHTMOST BUTTON IN OUR VIEW.
+    NSLog(@"%@, %f", NSStringFromCGRect(mapButtonFrameInScrollView), CGRectGetMinX(self.occurrencesControlsContainer.frame) - CGRectGetMaxX(mapButtonFrameInScrollView));
+    [self userActionOccurredToPullInOccurrencesControls:tapGesture horizontalForgiveness:CGRectGetMinX(self.occurrencesControlsContainer.frame) - CGRectGetMaxX(mapButtonFrameInScrollView)];
+}
+
+- (void) userActionOccurredToPullInOccurrencesControls:(UIGestureRecognizer *)gesture horizontalForgiveness:(CGFloat)horizontalForgiveness {
+    CGPoint location = [gesture locationInView:self.scrollView];
+    NSLog(@"userActionOccurredToPullInOccurrencesControls PROPOSED - %@ in %@", NSStringFromCGPoint(location), NSStringFromCGRect(CGRectMake(CGRectGetMinX(self.occurrencesControlsContainer.frame) - horizontalForgiveness, self.occurrencesControlsContainer.frame.origin.y + 40, horizontalForgiveness + (self.occurrencesControlsContainer.superview.bounds.size.width - CGRectGetMinX(self.occurrencesControlsContainer.frame)), self.occurrencesControlsContainer.frame.size.height - 40 - 5)));
+    if (CGRectContainsPoint(CGRectMake(CGRectGetMinX(self.occurrencesControlsContainer.frame) - horizontalForgiveness, 
+                                       self.occurrencesControlsContainer.frame.origin.y + 40, 
+                                       horizontalForgiveness + (self.occurrencesControlsContainer.superview.bounds.size.width - CGRectGetMinX(self.occurrencesControlsContainer.frame)), 
+                                       self.occurrencesControlsContainer.frame.size.height - 40 - 5), location) &&
+        !self.occurrencesControlsVisible) {
+        NSLog(@"userActionOccurredToPullInOccurrencesControls ACCEPTED - %@ in %@", NSStringFromCGPoint(location), NSStringFromCGRect(CGRectMake(CGRectGetMinX(self.occurrencesControlsContainer.frame) - horizontalForgiveness, self.occurrencesControlsContainer.frame.origin.y + 40, horizontalForgiveness + (self.occurrencesControlsContainer.superview.bounds.size.width - CGRectGetMinX(self.occurrencesControlsContainer.frame)), self.occurrencesControlsContainer.frame.size.height - 40 - 5)));
+        [self toggleOccurrencesControls];
     }
+}
+
+
+- (void) swipedToPushOutOccurrencesControls:(UISwipeGestureRecognizer *)swipeGesture {
+    NSLog(@"swipedToPushOutOccurrencesControls");
+    if (self.occurrencesControlsVisible) {
+        [self toggleOccurrencesControls];
+    }
+}
+
+
+- (void) toggleOccurrencesControls {
+    NSLog(@"toggleOccurrencesControls - switch visible from %d to %d", self.occurrencesControlsVisible, !self.occurrencesControlsVisible);
+    self.occurrencesControlsVisible = !self.occurrencesControlsVisible;
+    self.scrollView.scrollEnabled = !self.occurrencesControlsVisible;
+    self.tapToPullInOccurrencesControls.enabled = !self.occurrencesControlsVisible;
+    self.darkOverlayViewForScrollView.frame = CGRectMake(0, CGRectGetMaxY(self.titleBar.frame), self.scrollView.bounds.size.width, self.scrollView.bounds.size.height);
+    [UIView animateWithDuration:0.25 delay:0.0 options:UIViewAnimationOptionBeginFromCurrentState animations:^{
+        CGRect occurrencesControlsContainerFrame = self.occurrencesControlsContainer.frame;
+        if (self.occurrencesControlsVisible) {
+            occurrencesControlsContainerFrame.origin.x = -16;
+            self.darkOverlayViewForMainView.alpha = 1.0;
+            self.darkOverlayViewForScrollView.alpha = 1.0;
+            [[UIApplication sharedApplication] setStatusBarStyle:UIStatusBarStyleBlackOpaque animated:YES];
+        } else {
+            occurrencesControlsContainerFrame.origin.x = self.scrollView.bounds.size.width - 16;
+            self.darkOverlayViewForMainView.alpha = 0.0;
+            self.darkOverlayViewForScrollView.alpha = 0.0;
+            [[UIApplication sharedApplication] setStatusBarStyle:UIStatusBarStyleDefault animated:YES];
+        }
+        self.occurrencesControlsContainer.frame = occurrencesControlsContainerFrame;
+    } completion:^(BOOL finished){}];
 }
 
 //delete event from core data and revert back to table
@@ -941,6 +1031,10 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
     [self.occurrenceInfoPlaceholderRetryButton setTitle:EVC_OCCURRENCE_INFO_LOADING_STRING forState:UIControlStateNormal];
 }
 
+- (void) occurrenceInfoButtonTouched:(UIButton *)occurrenceInfoButton {
+    [self toggleOccurrencesControls];
+}
+
 - (UIAlertView *)connectionErrorOnUserActionRequestAlertView {
     if (connectionErrorOnUserActionRequestAlertView == nil) {
         connectionErrorOnUserActionRequestAlertView = [[UIAlertView alloc] initWithTitle:@"Connection Error" message:@"Sorry, due to a connection error, we could not complete your request. Please check your settings and try again." delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil];
@@ -949,11 +1043,26 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
 }
 
 - (void)scrollViewDidScroll:(UIScrollView *)theScrollView {
-
+    
     if (theScrollView == self.scrollView) {
+        // Adjust title bar frame
         CGRect titleBarFrame = self.titleBar.frame;
         titleBarFrame.origin.y = MAX(0, self.scrollView.contentOffset.y);
         self.titleBar.frame = titleBarFrame;
+        // Adjust shadow title bar frame
+        CGRect shadowTitleBarFrame = self.shadowTitleBar.frame;
+        shadowTitleBarFrame.origin.y = titleBarFrame.origin.y + 1;
+        self.shadowTitleBar.frame = shadowTitleBarFrame;        
+//        CGRect titleBarFrame = self.titleBar.frame;
+//        titleBarFrame.origin.y = CGRectGetMaxY(self.actionBar.frame) - MIN(0, self.scrollView.contentOffset.y);
+//        self.titleBar.frame = titleBarFrame;
+//        CGRect shadowTitleBarFrame = self.shadowTitleBar.frame;
+//        shadowTitleBarFrame.origin.y = titleBarFrame.origin.y + 1;
+//        self.shadowTitleBar.frame = shadowTitleBarFrame;
+        // Adjust occurrences controls frame
+        CGRect occurrencesControlsContainerFrame = self.occurrencesControlsContainer.frame;
+        occurrencesControlsContainerFrame.origin.y = CGRectGetMaxY(self.occurrenceInfoContainer.frame) - self.occurrencesControlsContainer.frame.size.height + self.scrollView.contentOffset.y;
+        self.occurrencesControlsContainer.frame = occurrencesControlsContainerFrame;
     }
     
 }
@@ -971,6 +1080,75 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
     [super viewDidUnload];
     // Release any retained subviews of the main view.
     // e.g. self.myOutlet = nil;
+}
+
+#pragma mark tableViews
+
+- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
+    return 1;
+}
+
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
+    NSInteger rowCount = 0;
+    if (tableView == self.occurrencesControlsDatesTableView) {
+        NSLog(@"About to try");
+        NSArray * dates = [self.coreDataModel getDistinctOccurrenceDatesForEvent:self.event];
+        if (dates && dates.count > 0) {
+            rowCount = dates.count;
+        } else {
+            rowCount = 1;
+        }
+        NSLog(@"Row count is %d", rowCount);
+    } else if (tableView == self.occurrencesControlsVenuesTableView) {
+        rowCount = 10;
+    } else if (tableView == self.occurrencesControlsTimesTableView) {
+        rowCount = 10;
+    } else {
+        NSLog(@"ERROR in EventViewController - unrecognized table view");
+    }
+    return rowCount;
+}
+
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
+    
+    UITableViewCell * tableViewCell = nil;
+    NSString * CellIdentifier = @"OccurrenceInfoGenericCell";
+    Class TableViewCellClass = [UITableViewCell class];
+    
+    if (tableView == self.occurrencesControlsDatesTableView) {
+        CellIdentifier = @"OccurrenceDateCell";
+        TableViewCellClass = [OccurrenceDateCell class];
+        
+    } else if (tableView == self.occurrencesControlsVenuesTableView) {
+        // ...
+    } else if (tableView == self.occurrencesControlsTimesTableView) {
+        // ...
+    } else {
+        NSLog(@"ERROR in EventViewController - unrecognized table view");
+    }
+    
+    tableViewCell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
+    if (tableViewCell == nil) {
+        tableViewCell = [[[TableViewCellClass alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier] autorelease];
+    }
+    
+    if (tableView == self.occurrencesControlsDatesTableView) {
+        NSArray * dates = [self.coreDataModel getDistinctOccurrenceDatesForEvent:self.event];
+        if (dates && dates.count > 0) {
+            Occurrence * occurrence = (Occurrence *)[dates objectAtIndex:indexPath.row];
+            OccurrenceDateCell * tableViewCellCast = (OccurrenceDateCell *)tableViewCell;
+            tableViewCellCast.date = occurrence.startDate;
+        }
+    } else if (tableView == self.occurrencesControlsVenuesTableView) {
+        tableViewCell.textLabel.text = [NSString stringWithFormat:@"Loc%d%d", indexPath.section, indexPath.row];
+    } else if (tableView == self.occurrencesControlsTimesTableView) {
+        tableViewCell.textLabel.text = [NSString stringWithFormat:@"Time%d%d", indexPath.section, indexPath.row];
+    } else {
+        NSLog(@"ERROR in EventViewController - unrecognized table view");
+    }
+    
+    return tableViewCell;
+    
 }
 
 @end
