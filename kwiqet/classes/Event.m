@@ -38,34 +38,43 @@
              nil]];
 }
 
+- (NSArray *) occurrencesByDateVenueTime {
+    return [self.occurrences sortedArrayUsingDescriptors:
+            [NSArray arrayWithObjects:
+             [NSSortDescriptor sortDescriptorWithKey:@"startDate" ascending:YES],
+             [NSSortDescriptor sortDescriptorWithKey:@"place.title" ascending:YES],
+             [NSSortDescriptor sortDescriptorWithKey:@"startTime" ascending:YES],
+             nil]];
+}
+
 - (NSSet *)occurrencesFilteredWithPredicate:(NSPredicate *)predicate {
     NSSet * filteredSet = [self.occurrences filteredSetUsingPredicate:predicate];
-    NSMutableString * (^stringFromOccurrencesSet) (NSSet * occurrencesSet) = ^(NSSet * occurrencesSet){
-        NSMutableString * occurrencesString = [NSMutableString string];
-        for (Occurrence * occurrence in occurrencesSet) {
-            [occurrencesString appendFormat:@"\n(%@, %@, %@)", occurrence.startDate, occurrence.place.title, occurrence.startTime];
-        }
-        return occurrencesString;
-    };
-    NSLog(@"All occurrences (%d): %@", self.occurrences.count, stringFromOccurrencesSet(self.occurrences));
-    NSLog(@"Filtered occurrences (%d): %@", filteredSet.count, stringFromOccurrencesSet(filteredSet));
+//    NSMutableString * (^stringFromOccurrencesSet) (NSSet * occurrencesSet) = ^(NSSet * occurrencesSet){
+//        NSMutableString * occurrencesString = [NSMutableString string];
+//        for (Occurrence * occurrence in occurrencesSet) {
+//            [occurrencesString appendFormat:@"\n(%@, %@, %@)", occurrence.startDate, occurrence.place.title, occurrence.startTime];
+//        }
+//        return occurrencesString;
+//    };
+//    NSLog(@"All occurrences (%d): %@", self.occurrences.count, stringFromOccurrencesSet(self.occurrences));
+//    NSLog(@"Filtered occurrences (%d): %@", filteredSet.count, stringFromOccurrencesSet(filteredSet));
     return filteredSet;
 }
 
 - (NSSet *) occurrencesNotOnDate:(NSDate *)dateNotToMatch {
-    NSLog(@"occurrencesNotOnDate:%@", dateNotToMatch);
+//    NSLog(@"occurrencesNotOnDate:%@", dateNotToMatch);
     return [self occurrencesFilteredWithPredicate:
             [NSPredicate predicateWithFormat:@"startDate != %@", dateNotToMatch]];
 }
 
 - (NSSet *) occurrencesOnDate:(NSDate *)dateToMatch notAtPlace:(Place *)placeNotToMatch {
-    NSLog(@"occurrencesOnDate:%@ notAtPlace:%@", dateToMatch, placeNotToMatch.title);
+//    NSLog(@"occurrencesOnDate:%@ notAtPlace:%@", dateToMatch, placeNotToMatch.title);
     return [self occurrencesFilteredWithPredicate:
             [NSPredicate predicateWithFormat:@"startDate == %@ && place != %@", dateToMatch, placeNotToMatch]];
 }
 
 - (NSSet *) occurrencesOnDate:(NSDate *)dateToMatch atPlace:(Place *)placeToMatch notAtTime:(NSDate *)timeNotToMatch {
-    NSLog(@"occurrencesOnDate:%@ atPlace:%@ notAtTime:%@", dateToMatch, placeToMatch.title, timeNotToMatch);
+//    NSLog(@"occurrencesOnDate:%@ atPlace:%@ notAtTime:%@", dateToMatch, placeToMatch.title, timeNotToMatch);
     return [self occurrencesFilteredWithPredicate:
             [NSPredicate predicateWithFormat:@"startDate == %@ && place == %@ && startTime != %@", dateToMatch, placeToMatch, timeNotToMatch]];
 }

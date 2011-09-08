@@ -75,7 +75,7 @@
     
     self.view.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"settingsGrayTexturedBG.png"]];
     
-    self.navBar.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"navbar_blank.png"]];
+    self.navBar.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"navbar.png"]];
     
     self.messageLabel.font = [UIFont fontWithName:@"HelveticaNeueLTStd-Cn" size:16.0];
     self.messageLabel.text = @"You have connected Kwiqet to your Facebook account, enabling you to connect, share, and plan events with your friends more easily.";

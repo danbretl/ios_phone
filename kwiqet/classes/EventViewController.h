@@ -81,22 +81,29 @@
     UITapGestureRecognizer * tapToPullInOccurrencesControls;
     BOOL occurrencesControlsVisible;
     IBOutlet UIView      * occurrencesControlsContainer;
+    IBOutlet UIImageView * occurrencesControlsHandleImageView;
     IBOutlet UIView      * occurrencesControlsNavBar;
     IBOutlet UIView      * occurrencesControlsTableViewContainer;
     IBOutlet UIView      * occurrencesControlsTableViewOverlay;
-    IBOutlet UIView      * occurrencesControlsDatesVenuesTableViewContainer;
+    IBOutlet UIView      * occurrencesControlsTableViewsContainer;
     IBOutlet UITableView * occurrencesControlsDatesTableView;
     IBOutlet UITableView * occurrencesControlsVenuesTableView;
-    IBOutlet UIView      * occurrencesControlsTimesTableViewContainer;
+    IBOutlet UIView      * occurrencesControlsDatesVenuesSeparatorView;
+    IBOutlet UIView      * occurrencesControlsVenuesTimesSeparatorView;
     IBOutlet UITableView * occurrencesControlsTimesTableView;
     
     WebActivityView * webActivityView;
-    
     Event * event;
+    Occurrence * eventOccurrenceCurrent;
+    int eventOccurrenceCurrentDateIndex;
+    int eventOccurrenceCurrentVenueIndex;
+    int eventOccurrenceCurrentTimeIndex;
+    NSMutableArray * eventOccurrencesSummaryArray;
     id<CardPageViewControllerDelegate> delegate;
     CoreDataModel * coreDataModel;
     MapViewController * mapViewController;    
     WebDataTranslator * webDataTranslator;
+    NSDateFormatter * occurrenceTimeFormatter;
     WebConnector * webConnector;
     UIAlertView * connectionErrorOnUserActionRequestAlertView;
     BOOL deleteAllowed_;

@@ -11,6 +11,7 @@
 @interface OccurrenceDateCell : UITableViewCell {
     
     NSDate * date_;
+    
     UILabel * monthLabel;
     UILabel * dayNumberLabel;
     UILabel * dayNameLabel;
@@ -20,5 +21,6 @@
 }
 
 @property (retain, nonatomic) NSDate * date;
+@property (retain, nonatomic) UIColor * dayNumberLabelColor;
 
 @end

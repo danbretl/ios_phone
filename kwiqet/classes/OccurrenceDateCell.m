@@ -25,15 +25,22 @@
     self = [super initWithStyle:style reuseIdentifier:reuseIdentifier];
     if (self) {
         
-        monthLabel = [[UILabel alloc] initWithFrame:CGRectMake(0, 2, self.contentView.bounds.size.width, 18)];
+        UIImageView * backgroundViewWithImage = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"btn_date.png"]];
+        self.backgroundView = backgroundViewWithImage;
+        [backgroundViewWithImage release];
+        UIImageView * selectedBackgroundViewWithImage = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"btn_date_highlight.png"]];
+        self.selectedBackgroundView = selectedBackgroundViewWithImage;
+        [selectedBackgroundViewWithImage release];
+
+        monthLabel = [[UILabel alloc] initWithFrame:CGRectMake(0, 6, self.contentView.bounds.size.width, 18)];
         self.monthLabel.autoresizingMask = UIViewAutoresizingFlexibleWidth;
         [self.contentView addSubview:monthLabel];
         
-        dayNumberLabel = [[UILabel alloc] initWithFrame:CGRectMake(0, 15, self.contentView.bounds.size.width, 42)];
+        dayNumberLabel = [[UILabel alloc] initWithFrame:CGRectMake(0, 24, self.contentView.bounds.size.width, 42)];
         self.dayNumberLabel.autoresizingMask = UIViewAutoresizingFlexibleWidth;
         [self.contentView addSubview:dayNumberLabel];
         
-        dayNameLabel = [[UILabel alloc] initWithFrame:CGRectMake(0, 42, self.contentView.bounds.size.width, 18)];
+        dayNameLabel = [[UILabel alloc] initWithFrame:CGRectMake(0, 53, self.contentView.bounds.size.width, 18)];
         self.dayNameLabel.autoresizingMask = UIViewAutoresizingFlexibleWidth;
         [self.contentView addSubview:dayNameLabel];
         
@@ -80,13 +87,21 @@
         [date_ release];
         date_ = [date retain];
         [self.dateFormatter setDateFormat:@"MMM"];
-        self.monthLabel.text = [self.dateFormatter stringFromDate:self.date];
+        self.monthLabel.text = [self.dateFormatter stringFromDate:self.date].uppercaseString;
         [self.dateFormatter setDateFormat:@"d"];
         self.dayNumberLabel.text = [self.dateFormatter stringFromDate:self.date];
         [self.dateFormatter setDateFormat:@"EEE"];
-        self.dayNameLabel.text = [self.dateFormatter stringFromDate:self.date];
-        NSLog(@"Date set to %@", self.date);
+        self.dayNameLabel.text = [self.dateFormatter stringFromDate:self.date].uppercaseString;
+//        NSLog(@"Date set to %@", self.date);
     }
+}
+
+- (void)setDayNumberLabelColor:(UIColor *)dayNumberLabelColor {
+    self.dayNumberLabel.textColor = dayNumberLabelColor;
+}
+
+- (UIColor *)dayNumberLabelColor {
+    return self.dayNumberLabel.textColor;
 }
 
 - (void)setSelected:(BOOL)selected animated:(BOOL)animated

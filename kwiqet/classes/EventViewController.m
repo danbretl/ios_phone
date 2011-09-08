@@ -20,6 +20,10 @@
 #import "Place.h"
 #import "Price.h"
 #import "OccurrenceDateCell.h"
+#import "OccurrenceVenueCell.h"
+#import "OccurrenceTimeCell.h"
+#import "OccurrenceSummaryDate.h"
+#import "OccurrenceSummaryVenue.h"
 
 #define CGFLOAT_MAX_TEXT_SIZE 10000
 
@@ -76,18 +80,28 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
 @property (retain) UITapGestureRecognizer * tapToPullInOccurrencesControls;
 @property BOOL occurrencesControlsVisible;
 @property (retain) IBOutlet UIView * occurrencesControlsContainer;
+@property (retain) IBOutlet UIImageView * occurrencesControlsHandleImageView;
 @property (retain) IBOutlet UIView * occurrencesControlsNavBar;
 @property (retain) IBOutlet UIView * occurrencesControlsTableViewContainer;
 @property (retain) IBOutlet UIView * occurrencesControlsTableViewOverlay;
-@property (retain) IBOutlet UIView * occurrencesControlsDatesVenuesTableViewContainer;
+@property (retain) IBOutlet UIView * occurrencesControlsTableViewsContainer;
 @property (retain) IBOutlet UITableView * occurrencesControlsDatesTableView;
 @property (retain) IBOutlet UITableView * occurrencesControlsVenuesTableView;
-@property (retain) IBOutlet UIView * occurrencesControlsTimesTableViewContainer;
+@property (retain) IBOutlet UIView * occurrencesControlsDatesVenuesSeparatorView;
+@property (retain) IBOutlet UIView * occurrencesControlsVenuesTimesSeparatorView;
 @property (retain) IBOutlet UITableView * occurrencesControlsTimesTableView;
+
+@property (retain) NSMutableArray * eventOccurrencesSummaryArray;
+@property (retain) Occurrence * eventOccurrenceCurrent;
+@property int eventOccurrenceCurrentDateIndex;
+@property int eventOccurrenceCurrentVenueIndex;
+@property int eventOccurrenceCurrentTimeIndex;
+
 @property (nonatomic, retain) WebActivityView * webActivityView;
 @property (retain) MapViewController * mapViewController;
 @property (nonatomic, readonly) WebConnector * webConnector;
 @property (nonatomic, readonly) WebDataTranslator * webDataTranslator;
+@property (nonatomic, readonly) NSDateFormatter * occurrenceTimeFormatter;
 @property (nonatomic, readonly) UIAlertView * connectionErrorOnUserActionRequestAlertView;
 @property (retain) UIActionSheet  * letsGoChoiceActionSheet;
 @property (retain) NSMutableArray * letsGoChoiceActionSheetSelectors;
@@ -103,6 +117,7 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
 - (IBAction) mapButtonTouched;
 - (IBAction) occurrenceInfoRetryButtonTouched;
 - (IBAction) occurrenceInfoButtonTouched:(UIButton *)occurrenceInfoButton;
+- (void) setOccurrencesControlsToShowTableView:(UITableView *)tableView animated:(BOOL)animated;
 - (void) swipedToGoBack:(UISwipeGestureRecognizer *)swipeGesture;
 - (void) swipedToPullInOccurrencesControls:(UISwipeGestureRecognizer *)swipeGesture;
 - (void) tappedToPullInOccurrencesControls:(UITapGestureRecognizer *)tapGesture;
@@ -114,7 +129,13 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
 - (void) pushedToCreateFacebookEvent;
 - (void) pushedToShareViaEmail;
 - (void) pushedToShareViaFacebook;
+- (NSString *) debugOccurrencesTableViewNameForTableViewTag:(int)tag;
 - (void) setOccurrenceInfoContainerIsVisible:(BOOL)isVisible animated:(BOOL)animated;
+@property (nonatomic, readonly) OccurrenceSummaryDate * eventOccurrenceCurrentDateSummaryObject;
+@property (nonatomic, readonly) OccurrenceSummaryVenue * eventOccurrenceCurrentVenueSummaryObject;
+- (NSUInteger) indexOfDate:(NSDate *)date inSummaryDates:(NSArray *)arrayOfSummaryDates; // Returns the index of summary date matching the given date. If a match does not exist, returns NSNotFound.
+- (NSUInteger) indexOfPlace:(Place *)place inSummaryVenues:(NSArray *)arrayOfSummaryVenues; // Returns the index of summary venue matching the given place. If a match does not exist, returns NSNotFound.
+- (NSUInteger) indexOfTime:(NSDate *)time inOccurrences:(NSArray *)arrayOfOccurrences settleForClosestFit:(BOOL)shouldSettleForClosestFit; // Returns the index of occurrence with startTime matching the given time. If there is no occurrence that matches the given time, then this method will (depending on given BOOL parameter) either return NSNotFound or the index of the best fit occurrence.
 - (void) facebookEventCreateSuccess:(NSNotification *)notification;
 - (void) facebookEventCreateFailure:(NSNotification *)notification;
 - (void) facebookEventInviteSuccess:(NSNotification *)notification;
@@ -129,9 +150,12 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
 @synthesize darkOverlayViewForMainView, darkOverlayViewForScrollView;
 @synthesize swipeToPullInOccurrencesControls, swipeToPushOutOccurrencesControls, tapToPullInOccurrencesControls;
 @synthesize occurrencesControlsVisible;
-@synthesize occurrencesControlsContainer, occurrencesControlsNavBar, occurrencesControlsTableViewContainer, occurrencesControlsTableViewOverlay, occurrencesControlsDatesVenuesTableViewContainer, occurrencesControlsDatesTableView, occurrencesControlsVenuesTableView, occurrencesControlsTimesTableViewContainer, occurrencesControlsTimesTableView;
+@synthesize occurrencesControlsContainer, occurrencesControlsHandleImageView, occurrencesControlsNavBar, occurrencesControlsTableViewContainer, occurrencesControlsTableViewOverlay, occurrencesControlsTableViewsContainer, occurrencesControlsDatesTableView, occurrencesControlsVenuesTableView, occurrencesControlsDatesVenuesSeparatorView, occurrencesControlsVenuesTimesSeparatorView, occurrencesControlsTimesTableView;
 
 @synthesize event;
+@synthesize eventOccurrenceCurrent;
+@synthesize eventOccurrenceCurrentDateIndex, eventOccurrenceCurrentVenueIndex, eventOccurrenceCurrentTimeIndex;
+@synthesize eventOccurrencesSummaryArray;
 @synthesize webActivityView;
 @synthesize delegate;
 @synthesize coreDataModel;
@@ -183,23 +207,28 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
     [darkOverlayViewForMainView release];
     [darkOverlayViewForScrollView release];
     [occurrencesControlsContainer release];
+    [occurrencesControlsHandleImageView release];
     [occurrencesControlsNavBar release];
     [occurrencesControlsTableViewContainer release]; 
     [occurrencesControlsTableViewOverlay release];
-    [occurrencesControlsDatesVenuesTableViewContainer release];
+    [occurrencesControlsTableViewsContainer release];
     [occurrencesControlsDatesTableView release];
     [occurrencesControlsVenuesTableView release];
-    [occurrencesControlsTimesTableViewContainer release];
+    [occurrencesControlsDatesVenuesSeparatorView release];
+    [occurrencesControlsVenuesTimesSeparatorView release];
     [occurrencesControlsTimesTableView release];
     [swipeToPullInOccurrencesControls release];
     [swipeToPushOutOccurrencesControls release];
     [tapToPullInOccurrencesControls release];
     [event release];
+    [eventOccurrenceCurrent release];
+    [eventOccurrencesSummaryArray release];
     [webActivityView release];
     [connectionErrorOnUserActionRequestAlertView release];
     [mapViewController release];
     [webConnector release];
     [webDataTranslator release];
+    [occurrenceTimeFormatter release];
     [facebookManager release];
     [letsGoChoiceActionSheet release];
     [letsGoChoiceActionSheetSelectors release];
@@ -213,8 +242,8 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
 {
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
     if (self) {
-        // Custom initialization
         self.deleteAllowed = YES;
+        self.eventOccurrencesSummaryArray = [NSMutableArray array];
     }
     return self;
 }
@@ -227,7 +256,7 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
     self.view.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"cardbg.png"]];
     
     // Navigation bar
-    self.navigationBar.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"navbar_blank.png"]];
+    self.navigationBar.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"navbar.png"]];
     
     // Action bar
     self.actionBar.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"actbar.png"]];
@@ -289,38 +318,44 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
     [self.occurrenceInfoPlaceholderRetryButton setTitle:EVC_OCCURRENCE_INFO_LOADING_STRING forState:UIControlStateNormal];
     
     // Date views
-    self.monthLabel.font= [UIFont fontWithName:@"HelveticaNeue" size:12];
-    self.dayNumberLabel.font= [UIFont fontWithName:@"HelveticaNeueLTStd-BdCn" size:33];
-    self.dayNameLabel.font = [UIFont fontWithName:@"HelveticaNeue" size:12];
+    self.monthLabel.font = [UIFont fontWithName:@"HelveticaNeue" size:10];
+    self.dayNumberLabel.font = [UIFont fontWithName:@"HelveticaNeueLTStd-BdCn" size:33];
+    self.dayNameLabel.font = [UIFont fontWithName:@"HelveticaNeue" size:10];
 
     // Time views
-    self.timeLabel.font= [UIFont fontWithName:@"HelveticaNeue" size:16];
+    self.timeLabel.font = [UIFont fontWithName:@"HelveticaNeueLTStd-BdCn" size:24];
     
     // Price views
     self.priceOccurrenceInfoButton.enabled = NO;
-    self.priceLabel.font= [UIFont fontWithName:@"HelveticaNeue" size:14];
+    self.priceLabel.font = [UIFont fontWithName:@"HelveticaNeueLTStd-BdCn" size:24];
                 
     // Location views
-    self.venueLabel.font= [UIFont fontWithName:@"HelveticaNeueLTStd-MdCn" size:22];
-    self.addressLabel.font= [UIFont fontWithName:@"HelveticaNeue" size:14];
-    self.cityStateZipLabel.font= [UIFont fontWithName:@"HelveticaNeue" size:14];
+    self.venueLabel.font = [UIFont fontWithName:@"HelveticaNeueLTStd-BdCn" size:21];
+    self.addressLabel.font = [UIFont fontWithName:@"HelveticaNeue" size:14];
+    self.cityStateZipLabel.font = [UIFont fontWithName:@"HelveticaNeue" size:14];
     
     // Phone number button
     self.phoneNumberButton.titleLabel.font = [UIFont fontWithName:@"HelveticaNeueLTStd-BdCn" size:12];
     
     // Occurrences controls
     [self.scrollView insertSubview:self.occurrencesControlsContainer belowSubview:self.titleBar];
-    self.occurrencesControlsContainer.frame = CGRectMake(self.scrollView.bounds.size.width - 16, CGRectGetMaxY(self.occurrenceInfoContainer.frame) - self.occurrencesControlsContainer.frame.size.height, self.occurrencesControlsContainer.frame.size.width, self.occurrencesControlsContainer.frame.size.height);
-    self.occurrencesControlsContainer.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"occurrences_mockup_shape.png"]];
-    self.occurrencesControlsContainer.opaque = NO;
-    self.occurrencesControlsContainer.layer.opaque = NO;
-    self.occurrencesControlsTableViewOverlay.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"occurrences_controls_table_view_overlay.png"]];
+    self.occurrencesControlsContainer.frame = CGRectMake(self.scrollView.bounds.size.width - self.occurrencesControlsHandleImageView.bounds.size.width, CGRectGetMaxY(self.occurrenceInfoContainer.frame) - self.occurrencesControlsContainer.frame.size.height, self.occurrencesControlsContainer.frame.size.width, self.occurrencesControlsContainer.frame.size.height);
+    self.occurrencesControlsNavBar.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"navbar.png"]];
+    self.occurrencesControlsTableViewOverlay.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"occurrence_faceplate.png"]];
     self.occurrencesControlsTableViewOverlay.opaque = NO;
     self.occurrencesControlsTableViewOverlay.layer.opaque = NO;
-    [self.occurrencesControlsTableViewContainer insertSubview:self.occurrencesControlsDatesVenuesTableViewContainer belowSubview:self.occurrencesControlsTableViewOverlay];
-    self.occurrencesControlsDatesVenuesTableViewContainer.frame = self.occurrencesControlsTableViewContainer.bounds;
-    [self.occurrencesControlsDatesTableView selectRowAtIndexPath:[NSIndexPath indexPathForRow:0 inSection:0] animated:NO scrollPosition:UITableViewScrollPositionMiddle];
-    [self.occurrencesControlsVenuesTableView selectRowAtIndexPath:[NSIndexPath indexPathForRow:0 inSection:0] animated:NO scrollPosition:UITableViewScrollPositionMiddle];
+    [self.occurrencesControlsTableViewContainer insertSubview:self.occurrencesControlsTableViewsContainer belowSubview:self.occurrencesControlsTableViewOverlay];
+    CGRect occurrencesControlsTableViewsContainerFrame = self.occurrencesControlsTableViewsContainer.frame;
+    occurrencesControlsTableViewsContainerFrame.size.height = self.occurrencesControlsTableViewContainer.bounds.size.height;
+    self.occurrencesControlsTableViewsContainer.frame = occurrencesControlsTableViewsContainerFrame;
+    [self setOccurrencesControlsToShowTableView:self.occurrencesControlsDatesTableView animated:NO];
+    self.occurrencesControlsVenuesTableView.backgroundColor = [UIColor colorWithWhite:241.0/255.0 alpha:1.0];
+    self.occurrencesControlsDatesVenuesSeparatorView.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"occurrence_tables_separator_shadow.png"]];
+    self.occurrencesControlsDatesVenuesSeparatorView.opaque = NO;
+    self.occurrencesControlsDatesVenuesSeparatorView.layer.opaque = NO;
+    self.occurrencesControlsVenuesTimesSeparatorView.backgroundColor = self.occurrencesControlsDatesVenuesSeparatorView.backgroundColor;
+    self.occurrencesControlsVenuesTimesSeparatorView.opaque = NO;
+    self.occurrencesControlsVenuesTimesSeparatorView.layer.opaque = NO;
     
     // Occurrences controls gesture recognizers
     // Swipe to pull in
@@ -370,6 +405,13 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
     [self.view bringSubviewToFront:self.webActivityView];
     
     if (self.event) {
+        NSArray * occurrencesByDateVenueTime = [self.event occurrencesByDateVenueTime];
+        Occurrence * arbitraryFirstOccurrence = nil;
+        if (occurrencesByDateVenueTime && 
+            occurrencesByDateVenueTime.count > 0) {
+            arbitraryFirstOccurrence = [occurrencesByDateVenueTime objectAtIndex:0];
+        }
+        self.eventOccurrenceCurrent = arbitraryFirstOccurrence;
         [self updateViewsFromDataAnimated:NO];
     }
     
@@ -416,6 +458,13 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
         [event release];
         event = [theEvent retain];
     }
+    NSArray * occurrencesByDateVenueTime = [self.event occurrencesByDateVenueTime];
+    Occurrence * arbitraryFirstOccurrence = nil;
+    if (occurrencesByDateVenueTime && 
+        occurrencesByDateVenueTime.count > 0) {
+        arbitraryFirstOccurrence = [occurrencesByDateVenueTime objectAtIndex:0];
+    }
+    self.eventOccurrenceCurrent = arbitraryFirstOccurrence;
     [self updateViewsFromDataAnimated:NO];
     [self.webConnector getAllOccurrencesForEventWithURI:event.uri]; // TURNING THIS OFF FOR TESTING
     [self.occurrenceInfoPlaceholderRetryButton setTitle:EVC_OCCURRENCE_INFO_LOADING_STRING forState:UIControlStateNormal]; // TURNING THIS OFF FOR TESTING
@@ -434,6 +483,76 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
     NSDictionary * responseDictionary = [responseString yajl_JSONWithOptions:YAJLParserOptionsAllowComments error:&error];
     [self.coreDataModel updateEvent:self.event withExhaustiveOccurrencesArray:[responseDictionary valueForKey:@"objects"]];
     [self.coreDataModel coreDataSave];
+    
+    NSArray * occurrencesByDateVenueTime = [self.event occurrencesByDateVenueTime];
+    self.eventOccurrenceCurrent = nil;
+    if (occurrencesByDateVenueTime && 
+        occurrencesByDateVenueTime.count > 0) {
+
+        // Sort through occurrences...
+        // Get rid of any existing occurrence summary objects
+        [self.eventOccurrencesSummaryArray removeAllObjects];
+        // Set up variables
+        OccurrenceSummaryDate * currentOccurrenceSummaryDate = nil;
+        OccurrenceSummaryVenue * currentOccurrenceSummaryVenue = nil;
+        NSMutableArray * currentDevelopingVenuesArray = nil;
+        NSMutableArray * currentDevelopingOccurrencesArray = nil;
+        // Loop through all occurrences (which are sorted by date, venue, time)
+        for (Occurrence * occurrence in occurrencesByDateVenueTime) {
+            // Check if we need to start a new OccurrenceSummaryDate object
+            if (![occurrence.startDate isEqualToDate:currentOccurrenceSummaryDate.date]) {
+                if (currentOccurrenceSummaryDate) {
+                    currentOccurrenceSummaryDate.venues = currentDevelopingVenuesArray;
+                }
+                currentOccurrenceSummaryDate = [[[OccurrenceSummaryDate alloc] init] autorelease]; 
+                [self.eventOccurrencesSummaryArray addObject:currentOccurrenceSummaryDate];
+                currentOccurrenceSummaryDate.date = occurrence.startDate;
+                currentDevelopingVenuesArray = [NSMutableArray array];
+            }
+            // Check if we need to start a new OccurrenceSummaryVenue object
+            if (occurrence.place != currentOccurrenceSummaryVenue.place) {
+                if (currentOccurrenceSummaryVenue) {
+                    [currentOccurrenceSummaryVenue setOccurrences:currentDevelopingOccurrencesArray makeTimesSummaryUsingTimeFormatter:self.occurrenceTimeFormatter];
+                }
+                currentOccurrenceSummaryVenue = [[[OccurrenceSummaryVenue alloc] init] autorelease];
+                [currentDevelopingVenuesArray addObject:currentOccurrenceSummaryVenue];
+                currentOccurrenceSummaryVenue.place = occurrence.place;
+                currentDevelopingOccurrencesArray = [NSMutableArray array];
+            }
+            // Add this occurrence to the current OccurrenceSummaryVenueObject
+            [currentDevelopingOccurrencesArray addObject:occurrence];
+        }
+        // Final cleanup
+        currentOccurrenceSummaryDate.venues = currentDevelopingVenuesArray;
+        [currentOccurrenceSummaryVenue setOccurrences:currentDevelopingOccurrencesArray makeTimesSummaryUsingTimeFormatter:self.occurrenceTimeFormatter];
+        
+        self.eventOccurrenceCurrent = [occurrencesByDateVenueTime objectAtIndex:0]; // THIS NEEDS TO CHANGE, ACCORDING TO WHAT THE USER'S FILTERS WERE IN EventsViewController, THEIR LOCATION, AND PROBABLY OTHER THINGS. THIS NEEDS TO CHANGE, ACCORDING TO WHAT THE USER'S FILTERS WERE IN EventsViewController, THEIR LOCATION, AND PROBABLY OTHER THINGS. THIS NEEDS TO CHANGE, ACCORDING TO WHAT THE USER'S FILTERS WERE IN EventsViewController, THEIR LOCATION, AND PROBABLY OTHER THINGS. THIS NEEDS TO CHANGE, ACCORDING TO WHAT THE USER'S FILTERS WERE IN EventsViewController, THEIR LOCATION, AND PROBABLY OTHER THINGS. THIS NEEDS TO CHANGE, ACCORDING TO WHAT THE USER'S FILTERS WERE IN EventsViewController, THEIR LOCATION, AND PROBABLY OTHER THINGS.
+        self.eventOccurrenceCurrentDateIndex = [self indexOfDate:self.eventOccurrenceCurrent.startDate inSummaryDates:self.eventOccurrencesSummaryArray];
+        self.eventOccurrenceCurrentVenueIndex = [self indexOfPlace:self.eventOccurrenceCurrent.place inSummaryVenues:self.eventOccurrenceCurrentDateSummaryObject.venues];
+        self.eventOccurrenceCurrentTimeIndex = [self indexOfTime:self.eventOccurrenceCurrent.startTime inOccurrences:self.eventOccurrenceCurrentVenueSummaryObject.occurrences settleForClosestFit:NO];
+
+//        // Debugging...
+//        NSLog(@"Summarize all that work we just did...");
+//        for (OccurrenceSummaryDate * osd in self.eventOccurrencesSummaryArray) {
+//            NSLog(@"OccurrenceSummaryDate %@", osd.date);
+//            for (OccurrenceSummaryVenue * osv in osd.venues) {
+//                NSLog(@"OccurrenceSummaryVenue %@", osv.place.title);
+//                for (Occurrence * o in osv.occurrences) {
+//                    NSLog(@"Occurrence at %@", [timeFormatter stringFromDate:o.startTime]);
+//                }
+//            }
+//        }
+        
+        // Seed the occurrences table views...
+        [self.occurrencesControlsDatesTableView reloadData];
+        [self.occurrencesControlsVenuesTableView reloadData];
+        [self.occurrencesControlsTimesTableView reloadData];
+        [self.occurrencesControlsDatesTableView selectRowAtIndexPath:[NSIndexPath indexPathForRow:self.eventOccurrenceCurrentDateIndex inSection:0] animated:NO scrollPosition:UITableViewScrollPositionMiddle];
+        [self.occurrencesControlsVenuesTableView selectRowAtIndexPath:[NSIndexPath indexPathForRow:self.eventOccurrenceCurrentVenueIndex inSection:0] animated:NO scrollPosition:UITableViewScrollPositionMiddle];
+        [self.occurrencesControlsTimesTableView selectRowAtIndexPath:[NSIndexPath indexPathForRow:self.eventOccurrenceCurrentTimeIndex inSection:0] animated:NO scrollPosition:UITableViewScrollPositionMiddle];
+
+    }
+    
     [self updateViewsFromDataAnimated:YES];
     if ([[[responseDictionary objectForKey:@"meta"] valueForKey:@"total_count"] isEqualToNumber:[NSNumber numberWithInt:0]]) {
         [self.occurrenceInfoPlaceholderRetryButton setTitle:@"There are no occurrences for this event!" forState:UIControlStateNormal];
@@ -450,77 +569,56 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
     
 }
 
--(void) updateViewsFromDataAnimated:(BOOL)animated {
+- (void) updateOccurrenceInfoViewsFromDataAnimated:(BOOL)animated {
     
-    NSString * EVENT_TIME_NOT_AVAILABLE = @"Time not available";
-    NSString * EVENT_DESCRIPTION_NOT_AVAILABLE = @"Description not available";
+    NSString * EVENT_TIME_NOT_AVAILABLE = @"--";
     NSString * EVENT_ADDRESS_NOT_AVAILABLE = @"Address not available";
     NSString * EVENT_PHONE_NOT_AVAILABLE = @"Phone number not available";
     
-    // Concrete parent category color
-    UIColor * concreteParentCategoryColor = self.event.concreteParentCategory.colorHex ? [WebUtil colorFromHexString:self.event.concreteParentCategory.colorHex] : [UIColor blackColor];
+    UIColor * categoryColor = [WebUtil colorFromHexString:self.event.concreteParentCategory.colorHex];
     
-    // Background
-//    self.view.backgroundColor = [concreteParentCategoryColor colorWithAlphaComponent:0.15];
-    self.backgroundColorView.backgroundColor = [concreteParentCategoryColor colorWithAlphaComponent:0.05];
-//    self.detailsBackgroundColorView.backgroundColor = [concreteParentCategoryColor colorWithAlphaComponent:0.10];
-    self.descriptionBackgroundColorView.backgroundColor = [concreteParentCategoryColor colorWithAlphaComponent:0.15];
-//    self.detailsLabel.backgroundColor = concreteParentCategoryColor;
-//    self.detailsLabel.textColor = [UIColor whiteColor];
-    
-    // Title
-    self.titleBar.text = self.event.title;
-    self.titleBar.color = concreteParentCategoryColor;
-    // Occurrences below... TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. EVERYTHING RELATED TO TEMPRANDOMOCCURRENCE NEEDS TO BE LOOKED OVER AND REWRITTEN. EVERYTHING RELATED TO TEMPRANDOMOCCURRENCE NEEDS TO BE LOOKED OVER AND REWRITTEN. EVERYTHING RELATED TO TEMPRANDOMOCCURRENCE NEEDS TO BE LOOKED OVER AND REWRITTEN. EVERYTHING RELATED TO TEMPRANDOMOCCURRENCE NEEDS TO BE LOOKED OVER AND REWRITTEN. EVERYTHING RELATED TO TEMPRANDOMOCCURRENCE NEEDS TO BE LOOKED OVER AND REWRITTEN. EVERYTHING RELATED TO TEMPRANDOMOCCURRENCE NEEDS TO BE LOOKED OVER AND REWRITTEN.
-    NSArray * occurrencesChronological = [self.event occurrencesChronological];
-    Occurrence * firstOccurrence = nil;
-    if (occurrencesChronological && occurrencesChronological.count > 0) {
-        firstOccurrence = [self.event.occurrencesChronological objectAtIndex:0];
-    }
-    // Occurrences above... TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. EVERYTHING RELATED TO TEMPRANDOMOCCURRENCE NEEDS TO BE LOOKED OVER AND REWRITTEN. EVERYTHING RELATED TO TEMPRANDOMOCCURRENCE NEEDS TO BE LOOKED OVER AND REWRITTEN. EVERYTHING RELATED TO TEMPRANDOMOCCURRENCE NEEDS TO BE LOOKED OVER AND REWRITTEN. EVERYTHING RELATED TO TEMPRANDOMOCCURRENCE NEEDS TO BE LOOKED OVER AND REWRITTEN. EVERYTHING RELATED TO TEMPRANDOMOCCURRENCE NEEDS TO BE LOOKED OVER AND REWRITTEN.
-    
-    if (firstOccurrence) {
+    if (self.eventOccurrenceCurrent) {
         
         // Date & Time
         NSDateFormatter * dateFormatter = [[NSDateFormatter alloc] init];
         // Month
         [dateFormatter setDateFormat:@"MMM"];
-        NSString * month = [dateFormatter stringFromDate:firstOccurrence.startDate];
+        NSString * month = [dateFormatter stringFromDate:self.eventOccurrenceCurrent.startDate];
         self.monthLabel.text = [month uppercaseString];
         // Day number
         [dateFormatter setDateFormat:@"d"];
-        NSString * dayNumber = [dateFormatter stringFromDate:firstOccurrence.startDate];
+        NSString * dayNumber = [dateFormatter stringFromDate:self.eventOccurrenceCurrent.startDate];
         self.dayNumberLabel.text = dayNumber;
-        self.dayNumberLabel.textColor = concreteParentCategoryColor;
+        self.dayNumberLabel.textColor = categoryColor;
         // Day name
         [dateFormatter setDateFormat:@"EEE"];
-        NSString * dayName = [dateFormatter stringFromDate:firstOccurrence.startDate];
+        NSString * dayName = [dateFormatter stringFromDate:self.eventOccurrenceCurrent.startDate];
         [dateFormatter release];
         self.dayNameLabel.text = [dayName uppercaseString];
         // Time
-        NSString * time = [self.webDataTranslator timeSpanStringFromStartDatetime:firstOccurrence.startTime endDatetime:firstOccurrence.endTime dataUnavailableString:EVENT_TIME_NOT_AVAILABLE];
+        NSString * time = [self.webDataTranslator timeSpanStringFromStartDatetime:self.eventOccurrenceCurrent.startTime endDatetime:self.eventOccurrenceCurrent.endTime dataUnavailableString:EVENT_TIME_NOT_AVAILABLE];
         self.timeLabel.text = time;
         
-        NSArray * prices = firstOccurrence.pricesLowToHigh;
+        NSArray * prices = self.eventOccurrenceCurrent.pricesLowToHigh;
         Price * minPrice = nil;
         Price * maxPrice = nil;
         if (prices && prices.count > 0) {
             minPrice = (Price *)[prices objectAtIndex:0];
             maxPrice = (Price *)[prices lastObject];
         }
-        NSString * price = [self.webDataTranslator priceRangeStringFromMinPrice:minPrice.value maxPrice:maxPrice.value dataUnavailableString:nil];
-        self.priceLabel.text = [NSString stringWithFormat:@"Price: %@", price];
+        NSString * price = [self.webDataTranslator priceRangeStringFromMinPrice:minPrice.value maxPrice:maxPrice.value dataUnavailableString:@"--"];
+        self.priceLabel.text = [NSString stringWithFormat:@"%@", price];
         
         // Location & Address
-        NSString * addressFirstLine = firstOccurrence.place.address;
-        NSString * addressSecondLine = [self.webDataTranslator addressSecondLineStringFromCity:firstOccurrence.place.city state:firstOccurrence.place.state zip:firstOccurrence.place.zip];
+        NSString * addressFirstLine = self.eventOccurrenceCurrent.place.address;
+        NSString * addressSecondLine = [self.webDataTranslator addressSecondLineStringFromCity:self.eventOccurrenceCurrent.place.city state:self.eventOccurrenceCurrent.place.state zip:self.eventOccurrenceCurrent.place.zip];
         BOOL someLocationInfo = addressFirstLine || addressSecondLine;
         if (!addressFirstLine) { addressFirstLine = EVENT_ADDRESS_NOT_AVAILABLE; }
         self.addressLabel.text = addressFirstLine;
         self.cityStateZipLabel.text = addressSecondLine;
         
         // Venue
-        NSString * venue = firstOccurrence.place.title;
+        NSString * venue = self.eventOccurrenceCurrent.place.title;
         if (!venue) { 
             if (someLocationInfo) {
                 venue = @"Location:";
@@ -529,27 +627,32 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
             }
         }
         self.venueLabel.text = venue;
+        self.venueLabel.textColor = categoryColor;
         
         // Map button
         self.mapButton.alpha = 1.0;
-        self.mapButton.enabled = firstOccurrence.place.latitude && firstOccurrence.place.longitude;
+        self.mapButton.enabled = self.eventOccurrenceCurrent.place.latitude && self.eventOccurrenceCurrent.place.longitude;
         
         // Phone
-        BOOL havePhoneNumber = firstOccurrence.place.phone != nil && [firstOccurrence.place.phone length] > 0;
-        NSString * phone = havePhoneNumber ? firstOccurrence.place.phone : EVENT_PHONE_NOT_AVAILABLE;
+        BOOL havePhoneNumber = self.eventOccurrenceCurrent.place.phone != nil && [self.eventOccurrenceCurrent.place.phone length] > 0;
+        NSString * phone = havePhoneNumber ? self.eventOccurrenceCurrent.place.phone : EVENT_PHONE_NOT_AVAILABLE;
         [self.phoneNumberButton setTitle:phone forState:UIControlStateNormal];
         self.phoneNumberButton.enabled = havePhoneNumber;
         
-        self.dateOccurrenceInfoButton.enabled = [self.event occurrencesNotOnDate:firstOccurrence.startDate].count > 0;
-        self.locationOccurrenceInfoButton.enabled = [self.event occurrencesOnDate:firstOccurrence.startDate notAtPlace:firstOccurrence.place].count > 0;
-        self.timeOccurrenceInfoButton.enabled = [self.event occurrencesOnDate:firstOccurrence.startDate atPlace:firstOccurrence.place notAtTime:firstOccurrence.startTime].count > 0;
-        self.occurrencesControlsContainer.hidden = !(self.dateOccurrenceInfoButton.enabled || self.locationOccurrenceInfoButton.enabled || self.timeOccurrenceInfoButton.enabled);
-        self.swipeToPullInOccurrencesControls.enabled = !self.occurrencesControlsContainer.hidden;
-        self.swipeToPushOutOccurrencesControls.enabled = self.swipeToPullInOccurrencesControls.enabled;
-        self.tapToPullInOccurrencesControls.enabled = self.swipeToPullInOccurrencesControls.enabled && !self.occurrencesControlsVisible;
-        [self.occurrencesControlsDatesTableView reloadData];
-        [self.occurrencesControlsVenuesTableView reloadData];
-        [self.occurrencesControlsTimesTableView reloadData];
+        NSArray * occurrencesByDateVenueTime = self.event.occurrencesByDateVenueTime;
+        
+        self.occurrencesControlsContainer.hidden = occurrencesByDateVenueTime.count <= 1;
+        CGRect priceLabelFrame = self.priceLabel.frame;
+        priceLabelFrame.size.width = self.occurrencesControlsContainer.hidden ? self.priceContainer.bounds.size.width - 2 * priceLabelFrame.origin.x : self.priceContainer.bounds.size.width - 2 * priceLabelFrame.origin.x - 20; // HARD CODED VALUES
+        self.priceLabel.frame = priceLabelFrame;
+        if (occurrencesByDateVenueTime.count > 1) {
+            self.swipeToPullInOccurrencesControls.enabled = !self.occurrencesControlsContainer.hidden;
+            self.swipeToPushOutOccurrencesControls.enabled = self.swipeToPullInOccurrencesControls.enabled;
+            self.tapToPullInOccurrencesControls.enabled = self.swipeToPullInOccurrencesControls.enabled && !self.occurrencesControlsVisible;            
+            self.dateOccurrenceInfoButton.enabled = [self.event occurrencesNotOnDate:self.eventOccurrenceCurrent.startDate].count > 0;
+            self.locationOccurrenceInfoButton.enabled = [self.event occurrencesOnDate:self.eventOccurrenceCurrent.startDate notAtPlace:self.eventOccurrenceCurrent.place].count > 0;
+            self.timeOccurrenceInfoButton.enabled = [self.event occurrencesOnDate:self.eventOccurrenceCurrent.startDate atPlace:self.eventOccurrenceCurrent.place notAtTime:self.eventOccurrenceCurrent.startTime].count > 0;
+        }
         
     } else {
         
@@ -566,17 +669,44 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
         self.mapButton.enabled = NO;
         self.mapButton.alpha = 0.0;
         
+        self.occurrencesControlsContainer.hidden = YES;
         self.dateOccurrenceInfoButton.enabled = NO;
         self.locationOccurrenceInfoButton.enabled = NO;
         self.timeOccurrenceInfoButton.enabled = NO;
-        self.occurrencesControlsContainer.hidden = YES;
+        self.swipeToPullInOccurrencesControls.enabled = NO;
+        self.swipeToPushOutOccurrencesControls.enabled = NO;
+        self.tapToPullInOccurrencesControls.enabled = NO;
+        
         
     }
     
     // Adjust the scroll view scroll indicator insets for the occurrences controls
     UIEdgeInsets scrollViewScrollIndicatorInsets = self.scrollView.scrollIndicatorInsets;
-    scrollViewScrollIndicatorInsets.bottom = self.occurrencesControlsContainer.hidden ? 0 : self.occurrencesControlsContainer.frame.size.height + (self.scrollView.bounds.size.height - CGRectGetMaxY(self.occurrencesControlsContainer.frame)) - 40;// * 2;
+    scrollViewScrollIndicatorInsets.bottom = self.occurrencesControlsContainer.hidden ? 0 : 163; // HARD CODED VALUE. HARD CODED VALUE. HARD CODED VALUE. HARD CODED VALUE. HARD CODED VALUE. HARD CODED VALUE. HARD CODED VALUE. HARD CODED VALUE. HARD CODED VALUE. HARD CODED VALUE. HARD CODED VALUE. HARD CODED VALUE. HARD CODED VALUE.
     self.scrollView.scrollIndicatorInsets = scrollViewScrollIndicatorInsets;
+    
+}
+
+- (void) updateViewsFromDataAnimated:(BOOL)animated {
+    
+    NSString * EVENT_DESCRIPTION_NOT_AVAILABLE = @"Description not available";
+        
+    // Concrete parent category color
+    UIColor * concreteParentCategoryColor = self.event.concreteParentCategory.colorHex ? [WebUtil colorFromHexString:self.event.concreteParentCategory.colorHex] : [UIColor blackColor];
+    
+    // Background
+//    self.view.backgroundColor = [concreteParentCategoryColor colorWithAlphaComponent:0.15];
+    self.backgroundColorView.backgroundColor = [concreteParentCategoryColor colorWithAlphaComponent:0.05];
+//    self.detailsBackgroundColorView.backgroundColor = [concreteParentCategoryColor colorWithAlphaComponent:0.10];
+    self.descriptionBackgroundColorView.backgroundColor = [concreteParentCategoryColor colorWithAlphaComponent:0.15];
+//    self.detailsLabel.backgroundColor = concreteParentCategoryColor;
+//    self.detailsLabel.textColor = [UIColor whiteColor];
+    
+    // Title
+    self.titleBar.text = self.event.title;
+    self.titleBar.color = concreteParentCategoryColor;
+    
+    [self updateOccurrenceInfoViewsFromDataAnimated:animated]; // see setOccurrenceInfoContainerIsVisible note below
     
     // Description
     NSString * descriptionString = self.event.eventDescription ? self.event.eventDescription : EVENT_DESCRIPTION_NOT_AVAILABLE;
@@ -592,7 +722,7 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
     self.descriptionContainer.frame = detailsContainerFrame;
     self.shadowDescriptionContainer.frame = CGRectMake(self.descriptionContainer.frame.origin.x, self.descriptionContainer.frame.origin.y, self.descriptionContainer.frame.size.width, self.descriptionContainer.frame.size.height-1);
     
-    [self setOccurrenceInfoContainerIsVisible:(firstOccurrence != nil) animated:animated];
+    [self setOccurrenceInfoContainerIsVisible:(self.eventOccurrenceCurrent != nil) animated:animated]; // THIS WILL CHANGE / PROBABLY DISAPPEAR ONCE YOU IMPLEMENT ALLEN'S NEW FIXED-HEIGHT DESIGN OF THE OCCURRENCE INFO PLACEHOLDER. THIS WILL CHANGE / PROBABLY DISAPPEAR ONCE YOU IMPLEMENT ALLEN'S NEW FIXED-HEIGHT DESIGN OF THE OCCURRENCE INFO PLACEHOLDER. THIS WILL CHANGE / PROBABLY DISAPPEAR ONCE YOU IMPLEMENT ALLEN'S NEW FIXED-HEIGHT DESIGN OF THE OCCURRENCE INFO PLACEHOLDER.
 
     self.scrollView.contentSize = CGSizeMake(self.scrollView.bounds.size.width, CGRectGetMaxY(self.descriptionContainer.frame));
     
@@ -603,6 +733,7 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
         [breadcrumbsString appendFormat:@", %@", breadcrumb.category.title];
     }
     self.breadcrumbsLabel.text = breadcrumbsString;
+    self.breadcrumbsBar.backgroundColor = [concreteParentCategoryColor colorWithAlphaComponent:0.6];
     
     [self.imageView setImageWithURL:[URLBuilder imageURLForImageLocation:self.event.imageLocation] placeholderImage:[UIImage imageNamed:@"event_img_placeholder.png"]];
     
@@ -669,6 +800,14 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
     return webDataTranslator;
 }
 
+- (NSDateFormatter *) occurrenceTimeFormatter {
+    if (occurrenceTimeFormatter == nil) {
+        occurrenceTimeFormatter = [[NSDateFormatter alloc] init];
+        [occurrenceTimeFormatter setDateFormat:@"h:mm a"];
+    }
+    return occurrenceTimeFormatter;
+}
+
 - (void) swipedToGoBack:(UISwipeGestureRecognizer *)swipeGesture {
     [self viewControllerIsFinished];
 }
@@ -694,6 +833,7 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
                                        self.occurrencesControlsContainer.frame.size.height - 40 - 5), location) &&
         !self.occurrencesControlsVisible) {
         NSLog(@"userActionOccurredToPullInOccurrencesControls ACCEPTED - %@ in %@", NSStringFromCGPoint(location), NSStringFromCGRect(CGRectMake(CGRectGetMinX(self.occurrencesControlsContainer.frame) - horizontalForgiveness, self.occurrencesControlsContainer.frame.origin.y + 40, horizontalForgiveness + (self.occurrencesControlsContainer.superview.bounds.size.width - CGRectGetMinX(self.occurrencesControlsContainer.frame)), self.occurrencesControlsContainer.frame.size.height - 40 - 5)));
+        [self setOccurrencesControlsToShowTableView:self.occurrencesControlsVenuesTableView animated:NO];
         [self toggleOccurrencesControls];
     }
 }
@@ -716,12 +856,12 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
     [UIView animateWithDuration:0.25 delay:0.0 options:UIViewAnimationOptionBeginFromCurrentState animations:^{
         CGRect occurrencesControlsContainerFrame = self.occurrencesControlsContainer.frame;
         if (self.occurrencesControlsVisible) {
-            occurrencesControlsContainerFrame.origin.x = -16;
+            occurrencesControlsContainerFrame.origin.x = -self.occurrencesControlsHandleImageView.bounds.size.width;
             self.darkOverlayViewForMainView.alpha = 1.0;
             self.darkOverlayViewForScrollView.alpha = 1.0;
             [[UIApplication sharedApplication] setStatusBarStyle:UIStatusBarStyleBlackOpaque animated:YES];
         } else {
-            occurrencesControlsContainerFrame.origin.x = self.scrollView.bounds.size.width - 16;
+            occurrencesControlsContainerFrame.origin.x = self.scrollView.bounds.size.width - self.occurrencesControlsHandleImageView.bounds.size.width;
             self.darkOverlayViewForMainView.alpha = 0.0;
             self.darkOverlayViewForScrollView.alpha = 0.0;
             [[UIApplication sharedApplication] setStatusBarStyle:UIStatusBarStyleDefault animated:YES];
@@ -990,22 +1130,16 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
 // make Phone number clickable..
 -(void)phoneButtonTouched {
 	NSLog(@"phone call");
-    // Occurrences below... TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. EVERYTHING RELATED TO TEMPRANDOMOCCURRENCE NEEDS TO BE LOOKED OVER AND REWRITTEN. EVERYTHING RELATED TO TEMPRANDOMOCCURRENCE NEEDS TO BE LOOKED OVER AND REWRITTEN. EVERYTHING RELATED TO TEMPRANDOMOCCURRENCE NEEDS TO BE LOOKED OVER AND REWRITTEN. EVERYTHING RELATED TO TEMPRANDOMOCCURRENCE NEEDS TO BE LOOKED OVER AND REWRITTEN. EVERYTHING RELATED TO TEMPRANDOMOCCURRENCE NEEDS TO BE LOOKED OVER AND REWRITTEN. EVERYTHING RELATED TO TEMPRANDOMOCCURRENCE NEEDS TO BE LOOKED OVER AND REWRITTEN.
-    Occurrence * firstOccurrence = [self.event.occurrencesChronological objectAtIndex:0];
-    // Occurrences above... TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. EVERYTHING RELATED TO TEMPRANDOMOCCURRENCE NEEDS TO BE LOOKED OVER AND REWRITTEN. EVERYTHING RELATED TO TEMPRANDOMOCCURRENCE NEEDS TO BE LOOKED OVER AND REWRITTEN. EVERYTHING RELATED TO TEMPRANDOMOCCURRENCE NEEDS TO BE LOOKED OVER AND REWRITTEN. EVERYTHING RELATED TO TEMPRANDOMOCCURRENCE NEEDS TO BE LOOKED OVER AND REWRITTEN. EVERYTHING RELATED TO TEMPRANDOMOCCURRENCE NEEDS TO BE LOOKED OVER AND REWRITTEN.
-    [[UIApplication sharedApplication] openURL:[NSURL URLWithString:[NSString stringWithFormat:@"tel:%@", firstOccurrence.place.phone]]];
+    [[UIApplication sharedApplication] openURL:[NSURL URLWithString:[NSString stringWithFormat:@"tel:%@", self.eventOccurrenceCurrent.place.phone]]];
 }
 
 -(void)mapButtonTouched {
     self.mapViewController = [[[MapViewController alloc] initWithNibName:@"MapViewController" bundle:[NSBundle mainBundle]] autorelease];
     self.mapViewController.delegate = self;
-    // Occurrences below... TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. EVERYTHING RELATED TO TEMPRANDOMOCCURRENCE NEEDS TO BE LOOKED OVER AND REWRITTEN. EVERYTHING RELATED TO TEMPRANDOMOCCURRENCE NEEDS TO BE LOOKED OVER AND REWRITTEN. EVERYTHING RELATED TO TEMPRANDOMOCCURRENCE NEEDS TO BE LOOKED OVER AND REWRITTEN. EVERYTHING RELATED TO TEMPRANDOMOCCURRENCE NEEDS TO BE LOOKED OVER AND REWRITTEN. EVERYTHING RELATED TO TEMPRANDOMOCCURRENCE NEEDS TO BE LOOKED OVER AND REWRITTEN. EVERYTHING RELATED TO TEMPRANDOMOCCURRENCE NEEDS TO BE LOOKED OVER AND REWRITTEN.
-    Occurrence * firstOccurrence = [self.event.occurrencesChronological objectAtIndex:0];
-    // Occurrences above... TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. EVERYTHING RELATED TO TEMPRANDOMOCCURRENCE NEEDS TO BE LOOKED OVER AND REWRITTEN. EVERYTHING RELATED TO TEMPRANDOMOCCURRENCE NEEDS TO BE LOOKED OVER AND REWRITTEN. EVERYTHING RELATED TO TEMPRANDOMOCCURRENCE NEEDS TO BE LOOKED OVER AND REWRITTEN. EVERYTHING RELATED TO TEMPRANDOMOCCURRENCE NEEDS TO BE LOOKED OVER AND REWRITTEN. EVERYTHING RELATED TO TEMPRANDOMOCCURRENCE NEEDS TO BE LOOKED OVER AND REWRITTEN.
-    self.mapViewController.locationLatitude = firstOccurrence.place.latitude;
-    self.mapViewController.locationLongitude = firstOccurrence.place.longitude;
-    self.mapViewController.locationName = firstOccurrence.place.title;
-    self.mapViewController.locationAddress = firstOccurrence.place.address;
+    self.mapViewController.locationLatitude = self.eventOccurrenceCurrent.place.latitude;
+    self.mapViewController.locationLongitude = self.eventOccurrenceCurrent.place.longitude;
+    self.mapViewController.locationName = self.eventOccurrenceCurrent.place.title;
+    self.mapViewController.locationAddress = self.eventOccurrenceCurrent.place.address;
     [self presentModalViewController:self.mapViewController animated:YES];
 }
 
@@ -1032,6 +1166,15 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
 }
 
 - (void) occurrenceInfoButtonTouched:(UIButton *)occurrenceInfoButton {
+    if (occurrenceInfoButton == self.dateOccurrenceInfoButton) {
+        [self setOccurrencesControlsToShowTableView:self.occurrencesControlsDatesTableView animated:NO];
+    } else if (occurrenceInfoButton == self.locationOccurrenceInfoButton) {
+        [self setOccurrencesControlsToShowTableView:self.occurrencesControlsVenuesTableView animated:NO];
+    } else if (occurrenceInfoButton == self.timeOccurrenceInfoButton) {
+        [self setOccurrencesControlsToShowTableView:self.occurrencesControlsTimesTableView animated:NO];
+    } else {
+        NSLog(@"ERROR in EventViewController - unrecognized occurrenceInfoButton");
+    }
     [self toggleOccurrencesControls];
 }
 
@@ -1067,6 +1210,14 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
     
 }
 
+- (void) scrollViewWillBeginDragging:(UIScrollView *)theScrollView {
+    if (theScrollView == self.occurrencesControlsDatesTableView) {
+        [self.occurrencesControlsVenuesTableView scrollToRowAtIndexPath:self.occurrencesControlsVenuesTableView.indexPathForSelectedRow atScrollPosition:UITableViewScrollPositionMiddle animated:YES];
+    } else if (theScrollView == self.occurrencesControlsVenuesTableView) {
+        [self.occurrencesControlsDatesTableView scrollToRowAtIndexPath:self.occurrencesControlsDatesTableView.indexPathForSelectedRow atScrollPosition:UITableViewScrollPositionMiddle animated:YES];
+    }
+}
+
 #pragma mark memory
 
 - (void)didReceiveMemoryWarning {
@@ -1084,32 +1235,53 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
 
 #pragma mark tableViews
 
+- (NSString *) debugOccurrencesTableViewNameForTableViewTag:(int)tag {
+    NSString * tableViewName = @"UnknownOccurrencesTableView";
+    switch (tag) {
+        case 1: tableViewName = @"DatesOccurrencesTableView"; break;
+        case 2: tableViewName = @"VenuesOccurrencesTableView"; break;
+        case 3: tableViewName = @"TimesOccurrencesTableView"; break;
+        default: break;
+    }
+    return tableViewName;
+}
+
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
     return 1;
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
+//    NSLog(@"%@ numberOfRowsInSection %d", [self debugOccurrencesTableViewNameForTableViewTag:tableView.tag], section);
     NSInteger rowCount = 0;
-    if (tableView == self.occurrencesControlsDatesTableView) {
-        NSLog(@"About to try");
-        NSArray * dates = [self.coreDataModel getDistinctOccurrenceDatesForEvent:self.event];
-        if (dates && dates.count > 0) {
-            rowCount = dates.count;
+    if (self.eventOccurrencesSummaryArray && 
+        self.eventOccurrencesSummaryArray.count > 1) {
+        
+        if (tableView == self.occurrencesControlsDatesTableView) {
+            
+            rowCount = self.eventOccurrencesSummaryArray.count;
+            
         } else {
-            rowCount = 1;
+            
+            if (tableView == self.occurrencesControlsVenuesTableView) {
+                
+                rowCount = self.eventOccurrenceCurrentDateSummaryObject.venues.count;
+                
+            } else if (tableView == self.occurrencesControlsTimesTableView) {
+                
+                rowCount = self.eventOccurrenceCurrentVenueSummaryObject.occurrences.count;
+                
+            } else {
+                NSLog(@"ERROR in EventViewController - unrecognized table view");
+            }
+
         }
-        NSLog(@"Row count is %d", rowCount);
-    } else if (tableView == self.occurrencesControlsVenuesTableView) {
-        rowCount = 10;
-    } else if (tableView == self.occurrencesControlsTimesTableView) {
-        rowCount = 10;
-    } else {
-        NSLog(@"ERROR in EventViewController - unrecognized table view");
     }
     return rowCount;
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
+    
+//    NSLog(@"%@ cellForRowAtIndexPath %d-%d", [self debugOccurrencesTableViewNameForTableViewTag:tableView.tag], indexPath.section, indexPath.row);
     
     UITableViewCell * tableViewCell = nil;
     NSString * CellIdentifier = @"OccurrenceInfoGenericCell";
@@ -1118,11 +1290,12 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
     if (tableView == self.occurrencesControlsDatesTableView) {
         CellIdentifier = @"OccurrenceDateCell";
         TableViewCellClass = [OccurrenceDateCell class];
-        
     } else if (tableView == self.occurrencesControlsVenuesTableView) {
-        // ...
+        CellIdentifier = @"OccurrenceVenueCell";
+        TableViewCellClass = [OccurrenceVenueCell class];
     } else if (tableView == self.occurrencesControlsTimesTableView) {
-        // ...
+        CellIdentifier = @"OccurrenceTimeCell";
+        TableViewCellClass = [OccurrenceTimeCell class];
     } else {
         NSLog(@"ERROR in EventViewController - unrecognized table view");
     }
@@ -1132,22 +1305,223 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
         tableViewCell = [[[TableViewCellClass alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier] autorelease];
     }
     
+    int occurrenceSummaryDateIndex = (tableView == self.occurrencesControlsDatesTableView) ? indexPath.row : self.eventOccurrenceCurrentDateIndex;
+    OccurrenceSummaryDate * occurrenceSummaryDate = [self.eventOccurrencesSummaryArray objectAtIndex:occurrenceSummaryDateIndex];
+    UIColor * categoryColor = [WebUtil colorFromHexString:self.event.concreteParentCategory.colorHex];
+    
     if (tableView == self.occurrencesControlsDatesTableView) {
-        NSArray * dates = [self.coreDataModel getDistinctOccurrenceDatesForEvent:self.event];
-        if (dates && dates.count > 0) {
-            Occurrence * occurrence = (Occurrence *)[dates objectAtIndex:indexPath.row];
-            OccurrenceDateCell * tableViewCellCast = (OccurrenceDateCell *)tableViewCell;
-            tableViewCellCast.date = occurrence.startDate;
+        
+        OccurrenceDateCell * tableViewCellCast = (OccurrenceDateCell *)tableViewCell;
+        tableViewCellCast.date = occurrenceSummaryDate.date;
+        tableViewCellCast.dayNumberLabelColor = categoryColor;
+        
+    } else {
+        
+        int occurrenceSummaryVenueIndex = (tableView == self.occurrencesControlsVenuesTableView) ? indexPath.row : self.eventOccurrenceCurrentVenueIndex;
+        OccurrenceSummaryVenue * occurrenceSummaryVenue = [occurrenceSummaryDate.venues objectAtIndex:occurrenceSummaryVenueIndex];
+        
+        if (tableView == self.occurrencesControlsVenuesTableView) {
+            
+            OccurrenceVenueCell * tableViewCellCast = (OccurrenceVenueCell *)tableViewCell;
+            tableViewCellCast.venueLabel.text = occurrenceSummaryVenue.place.title;
+            tableViewCellCast.venueLabelColor = categoryColor;
+            tableViewCellCast.addressLabel.text = occurrenceSummaryVenue.place.address;
+            tableViewCellCast.timesString = occurrenceSummaryVenue.timesString;
+            
+        } else if (tableView == self.occurrencesControlsTimesTableView) {
+            
+            Occurrence * occurrence = [occurrenceSummaryVenue.occurrences objectAtIndex:indexPath.row];
+            OccurrenceTimeCell * tableViewCellCast = (OccurrenceTimeCell *)tableViewCell;
+            tableViewCellCast.timeLabel.text = [self.occurrenceTimeFormatter stringFromDate:occurrence.startTime];
+            NSArray * pricesLowToHigh = occurrence.pricesLowToHigh;
+            NSNumber * minPrice = nil;
+            NSNumber * maxPrice = nil;
+            if (pricesLowToHigh && pricesLowToHigh.count > 0) {
+                minPrice = [pricesLowToHigh objectAtIndex:0];
+                maxPrice = pricesLowToHigh.lastObject;
+            }
+            tableViewCellCast.priceAndInfoLabel.text = [self.webDataTranslator priceRangeStringFromMinPrice:minPrice maxPrice:maxPrice dataUnavailableString:@"No price or info available"];
+            
+        } else {
+            NSLog(@"ERROR in EventViewController - unrecognized table view");
         }
+        
+    }
+    
+    return tableViewCell;
+    
+}
+
+- (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
+    CGFloat rowHeight = 44;
+    
+//    NSLog(@"%@ heightForRowAtIndexPath %d-%d", [self debugOccurrencesTableViewNameForTableViewTag:tableView.tag], indexPath.section, indexPath.row);
+    
+    if (tableView == self.occurrencesControlsDatesTableView) {
+        
+        rowHeight = self.occurrencesControlsDatesTableView.rowHeight;
+        
     } else if (tableView == self.occurrencesControlsVenuesTableView) {
-        tableViewCell.textLabel.text = [NSString stringWithFormat:@"Loc%d%d", indexPath.section, indexPath.row];
+        
+        OccurrenceSummaryVenue * occurrenceSummaryVenue = [self.eventOccurrenceCurrentDateSummaryObject.venues objectAtIndex:indexPath.row];
+        rowHeight = [OccurrenceVenueCell cellHeightForTimesString:occurrenceSummaryVenue.timesString cellWidth:self.occurrencesControlsVenuesTableView.bounds.size.width];
+        
     } else if (tableView == self.occurrencesControlsTimesTableView) {
-        tableViewCell.textLabel.text = [NSString stringWithFormat:@"Time%d%d", indexPath.section, indexPath.row];
+        
+        rowHeight = self.occurrencesControlsTimesTableView.rowHeight;
+        
     } else {
         NSLog(@"ERROR in EventViewController - unrecognized table view");
     }
     
-    return tableViewCell;
+    return rowHeight;
+}
+
+//- (NSIndexPath *)tableView:(UITableView *)tableView willSelectRowAtIndexPath:(NSIndexPath *)indexPath {
+//    NSIndexPath * returnIndexPath = indexPath;
+//    if ([indexPath isEqual:tableView.indexPathForSelectedRow]) {
+//        returnIndexPath = nil;
+//    }
+//    return returnIndexPath;
+//}
+
+- (void) tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
+    
+    BOOL updateSelectedVenue = NO;
+    BOOL updateSelectedTime = NO;
+    
+    if (tableView == self.occurrencesControlsDatesTableView) {
+        
+        self.eventOccurrenceCurrentDateIndex = indexPath.row;
+        [self.occurrencesControlsDatesTableView scrollToRowAtIndexPath:indexPath atScrollPosition:UITableViewScrollPositionMiddle animated:YES];
+        
+        updateSelectedVenue = YES;
+        updateSelectedTime = YES;
+        
+    } else if (tableView == self.occurrencesControlsVenuesTableView) {
+        
+        self.eventOccurrenceCurrentVenueIndex = indexPath.row;
+        [self.occurrencesControlsVenuesTableView scrollToRowAtIndexPath:indexPath atScrollPosition:UITableViewScrollPositionMiddle animated:YES];
+        
+        updateSelectedTime = YES;
+        
+        [self setOccurrencesControlsToShowTableView:self.occurrencesControlsTimesTableView animated:YES];
+        
+    } else if (tableView == self.occurrencesControlsTimesTableView) {
+        
+        self.eventOccurrenceCurrentTimeIndex = indexPath.row;
+        [self.occurrencesControlsTimesTableView scrollToRowAtIndexPath:indexPath atScrollPosition:UITableViewScrollPositionMiddle animated:YES];
+        
+        [self toggleOccurrencesControls];
+        
+    } else {
+        NSLog(@"ERROR in EventViewController - unrecognized table view");
+    }
+    
+    if (updateSelectedVenue) {
+        updateSelectedTime = YES;
+//        self.eventOccurrenceCurrentVenueIndex = 0; // Temporary safety value...
+        NSUInteger indexOfVenueToSelect = [self indexOfPlace:self.eventOccurrenceCurrent.place inSummaryVenues:self.eventOccurrenceCurrentDateSummaryObject.venues];
+        if (indexOfVenueToSelect == NSNotFound) { indexOfVenueToSelect = 0; } // THIS FALLBACK PROBABLY NEEDS TO BE UPDATED ONCE WE ARE SORTING THE LIST BY PROXIMITY TO USER, ETC...
+        self.eventOccurrenceCurrentVenueIndex = indexOfVenueToSelect;
+        NSIndexPath * indexPathOfVenueToSelect = [NSIndexPath indexPathForRow:self.eventOccurrenceCurrentVenueIndex inSection:0];
+        [self.occurrencesControlsVenuesTableView reloadData];
+        [self.occurrencesControlsVenuesTableView selectRowAtIndexPath:indexPathOfVenueToSelect animated:NO scrollPosition:UITableViewScrollPositionNone];
+        [self.occurrencesControlsVenuesTableView scrollToRowAtIndexPath:indexPathOfVenueToSelect atScrollPosition:UITableViewScrollPositionMiddle animated:YES];
+    }
+    
+    if (updateSelectedTime) {
+//        self.eventOccurrenceCurrentTimeIndex = 0; // Temporary safety value...
+        NSUInteger indexOfTimeToSelect = [self indexOfTime:self.eventOccurrenceCurrent.startTime inOccurrences:self.eventOccurrenceCurrentVenueSummaryObject.occurrences settleForClosestFit:YES];
+        self.eventOccurrenceCurrentTimeIndex = indexOfTimeToSelect;
+        NSIndexPath * indexPathOfTimeToSelect = [NSIndexPath indexPathForRow:self.eventOccurrenceCurrentTimeIndex inSection:0];
+        [self.occurrencesControlsTimesTableView reloadData];
+        [self.occurrencesControlsTimesTableView selectRowAtIndexPath:indexPathOfTimeToSelect animated:NO scrollPosition:UITableViewScrollPositionNone];
+        [self.occurrencesControlsTimesTableView scrollToRowAtIndexPath:indexPathOfTimeToSelect atScrollPosition:UITableViewScrollPositionMiddle animated:YES];
+    }
+    
+    self.eventOccurrenceCurrent = [self.eventOccurrenceCurrentVenueSummaryObject.occurrences objectAtIndex:self.eventOccurrenceCurrentTimeIndex];
+    [self updateOccurrenceInfoViewsFromDataAnimated:YES];
+    
+}
+
+- (OccurrenceSummaryDate *) eventOccurrenceCurrentDateSummaryObject {
+//    NSLog(@"Getting current event occurrence date at index %d from array of dates with count of %d", self.eventOccurrenceCurrentDateIndex, self.eventOccurrencesSummaryArray.count);
+    return [self.eventOccurrencesSummaryArray objectAtIndex:self.eventOccurrenceCurrentDateIndex];
+}
+
+- (OccurrenceSummaryVenue *) eventOccurrenceCurrentVenueSummaryObject {
+//    NSLog(@"Getting current event occurrence venue at index %d from array of venues with count of %d", self.eventOccurrenceCurrentVenueIndex, self.eventOccurrenceCurrentDateSummaryObject.venues.count);
+    return [self.eventOccurrenceCurrentDateSummaryObject.venues objectAtIndex:self.eventOccurrenceCurrentVenueIndex];
+}
+
+// Returns the index of summary date matching the given date. If a match does not exist, returns NSNotFound.
+- (NSUInteger) indexOfDate:(NSDate *)date inSummaryDates:(NSArray *)arrayOfSummaryDates {
+    BOOL(^passTestBlock)(id, NSUInteger, BOOL *) = ^(id elementInArray, NSUInteger indexOfElement, BOOL *stopFurtherProcessing){
+        OccurrenceSummaryDate * occurrenceSummaryDate = (OccurrenceSummaryDate*)elementInArray;
+        return [occurrenceSummaryDate.date isEqual:date];
+    };
+    return [arrayOfSummaryDates indexOfObjectPassingTest:passTestBlock];
+}
+
+// Returns the index of summary venue matching the given place. If a match does not exist, returns NSNotFound.
+- (NSUInteger) indexOfPlace:(Place *)place inSummaryVenues:(NSArray *)arrayOfSummaryVenues {
+    BOOL(^passTestBlock)(id, NSUInteger, BOOL *) = ^(id elementInArray, NSUInteger indexOfElement, BOOL *stopFurtherProcessing){
+        OccurrenceSummaryVenue * occurrenceSummaryVenue = (OccurrenceSummaryVenue*)elementInArray;
+        return [occurrenceSummaryVenue.place isEqual:place];
+    };
+    return [arrayOfSummaryVenues indexOfObjectPassingTest:passTestBlock];
+}
+
+// Returns the index of occurrence with startTime matching the given time. If there is no occurrence that matches the given time, then this method will (depending on given BOOL parameter) either return NSNotFound or the index of the best fit occurrence.
+- (NSUInteger) indexOfTime:(NSDate *)time inOccurrences:(NSArray *)arrayOfOccurrences settleForClosestFit:(BOOL)shouldSettleForClosestFit {
+    BOOL(^passTestBlock)(id, NSUInteger, BOOL *) = ^(id elementInArray, NSUInteger indexOfElement, BOOL *stopFurtherProcessing){
+        Occurrence * occurrence = (Occurrence *)elementInArray;
+        NSComparisonResult comparisonResult = [occurrence.startTime compare:time];
+        BOOL occurrenceMatched = (comparisonResult == NSOrderedSame ||
+                                  (shouldSettleForClosestFit &&
+                                   comparisonResult == NSOrderedDescending));
+        return occurrenceMatched;
+    };
+    NSUInteger indexMatched = [arrayOfOccurrences indexOfObjectPassingTest:passTestBlock];
+    if (indexMatched == NSNotFound && shouldSettleForClosestFit) {
+        indexMatched = arrayOfOccurrences.count - 1;
+    }
+    return indexMatched;
+}
+
+- (void) setOccurrencesControlsToShowTableView:(UITableView *)tableView animated:(BOOL)animated {
+    
+    void(^changesBlock)(void) = ^{
+        CGRect tableViewsContainerFrame = self.occurrencesControlsTableViewsContainer.frame;
+        CGFloat tableViewsContainerOriginX = 0;
+//        CGFloat occurrencesControlsVenuesTimesSeparatorViewAlpha = 0.0;
+        
+        if (tableView == self.occurrencesControlsDatesTableView ||
+            tableView == self.occurrencesControlsVenuesTableView) {
+            
+            tableViewsContainerOriginX = 0;
+//            occurrencesControlsVenuesTimesSeparatorViewAlpha = 1.0;
+            
+        } else if (tableView == self.occurrencesControlsTimesTableView) {
+            
+            tableViewsContainerOriginX = -self.occurrencesControlsTimesTableView.frame.origin.x + 5;
+//            occurrencesControlsVenuesTimesSeparatorViewAlpha = 0.0;
+            
+        } else {
+            NSLog(@"ERROR in EventViewController - unrecognized table view");
+        }
+        
+        tableViewsContainerFrame.origin.x = tableViewsContainerOriginX;
+        self.occurrencesControlsTableViewsContainer.frame = tableViewsContainerFrame;
+//        self.occurrencesControlsVenuesTimesSeparatorView.alpha = occurrencesControlsVenuesTimesSeparatorViewAlpha;
+    };
+    
+    if (animated) {
+        [UIView animateWithDuration:.25 animations:changesBlock];
+    } else {
+        changesBlock();
+    }
     
 }
 

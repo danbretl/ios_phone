@@ -45,7 +45,7 @@ static NSString * const WDT_PRICE_MAXIMUM_KEY = @"maximum";
 - (NSString *) timeSpanStringFromStartDatetime:(NSDate *)startDatetime endDatetime:(NSDate *)endDatetime dataUnavailableString:(NSString *)dataUnavailableString;
 - (NSString *) timeSpanStringFromStartTimeString:(NSString *)timeStart endTimeString:(NSString *)timeEnd dataUnavailableString:(NSString *)dataUnavailableString;
 // Price
-- (NSString *) priceRangeStringFromMinPrice:(NSNumber *)minPrice maxPrice:(NSNumber *)maxPrice dataUnavailableString:(NSString *)dataUnavailableString;
+- (NSString *) priceRangeStringFromMinPrice:(NSNumber *)minPrice maxPrice:(NSNumber *)maxPrice dataUnavailableString:(NSString *)dataUnavailableString; // Prices are currently rounded to display as integers
 // Address
 - (NSString *) addressSecondLineStringFromCity:(NSString *)city state:(NSString *)state zip:(NSString *)zip;
 + (NSString *) addressSecondLineStringFromCity:(NSString *)city state:(NSString *)state zip:(NSString *)zip;

@@ -132,7 +132,7 @@ float const CSVC_TAB_BUTTON_ANIMATION_DURATION = .25;
     self.friendsTableView.scrollsToTop = YES;
     self.selectedTableView.scrollsToTop = NO;
     
-    self.navBar.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"navbar_blank.png"]];
+    self.navBar.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"navbar.png"]];
     
     self.showAllFriendsTabButton.imageView.contentMode = UIViewContentModeCenter;
     self.showAllFriendsTabButton.imageView.autoresizingMask = UIViewAutoresizingFlexibleWidth;

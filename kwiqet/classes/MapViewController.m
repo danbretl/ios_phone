@@ -76,7 +76,7 @@
     [super viewDidLoad];
     
     // Navigation bar
-    self.navigationBarView.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"navbar_blank.png"]];
+    self.navigationBarView.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"navbar.png"]];
     
     // Back button
     [self.backButton setImage:[UIImage imageNamed:@"btn_back.png"] forState:UIControlStateNormal];

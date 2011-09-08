@@ -560,7 +560,10 @@
     
 }
 
-// Events continued - Occurrences & the like
+//////////////////////////
+// EVENTS - OCCURRENCES //
+//////////////////////////
+
 - (NSArray *) getDistinctOccurrenceDatesForEvent:(Event *)event {
     NSFetchRequest * fetchRequest = [[NSFetchRequest alloc] init];
     NSEntityDescription * occurrenceEntity = [NSEntityDescription entityForName:@"Occurrence" inManagedObjectContext:self.managedObjectContext];
@@ -568,22 +571,25 @@
     NSPropertyDescription * startDateProperty = [occurrenceEntity.attributesByName objectForKey:@"startDate"];
     fetchRequest.propertiesToFetch = [NSArray arrayWithObject:startDateProperty];
     fetchRequest.returnsDistinctResults = YES;
+    fetchRequest.resultType = NSDictionaryResultType;
     fetchRequest.sortDescriptors = [NSArray arrayWithObjects:
                                     [NSSortDescriptor sortDescriptorWithKey:@"startDate" ascending:YES],
-                                    [NSSortDescriptor sortDescriptorWithKey:@"endDate" ascending:YES],
                                     nil];
     fetchRequest.predicate = [NSPredicate predicateWithFormat:@"event == %@", event];
 	NSError * error;
 	NSArray * fetchedObjects = [self.managedObjectContext executeFetchRequest:fetchRequest error:&error];
     [fetchRequest release];
+//    NSLog(@"%@", fetchedObjects);
     return fetchedObjects;
 }
 
 - (NSArray *) getDistinctOccurrencePlacesForEvent:(Event *)event onDate:(NSDate *)date {
+    
     return nil;
 }
 
 - (NSArray *) getDistinctOccurrenceTimesForEvent:(Event *)event onDate:(NSDate *)date atPlace:(Place *)place {
+    
     return nil;
 }
 

@@ -263,6 +263,7 @@ static NSString * const WDT_DATA_UNAVAILABLE_EVENT_LIST_TIME  = @"";
     
 }
 
+// Prices are currently rounded to display as integers
 - (NSString *)priceRangeStringFromMinPrice:(NSNumber *)minPrice maxPrice:(NSNumber *)maxPrice dataUnavailableString:(NSString *)dataUnavailableString {
     
     NSString * priceRange = @"";
@@ -275,7 +276,7 @@ static NSString * const WDT_DATA_UNAVAILABLE_EVENT_LIST_TIME  = @"";
     BOOL noPrices = (!(minPrice || maxPrice));
     
     if (twoDistinctPrices) {
-        priceRange = [NSString stringWithFormat:@"$%@ - $%@", minPrice, maxPrice];
+        priceRange = [NSString stringWithFormat:@"$%d - $%d", minPrice.intValue, maxPrice.intValue];
     } else if (noPrices) {
         priceRange = dataUnavailableString ? dataUnavailableString : WDT_DATA_UNAVAILABLE_PRICE;
     } else {
@@ -283,7 +284,7 @@ static NSString * const WDT_DATA_UNAVAILABLE_EVENT_LIST_TIME  = @"";
         if ([keyPrice intValue] == 0) {
             priceRange = @"Free";
         } else {
-            priceRange = [NSString stringWithFormat:@"$%@", keyPrice];
+            priceRange = [NSString stringWithFormat:@"$%d", keyPrice.intValue];
         }
     }
     
