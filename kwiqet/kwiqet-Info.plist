@@ -50,6 +50,9 @@
 		<string>HelveticaNeueLTStd-CnO.otf</string>
 		<string>HelveticaNeueLTStd-Cn.otf</string>
 		<string>HelveticaNeueLTStd-BdCn.otf</string>
+		<string>LTe50050.ttf</string>
+		<string>LTe50052.ttf</string>
+		<string>LTe50054.ttf</string>
 	</array>
 	<key>UIPrerenderedIcon</key>
 	<true/>

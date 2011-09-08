@@ -319,7 +319,16 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
     
     // Date views
     self.monthLabel.font = [UIFont fontWithName:@"HelveticaNeue" size:10];
-    self.dayNumberLabel.font = [UIFont fontWithName:@"HelveticaNeueLTStd-BdCn" size:33];
+    self.dayNumberLabel.font = [UIFont fontWithName:@"HelveticaNeueLTStd-BdCn" size:30];
+//    self.dayNumberLabel.font = [UIFont fontWithName:@"HelveticaNeue-Bold" size:30];
+//    NSLog(@"%@", [UIFont familyNames]);
+//    for (NSString * familyName in [UIFont familyNames]) {
+//        NSLog(@"%@", [UIFont fontNamesForFamilyName:familyName]);
+//    }
+//    self.dayNumberLabel.font = [UIFont fontWithName:@"Glasket" size:30];
+////    self.dayNumberLabel.font = [UIFont fontWithName:@"HelveticaNeueLTPro-BdCn" size:30];
+//    self.dayNumberLabel.font = [UIFont fontWithName:@"HelveticaLT-Condensed-Bold" size:30];
+    self.dayNumberLabel.backgroundColor = [UIColor redColor];
     self.dayNameLabel.font = [UIFont fontWithName:@"HelveticaNeue" size:10];
 
     // Time views
@@ -350,6 +359,8 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
     self.occurrencesControlsTableViewsContainer.frame = occurrencesControlsTableViewsContainerFrame;
     [self setOccurrencesControlsToShowTableView:self.occurrencesControlsDatesTableView animated:NO];
     self.occurrencesControlsVenuesTableView.backgroundColor = [UIColor colorWithWhite:241.0/255.0 alpha:1.0];
+    self.occurrencesControlsTimesTableView.backgroundColor = [UIColor colorWithWhite:241.0/255.0 alpha:1.0];
+    
     self.occurrencesControlsDatesVenuesSeparatorView.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"occurrence_tables_separator_shadow.png"]];
     self.occurrencesControlsDatesVenuesSeparatorView.opaque = NO;
     self.occurrencesControlsDatesVenuesSeparatorView.layer.opaque = NO;
@@ -543,13 +554,16 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
 //            }
 //        }
         
-        // Seed the occurrences table views...
-        [self.occurrencesControlsDatesTableView reloadData];
-        [self.occurrencesControlsVenuesTableView reloadData];
-        [self.occurrencesControlsTimesTableView reloadData];
-        [self.occurrencesControlsDatesTableView selectRowAtIndexPath:[NSIndexPath indexPathForRow:self.eventOccurrenceCurrentDateIndex inSection:0] animated:NO scrollPosition:UITableViewScrollPositionMiddle];
-        [self.occurrencesControlsVenuesTableView selectRowAtIndexPath:[NSIndexPath indexPathForRow:self.eventOccurrenceCurrentVenueIndex inSection:0] animated:NO scrollPosition:UITableViewScrollPositionMiddle];
-        [self.occurrencesControlsTimesTableView selectRowAtIndexPath:[NSIndexPath indexPathForRow:self.eventOccurrenceCurrentTimeIndex inSection:0] animated:NO scrollPosition:UITableViewScrollPositionMiddle];
+        if (occurrencesByDateVenueTime &&
+            occurrencesByDateVenueTime.count > 1) {
+            // Seed the occurrences table views...
+            [self.occurrencesControlsDatesTableView reloadData];
+            [self.occurrencesControlsVenuesTableView reloadData];
+            [self.occurrencesControlsTimesTableView reloadData];
+            [self.occurrencesControlsDatesTableView selectRowAtIndexPath:[NSIndexPath indexPathForRow:self.eventOccurrenceCurrentDateIndex inSection:0] animated:NO scrollPosition:UITableViewScrollPositionMiddle];
+            [self.occurrencesControlsVenuesTableView selectRowAtIndexPath:[NSIndexPath indexPathForRow:self.eventOccurrenceCurrentVenueIndex inSection:0] animated:NO scrollPosition:UITableViewScrollPositionMiddle];
+            [self.occurrencesControlsTimesTableView selectRowAtIndexPath:[NSIndexPath indexPathForRow:self.eventOccurrenceCurrentTimeIndex inSection:0] animated:NO scrollPosition:UITableViewScrollPositionMiddle];
+        }
 
     }
     
