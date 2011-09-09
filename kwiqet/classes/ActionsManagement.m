@@ -96,7 +96,7 @@
     if (firstOccurrence.place.address && emailAddressSecond) { emailAddressFirst = [emailAddressFirst stringByAppendingString:@", "]; }
     if (!emailAddressSecond) { emailAddressSecond = @""; }
     NSString * emailAddressFull = ([emailAddressFirst isEqualToString:@""] && [emailAddressSecond isEqualToString:@""]) ? @"" : [NSString stringWithFormat:@"    Address: %@%@<br>", emailAddressFirst, emailAddressSecond];
-    NSString * emailTime = [webDataTranslator timeSpanStringFromStartDatetime:firstOccurrence.startTime endDatetime:firstOccurrence.endTime dataUnavailableString:@""];
+    NSString * emailTime = [webDataTranslator timeSpanStringFromStartDatetime:firstOccurrence.startTime endDatetime:firstOccurrence.endTime separatorString:nil dataUnavailableString:@""];
     if (![emailTime length] == 0) {
         emailTime = [NSString stringWithFormat:@"    Time: %@<br>", emailTime];
     }
@@ -111,7 +111,7 @@
         minPrice = [prices objectAtIndex:0];
         maxPrice = prices.lastObject;
     }
-    NSString * emailPrice = [webDataTranslator priceRangeStringFromMinPrice:minPrice.value maxPrice:maxPrice.value dataUnavailableString:@""];
+    NSString * emailPrice = [webDataTranslator priceRangeStringFromMinPrice:minPrice.value maxPrice:maxPrice.value separatorString:nil dataUnavailableString:@""];
     if (![emailPrice length] == 0) {
         emailPrice = [NSString stringWithFormat:@"    Price: %@", emailPrice];
     }

@@ -1952,7 +1952,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     NSString * finalDatetimeString = [NSString stringWithFormat:@"%@%@%@", dateToDisplay, divider, timeToDisplay];
     cell.dateAndTimeLabel.text = finalDatetimeString;
     
-    NSString * priceRange = [self.webDataTranslator priceRangeStringFromMinPrice:priceMin maxPrice:priceMax dataUnavailableString:nil];
+    NSString * priceRange = [self.webDataTranslator priceRangeStringFromMinPrice:priceMin maxPrice:priceMax separatorString:nil dataUnavailableString:nil];
     cell.priceLabel.text = priceRange;
     
 }

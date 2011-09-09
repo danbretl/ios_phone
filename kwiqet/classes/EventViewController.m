@@ -24,6 +24,7 @@
 #import "OccurrenceTimeCell.h"
 #import "OccurrenceSummaryDate.h"
 #import "OccurrenceSummaryVenue.h"
+#import "UIFont+Kwiqet.h"
 
 #define CGFLOAT_MAX_TEXT_SIZE 10000
 
@@ -57,7 +58,9 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
 @property (retain) IBOutlet UILabel  * dayNumberLabel;
 @property (retain) IBOutlet UILabel  * dayNameLabel;
 @property (retain) IBOutlet UIView   * timeContainer;
-@property (retain) IBOutlet UILabel  * timeLabel;
+@property (retain) IBOutlet UILabel  * timeLabelSingle;
+@property (retain) IBOutlet UILabel  * timeLabelMultipleStart;
+@property (retain) IBOutlet UILabel  * timeLabelMultipleEnd;
 @property (retain) IBOutlet UIButton * timeOccurrenceInfoButton;
 @property (retain) IBOutlet UIView   * priceContainer;
 @property (retain) IBOutlet UIButton * priceOccurrenceInfoButton;
@@ -130,6 +133,7 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
 - (void) pushedToShareViaEmail;
 - (void) pushedToShareViaFacebook;
 - (NSString *) debugOccurrencesTableViewNameForTableViewTag:(int)tag;
+- (void) setTimeLabelTextToTimeString:(NSString *)timeLabelString containsTwoTimes:(BOOL)doesContainTwoTimes usingSeparatorString:(NSString *)separatorString;
 - (void) setOccurrenceInfoContainerIsVisible:(BOOL)isVisible animated:(BOOL)animated;
 @property (nonatomic, readonly) OccurrenceSummaryDate * eventOccurrenceCurrentDateSummaryObject;
 @property (nonatomic, readonly) OccurrenceSummaryVenue * eventOccurrenceCurrentVenueSummaryObject;
@@ -146,7 +150,7 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
 
 @implementation EventViewController
 
-@synthesize backgroundColorView, navigationBar, backButton, logoButton, actionBar, letsGoButton, shareButton, deleteButton, scrollView, titleBar, shadowTitleBar, imageView, breadcrumbsBar, breadcrumbsLabel, occurrenceInfoContainer, occurrenceInfoContainerRegularHeight, occurrenceInfoContainerCollapsedHeight, occurrenceInfoPlaceholderView, occurrenceInfoPlaceholderRetryButton, dateContainer, dateOccurrenceInfoButton, monthLabel, dayNumberLabel, dayNameLabel, timeContainer, timeOccurrenceInfoButton, timeLabel, priceContainer, priceOccurrenceInfoButton, priceLabel, locationContainer, locationOccurrenceInfoButton, venueLabel, addressLabel, cityStateZipLabel, phoneNumberButton, mapButton, descriptionContainer, descriptionBackgroundColorView, descriptionLabel, shadowDescriptionContainer;
+@synthesize backgroundColorView, navigationBar, backButton, logoButton, actionBar, letsGoButton, shareButton, deleteButton, scrollView, titleBar, shadowTitleBar, imageView, breadcrumbsBar, breadcrumbsLabel, occurrenceInfoContainer, occurrenceInfoContainerRegularHeight, occurrenceInfoContainerCollapsedHeight, occurrenceInfoPlaceholderView, occurrenceInfoPlaceholderRetryButton, dateContainer, dateOccurrenceInfoButton, monthLabel, dayNumberLabel, dayNameLabel, timeContainer, timeOccurrenceInfoButton, timeLabelSingle, timeLabelMultipleStart, timeLabelMultipleEnd, priceContainer, priceOccurrenceInfoButton, priceLabel, locationContainer, locationOccurrenceInfoButton, venueLabel, addressLabel, cityStateZipLabel, phoneNumberButton, mapButton, descriptionContainer, descriptionBackgroundColorView, descriptionLabel, shadowDescriptionContainer;
 @synthesize darkOverlayViewForMainView, darkOverlayViewForScrollView;
 @synthesize swipeToPullInOccurrencesControls, swipeToPushOutOccurrencesControls, tapToPullInOccurrencesControls;
 @synthesize occurrencesControlsVisible;
@@ -189,7 +193,9 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
     [dayNameLabel release];
     [timeContainer release];
     [timeOccurrenceInfoButton release];
-    [timeLabel release];
+    [timeLabelSingle release];
+    [timeLabelMultipleStart release];
+    [timeLabelMultipleEnd release];
     [priceContainer release];
     [priceOccurrenceInfoButton release];
     [priceLabel release];
@@ -318,33 +324,24 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
     [self.occurrenceInfoPlaceholderRetryButton setTitle:EVC_OCCURRENCE_INFO_LOADING_STRING forState:UIControlStateNormal];
     
     // Date views
-    self.monthLabel.font = [UIFont fontWithName:@"HelveticaNeue" size:10];
-    self.dayNumberLabel.font = [UIFont fontWithName:@"HelveticaNeueLTStd-BdCn" size:30];
-//    self.dayNumberLabel.font = [UIFont fontWithName:@"HelveticaNeue-Bold" size:30];
-//    NSLog(@"%@", [UIFont familyNames]);
-//    for (NSString * familyName in [UIFont familyNames]) {
-//        NSLog(@"%@", [UIFont fontNamesForFamilyName:familyName]);
-//    }
-//    self.dayNumberLabel.font = [UIFont fontWithName:@"Glasket" size:30];
-////    self.dayNumberLabel.font = [UIFont fontWithName:@"HelveticaNeueLTPro-BdCn" size:30];
-//    self.dayNumberLabel.font = [UIFont fontWithName:@"HelveticaLT-Condensed-Bold" size:30];
-    self.dayNumberLabel.backgroundColor = [UIColor redColor];
-    self.dayNameLabel.font = [UIFont fontWithName:@"HelveticaNeue" size:10];
+    self.dayNumberLabel.font = [UIFont kwiqetFontOfType:BoldCompressedKwiqetFont size:30];
 
     // Time views
-    self.timeLabel.font = [UIFont fontWithName:@"HelveticaNeueLTStd-BdCn" size:24];
+    self.timeLabelSingle.font = [UIFont kwiqetFontOfType:BoldCompressedKwiqetFont size:24];
+    self.timeLabelMultipleStart.font = [UIFont kwiqetFontOfType:BoldCompressedKwiqetFont size:18];
+    self.timeLabelMultipleEnd.font = self.timeLabelMultipleStart.font;
     
     // Price views
     self.priceOccurrenceInfoButton.enabled = NO;
-    self.priceLabel.font = [UIFont fontWithName:@"HelveticaNeueLTStd-BdCn" size:24];
+    self.priceLabel.font = [UIFont kwiqetFontOfType:BoldCompressedKwiqetFont size:24];
                 
     // Location views
-    self.venueLabel.font = [UIFont fontWithName:@"HelveticaNeueLTStd-BdCn" size:21];
-    self.addressLabel.font = [UIFont fontWithName:@"HelveticaNeue" size:14];
-    self.cityStateZipLabel.font = [UIFont fontWithName:@"HelveticaNeue" size:14];
+    self.venueLabel.font = [UIFont kwiqetFontOfType:BoldCompressedKwiqetFont size:21];
+    self.addressLabel.font = [UIFont kwiqetFontOfType:RegularCompressedKwiqetFont size:14];
+    self.cityStateZipLabel.font = [UIFont kwiqetFontOfType:RegularCompressedKwiqetFont size:14];
     
     // Phone number button
-    self.phoneNumberButton.titleLabel.font = [UIFont fontWithName:@"HelveticaNeueLTStd-BdCn" size:12];
+    self.phoneNumberButton.titleLabel.font = [UIFont kwiqetFontOfType:BoldCompressedKwiqetFont size:12];
     
     // Occurrences controls
     [self.scrollView insertSubview:self.occurrencesControlsContainer belowSubview:self.titleBar];
@@ -610,8 +607,9 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
         [dateFormatter release];
         self.dayNameLabel.text = [dayName uppercaseString];
         // Time
-        NSString * time = [self.webDataTranslator timeSpanStringFromStartDatetime:self.eventOccurrenceCurrent.startTime endDatetime:self.eventOccurrenceCurrent.endTime dataUnavailableString:EVENT_TIME_NOT_AVAILABLE];
-        self.timeLabel.text = time;
+        NSString * timesSeparatorString = @"\n -";
+        NSString * time = [self.webDataTranslator timeSpanStringFromStartDatetime:self.eventOccurrenceCurrent.startTime endDatetime:self.eventOccurrenceCurrent.endTime separatorString:timesSeparatorString dataUnavailableString:EVENT_TIME_NOT_AVAILABLE];
+        [self setTimeLabelTextToTimeString:time containsTwoTimes:(self.eventOccurrenceCurrent.startTime && self.eventOccurrenceCurrent.endTime) usingSeparatorString:timesSeparatorString];
         
         NSArray * prices = self.eventOccurrenceCurrent.pricesLowToHigh;
         Price * minPrice = nil;
@@ -620,8 +618,8 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
             minPrice = (Price *)[prices objectAtIndex:0];
             maxPrice = (Price *)[prices lastObject];
         }
-        NSString * price = [self.webDataTranslator priceRangeStringFromMinPrice:minPrice.value maxPrice:maxPrice.value dataUnavailableString:@"--"];
-        self.priceLabel.text = [NSString stringWithFormat:@"%@", price];
+        NSString * price = [self.webDataTranslator priceRangeStringFromMinPrice:minPrice.value maxPrice:maxPrice.value separatorString:nil dataUnavailableString:@"--"];
+        self.priceLabel.text = price;
         
         // Location & Address
         NSString * addressFirstLine = self.eventOccurrenceCurrent.place.address;
@@ -673,12 +671,12 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
         self.monthLabel.text = @"";
         self.dayNumberLabel.text = @"";
         self.dayNameLabel.text = @"";
-        self.timeLabel.text = @"";
+        [self setTimeLabelTextToTimeString:@"" containsTwoTimes:NO usingSeparatorString:nil];
         self.priceLabel.text = @"";
         self.venueLabel.text = @"";
         self.addressLabel.text = @"";
         self.cityStateZipLabel.text = @"";
-        [self.phoneNumberButton setTitle:@"" forState:UIControlStateNormal];
+        self.priceLabel.text = @"";
         self.phoneNumberButton.enabled = NO;
         self.mapButton.enabled = NO;
         self.mapButton.alpha = 0.0;
@@ -699,6 +697,47 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
     scrollViewScrollIndicatorInsets.bottom = self.occurrencesControlsContainer.hidden ? 0 : 163; // HARD CODED VALUE. HARD CODED VALUE. HARD CODED VALUE. HARD CODED VALUE. HARD CODED VALUE. HARD CODED VALUE. HARD CODED VALUE. HARD CODED VALUE. HARD CODED VALUE. HARD CODED VALUE. HARD CODED VALUE. HARD CODED VALUE. HARD CODED VALUE.
     self.scrollView.scrollIndicatorInsets = scrollViewScrollIndicatorInsets;
     
+}
+
+- (void) setTimeLabelTextToTimeString:(NSString *)timeLabelString containsTwoTimes:(BOOL)doesContainTwoTimes usingSeparatorString:(NSString *)separatorString {
+    self.timeLabelSingle.hidden = doesContainTwoTimes;
+    self.timeLabelMultipleStart.hidden = !doesContainTwoTimes;
+    self.timeLabelMultipleEnd.hidden = !doesContainTwoTimes;
+    if (!doesContainTwoTimes) {
+        self.timeLabelSingle.text = timeLabelString;        
+    } else {
+        NSArray * stringParts = [timeLabelString componentsSeparatedByString:separatorString];
+        separatorString = [separatorString stringByReplacingOccurrencesOfString:@"\n" withString:@""];
+        self.timeLabelMultipleStart.text = [stringParts objectAtIndex:0];
+        self.timeLabelMultipleEnd.text = [NSString stringWithFormat:@"%@%@", separatorString, [stringParts lastObject]];
+        // Gather some values for simplicity
+        CGFloat superviewWidth = self.timeLabelMultipleStart.superview.bounds.size.width;
+        CGFloat horizontalPadding = 5;
+        // Hold on to the original frames
+        CGRect timeLabelMultipleStartFrameOriginal = self.timeLabelMultipleStart.frame;
+        CGRect timeLabelMultipleEndFrameOriginal = self.timeLabelMultipleEnd.frame;
+        // Size the frames to fit the new text
+        [self.timeLabelMultipleStart sizeToFit];
+        [self.timeLabelMultipleEnd sizeToFit];
+        // Grab the new frames, and make sure their widths are not too big
+        CGRect timeLabelMultipleStartFrameModified = self.timeLabelMultipleStart.frame;
+        timeLabelMultipleStartFrameModified.size.width = MIN(superviewWidth - horizontalPadding*2, timeLabelMultipleStartFrameModified.size.width);
+        CGRect timeLabelMultipleEndFrameModified = self.timeLabelMultipleEnd.frame;
+        timeLabelMultipleEndFrameModified.size.width = MIN(superviewWidth - horizontalPadding*2, timeLabelMultipleEndFrameModified.size.width);
+        // Adjust the new frames' heights back to the original heights
+        timeLabelMultipleStartFrameModified.size.height = timeLabelMultipleStartFrameOriginal.size.height;
+        timeLabelMultipleEndFrameModified.size.height = timeLabelMultipleEndFrameOriginal.size.height;
+        // Adjust the new frames' x origin
+        CGFloat maximumTimeLabelMultipleWidth = MAX(timeLabelMultipleStartFrameModified.size.width, timeLabelMultipleEndFrameModified.size.width);
+        CGSize separatorSize = [separatorString sizeWithFont:self.timeLabelMultipleEnd.font];
+        timeLabelMultipleStartFrameModified.origin.x = (superviewWidth - maximumTimeLabelMultipleWidth) / 2.0 + (maximumTimeLabelMultipleWidth - timeLabelMultipleStartFrameModified.size.width) - separatorSize.width / 2.0;
+        timeLabelMultipleEndFrameModified.origin.x = (superviewWidth - maximumTimeLabelMultipleWidth) / 2.0 + (maximumTimeLabelMultipleWidth - timeLabelMultipleEndFrameModified.size.width) - separatorSize.width / 2.0;
+        self.timeLabelMultipleStart.frame = timeLabelMultipleStartFrameModified;
+        self.timeLabelMultipleEnd.frame = timeLabelMultipleEndFrameModified;
+//        self.timeLabelMultipleStart.backgroundColor = [UIColor yellowColor];
+//        self.timeLabelMultipleEnd.backgroundColor = [UIColor redColor];
+    }
+    NSLog(@"EventViewController setTimeLabelToTimeString to %@", timeLabelString);
 }
 
 - (void) updateViewsFromDataAnimated:(BOOL)animated {
@@ -1354,7 +1393,7 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
                 minPrice = [pricesLowToHigh objectAtIndex:0];
                 maxPrice = pricesLowToHigh.lastObject;
             }
-            tableViewCellCast.priceAndInfoLabel.text = [self.webDataTranslator priceRangeStringFromMinPrice:minPrice maxPrice:maxPrice dataUnavailableString:@"No price or info available"];
+            tableViewCellCast.priceAndInfoLabel.text = [self.webDataTranslator priceRangeStringFromMinPrice:minPrice maxPrice:maxPrice separatorString:nil dataUnavailableString:@"No price or info available"];
             
         } else {
             NSLog(@"ERROR in EventViewController - unrecognized table view");

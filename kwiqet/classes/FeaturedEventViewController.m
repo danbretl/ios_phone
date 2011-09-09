@@ -536,7 +536,7 @@ CGFloat const FEV_DESCRIPTION_LABEL_PADDING_HORIZONTAL = 20.0;
         // Occurrences above... TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. TEMP, NOT IMPLEMENTED YET. EVERYTHING RELATED TO TEMPRANDOMOCCURRENCE NEEDS TO BE LOOKED OVER AND REWRITTEN. EVERYTHING RELATED TO TEMPRANDOMOCCURRENCE NEEDS TO BE LOOKED OVER AND REWRITTEN. EVERYTHING RELATED TO TEMPRANDOMOCCURRENCE NEEDS TO BE LOOKED OVER AND REWRITTEN. EVERYTHING RELATED TO TEMPRANDOMOCCURRENCE NEEDS TO BE LOOKED OVER AND REWRITTEN. EVERYTHING RELATED TO TEMPRANDOMOCCURRENCE NEEDS TO BE LOOKED OVER AND REWRITTEN.
 
         // Date & Time
-        NSString * time = [self.webDataTranslator timeSpanStringFromStartDatetime:firstOccurrence.startTime endDatetime:firstOccurrence.endTime dataUnavailableString:FEATURED_EVENT_TIME_NOT_AVAILABLE];
+        NSString * time = [self.webDataTranslator timeSpanStringFromStartDatetime:firstOccurrence.startTime endDatetime:firstOccurrence.endTime separatorString:nil dataUnavailableString:FEATURED_EVENT_TIME_NOT_AVAILABLE];
         NSString * date = [self.webDataTranslator dateSpanStringFromStartDatetime:firstOccurrence.startDate endDatetime:firstOccurrence.endDate relativeDates:YES dataUnavailableString:FEATURED_EVENT_DATE_NOT_AVAILABLE];
         
         // Price
@@ -547,7 +547,7 @@ CGFloat const FEV_DESCRIPTION_LABEL_PADDING_HORIZONTAL = 20.0;
             priceMinimum = [prices objectAtIndex:0];
             priceMaximum = [prices lastObject];
         }
-        NSString * price = [self.webDataTranslator priceRangeStringFromMinPrice:priceMinimum.value maxPrice:priceMaximum.value dataUnavailableString:FEATURED_EVENT_COST_NOT_AVAILABLE];
+        NSString * price = [self.webDataTranslator priceRangeStringFromMinPrice:priceMinimum.value maxPrice:priceMaximum.value separatorString:nil dataUnavailableString:FEATURED_EVENT_COST_NOT_AVAILABLE];
         price = [NSString stringWithFormat:@"Price: %@", price];
         
         // Location & Address

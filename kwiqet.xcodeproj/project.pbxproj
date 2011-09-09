@@ -206,6 +206,7 @@
 		326098AF14058D6C00AF396A /* btn_reload_touch@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 326098AB14058D6C00AF396A /* btn_reload_touch@2x.png */; };
 		326098B014058D6C00AF396A /* btn_reload.png in Resources */ = {isa = PBXBuildFile; fileRef = 326098AC14058D6C00AF396A /* btn_reload.png */; };
 		326098B114058D6C00AF396A /* btn_reload@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 326098AD14058D6C00AF396A /* btn_reload@2x.png */; };
+		326A2C88141A5C7100F44E22 /* UIFont+Kwiqet.m in Sources */ = {isa = PBXBuildFile; fileRef = 326A2C87141A5C7100F44E22 /* UIFont+Kwiqet.m */; };
 		326F6C7A13D0E2B80032CA5F /* UIImageView+WebCache.m in Sources */ = {isa = PBXBuildFile; fileRef = 326F6C6E13D0E2B80032CA5F /* UIImageView+WebCache.m */; };
 		326F6C7B13D0E2B80032CA5F /* SDWebImageManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 326F6C7113D0E2B80032CA5F /* SDWebImageManager.m */; };
 		326F6C7C13D0E2B80032CA5F /* SDWebImageDownloader.m in Sources */ = {isa = PBXBuildFile; fileRef = 326F6C7413D0E2B80032CA5F /* SDWebImageDownloader.m */; };
@@ -720,6 +721,8 @@
 		326098AB14058D6C00AF396A /* btn_reload_touch@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "btn_reload_touch@2x.png"; sourceTree = "<group>"; };
 		326098AC14058D6C00AF396A /* btn_reload.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = btn_reload.png; sourceTree = "<group>"; };
 		326098AD14058D6C00AF396A /* btn_reload@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "btn_reload@2x.png"; sourceTree = "<group>"; };
+		326A2C86141A5C7100F44E22 /* UIFont+Kwiqet.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIFont+Kwiqet.h"; sourceTree = "<group>"; };
+		326A2C87141A5C7100F44E22 /* UIFont+Kwiqet.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIFont+Kwiqet.m"; sourceTree = "<group>"; };
 		326F6C6E13D0E2B80032CA5F /* UIImageView+WebCache.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIImageView+WebCache.m"; sourceTree = "<group>"; };
 		326F6C6F13D0E2B80032CA5F /* UIImageView+WebCache.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIImageView+WebCache.h"; sourceTree = "<group>"; };
 		326F6C7013D0E2B80032CA5F /* SDWebImageManagerDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDWebImageManagerDelegate.h; sourceTree = "<group>"; };
@@ -1447,6 +1450,15 @@
 			name = EventViewController;
 			sourceTree = "<group>";
 		};
+		326A2C84141A5C3100F44E22 /* Obj-C Categories */ = {
+			isa = PBXGroup;
+			children = (
+				326A2C86141A5C7100F44E22 /* UIFont+Kwiqet.h */,
+				326A2C87141A5C7100F44E22 /* UIFont+Kwiqet.m */,
+			);
+			name = "Obj-C Categories";
+			sourceTree = "<group>";
+		};
 		326F6C6C13D0E2540032CA5F /* SDWebImage */ = {
 			isa = PBXGroup;
 			children = (
@@ -2053,6 +2065,7 @@
 				32D7FEE613B0C1E0005E8406 /* models etc */,
 				32D7FEE513B0C1B0005E8406 /* web */,
 				32D7FEE113B0BD08005E8406 /* 3rd party */,
+				326A2C84141A5C3100F44E22 /* Obj-C Categories */,
 			);
 			path = classes;
 			sourceTree = "<group>";
@@ -2599,6 +2612,7 @@
 				32590DA91417D658006F65D4 /* OccurrenceSummaryDate.m in Sources */,
 				32590DAC1417D66A006F65D4 /* OccurrenceSummaryVenue.m in Sources */,
 				32590DAF1418172B006F65D4 /* OccurrenceTimeCell.m in Sources */,
+				326A2C88141A5C7100F44E22 /* UIFont+Kwiqet.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

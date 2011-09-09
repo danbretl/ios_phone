@@ -57,7 +57,9 @@
     IBOutlet UILabel  * dayNameLabel;
     IBOutlet UIView   * timeContainer;
     IBOutlet UIButton * timeOccurrenceInfoButton;
-    IBOutlet UILabel  * timeLabel;
+    IBOutlet UILabel  * timeLabelSingle;
+    IBOutlet UILabel  * timeLabelMultipleStart;
+    IBOutlet UILabel  * timeLabelMultipleEnd;
     IBOutlet UIView   * priceContainer;
     IBOutlet UIButton * priceOccurrenceInfoButton;
     IBOutlet UILabel  * priceLabel;

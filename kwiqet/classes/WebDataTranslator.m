@@ -231,16 +231,19 @@ static NSString * const WDT_DATA_UNAVAILABLE_EVENT_LIST_TIME  = @"";
     
 }
 
-- (NSString *)timeSpanStringFromStartDatetime:(NSDate *)startDatetime endDatetime:(NSDate *)endDatetime dataUnavailableString:(NSString *)dataUnavailableString {
+- (NSString *)timeSpanStringFromStartDatetime:(NSDate *)startDatetime endDatetime:(NSDate *)endDatetime separatorString:(NSString *)separatorString dataUnavailableString:(NSString *)dataUnavailableString {
     
     NSString * timeDisplayString = nil;
+    if (separatorString == nil) {
+        separatorString = @" - ";
+    }
     
     [self.dateFormatter setDateFormat:@"h:mm a"];
     
     if (startDatetime) {
         timeDisplayString = [self.dateFormatter stringFromDate:startDatetime];
         if (endDatetime) {
-            timeDisplayString = [NSString stringWithFormat:@"%@ - %@", timeDisplayString, [dateFormatter stringFromDate:endDatetime]];
+            timeDisplayString = [NSString stringWithFormat:@"%@%@%@", timeDisplayString, separatorString, [dateFormatter stringFromDate:endDatetime]];
         }
     }
     
@@ -252,21 +255,24 @@ static NSString * const WDT_DATA_UNAVAILABLE_EVENT_LIST_TIME  = @"";
     
 }
 
-- (NSString *)timeSpanStringFromStartTimeString:(NSString *)timeStart endTimeString:(NSString *)timeEnd dataUnavailableString:(NSString *)dataUnavailableString {
+- (NSString *)timeSpanStringFromStartTimeString:(NSString *)timeStart endTimeString:(NSString *)timeEnd separatorString:(NSString *)separatorString dataUnavailableString:(NSString *)dataUnavailableString {
     
     [self.dateFormatter setDateFormat:@"HH:mm:ss"];
     
     NSDate * datetimeStart = timeStart ? [self.dateFormatter dateFromString:timeStart] : nil;
     NSDate * datetimeEnd = timeEnd ? [self.dateFormatter dateFromString:timeEnd] : nil;
     
-    return [self timeSpanStringFromStartDatetime:datetimeStart endDatetime:datetimeEnd dataUnavailableString:dataUnavailableString];
+    return [self timeSpanStringFromStartDatetime:datetimeStart endDatetime:datetimeEnd separatorString:separatorString dataUnavailableString:dataUnavailableString];
     
 }
 
 // Prices are currently rounded to display as integers
-- (NSString *)priceRangeStringFromMinPrice:(NSNumber *)minPrice maxPrice:(NSNumber *)maxPrice dataUnavailableString:(NSString *)dataUnavailableString {
+- (NSString *)priceRangeStringFromMinPrice:(NSNumber *)minPrice maxPrice:(NSNumber *)maxPrice separatorString:(NSString *)separatorString dataUnavailableString:(NSString *)dataUnavailableString {
     
     NSString * priceRange = @"";
+    if (separatorString == nil) {
+        separatorString = @" - ";
+    }
     
     minPrice = [WebUtil numberOrNil:minPrice];
     maxPrice = [WebUtil numberOrNil:maxPrice];
@@ -276,7 +282,7 @@ static NSString * const WDT_DATA_UNAVAILABLE_EVENT_LIST_TIME  = @"";
     BOOL noPrices = (!(minPrice || maxPrice));
     
     if (twoDistinctPrices) {
-        priceRange = [NSString stringWithFormat:@"$%d - $%d", minPrice.intValue, maxPrice.intValue];
+        priceRange = [NSString stringWithFormat:@"$%d%@$%d", minPrice.intValue, separatorString, maxPrice.intValue];
     } else if (noPrices) {
         priceRange = dataUnavailableString ? dataUnavailableString : WDT_DATA_UNAVAILABLE_PRICE;
     } else {
@@ -408,7 +414,7 @@ static NSString * const WDT_DATA_UNAVAILABLE_EVENT_LIST_TIME  = @"";
 }
 
 - (NSString *) eventsListTimeStringFromTime:(NSDate *)time {
-    return [self timeSpanStringFromStartDatetime:time endDatetime:nil dataUnavailableString:WDT_DATA_UNAVAILABLE_EVENT_LIST_TIME];
+    return [self timeSpanStringFromStartDatetime:time endDatetime:nil separatorString:nil dataUnavailableString:WDT_DATA_UNAVAILABLE_EVENT_LIST_TIME];
 }
 
 @end
