@@ -9,14 +9,18 @@
 #import <UIKit/UIKit.h>
 
 typedef enum {
-    BoldCompressedKwiqetFont = 110,
-    RegularCompressedKwiqetFont = 105,
-    LightCompressedKwiqetFont = 102,
-    HelveticaNeueRegular = 5
+    LightCondensed = 101,
+    RegularCondensed = 102,
+    BoldCondensed = 103,
+    LightNormal = 201,
+    RegularNormal = 202,
+    BoldNormal = 203,
+    HelveticaNeue = 9991
 } KwiqetFontType;
 
 @interface UIFont (UIFont_Kwiqet)
 
 + (UIFont *) kwiqetFontOfType:(KwiqetFontType)kwiqetFontType size:(CGFloat)fontSize;
++ (void) logListOfAllAvailableFonts;
 
 @end

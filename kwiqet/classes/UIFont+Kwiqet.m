@@ -13,21 +13,39 @@
 + (UIFont *) kwiqetFontOfType:(KwiqetFontType)kwiqetFontType size:(CGFloat)fontSize {
     NSString * fontName = nil;
     switch (kwiqetFontType) {
-        case BoldCompressedKwiqetFont:
+        case BoldCondensed:
             fontName = @"HelveticaLT-Condensed-Bold";
             break;
-        case RegularCompressedKwiqetFont:
+        case RegularCondensed:
             fontName = @"HelveticaLT-Condensed";
             break;
-        case LightCompressedKwiqetFont:
+        case LightCondensed:
             fontName = @"HelveticaLT-Condensed-Light";
             break;
-        case HelveticaNeueRegular:
+        case BoldNormal:
+            fontName = @"HelveticaLT-Bold";
+            break;
+        case RegularNormal:
+            fontName = @"HelveticaLT";
+            break;
+        case LightNormal:
+            fontName = @"HelveticaLT-Light";
+            break;
+        case HelveticaNeue:
         default:
             fontName = @"HelveticaNeue";
             break;
     }
     return [UIFont fontWithName:fontName size:fontSize];
+}
+
++ (void) logListOfAllAvailableFonts {
+    for (NSString * familyName in [UIFont familyNames]) {
+        NSLog(@"%@:", familyName);
+        for (NSString * fontName in [UIFont fontNamesForFamilyName:familyName]) {
+            NSLog(@"%@", fontName);
+        }
+    }
 }
 
 @end

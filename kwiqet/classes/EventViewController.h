@@ -22,6 +22,7 @@
 #import "ContactsSelectViewController.h"
 #import "UIImageView+WebCache.h"
 #import "SDWebImageManager.h"
+#import "OccurrenceInfoOverlayView.h"
 
 @protocol CardPageViewControllerDelegate;
 
@@ -46,10 +47,8 @@
     IBOutlet UILabel * breadcrumbsLabel;
     
     IBOutlet UIView   * occurrenceInfoContainer;
-    CGFloat occurrenceInfoContainerRegularHeight;
-    CGFloat occurrenceInfoContainerCollapsedHeight;
-    IBOutlet UIView   * occurrenceInfoPlaceholderView;
-    IBOutlet UIButton * occurrenceInfoPlaceholderRetryButton;
+    UIView * shadowOccurrenceInfoContainer;
+    OccurrenceInfoOverlayView * occurrenceInfoOverlayView;
     IBOutlet UIView   * dateContainer;
     IBOutlet UIButton * dateOccurrenceInfoButton;
     IBOutlet UILabel  * monthLabel;
@@ -57,9 +56,8 @@
     IBOutlet UILabel  * dayNameLabel;
     IBOutlet UIView   * timeContainer;
     IBOutlet UIButton * timeOccurrenceInfoButton;
-    IBOutlet UILabel  * timeLabelSingle;
-    IBOutlet UILabel  * timeLabelMultipleStart;
-    IBOutlet UILabel  * timeLabelMultipleEnd;
+    IBOutlet UILabel  * timeStartLabel;
+    IBOutlet UILabel  * timeEndLabel;
     IBOutlet UIView   * priceContainer;
     IBOutlet UIButton * priceOccurrenceInfoButton;
     IBOutlet UILabel  * priceLabel;

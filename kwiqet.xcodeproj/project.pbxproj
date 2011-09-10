@@ -207,6 +207,10 @@
 		326098B014058D6C00AF396A /* btn_reload.png in Resources */ = {isa = PBXBuildFile; fileRef = 326098AC14058D6C00AF396A /* btn_reload.png */; };
 		326098B114058D6C00AF396A /* btn_reload@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 326098AD14058D6C00AF396A /* btn_reload@2x.png */; };
 		326A2C88141A5C7100F44E22 /* UIFont+Kwiqet.m in Sources */ = {isa = PBXBuildFile; fileRef = 326A2C87141A5C7100F44E22 /* UIFont+Kwiqet.m */; };
+		326A2C8A141ABB4B00F44E22 /* LTe50046.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 326A2C89141ABB4B00F44E22 /* LTe50046.ttf */; };
+		326A2C8D141ABD8D00F44E22 /* LTe51250.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 326A2C8B141ABD8D00F44E22 /* LTe51250.ttf */; };
+		326A2C8E141ABD8D00F44E22 /* LTe51252.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 326A2C8C141ABD8D00F44E22 /* LTe51252.ttf */; };
+		326A2C91141ACCC200F44E22 /* OccurrenceInfoOverlayView.m in Sources */ = {isa = PBXBuildFile; fileRef = 326A2C90141ACCC200F44E22 /* OccurrenceInfoOverlayView.m */; };
 		326F6C7A13D0E2B80032CA5F /* UIImageView+WebCache.m in Sources */ = {isa = PBXBuildFile; fileRef = 326F6C6E13D0E2B80032CA5F /* UIImageView+WebCache.m */; };
 		326F6C7B13D0E2B80032CA5F /* SDWebImageManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 326F6C7113D0E2B80032CA5F /* SDWebImageManager.m */; };
 		326F6C7C13D0E2B80032CA5F /* SDWebImageDownloader.m in Sources */ = {isa = PBXBuildFile; fileRef = 326F6C7413D0E2B80032CA5F /* SDWebImageDownloader.m */; };
@@ -723,6 +727,11 @@
 		326098AD14058D6C00AF396A /* btn_reload@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "btn_reload@2x.png"; sourceTree = "<group>"; };
 		326A2C86141A5C7100F44E22 /* UIFont+Kwiqet.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIFont+Kwiqet.h"; sourceTree = "<group>"; };
 		326A2C87141A5C7100F44E22 /* UIFont+Kwiqet.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIFont+Kwiqet.m"; sourceTree = "<group>"; };
+		326A2C89141ABB4B00F44E22 /* LTe50046.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = LTe50046.ttf; sourceTree = "<group>"; };
+		326A2C8B141ABD8D00F44E22 /* LTe51250.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = LTe51250.ttf; sourceTree = "<group>"; };
+		326A2C8C141ABD8D00F44E22 /* LTe51252.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = LTe51252.ttf; sourceTree = "<group>"; };
+		326A2C8F141ACCC200F44E22 /* OccurrenceInfoOverlayView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OccurrenceInfoOverlayView.h; sourceTree = "<group>"; };
+		326A2C90141ACCC200F44E22 /* OccurrenceInfoOverlayView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OccurrenceInfoOverlayView.m; sourceTree = "<group>"; };
 		326F6C6E13D0E2B80032CA5F /* UIImageView+WebCache.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIImageView+WebCache.m"; sourceTree = "<group>"; };
 		326F6C6F13D0E2B80032CA5F /* UIImageView+WebCache.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIImageView+WebCache.h"; sourceTree = "<group>"; };
 		326F6C7013D0E2B80032CA5F /* SDWebImageManagerDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDWebImageManagerDelegate.h; sourceTree = "<group>"; };
@@ -1126,9 +1135,12 @@
 				32041A3313AFFC700072F95C /* HelveticaNeueLTStd-Cn.otf */,
 				32041A3413AFFC700072F95C /* HelveticaNeueLTStd-CnO.otf */,
 				32041A3513AFFC700072F95C /* HelveticaNeueLTStd-MdCn.otf */,
+				326A2C89141ABB4B00F44E22 /* LTe50046.ttf */,
 				3239BF501419861900783BED /* LTe50050.ttf */,
 				3239BF511419861900783BED /* LTe50052.ttf */,
 				3239BF54141986DD00783BED /* LTe50054.ttf */,
+				326A2C8B141ABD8D00F44E22 /* LTe51250.ttf */,
+				326A2C8C141ABD8D00F44E22 /* LTe51252.ttf */,
 			);
 			name = fonts;
 			path = kwiqet/fonts;
@@ -1445,6 +1457,8 @@
 				32FD383E13AFF52F007549B6 /* EventViewController.h */,
 				32FD383F13AFF52F007549B6 /* EventViewController.m */,
 				3288427D13F07DC900C06DDE /* EventViewController.xib */,
+				326A2C8F141ACCC200F44E22 /* OccurrenceInfoOverlayView.h */,
+				326A2C90141ACCC200F44E22 /* OccurrenceInfoOverlayView.m */,
 				32590DA41417D61A006F65D4 /* Occurrences */,
 			);
 			name = EventViewController;
@@ -2526,6 +2540,9 @@
 				3239BF521419861900783BED /* LTe50050.ttf in Resources */,
 				3239BF531419861900783BED /* LTe50052.ttf in Resources */,
 				3239BF55141986DD00783BED /* LTe50054.ttf in Resources */,
+				326A2C8A141ABB4B00F44E22 /* LTe50046.ttf in Resources */,
+				326A2C8D141ABD8D00F44E22 /* LTe51250.ttf in Resources */,
+				326A2C8E141ABD8D00F44E22 /* LTe51252.ttf in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2613,6 +2630,7 @@
 				32590DAC1417D66A006F65D4 /* OccurrenceSummaryVenue.m in Sources */,
 				32590DAF1418172B006F65D4 /* OccurrenceTimeCell.m in Sources */,
 				326A2C88141A5C7100F44E22 /* UIFont+Kwiqet.m in Sources */,
+				326A2C91141ACCC200F44E22 /* OccurrenceInfoOverlayView.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

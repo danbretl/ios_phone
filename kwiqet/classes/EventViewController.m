@@ -48,19 +48,16 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
 @property (retain) IBOutlet UIView * breadcrumbsBar;
 @property (retain) IBOutlet UILabel * breadcrumbsLabel;
 @property (retain) IBOutlet UIView   * occurrenceInfoContainer;
-@property CGFloat occurrenceInfoContainerRegularHeight;
-@property CGFloat occurrenceInfoContainerCollapsedHeight;
-@property (retain) IBOutlet UIView   * occurrenceInfoPlaceholderView;
-@property (retain) IBOutlet UIButton * occurrenceInfoPlaceholderRetryButton;
+@property (retain) UIView * shadowOccurrenceInfoContainer;
+@property (retain) OccurrenceInfoOverlayView * occurrenceInfoOverlayView;
 @property (retain) IBOutlet UIView   * dateContainer;
 @property (retain) IBOutlet UIButton * dateOccurrenceInfoButton;
 @property (retain) IBOutlet UILabel  * monthLabel;
 @property (retain) IBOutlet UILabel  * dayNumberLabel;
 @property (retain) IBOutlet UILabel  * dayNameLabel;
 @property (retain) IBOutlet UIView   * timeContainer;
-@property (retain) IBOutlet UILabel  * timeLabelSingle;
-@property (retain) IBOutlet UILabel  * timeLabelMultipleStart;
-@property (retain) IBOutlet UILabel  * timeLabelMultipleEnd;
+@property (retain) IBOutlet UILabel  * timeStartLabel;
+@property (retain) IBOutlet UILabel  * timeEndLabel;
 @property (retain) IBOutlet UIButton * timeOccurrenceInfoButton;
 @property (retain) IBOutlet UIView   * priceContainer;
 @property (retain) IBOutlet UIButton * priceOccurrenceInfoButton;
@@ -118,7 +115,7 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
 - (IBAction) deleteButtonTouched;
 - (IBAction) phoneButtonTouched;
 - (IBAction) mapButtonTouched;
-- (IBAction) occurrenceInfoRetryButtonTouched;
+- (void) occurrenceInfoRetryButtonTouched;
 - (IBAction) occurrenceInfoButtonTouched:(UIButton *)occurrenceInfoButton;
 - (void) setOccurrencesControlsToShowTableView:(UITableView *)tableView animated:(BOOL)animated;
 - (void) swipedToGoBack:(UISwipeGestureRecognizer *)swipeGesture;
@@ -132,6 +129,9 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
 - (void) pushedToCreateFacebookEvent;
 - (void) pushedToShareViaEmail;
 - (void) pushedToShareViaFacebook;
+- (void) processOccurrencesFromEvent:(Event *)theEvent;
+- (void) reloadOccurrencesTableViews;
+- (void) updateOccurrenceInfoViewsFromDataAnimated:(BOOL)animated;
 - (NSString *) debugOccurrencesTableViewNameForTableViewTag:(int)tag;
 - (void) setTimeLabelTextToTimeString:(NSString *)timeLabelString containsTwoTimes:(BOOL)doesContainTwoTimes usingSeparatorString:(NSString *)separatorString;
 - (void) setOccurrenceInfoContainerIsVisible:(BOOL)isVisible animated:(BOOL)animated;
@@ -150,7 +150,7 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
 
 @implementation EventViewController
 
-@synthesize backgroundColorView, navigationBar, backButton, logoButton, actionBar, letsGoButton, shareButton, deleteButton, scrollView, titleBar, shadowTitleBar, imageView, breadcrumbsBar, breadcrumbsLabel, occurrenceInfoContainer, occurrenceInfoContainerRegularHeight, occurrenceInfoContainerCollapsedHeight, occurrenceInfoPlaceholderView, occurrenceInfoPlaceholderRetryButton, dateContainer, dateOccurrenceInfoButton, monthLabel, dayNumberLabel, dayNameLabel, timeContainer, timeOccurrenceInfoButton, timeLabelSingle, timeLabelMultipleStart, timeLabelMultipleEnd, priceContainer, priceOccurrenceInfoButton, priceLabel, locationContainer, locationOccurrenceInfoButton, venueLabel, addressLabel, cityStateZipLabel, phoneNumberButton, mapButton, descriptionContainer, descriptionBackgroundColorView, descriptionLabel, shadowDescriptionContainer;
+@synthesize backgroundColorView, navigationBar, backButton, logoButton, actionBar, letsGoButton, shareButton, deleteButton, scrollView, titleBar, shadowTitleBar, imageView, breadcrumbsBar, breadcrumbsLabel, occurrenceInfoContainer, shadowOccurrenceInfoContainer, occurrenceInfoOverlayView, dateContainer, dateOccurrenceInfoButton, monthLabel, dayNumberLabel, dayNameLabel, timeContainer, timeOccurrenceInfoButton, timeStartLabel, timeEndLabel, priceContainer, priceOccurrenceInfoButton, priceLabel, locationContainer, locationOccurrenceInfoButton, venueLabel, addressLabel, cityStateZipLabel, phoneNumberButton, mapButton, descriptionContainer, descriptionBackgroundColorView, descriptionLabel, shadowDescriptionContainer;
 @synthesize darkOverlayViewForMainView, darkOverlayViewForScrollView;
 @synthesize swipeToPullInOccurrencesControls, swipeToPushOutOccurrencesControls, tapToPullInOccurrencesControls;
 @synthesize occurrencesControlsVisible;
@@ -184,8 +184,8 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
     [breadcrumbsBar release];
     [breadcrumbsLabel release];
     [occurrenceInfoContainer release];
-    [occurrenceInfoPlaceholderView release];
-    [occurrenceInfoPlaceholderRetryButton release];
+    [shadowOccurrenceInfoContainer release];
+    [occurrenceInfoOverlayView release];
     [dateContainer release];
     [dateOccurrenceInfoButton release];
     [monthLabel release];
@@ -193,9 +193,8 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
     [dayNameLabel release];
     [timeContainer release];
     [timeOccurrenceInfoButton release];
-    [timeLabelSingle release];
-    [timeLabelMultipleStart release];
-    [timeLabelMultipleEnd release];
+    [timeStartLabel release];
+    [timeEndLabel release];
     [priceContainer release];
     [priceOccurrenceInfoButton release];
     [priceLabel release];
@@ -313,35 +312,47 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
     [self.imageView addGestureRecognizer:swipeToGoBack];
     [swipeToGoBack release];
     
+    // Breadcrumbs bar
+    self.breadcrumbsLabel.font = [UIFont kwiqetFontOfType:RegularNormal size:12];
+    
     // Occurrence info container
-    self.occurrenceInfoContainerRegularHeight = self.occurrenceInfoContainer.frame.size.height;
-    self.occurrenceInfoContainerCollapsedHeight = self.dateContainer.frame.size.height;
-    [self.occurrenceInfoContainer addSubview:self.occurrenceInfoPlaceholderView];
-    self.occurrenceInfoPlaceholderView.alpha = 0.0;
-    self.occurrenceInfoPlaceholderView.userInteractionEnabled = NO;
-    self.occurrenceInfoPlaceholderRetryButton.imageView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-    self.occurrenceInfoPlaceholderRetryButton.titleLabel.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-    [self.occurrenceInfoPlaceholderRetryButton setTitle:EVC_OCCURRENCE_INFO_LOADING_STRING forState:UIControlStateNormal];
+    occurrenceInfoOverlayView = [[OccurrenceInfoOverlayView alloc] initWithFrame:CGRectMake(5, 5, self.occurrenceInfoContainer.bounds.size.width - 5 * 2, self.dateContainer.bounds.size.height - 5 * 2)];
+    self.occurrenceInfoOverlayView.autoresizingMask = UIViewAutoresizingFlexibleBottomMargin | UIViewAutoresizingFlexibleWidth;
+    [self.occurrenceInfoContainer addSubview:self.occurrenceInfoOverlayView];
+    [self.occurrenceInfoOverlayView.button addTarget:self action:@selector(occurrenceInfoRetryButtonTouched) forControlEvents:UIControlEventTouchUpInside];
+    [self setOccurrenceInfoContainerIsVisible:YES animated:NO];
+    
+    // Occurrence info container shadow
+    shadowOccurrenceInfoContainer = [[UIView alloc] initWithFrame:
+                                     CGRectMake(0, 1, self.occurrenceInfoContainer.bounds.size.width, self.occurrenceInfoContainer.bounds.size.height - 1 - 1)];
+    self.shadowOccurrenceInfoContainer.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+    self.shadowOccurrenceInfoContainer.backgroundColor = [UIColor blackColor];
+    self.shadowOccurrenceInfoContainer.layer.shadowColor = [UIColor blackColor].CGColor;
+    self.shadowOccurrenceInfoContainer.layer.shadowOffset = CGSizeMake(0, 0);
+    self.shadowOccurrenceInfoContainer.layer.shadowOpacity = 0.55;
+    self.shadowOccurrenceInfoContainer.layer.shouldRasterize = YES;
+    [self.occurrenceInfoContainer insertSubview:self.shadowOccurrenceInfoContainer atIndex:0];
     
     // Date views
-    self.dayNumberLabel.font = [UIFont kwiqetFontOfType:BoldCompressedKwiqetFont size:30];
+    self.monthLabel.font = [UIFont kwiqetFontOfType:RegularCondensed size:10];
+    self.dayNumberLabel.font = [UIFont kwiqetFontOfType:BoldCondensed size:30];
+    self.dayNameLabel.font = [UIFont kwiqetFontOfType:RegularCondensed size:10];
 
     // Time views
-    self.timeLabelSingle.font = [UIFont kwiqetFontOfType:BoldCompressedKwiqetFont size:24];
-    self.timeLabelMultipleStart.font = [UIFont kwiqetFontOfType:BoldCompressedKwiqetFont size:18];
-    self.timeLabelMultipleEnd.font = self.timeLabelMultipleStart.font;
+    self.timeStartLabel.font = [UIFont kwiqetFontOfType:BoldCondensed size:24];
+    self.timeEndLabel.font = [UIFont kwiqetFontOfType:RegularCondensed size:10];
     
     // Price views
     self.priceOccurrenceInfoButton.enabled = NO;
-    self.priceLabel.font = [UIFont kwiqetFontOfType:BoldCompressedKwiqetFont size:24];
+    self.priceLabel.font = [UIFont kwiqetFontOfType:BoldCondensed size:24];
                 
     // Location views
-    self.venueLabel.font = [UIFont kwiqetFontOfType:BoldCompressedKwiqetFont size:21];
-    self.addressLabel.font = [UIFont kwiqetFontOfType:RegularCompressedKwiqetFont size:14];
-    self.cityStateZipLabel.font = [UIFont kwiqetFontOfType:RegularCompressedKwiqetFont size:14];
+    self.venueLabel.font = [UIFont kwiqetFontOfType:BoldCondensed size:21];
+    self.addressLabel.font = [UIFont kwiqetFontOfType:RegularCondensed size:14];
+    self.cityStateZipLabel.font = [UIFont kwiqetFontOfType:RegularCondensed size:14];
     
     // Phone number button
-    self.phoneNumberButton.titleLabel.font = [UIFont kwiqetFontOfType:BoldCompressedKwiqetFont size:12];
+    self.phoneNumberButton.titleLabel.font = [UIFont kwiqetFontOfType:BoldCondensed size:12];
     
     // Occurrences controls
     [self.scrollView insertSubview:self.occurrencesControlsContainer belowSubview:self.titleBar];
@@ -394,7 +405,7 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
     [self.scrollView insertSubview:self.darkOverlayViewForScrollView belowSubview:self.occurrencesControlsContainer];
     
     // Event description views
-    self.descriptionLabel.font = [UIFont fontWithName:@"HelveticaNeueLTStd-MdCn" size:18];
+    self.descriptionLabel.font = [UIFont kwiqetFontOfType:LightNormal size:14];
     shadowDescriptionContainer = [[UIView alloc] initWithFrame:
                                   CGRectMake(self.descriptionContainer.frame.origin.x, 
                                              self.descriptionContainer.frame.origin.y, 
@@ -405,7 +416,7 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
     self.shadowDescriptionContainer.layer.shadowOffset = CGSizeMake(0, 0);
     self.shadowDescriptionContainer.layer.shadowOpacity = .55;
     self.shadowDescriptionContainer.layer.shouldRasterize = YES;
-    [self.scrollView insertSubview:self.shadowDescriptionContainer atIndex:0];
+    [self.scrollView insertSubview:self.shadowDescriptionContainer belowSubview:self.descriptionContainer];
     
     CGFloat webActivityViewSize = 60.0;
     webActivityView = [[WebActivityView alloc] initWithSize:CGSizeMake(webActivityViewSize, webActivityViewSize) centeredInFrame:self.view.frame];
@@ -413,13 +424,11 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
     [self.view bringSubviewToFront:self.webActivityView];
     
     if (self.event) {
-        NSArray * occurrencesByDateVenueTime = [self.event occurrencesByDateVenueTime];
-        Occurrence * arbitraryFirstOccurrence = nil;
-        if (occurrencesByDateVenueTime && 
-            occurrencesByDateVenueTime.count > 0) {
-            arbitraryFirstOccurrence = [occurrencesByDateVenueTime objectAtIndex:0];
+        if (self.event.occurrencesByDateVenueTime && 
+            self.event.occurrencesByDateVenueTime.count > 0) {
+            [self processOccurrencesFromEvent:self.event];
+            [self reloadOccurrencesTableViews];
         }
-        self.eventOccurrenceCurrent = arbitraryFirstOccurrence;
         [self updateViewsFromDataAnimated:NO];
     }
     
@@ -465,23 +474,81 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
     if (event != theEvent) {
         [event release];
         event = [theEvent retain];
+        if (self.event.occurrencesByDateVenueTime && 
+            self.event.occurrencesByDateVenueTime.count > 0) {
+            [self processOccurrencesFromEvent:self.event];
+            [self reloadOccurrencesTableViews];
+        }
+        [self updateViewsFromDataAnimated:NO];
+        [self.webConnector getAllOccurrencesForEventWithURI:event.uri]; // TURNING THIS OFF FOR TESTING
+        [self.occurrenceInfoOverlayView setMessagesForMode:LoadingEventDetails]; // TURNING THIS OFF FOR TESTING
     }
-    NSArray * occurrencesByDateVenueTime = [self.event occurrencesByDateVenueTime];
-    Occurrence * arbitraryFirstOccurrence = nil;
-    if (occurrencesByDateVenueTime && 
-        occurrencesByDateVenueTime.count > 0) {
-        arbitraryFirstOccurrence = [occurrencesByDateVenueTime objectAtIndex:0];
-    }
-    self.eventOccurrenceCurrent = arbitraryFirstOccurrence;
-    [self updateViewsFromDataAnimated:NO];
-    [self.webConnector getAllOccurrencesForEventWithURI:event.uri]; // TURNING THIS OFF FOR TESTING
-    [self.occurrenceInfoPlaceholderRetryButton setTitle:EVC_OCCURRENCE_INFO_LOADING_STRING forState:UIControlStateNormal]; // TURNING THIS OFF FOR TESTING
-//    [self showWebLoadingViews]; // This is unnecessary.
 }
 
 - (void)setDeleteAllowed:(BOOL)deleteAllowed {
     deleteAllowed_ = deleteAllowed;
     self.deleteButton.enabled = self.deleteAllowed;
+}
+
+- (void)processOccurrencesFromEvent:(Event *)theEvent {
+    NSArray * occurrencesByDateVenueTime = theEvent.occurrencesByDateVenueTime;
+    // Sort through occurrences...
+    // Get rid of any existing occurrence summary objects
+    [self.eventOccurrencesSummaryArray removeAllObjects];
+    // Set up variables
+    OccurrenceSummaryDate * currentOccurrenceSummaryDate = nil;
+    OccurrenceSummaryVenue * currentOccurrenceSummaryVenue = nil;
+    NSMutableArray * currentDevelopingVenuesArray = nil;
+    NSMutableArray * currentDevelopingOccurrencesArray = nil;
+    // Loop through all occurrences (which are sorted by date, venue, time)
+    for (Occurrence * occurrence in occurrencesByDateVenueTime) {
+        // Check if we need to start a new OccurrenceSummaryDate object
+        if (![occurrence.startDate isEqualToDate:currentOccurrenceSummaryDate.date]) {
+            if (currentOccurrenceSummaryDate) {
+                currentOccurrenceSummaryDate.venues = currentDevelopingVenuesArray;
+            }
+            currentOccurrenceSummaryDate = [[[OccurrenceSummaryDate alloc] init] autorelease]; 
+            [self.eventOccurrencesSummaryArray addObject:currentOccurrenceSummaryDate];
+            currentOccurrenceSummaryDate.date = occurrence.startDate;
+            currentDevelopingVenuesArray = [NSMutableArray array];
+        }
+        // Check if we need to start a new OccurrenceSummaryVenue object
+        if (occurrence.place != currentOccurrenceSummaryVenue.place) {
+            if (currentOccurrenceSummaryVenue) {
+                [currentOccurrenceSummaryVenue setOccurrences:currentDevelopingOccurrencesArray makeTimesSummaryUsingTimeFormatter:self.occurrenceTimeFormatter];
+            }
+            currentOccurrenceSummaryVenue = [[[OccurrenceSummaryVenue alloc] init] autorelease];
+            [currentDevelopingVenuesArray addObject:currentOccurrenceSummaryVenue];
+            currentOccurrenceSummaryVenue.place = occurrence.place;
+            currentDevelopingOccurrencesArray = [NSMutableArray array];
+        }
+        // Add this occurrence to the current OccurrenceSummaryVenueObject
+        [currentDevelopingOccurrencesArray addObject:occurrence];
+    }
+    // Final cleanup
+    currentOccurrenceSummaryDate.venues = currentDevelopingVenuesArray;
+    [currentOccurrenceSummaryVenue setOccurrences:currentDevelopingOccurrencesArray makeTimesSummaryUsingTimeFormatter:self.occurrenceTimeFormatter];
+    
+    self.eventOccurrenceCurrent = [occurrencesByDateVenueTime objectAtIndex:0]; // THIS NEEDS TO CHANGE, ACCORDING TO WHAT THE USER'S FILTERS WERE IN EventsViewController, THEIR LOCATION, AND PROBABLY OTHER THINGS. THIS NEEDS TO CHANGE, ACCORDING TO WHAT THE USER'S FILTERS WERE IN EventsViewController, THEIR LOCATION, AND PROBABLY OTHER THINGS. THIS NEEDS TO CHANGE, ACCORDING TO WHAT THE USER'S FILTERS WERE IN EventsViewController, THEIR LOCATION, AND PROBABLY OTHER THINGS. THIS NEEDS TO CHANGE, ACCORDING TO WHAT THE USER'S FILTERS WERE IN EventsViewController, THEIR LOCATION, AND PROBABLY OTHER THINGS. THIS NEEDS TO CHANGE, ACCORDING TO WHAT THE USER'S FILTERS WERE IN EventsViewController, THEIR LOCATION, AND PROBABLY OTHER THINGS.
+    self.eventOccurrenceCurrentDateIndex = [self indexOfDate:self.eventOccurrenceCurrent.startDate inSummaryDates:self.eventOccurrencesSummaryArray];
+    self.eventOccurrenceCurrentVenueIndex = [self indexOfPlace:self.eventOccurrenceCurrent.place inSummaryVenues:self.eventOccurrenceCurrentDateSummaryObject.venues];
+    self.eventOccurrenceCurrentTimeIndex = [self indexOfTime:self.eventOccurrenceCurrent.startTime inOccurrences:self.eventOccurrenceCurrentVenueSummaryObject.occurrences settleForClosestFit:NO];
+    
+    // Debugging...
+    NSLog(@"Summarize all that processing work we just did...");
+    for (OccurrenceSummaryDate * osd in self.eventOccurrencesSummaryArray) {
+        NSLog(@"OccurrenceSummaryDate %@", osd.date);
+        for (OccurrenceSummaryVenue * osv in osd.venues) {
+            NSLog(@"OccurrenceSummaryVenue %@", osv.place.title);
+            for (Occurrence * o in osv.occurrences) {
+                NSLog(@"Occurrence at %@", [self.occurrenceTimeFormatter stringFromDate:o.startTime]);
+            }
+        }
+    }
+    NSLog(@"eventOccurrenceCurrentDateIndex=%d", self.eventOccurrenceCurrentDateIndex);
+    NSLog(@"eventOccurrenceCurrentVenueIndex=%d", self.eventOccurrenceCurrentVenueIndex);
+    NSLog(@"eventOccurrenceCurrentTimeIndex=%d", self.eventOccurrenceCurrentTimeIndex);
+    
 }
 
 - (void) webConnector:(WebConnector *)webConnector getAllOccurrencesSuccess:(ASIHTTPRequest *)request forEventURI:(NSString *)eventURI {
@@ -492,81 +559,15 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
     [self.coreDataModel updateEvent:self.event withExhaustiveOccurrencesArray:[responseDictionary valueForKey:@"objects"]];
     [self.coreDataModel coreDataSave];
     
-    NSArray * occurrencesByDateVenueTime = [self.event occurrencesByDateVenueTime];
-    self.eventOccurrenceCurrent = nil;
-    if (occurrencesByDateVenueTime && 
-        occurrencesByDateVenueTime.count > 0) {
-
-        // Sort through occurrences...
-        // Get rid of any existing occurrence summary objects
-        [self.eventOccurrencesSummaryArray removeAllObjects];
-        // Set up variables
-        OccurrenceSummaryDate * currentOccurrenceSummaryDate = nil;
-        OccurrenceSummaryVenue * currentOccurrenceSummaryVenue = nil;
-        NSMutableArray * currentDevelopingVenuesArray = nil;
-        NSMutableArray * currentDevelopingOccurrencesArray = nil;
-        // Loop through all occurrences (which are sorted by date, venue, time)
-        for (Occurrence * occurrence in occurrencesByDateVenueTime) {
-            // Check if we need to start a new OccurrenceSummaryDate object
-            if (![occurrence.startDate isEqualToDate:currentOccurrenceSummaryDate.date]) {
-                if (currentOccurrenceSummaryDate) {
-                    currentOccurrenceSummaryDate.venues = currentDevelopingVenuesArray;
-                }
-                currentOccurrenceSummaryDate = [[[OccurrenceSummaryDate alloc] init] autorelease]; 
-                [self.eventOccurrencesSummaryArray addObject:currentOccurrenceSummaryDate];
-                currentOccurrenceSummaryDate.date = occurrence.startDate;
-                currentDevelopingVenuesArray = [NSMutableArray array];
-            }
-            // Check if we need to start a new OccurrenceSummaryVenue object
-            if (occurrence.place != currentOccurrenceSummaryVenue.place) {
-                if (currentOccurrenceSummaryVenue) {
-                    [currentOccurrenceSummaryVenue setOccurrences:currentDevelopingOccurrencesArray makeTimesSummaryUsingTimeFormatter:self.occurrenceTimeFormatter];
-                }
-                currentOccurrenceSummaryVenue = [[[OccurrenceSummaryVenue alloc] init] autorelease];
-                [currentDevelopingVenuesArray addObject:currentOccurrenceSummaryVenue];
-                currentOccurrenceSummaryVenue.place = occurrence.place;
-                currentDevelopingOccurrencesArray = [NSMutableArray array];
-            }
-            // Add this occurrence to the current OccurrenceSummaryVenueObject
-            [currentDevelopingOccurrencesArray addObject:occurrence];
-        }
-        // Final cleanup
-        currentOccurrenceSummaryDate.venues = currentDevelopingVenuesArray;
-        [currentOccurrenceSummaryVenue setOccurrences:currentDevelopingOccurrencesArray makeTimesSummaryUsingTimeFormatter:self.occurrenceTimeFormatter];
-        
-        self.eventOccurrenceCurrent = [occurrencesByDateVenueTime objectAtIndex:0]; // THIS NEEDS TO CHANGE, ACCORDING TO WHAT THE USER'S FILTERS WERE IN EventsViewController, THEIR LOCATION, AND PROBABLY OTHER THINGS. THIS NEEDS TO CHANGE, ACCORDING TO WHAT THE USER'S FILTERS WERE IN EventsViewController, THEIR LOCATION, AND PROBABLY OTHER THINGS. THIS NEEDS TO CHANGE, ACCORDING TO WHAT THE USER'S FILTERS WERE IN EventsViewController, THEIR LOCATION, AND PROBABLY OTHER THINGS. THIS NEEDS TO CHANGE, ACCORDING TO WHAT THE USER'S FILTERS WERE IN EventsViewController, THEIR LOCATION, AND PROBABLY OTHER THINGS. THIS NEEDS TO CHANGE, ACCORDING TO WHAT THE USER'S FILTERS WERE IN EventsViewController, THEIR LOCATION, AND PROBABLY OTHER THINGS.
-        self.eventOccurrenceCurrentDateIndex = [self indexOfDate:self.eventOccurrenceCurrent.startDate inSummaryDates:self.eventOccurrencesSummaryArray];
-        self.eventOccurrenceCurrentVenueIndex = [self indexOfPlace:self.eventOccurrenceCurrent.place inSummaryVenues:self.eventOccurrenceCurrentDateSummaryObject.venues];
-        self.eventOccurrenceCurrentTimeIndex = [self indexOfTime:self.eventOccurrenceCurrent.startTime inOccurrences:self.eventOccurrenceCurrentVenueSummaryObject.occurrences settleForClosestFit:NO];
-
-//        // Debugging...
-//        NSLog(@"Summarize all that work we just did...");
-//        for (OccurrenceSummaryDate * osd in self.eventOccurrencesSummaryArray) {
-//            NSLog(@"OccurrenceSummaryDate %@", osd.date);
-//            for (OccurrenceSummaryVenue * osv in osd.venues) {
-//                NSLog(@"OccurrenceSummaryVenue %@", osv.place.title);
-//                for (Occurrence * o in osv.occurrences) {
-//                    NSLog(@"Occurrence at %@", [timeFormatter stringFromDate:o.startTime]);
-//                }
-//            }
-//        }
-        
-        if (occurrencesByDateVenueTime &&
-            occurrencesByDateVenueTime.count > 1) {
-            // Seed the occurrences table views...
-            [self.occurrencesControlsDatesTableView reloadData];
-            [self.occurrencesControlsVenuesTableView reloadData];
-            [self.occurrencesControlsTimesTableView reloadData];
-            [self.occurrencesControlsDatesTableView selectRowAtIndexPath:[NSIndexPath indexPathForRow:self.eventOccurrenceCurrentDateIndex inSection:0] animated:NO scrollPosition:UITableViewScrollPositionMiddle];
-            [self.occurrencesControlsVenuesTableView selectRowAtIndexPath:[NSIndexPath indexPathForRow:self.eventOccurrenceCurrentVenueIndex inSection:0] animated:NO scrollPosition:UITableViewScrollPositionMiddle];
-            [self.occurrencesControlsTimesTableView selectRowAtIndexPath:[NSIndexPath indexPathForRow:self.eventOccurrenceCurrentTimeIndex inSection:0] animated:NO scrollPosition:UITableViewScrollPositionMiddle];
-        }
-
+    if (self.event.occurrencesByDateVenueTime && 
+        self.event.occurrencesByDateVenueTime.count > 0) {
+        [self processOccurrencesFromEvent:self.event];
+        [self reloadOccurrencesTableViews];
     }
     
     [self updateViewsFromDataAnimated:YES];
     if ([[[responseDictionary objectForKey:@"meta"] valueForKey:@"total_count"] isEqualToNumber:[NSNumber numberWithInt:0]]) {
-        [self.occurrenceInfoPlaceholderRetryButton setTitle:@"There are no occurrences for this event!" forState:UIControlStateNormal];
+        [self.occurrenceInfoOverlayView setMessagesForMode:NoOccurrencesExist];
     }
     [self hideWebLoadingViews];
     
@@ -575,9 +576,20 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
 - (void) webConnector:(WebConnector *)webConnector getAllOccurrencesFailure:(ASIHTTPRequest *)request forEventURI:(NSString *)eventURI {
     
     NSLog(@"getAllOccurrencesFailure - need to deal with this!");
-    [self.occurrenceInfoPlaceholderRetryButton setTitle:EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING forState:UIControlStateNormal];
+    [self.occurrenceInfoOverlayView setMessagesForMode:FailedToLoadEventDetails];
     [self hideWebLoadingViews];
     
+}
+
+- (void) reloadOccurrencesTableViews {
+    // Seed the occurrences table views...
+    [self.occurrencesControlsDatesTableView reloadData];
+    [self.occurrencesControlsVenuesTableView reloadData];
+    [self.occurrencesControlsTimesTableView reloadData];
+//    NSLog(@"Trying to select index path %@ in table %@ with %d rows, with data coming from an array with %d objects", [NSIndexPath indexPathForRow:self.eventOccurrenceCurrentDateIndex inSection:0], [self debugOccurrencesTableViewNameForTableViewTag:self.occurrencesControlsDatesTableView.tag], [self tableView:self.occurrencesControlsDatesTableView numberOfRowsInSection:0], self.eventOccurrencesSummaryArray.count);
+    [self.occurrencesControlsDatesTableView selectRowAtIndexPath:[NSIndexPath indexPathForRow:self.eventOccurrenceCurrentDateIndex inSection:0] animated:NO scrollPosition:UITableViewScrollPositionMiddle];
+    [self.occurrencesControlsVenuesTableView selectRowAtIndexPath:[NSIndexPath indexPathForRow:self.eventOccurrenceCurrentVenueIndex inSection:0] animated:NO scrollPosition:UITableViewScrollPositionMiddle];
+    [self.occurrencesControlsTimesTableView selectRowAtIndexPath:[NSIndexPath indexPathForRow:self.eventOccurrenceCurrentTimeIndex inSection:0] animated:NO scrollPosition:UITableViewScrollPositionMiddle];
 }
 
 - (void) updateOccurrenceInfoViewsFromDataAnimated:(BOOL)animated {
@@ -607,7 +619,11 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
         [dateFormatter release];
         self.dayNameLabel.text = [dayName uppercaseString];
         // Time
-        NSString * timesSeparatorString = @"\n -";
+        NSString * timesSeparatorString = @"ARBITRARYSEPARATORNOTTODISPLAY";
+        /* TESTING / DEBUGGING BELOW */
+//        NSString * time = [self.webDataTranslator timeSpanStringFromStartDatetime:self.eventOccurrenceCurrent.startTime endDatetime:[NSDate dateWithTimeInterval:3600 sinceDate:self.eventOccurrenceCurrent.startTime] separatorString:timesSeparatorString dataUnavailableString:EVENT_TIME_NOT_AVAILABLE]; // Debugging
+//        [self setTimeLabelTextToTimeString:time containsTwoTimes:YES usingSeparatorString:timesSeparatorString]; // Debugging
+        /* TESTING / DEBUGGING ABOVE */
         NSString * time = [self.webDataTranslator timeSpanStringFromStartDatetime:self.eventOccurrenceCurrent.startTime endDatetime:self.eventOccurrenceCurrent.endTime separatorString:timesSeparatorString dataUnavailableString:EVENT_TIME_NOT_AVAILABLE];
         [self setTimeLabelTextToTimeString:time containsTwoTimes:(self.eventOccurrenceCurrent.startTime && self.eventOccurrenceCurrent.endTime) usingSeparatorString:timesSeparatorString];
         
@@ -657,14 +673,15 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
         CGRect priceLabelFrame = self.priceLabel.frame;
         priceLabelFrame.size.width = self.occurrencesControlsContainer.hidden ? self.priceContainer.bounds.size.width - 2 * priceLabelFrame.origin.x : self.priceContainer.bounds.size.width - 2 * priceLabelFrame.origin.x - 20; // HARD CODED VALUES
         self.priceLabel.frame = priceLabelFrame;
-        if (occurrencesByDateVenueTime.count > 1) {
-            self.swipeToPullInOccurrencesControls.enabled = !self.occurrencesControlsContainer.hidden;
-            self.swipeToPushOutOccurrencesControls.enabled = self.swipeToPullInOccurrencesControls.enabled;
-            self.tapToPullInOccurrencesControls.enabled = self.swipeToPullInOccurrencesControls.enabled && !self.occurrencesControlsVisible;            
-            self.dateOccurrenceInfoButton.enabled = [self.event occurrencesNotOnDate:self.eventOccurrenceCurrent.startDate].count > 0;
-            self.locationOccurrenceInfoButton.enabled = [self.event occurrencesOnDate:self.eventOccurrenceCurrent.startDate notAtPlace:self.eventOccurrenceCurrent.place].count > 0;
-            self.timeOccurrenceInfoButton.enabled = [self.event occurrencesOnDate:self.eventOccurrenceCurrent.startDate atPlace:self.eventOccurrenceCurrent.place notAtTime:self.eventOccurrenceCurrent.startTime].count > 0;
-        }
+
+        NSLog(@"before the crash");
+        self.swipeToPullInOccurrencesControls.enabled = !self.occurrencesControlsContainer.hidden;
+        self.swipeToPushOutOccurrencesControls.enabled = self.swipeToPullInOccurrencesControls.enabled;
+        self.tapToPullInOccurrencesControls.enabled = self.swipeToPullInOccurrencesControls.enabled && !self.occurrencesControlsVisible;            
+        self.dateOccurrenceInfoButton.enabled = [self.event occurrencesNotOnDate:self.eventOccurrenceCurrent.startDate].count > 0;
+        self.locationOccurrenceInfoButton.enabled = [self.event occurrencesOnDate:self.eventOccurrenceCurrent.startDate notAtPlace:self.eventOccurrenceCurrent.place].count > 0;
+        self.timeOccurrenceInfoButton.enabled = [self.event occurrencesOnDate:self.eventOccurrenceCurrent.startDate atPlace:self.eventOccurrenceCurrent.place notAtTime:self.eventOccurrenceCurrent.startTime].count > 0;
+        NSLog(@"after the crash");
         
     } else {
         
@@ -700,43 +717,35 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
 }
 
 - (void) setTimeLabelTextToTimeString:(NSString *)timeLabelString containsTwoTimes:(BOOL)doesContainTwoTimes usingSeparatorString:(NSString *)separatorString {
-    self.timeLabelSingle.hidden = doesContainTwoTimes;
-    self.timeLabelMultipleStart.hidden = !doesContainTwoTimes;
-    self.timeLabelMultipleEnd.hidden = !doesContainTwoTimes;
+    // Hide end time label if appropriate
+    self.timeEndLabel.hidden = !doesContainTwoTimes;
+    // Gather some values for simplicity
+    CGSize superviewSize = self.timeStartLabel.superview.bounds.size;
+    CGFloat horizontalPadding = 5;
     if (!doesContainTwoTimes) {
-        self.timeLabelSingle.text = timeLabelString;        
+        self.timeStartLabel.text = timeLabelString;
+        self.timeStartLabel.frame = CGRectMake(horizontalPadding, 0, superviewSize.width - 2*horizontalPadding, self.timeStartLabel.superview.bounds.size.height);
     } else {
         NSArray * stringParts = [timeLabelString componentsSeparatedByString:separatorString];
-        separatorString = [separatorString stringByReplacingOccurrencesOfString:@"\n" withString:@""];
-        self.timeLabelMultipleStart.text = [stringParts objectAtIndex:0];
-        self.timeLabelMultipleEnd.text = [NSString stringWithFormat:@"%@%@", separatorString, [stringParts lastObject]];
-        // Gather some values for simplicity
-        CGFloat superviewWidth = self.timeLabelMultipleStart.superview.bounds.size.width;
-        CGFloat horizontalPadding = 5;
-        // Hold on to the original frames
-        CGRect timeLabelMultipleStartFrameOriginal = self.timeLabelMultipleStart.frame;
-        CGRect timeLabelMultipleEndFrameOriginal = self.timeLabelMultipleEnd.frame;
+        self.timeStartLabel.text = [stringParts objectAtIndex:0];
+        self.timeEndLabel.text = [NSString stringWithFormat:@"until %@", [stringParts lastObject]];
         // Size the frames to fit the new text
-        [self.timeLabelMultipleStart sizeToFit];
-        [self.timeLabelMultipleEnd sizeToFit];
-        // Grab the new frames, and make sure their widths are not too big
-        CGRect timeLabelMultipleStartFrameModified = self.timeLabelMultipleStart.frame;
-        timeLabelMultipleStartFrameModified.size.width = MIN(superviewWidth - horizontalPadding*2, timeLabelMultipleStartFrameModified.size.width);
-        CGRect timeLabelMultipleEndFrameModified = self.timeLabelMultipleEnd.frame;
-        timeLabelMultipleEndFrameModified.size.width = MIN(superviewWidth - horizontalPadding*2, timeLabelMultipleEndFrameModified.size.width);
-        // Adjust the new frames' heights back to the original heights
-        timeLabelMultipleStartFrameModified.size.height = timeLabelMultipleStartFrameOriginal.size.height;
-        timeLabelMultipleEndFrameModified.size.height = timeLabelMultipleEndFrameOriginal.size.height;
+        [self.timeStartLabel sizeToFit];
+        [self.timeEndLabel sizeToFit];
+        // Grab the frames, and make sure that the time start frame is not too wide
+        CGRect timeStartLabelFrame = self.timeStartLabel.frame;
+        timeStartLabelFrame.size = CGSizeMake(MIN(superviewSize.width - horizontalPadding*2, timeStartLabelFrame.size.width), superviewSize.height);
+        CGRect timeEndLabelFrame = self.timeEndLabel.frame;
         // Adjust the new frames' x origin
-        CGFloat maximumTimeLabelMultipleWidth = MAX(timeLabelMultipleStartFrameModified.size.width, timeLabelMultipleEndFrameModified.size.width);
-        CGSize separatorSize = [separatorString sizeWithFont:self.timeLabelMultipleEnd.font];
-        timeLabelMultipleStartFrameModified.origin.x = (superviewWidth - maximumTimeLabelMultipleWidth) / 2.0 + (maximumTimeLabelMultipleWidth - timeLabelMultipleStartFrameModified.size.width) - separatorSize.width / 2.0;
-        timeLabelMultipleEndFrameModified.origin.x = (superviewWidth - maximumTimeLabelMultipleWidth) / 2.0 + (maximumTimeLabelMultipleWidth - timeLabelMultipleEndFrameModified.size.width) - separatorSize.width / 2.0;
-        self.timeLabelMultipleStart.frame = timeLabelMultipleStartFrameModified;
-        self.timeLabelMultipleEnd.frame = timeLabelMultipleEndFrameModified;
-//        self.timeLabelMultipleStart.backgroundColor = [UIColor yellowColor];
-//        self.timeLabelMultipleEnd.backgroundColor = [UIColor redColor];
+        timeStartLabelFrame.origin.x = (superviewSize.width - timeStartLabelFrame.size.width) / 2.0;
+        timeEndLabelFrame.origin.x = timeStartLabelFrame.origin.x;
+        self.timeStartLabel.frame = timeStartLabelFrame;
+        self.timeEndLabel.frame = timeEndLabelFrame;
     }
+    // Debugging...
+//    self.timeStartLabel.backgroundColor = [UIColor yellowColor];
+//    self.timeEndLabel.backgroundColor = [UIColor redColor];
+    [self.timeEndLabel.superview bringSubviewToFront:self.timeEndLabel];
     NSLog(@"EventViewController setTimeLabelToTimeString to %@", timeLabelString);
 }
 
@@ -768,10 +777,11 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
     CGSize detailsLabelSize = [self.descriptionLabel.text sizeWithFont:self.descriptionLabel.font constrainedToSize:CGSizeMake(self.descriptionLabel.bounds.size.width, 10000)];
     CGRect detailsLabelFrame = self.descriptionLabel.frame;
     detailsLabelFrame.size.height = detailsLabelSize.height;
+    detailsLabelFrame.size.width = self.occurrencesControlsContainer.hidden ? self.scrollView.bounds.size.width - 2 * detailsLabelFrame.origin.x : CGRectGetMinX(self.occurrencesControlsContainer.frame) - 2 * detailsLabelFrame.origin.x;
     self.descriptionLabel.frame = detailsLabelFrame;
 //    NSLog(@"%@", NSStringFromCGRect(self.detailsLabel.frame));
     CGRect detailsContainerFrame = self.descriptionContainer.frame;
-    detailsContainerFrame.size.height = CGRectGetMaxY(self.descriptionLabel.frame) + self.descriptionLabel.frame.origin.y - 6; // TEMPORARY HACK, INFERRING THAT THE ORIGIN Y OF THE DETAILS LABEL IS EQUAL TO THE VERTICAL PADDING WE SHOULD GIVE UNDER THAT LABEL. // EVEN WORSE TEMPORARY HACK, HARDCODING AN OFFSET BECAUSE PUTTING EQUAL PADDING AFTER AS BEFORE DOES NOT LOOK EVEN.
+    detailsContainerFrame.size.height = CGRectGetMaxY(self.descriptionLabel.frame) + self.descriptionLabel.frame.origin.y;// - 6; // TEMPORARY HACK, INFERRING THAT THE ORIGIN Y OF THE DETAILS LABEL IS EQUAL TO THE VERTICAL PADDING WE SHOULD GIVE UNDER THAT LABEL. // EVEN WORSE TEMPORARY HACK, HARDCODING AN OFFSET BECAUSE PUTTING EQUAL PADDING AFTER AS BEFORE DOES NOT LOOK EVEN.
     self.descriptionContainer.frame = detailsContainerFrame;
     self.shadowDescriptionContainer.frame = CGRectMake(self.descriptionContainer.frame.origin.x, self.descriptionContainer.frame.origin.y, self.descriptionContainer.frame.size.width, self.descriptionContainer.frame.size.height-1);
     
@@ -796,28 +806,28 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
 
     void (^occurrenceInfoContainerChangesBlock)(void) = ^{
         
-        // Calculating frame values
-        CGFloat newOccurrenceInfoContainerHeight = 0.0;
-        if (isVisible) {
-            newOccurrenceInfoContainerHeight = self.occurrenceInfoContainerRegularHeight;
-        } else {
-            CGFloat minOccurrenceInfoContainerHeight = self.scrollView.frame.size.height - self.descriptionContainer.frame.size.height - self.occurrenceInfoContainer.frame.origin.y;
-            newOccurrenceInfoContainerHeight = MAX(self.occurrenceInfoContainerCollapsedHeight, minOccurrenceInfoContainerHeight);
-        }
-        
-        // Setting frame values
-        CGRect occurrenceInfoContainerFrame = self.occurrenceInfoContainer.frame;
-        occurrenceInfoContainerFrame.size.height = newOccurrenceInfoContainerHeight;
-        self.occurrenceInfoContainer.frame = occurrenceInfoContainerFrame;
-        CGRect descriptionContainerFrame = self.descriptionContainer.frame;
-        descriptionContainerFrame.origin.y = CGRectGetMaxY(self.occurrenceInfoContainer.frame);
-        self.descriptionContainer.frame = descriptionContainerFrame;
-        CGRect shadowDescriptionContainerFrame = self.shadowDescriptionContainer.frame;
-        shadowDescriptionContainerFrame.origin.y = self.descriptionContainer.frame.origin.y;
-        self.shadowDescriptionContainer.frame = shadowDescriptionContainerFrame;
-        
         // Showing / hiding views
-        self.occurrenceInfoPlaceholderView.alpha = isVisible ? 0.0 : 1.0;
+        self.occurrenceInfoOverlayView.alpha = isVisible ? 0.0 : 1.0;
+
+//        // Moving occurrence location info frame
+//        CGFloat locationContainerFrameOriginY = CGRectGetMaxY(self.dateContainer.frame);
+//        if (!isVisible) {
+//            locationContainerFrameOriginY -= self.locationContainer.frame.size.height;
+//        }
+//        CGRect locationContainerFrame = self.locationContainer.frame;
+//        locationContainerFrame.origin.y = locationContainerFrameOriginY;
+//        self.locationContainer.frame = locationContainerFrame;
+//        // Adjusting occurrence info container frame
+//        CGRect occurrenceInfoContainerFrame = self.occurrenceInfoContainer.frame;
+//        occurrenceInfoContainerFrame.size.height = CGRectGetMaxY(self.locationContainer.frame);
+//        self.occurrenceInfoContainer.frame = occurrenceInfoContainerFrame;
+//        // Moving description frame
+//        CGRect descriptionContainerFrame = self.descriptionContainer.frame;
+//        descriptionContainerFrame.origin.y = CGRectGetMaxY(self.locationContainer.frame);
+//        self.descriptionContainer.frame = descriptionContainerFrame;
+//        CGRect shadowDescriptionContainerFrame = self.shadowDescriptionContainer.frame;
+//        shadowDescriptionContainerFrame.origin.y = self.descriptionContainer.frame.origin.y;
+//        self.shadowDescriptionContainer.frame = shadowDescriptionContainerFrame;
         
     };
     
@@ -827,7 +837,8 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
         occurrenceInfoContainerChangesBlock();
     }
     
-    self.occurrenceInfoPlaceholderView.userInteractionEnabled = !isVisible;
+    // Interaction
+    self.occurrenceInfoOverlayView.userInteractionEnabled = !isVisible;
     
 }
 
@@ -1215,7 +1226,7 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
 
 - (void) occurrenceInfoRetryButtonTouched {
     [self.webConnector getAllOccurrencesForEventWithURI:self.event.uri];
-    [self.occurrenceInfoPlaceholderRetryButton setTitle:EVC_OCCURRENCE_INFO_LOADING_STRING forState:UIControlStateNormal];
+    [self.occurrenceInfoOverlayView setMessagesForMode:LoadingEventDetails];
 }
 
 - (void) occurrenceInfoButtonTouched:(UIButton *)occurrenceInfoButton {
@@ -1255,9 +1266,17 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
 //        CGRect shadowTitleBarFrame = self.shadowTitleBar.frame;
 //        shadowTitleBarFrame.origin.y = titleBarFrame.origin.y + 1;
 //        self.shadowTitleBar.frame = shadowTitleBarFrame;
+        // Adjust occurrence info container frame
+        CGRect occurrenceInfoContainerFrame = self.occurrenceInfoContainer.frame;
+        occurrenceInfoContainerFrame.origin.y = MAX(CGRectGetMaxY(self.titleBar.frame), CGRectGetMaxY(self.breadcrumbsBar.frame));
+        self.occurrenceInfoContainer.frame = occurrenceInfoContainerFrame;
+//        // Adjust shadow occurrence info container frame
+//        CGRect shadowOccurrenceInfoContainerFrame = self.shadowOccurrenceInfoContainer.frame;
+//        shadowOccurrenceInfoContainerFrame.origin.y = self.occurrenceInfoContainer.frame.origin.y + 10;
+//        self.shadowOccurrenceInfoContainer.frame = shadowOccurrenceInfoContainerFrame;
         // Adjust occurrences controls frame
         CGRect occurrencesControlsContainerFrame = self.occurrencesControlsContainer.frame;
-        occurrencesControlsContainerFrame.origin.y = CGRectGetMaxY(self.occurrenceInfoContainer.frame) - self.occurrencesControlsContainer.frame.size.height + self.scrollView.contentOffset.y;
+        occurrencesControlsContainerFrame.origin.y = CGRectGetMinY(self.descriptionContainer.frame) - self.occurrencesControlsContainer.frame.size.height + self.scrollView.contentOffset.y;
         self.occurrencesControlsContainer.frame = occurrencesControlsContainerFrame;
     }
     
@@ -1305,29 +1324,25 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
 //    NSLog(@"%@ numberOfRowsInSection %d", [self debugOccurrencesTableViewNameForTableViewTag:tableView.tag], section);
-    NSInteger rowCount = 0;
-    if (self.eventOccurrencesSummaryArray && 
-        self.eventOccurrencesSummaryArray.count > 1) {
+    NSInteger rowCount = 0;        
+    if (tableView == self.occurrencesControlsDatesTableView) {
         
-        if (tableView == self.occurrencesControlsDatesTableView) {
+        rowCount = self.eventOccurrencesSummaryArray.count;
+        
+    } else {
+        
+        if (tableView == self.occurrencesControlsVenuesTableView) {
             
-            rowCount = self.eventOccurrencesSummaryArray.count;
+            rowCount = self.eventOccurrenceCurrentDateSummaryObject.venues.count;
+            
+        } else if (tableView == self.occurrencesControlsTimesTableView) {
+            
+            rowCount = self.eventOccurrenceCurrentVenueSummaryObject.occurrences.count;
             
         } else {
-            
-            if (tableView == self.occurrencesControlsVenuesTableView) {
-                
-                rowCount = self.eventOccurrenceCurrentDateSummaryObject.venues.count;
-                
-            } else if (tableView == self.occurrencesControlsTimesTableView) {
-                
-                rowCount = self.eventOccurrenceCurrentVenueSummaryObject.occurrences.count;
-                
-            } else {
-                NSLog(@"ERROR in EventViewController - unrecognized table view");
-            }
-
+            NSLog(@"ERROR in EventViewController - unrecognized table view");
         }
+
     }
     return rowCount;
 }
@@ -1390,8 +1405,8 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
             NSNumber * minPrice = nil;
             NSNumber * maxPrice = nil;
             if (pricesLowToHigh && pricesLowToHigh.count > 0) {
-                minPrice = [pricesLowToHigh objectAtIndex:0];
-                maxPrice = pricesLowToHigh.lastObject;
+                minPrice = ((Price *)[pricesLowToHigh objectAtIndex:0]).value;
+                maxPrice = ((Price *)pricesLowToHigh.lastObject).value;
             }
             tableViewCellCast.priceAndInfoLabel.text = [self.webDataTranslator priceRangeStringFromMinPrice:minPrice maxPrice:maxPrice separatorString:nil dataUnavailableString:@"No price or info available"];
             
@@ -1500,12 +1515,22 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
 
 - (OccurrenceSummaryDate *) eventOccurrenceCurrentDateSummaryObject {
 //    NSLog(@"Getting current event occurrence date at index %d from array of dates with count of %d", self.eventOccurrenceCurrentDateIndex, self.eventOccurrencesSummaryArray.count);
-    return [self.eventOccurrencesSummaryArray objectAtIndex:self.eventOccurrenceCurrentDateIndex];
+    OccurrenceSummaryDate * occurrenceSummaryDate = nil;
+    if (self.eventOccurrencesSummaryArray && 
+        self.eventOccurrencesSummaryArray.count > self.eventOccurrenceCurrentDateIndex) {
+        occurrenceSummaryDate = [self.eventOccurrencesSummaryArray objectAtIndex:self.eventOccurrenceCurrentDateIndex];
+    }
+    return occurrenceSummaryDate;
 }
 
 - (OccurrenceSummaryVenue *) eventOccurrenceCurrentVenueSummaryObject {
 //    NSLog(@"Getting current event occurrence venue at index %d from array of venues with count of %d", self.eventOccurrenceCurrentVenueIndex, self.eventOccurrenceCurrentDateSummaryObject.venues.count);
-    return [self.eventOccurrenceCurrentDateSummaryObject.venues objectAtIndex:self.eventOccurrenceCurrentVenueIndex];
+    OccurrenceSummaryVenue * occurrenceSummaryVenue = nil;
+    if (self.eventOccurrenceCurrentDateSummaryObject.venues &&
+        self.eventOccurrenceCurrentDateSummaryObject.venues.count > self.eventOccurrenceCurrentVenueIndex) {
+        occurrenceSummaryVenue = [self.eventOccurrenceCurrentDateSummaryObject.venues objectAtIndex:self.eventOccurrenceCurrentVenueIndex];
+    }
+    return occurrenceSummaryVenue;
 }
 
 // Returns the index of summary date matching the given date. If a match does not exist, returns NSNotFound.
