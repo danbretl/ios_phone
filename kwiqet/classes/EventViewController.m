@@ -48,6 +48,7 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
 @property (retain) IBOutlet UIView * breadcrumbsBar;
 @property (retain) IBOutlet UILabel * breadcrumbsLabel;
 @property (retain) IBOutlet UIView   * occurrenceInfoContainer;
+@property BOOL occurrenceInfoContainerIsCollapsed;
 @property (retain) UIView * shadowOccurrenceInfoContainer;
 @property (retain) OccurrenceInfoOverlayView * occurrenceInfoOverlayView;
 @property (retain) IBOutlet UIView   * dateContainer;
@@ -78,9 +79,10 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
 @property (retain) UISwipeGestureRecognizer * swipeToPullInOccurrencesControls;
 @property (retain) UISwipeGestureRecognizer * swipeToPushOutOccurrencesControls;
 @property (retain) UITapGestureRecognizer * tapToPullInOccurrencesControls;
-@property BOOL occurrencesControlsVisible;
+@property BOOL occurrencesControlsPulledOut;
 @property (retain) IBOutlet UIView * occurrencesControlsContainer;
 @property (retain) IBOutlet UIImageView * occurrencesControlsHandleImageView;
+@property (nonatomic, readonly) BOOL occurrencesControlsHandleIsAvailable;
 @property (retain) IBOutlet UIView * occurrencesControlsNavBar;
 @property (retain) IBOutlet UIView * occurrencesControlsTableViewContainer;
 @property (retain) IBOutlet UIView * occurrencesControlsTableViewOverlay;
@@ -134,7 +136,8 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
 - (void) updateOccurrenceInfoViewsFromDataAnimated:(BOOL)animated;
 - (NSString *) debugOccurrencesTableViewNameForTableViewTag:(int)tag;
 - (void) setTimeLabelTextToTimeString:(NSString *)timeLabelString containsTwoTimes:(BOOL)doesContainTwoTimes usingSeparatorString:(NSString *)separatorString;
-- (void) setOccurrenceInfoContainerIsVisible:(BOOL)isVisible animated:(BOOL)animated;
+- (void) setOccurrenceInfoContainerIsCollapsed:(BOOL)isCollapsed animated:(BOOL)animated;
+- (void) setOccurrencesControlsHandleIsAvailable:(BOOL)isAvailable animated:(BOOL)animated;
 @property (nonatomic, readonly) OccurrenceSummaryDate * eventOccurrenceCurrentDateSummaryObject;
 @property (nonatomic, readonly) OccurrenceSummaryVenue * eventOccurrenceCurrentVenueSummaryObject;
 - (NSUInteger) indexOfDate:(NSDate *)date inSummaryDates:(NSArray *)arrayOfSummaryDates; // Returns the index of summary date matching the given date. If a match does not exist, returns NSNotFound.
@@ -150,10 +153,10 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
 
 @implementation EventViewController
 
-@synthesize backgroundColorView, navigationBar, backButton, logoButton, actionBar, letsGoButton, shareButton, deleteButton, scrollView, titleBar, shadowTitleBar, imageView, breadcrumbsBar, breadcrumbsLabel, occurrenceInfoContainer, shadowOccurrenceInfoContainer, occurrenceInfoOverlayView, dateContainer, dateOccurrenceInfoButton, monthLabel, dayNumberLabel, dayNameLabel, timeContainer, timeOccurrenceInfoButton, timeStartLabel, timeEndLabel, priceContainer, priceOccurrenceInfoButton, priceLabel, locationContainer, locationOccurrenceInfoButton, venueLabel, addressLabel, cityStateZipLabel, phoneNumberButton, mapButton, descriptionContainer, descriptionBackgroundColorView, descriptionLabel, shadowDescriptionContainer;
+@synthesize backgroundColorView, navigationBar, backButton, logoButton, actionBar, letsGoButton, shareButton, deleteButton, scrollView, titleBar, shadowTitleBar, imageView, breadcrumbsBar, breadcrumbsLabel, occurrenceInfoContainer, occurrenceInfoContainerIsCollapsed, shadowOccurrenceInfoContainer, occurrenceInfoOverlayView, dateContainer, dateOccurrenceInfoButton, monthLabel, dayNumberLabel, dayNameLabel, timeContainer, timeOccurrenceInfoButton, timeStartLabel, timeEndLabel, priceContainer, priceOccurrenceInfoButton, priceLabel, locationContainer, locationOccurrenceInfoButton, venueLabel, addressLabel, cityStateZipLabel, phoneNumberButton, mapButton, descriptionContainer, descriptionBackgroundColorView, descriptionLabel, shadowDescriptionContainer;
 @synthesize darkOverlayViewForMainView, darkOverlayViewForScrollView;
 @synthesize swipeToPullInOccurrencesControls, swipeToPushOutOccurrencesControls, tapToPullInOccurrencesControls;
-@synthesize occurrencesControlsVisible;
+@synthesize occurrencesControlsPulledOut;
 @synthesize occurrencesControlsContainer, occurrencesControlsHandleImageView, occurrencesControlsNavBar, occurrencesControlsTableViewContainer, occurrencesControlsTableViewOverlay, occurrencesControlsTableViewsContainer, occurrencesControlsDatesTableView, occurrencesControlsVenuesTableView, occurrencesControlsDatesVenuesSeparatorView, occurrencesControlsVenuesTimesSeparatorView, occurrencesControlsTimesTableView;
 
 @synthesize event;
@@ -320,7 +323,6 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
     self.occurrenceInfoOverlayView.autoresizingMask = UIViewAutoresizingFlexibleBottomMargin | UIViewAutoresizingFlexibleWidth;
     [self.occurrenceInfoContainer addSubview:self.occurrenceInfoOverlayView];
     [self.occurrenceInfoOverlayView.button addTarget:self action:@selector(occurrenceInfoRetryButtonTouched) forControlEvents:UIControlEventTouchUpInside];
-    [self setOccurrenceInfoContainerIsVisible:YES animated:NO];
     
     // Occurrence info container shadow
     shadowOccurrenceInfoContainer = [[UIView alloc] initWithFrame:
@@ -423,6 +425,7 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
     [self.view addSubview:self.webActivityView];
     [self.view bringSubviewToFront:self.webActivityView];
     
+    [self.occurrenceInfoOverlayView setMessagesForMode:LoadingEventDetails];
     if (self.event) {
         if (self.event.occurrencesByDateVenueTime && 
             self.event.occurrencesByDateVenueTime.count > 0) {
@@ -450,24 +453,34 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
 }
 
 -(void) showWebLoadingViews  {
-//    NSLog(@"showWebLoadingViews");
-//    if (self.view.window) {
-//        NSLog(@"self.view.window");
-        // ACTIVITY VIEWS
-        [self.view bringSubviewToFront:self.webActivityView];
-        [self.webActivityView showAnimated:YES];
-        // USER INTERACTION
-        self.view.userInteractionEnabled = NO;
-//    }
+    // ACTIVITY VIEWS
+    [self.view bringSubviewToFront:self.webActivityView];
+    [self.webActivityView showAnimated:YES];
+    // USER INTERACTION
+    self.letsGoButton.userInteractionEnabled = NO;
+    self.shareButton.userInteractionEnabled = NO;
+    self.deleteButton.userInteractionEnabled = NO;
+    self.phoneNumberButton.userInteractionEnabled = NO;
+    self.mapButton.userInteractionEnabled = NO;
+    self.dateContainer.userInteractionEnabled = NO;
+    self.timeContainer.userInteractionEnabled = NO;
+    self.priceContainer.userInteractionEnabled = NO;
+    self.locationContainer.userInteractionEnabled = NO;
 }
 
 -(void)hideWebLoadingViews  {
-    
     // ACTIVITY VIEWS
     [self.webActivityView hideAnimated:NO];
     // USER INTERACTION
-    self.view.userInteractionEnabled = YES;
-    
+    self.letsGoButton.userInteractionEnabled = YES;
+    self.shareButton.userInteractionEnabled = YES;
+    self.deleteButton.userInteractionEnabled = YES;
+    self.phoneNumberButton.userInteractionEnabled = YES;
+    self.mapButton.userInteractionEnabled = YES;
+    self.dateContainer.userInteractionEnabled = YES;
+    self.timeContainer.userInteractionEnabled = YES;
+    self.priceContainer.userInteractionEnabled = YES;
+    self.locationContainer.userInteractionEnabled = YES;
 }
 
 - (void)setEvent:(Event *)theEvent {
@@ -479,9 +492,11 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
             [self processOccurrencesFromEvent:self.event];
             [self reloadOccurrencesTableViews];
         }
-        [self updateViewsFromDataAnimated:NO];
-        [self.webConnector getAllOccurrencesForEventWithURI:event.uri]; // TURNING THIS OFF FOR TESTING
-        [self.occurrenceInfoOverlayView setMessagesForMode:LoadingEventDetails]; // TURNING THIS OFF FOR TESTING
+        if (self.view.window) {
+            [self updateViewsFromDataAnimated:NO];
+            [self.occurrenceInfoOverlayView setMessagesForMode:LoadingEventDetails];
+        }
+        [self.webConnector getAllOccurrencesForEventWithURI:event.uri];
     }
 }
 
@@ -568,6 +583,7 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
     [self updateViewsFromDataAnimated:YES];
     if ([[[responseDictionary objectForKey:@"meta"] valueForKey:@"total_count"] isEqualToNumber:[NSNumber numberWithInt:0]]) {
         [self.occurrenceInfoOverlayView setMessagesForMode:NoOccurrencesExist];
+        self.occurrenceInfoOverlayView.userInteractionEnabled = NO;
     }
     [self hideWebLoadingViews];
     
@@ -620,10 +636,6 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
         self.dayNameLabel.text = [dayName uppercaseString];
         // Time
         NSString * timesSeparatorString = @"ARBITRARYSEPARATORNOTTODISPLAY";
-        /* TESTING / DEBUGGING BELOW */
-//        NSString * time = [self.webDataTranslator timeSpanStringFromStartDatetime:self.eventOccurrenceCurrent.startTime endDatetime:[NSDate dateWithTimeInterval:3600 sinceDate:self.eventOccurrenceCurrent.startTime] separatorString:timesSeparatorString dataUnavailableString:EVENT_TIME_NOT_AVAILABLE]; // Debugging
-//        [self setTimeLabelTextToTimeString:time containsTwoTimes:YES usingSeparatorString:timesSeparatorString]; // Debugging
-        /* TESTING / DEBUGGING ABOVE */
         NSString * time = [self.webDataTranslator timeSpanStringFromStartDatetime:self.eventOccurrenceCurrent.startTime endDatetime:self.eventOccurrenceCurrent.endTime separatorString:timesSeparatorString dataUnavailableString:EVENT_TIME_NOT_AVAILABLE];
         [self setTimeLabelTextToTimeString:time containsTwoTimes:(self.eventOccurrenceCurrent.startTime && self.eventOccurrenceCurrent.endTime) usingSeparatorString:timesSeparatorString];
         
@@ -669,19 +681,21 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
         
         NSArray * occurrencesByDateVenueTime = self.event.occurrencesByDateVenueTime;
         
-        self.occurrencesControlsContainer.hidden = occurrencesByDateVenueTime.count <= 1;
+        if (!self.occurrencesControlsPulledOut) {
+            [self setOccurrencesControlsHandleIsAvailable:(occurrencesByDateVenueTime.count > 1) animated:animated];
+        }
         CGRect priceLabelFrame = self.priceLabel.frame;
-        priceLabelFrame.size.width = self.occurrencesControlsContainer.hidden ? self.priceContainer.bounds.size.width - 2 * priceLabelFrame.origin.x : self.priceContainer.bounds.size.width - 2 * priceLabelFrame.origin.x - 20; // HARD CODED VALUES
+        priceLabelFrame.size.width = self.occurrencesControlsHandleIsAvailable ? self.priceContainer.bounds.size.width - 2 * priceLabelFrame.origin.x - 20 /* HARD CODED VALUE! */ : self.priceContainer.bounds.size.width - 2 * priceLabelFrame.origin.x;
         self.priceLabel.frame = priceLabelFrame;
 
-        NSLog(@"before the crash");
-        self.swipeToPullInOccurrencesControls.enabled = !self.occurrencesControlsContainer.hidden;
+//        NSLog(@"before the crash");
+        self.swipeToPullInOccurrencesControls.enabled = self.occurrencesControlsHandleIsAvailable;
         self.swipeToPushOutOccurrencesControls.enabled = self.swipeToPullInOccurrencesControls.enabled;
-        self.tapToPullInOccurrencesControls.enabled = self.swipeToPullInOccurrencesControls.enabled && !self.occurrencesControlsVisible;            
+        self.tapToPullInOccurrencesControls.enabled = self.swipeToPullInOccurrencesControls.enabled && !self.occurrencesControlsPulledOut;
         self.dateOccurrenceInfoButton.enabled = [self.event occurrencesNotOnDate:self.eventOccurrenceCurrent.startDate].count > 0;
         self.locationOccurrenceInfoButton.enabled = [self.event occurrencesOnDate:self.eventOccurrenceCurrent.startDate notAtPlace:self.eventOccurrenceCurrent.place].count > 0;
         self.timeOccurrenceInfoButton.enabled = [self.event occurrencesOnDate:self.eventOccurrenceCurrent.startDate atPlace:self.eventOccurrenceCurrent.place notAtTime:self.eventOccurrenceCurrent.startTime].count > 0;
-        NSLog(@"after the crash");
+//        NSLog(@"after the crash");
         
     } else {
         
@@ -698,7 +712,7 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
         self.mapButton.enabled = NO;
         self.mapButton.alpha = 0.0;
         
-        self.occurrencesControlsContainer.hidden = YES;
+        [self setOccurrencesControlsHandleIsAvailable:NO animated:animated];
         self.dateOccurrenceInfoButton.enabled = NO;
         self.locationOccurrenceInfoButton.enabled = NO;
         self.timeOccurrenceInfoButton.enabled = NO;
@@ -709,9 +723,11 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
         
     }
     
+    [self setOccurrenceInfoContainerIsCollapsed:self.eventOccurrenceCurrent == nil animated:animated];        
+    
     // Adjust the scroll view scroll indicator insets for the occurrences controls
     UIEdgeInsets scrollViewScrollIndicatorInsets = self.scrollView.scrollIndicatorInsets;
-    scrollViewScrollIndicatorInsets.bottom = self.occurrencesControlsContainer.hidden ? 0 : 163; // HARD CODED VALUE. HARD CODED VALUE. HARD CODED VALUE. HARD CODED VALUE. HARD CODED VALUE. HARD CODED VALUE. HARD CODED VALUE. HARD CODED VALUE. HARD CODED VALUE. HARD CODED VALUE. HARD CODED VALUE. HARD CODED VALUE. HARD CODED VALUE.
+    scrollViewScrollIndicatorInsets.bottom = self.occurrencesControlsHandleIsAvailable ? 163 /* HARD CODED VALUE. HARD CODED VALUE. HARD CODED VALUE. HARD CODED VALUE. HARD CODED VALUE. HARD CODED VALUE. HARD CODED VALUE. HARD CODED VALUE. HARD CODED VALUE. HARD CODED VALUE. HARD CODED VALUE. HARD CODED VALUE. HARD CODED VALUE */ : 0;
     self.scrollView.scrollIndicatorInsets = scrollViewScrollIndicatorInsets;
     
 }
@@ -768,24 +784,23 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
     self.titleBar.text = self.event.title;
     self.titleBar.color = concreteParentCategoryColor;
     
-    [self updateOccurrenceInfoViewsFromDataAnimated:animated]; // see setOccurrenceInfoContainerIsVisible note below
+    // Occurrence Info
+    [self updateOccurrenceInfoViewsFromDataAnimated:animated]; // This should come before setting the description string and sizes, because those things are dependent on whether or not the occurrence controls pull tab is visible.
     
     // Description
     NSString * descriptionString = self.event.eventDescription ? self.event.eventDescription : EVENT_DESCRIPTION_NOT_AVAILABLE;
     self.descriptionLabel.text = descriptionString;
     //set contentSize for scroll view
-    CGSize detailsLabelSize = [self.descriptionLabel.text sizeWithFont:self.descriptionLabel.font constrainedToSize:CGSizeMake(self.descriptionLabel.bounds.size.width, 10000)];
+    CGFloat detailsLabelWidth = self.occurrencesControlsHandleIsAvailable ? CGRectGetMinX(self.occurrencesControlsContainer.frame) - 2 * self.descriptionLabel.frame.origin.x : self.scrollView.bounds.size.width - 2 * self.descriptionLabel.frame.origin.x; // This should come after updating the occurrence info views, because those things influence the width of the details label.
+    CGSize detailsLabelSize = [self.descriptionLabel.text sizeWithFont:self.descriptionLabel.font constrainedToSize:CGSizeMake(detailsLabelWidth, 10000)];
     CGRect detailsLabelFrame = self.descriptionLabel.frame;
     detailsLabelFrame.size.height = detailsLabelSize.height;
-    detailsLabelFrame.size.width = self.occurrencesControlsContainer.hidden ? self.scrollView.bounds.size.width - 2 * detailsLabelFrame.origin.x : CGRectGetMinX(self.occurrencesControlsContainer.frame) - 2 * detailsLabelFrame.origin.x;
+    detailsLabelFrame.size.width = detailsLabelWidth;
     self.descriptionLabel.frame = detailsLabelFrame;
-//    NSLog(@"%@", NSStringFromCGRect(self.detailsLabel.frame));
     CGRect detailsContainerFrame = self.descriptionContainer.frame;
-    detailsContainerFrame.size.height = CGRectGetMaxY(self.descriptionLabel.frame) + self.descriptionLabel.frame.origin.y;// - 6; // TEMPORARY HACK, INFERRING THAT THE ORIGIN Y OF THE DETAILS LABEL IS EQUAL TO THE VERTICAL PADDING WE SHOULD GIVE UNDER THAT LABEL. // EVEN WORSE TEMPORARY HACK, HARDCODING AN OFFSET BECAUSE PUTTING EQUAL PADDING AFTER AS BEFORE DOES NOT LOOK EVEN.
+    detailsContainerFrame.size.height = CGRectGetMaxY(self.descriptionLabel.frame) + self.descriptionLabel.frame.origin.y;
     self.descriptionContainer.frame = detailsContainerFrame;
     self.shadowDescriptionContainer.frame = CGRectMake(self.descriptionContainer.frame.origin.x, self.descriptionContainer.frame.origin.y, self.descriptionContainer.frame.size.width, self.descriptionContainer.frame.size.height-1);
-    
-    [self setOccurrenceInfoContainerIsVisible:(self.eventOccurrenceCurrent != nil) animated:animated]; // THIS WILL CHANGE / PROBABLY DISAPPEAR ONCE YOU IMPLEMENT ALLEN'S NEW FIXED-HEIGHT DESIGN OF THE OCCURRENCE INFO PLACEHOLDER. THIS WILL CHANGE / PROBABLY DISAPPEAR ONCE YOU IMPLEMENT ALLEN'S NEW FIXED-HEIGHT DESIGN OF THE OCCURRENCE INFO PLACEHOLDER. THIS WILL CHANGE / PROBABLY DISAPPEAR ONCE YOU IMPLEMENT ALLEN'S NEW FIXED-HEIGHT DESIGN OF THE OCCURRENCE INFO PLACEHOLDER.
 
     self.scrollView.contentSize = CGSizeMake(self.scrollView.bounds.size.width, CGRectGetMaxY(self.descriptionContainer.frame));
     
@@ -802,44 +817,147 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
     
 }
 
-- (void) setOccurrenceInfoContainerIsVisible:(BOOL)isVisible animated:(BOOL)animated {
+- (void) setOccurrenceInfoContainerIsCollapsed:(BOOL)isCollapsed animated:(BOOL)animated {
 
     void (^occurrenceInfoContainerChangesBlock)(void) = ^{
         
-        // Showing / hiding views
-        self.occurrenceInfoOverlayView.alpha = isVisible ? 0.0 : 1.0;
+        // Show / hide views
+        self.occurrenceInfoOverlayView.alpha = isCollapsed ? 1.0 : 0.0;
 
-//        // Moving occurrence location info frame
-//        CGFloat locationContainerFrameOriginY = CGRectGetMaxY(self.dateContainer.frame);
-//        if (!isVisible) {
-//            locationContainerFrameOriginY -= self.locationContainer.frame.size.height;
-//        }
-//        CGRect locationContainerFrame = self.locationContainer.frame;
-//        locationContainerFrame.origin.y = locationContainerFrameOriginY;
-//        self.locationContainer.frame = locationContainerFrame;
-//        // Adjusting occurrence info container frame
-//        CGRect occurrenceInfoContainerFrame = self.occurrenceInfoContainer.frame;
-//        occurrenceInfoContainerFrame.size.height = CGRectGetMaxY(self.locationContainer.frame);
-//        self.occurrenceInfoContainer.frame = occurrenceInfoContainerFrame;
-//        // Moving description frame
-//        CGRect descriptionContainerFrame = self.descriptionContainer.frame;
-//        descriptionContainerFrame.origin.y = CGRectGetMaxY(self.locationContainer.frame);
-//        self.descriptionContainer.frame = descriptionContainerFrame;
-//        CGRect shadowDescriptionContainerFrame = self.shadowDescriptionContainer.frame;
-//        shadowDescriptionContainerFrame.origin.y = self.descriptionContainer.frame.origin.y;
-//        self.shadowDescriptionContainer.frame = shadowDescriptionContainerFrame;
+        // Move occurrence location info frame
+        CGFloat locationContainerFrameOriginY = CGRectGetMaxY(self.dateContainer.frame);
+        if (isCollapsed) {
+            locationContainerFrameOriginY -= self.locationContainer.frame.size.height;
+        }
+        CGRect locationContainerFrame = self.locationContainer.frame;
+        locationContainerFrame.origin.y = locationContainerFrameOriginY;
+        self.locationContainer.frame = locationContainerFrame;
+        
+        // Adjust occurrence info container frame
+        CGRect occurrenceInfoContainerFrame = self.occurrenceInfoContainer.frame;
+        occurrenceInfoContainerFrame.size.height = CGRectGetMaxY(self.locationContainer.frame);
+        self.occurrenceInfoContainer.frame = occurrenceInfoContainerFrame;
+        
+        // Move description frame
+        CGRect descriptionContainerFrame = self.descriptionContainer.frame;
+        descriptionContainerFrame.origin.y = CGRectGetMaxY(self.occurrenceInfoContainer.frame);
+        self.descriptionContainer.frame = descriptionContainerFrame;
+        CGRect shadowDescriptionContainerFrame = self.shadowDescriptionContainer.frame;
+        shadowDescriptionContainerFrame.origin.y = self.descriptionContainer.frame.origin.y;
+        self.shadowDescriptionContainer.frame = shadowDescriptionContainerFrame;
+        NSLog(@"self.descriptionContainer.frame = %@", NSStringFromCGRect(self.descriptionContainer.frame));
+
+        // Adjust scroll view content size
+        self.scrollView.contentSize = CGSizeMake(self.scrollView.bounds.size.width, CGRectGetMaxY(self.descriptionContainer.frame));
+        NSLog(@"self.scrollView.contentSize = %@", NSStringFromCGSize(self.scrollView.contentSize));
+        
+    };
+    
+    if (isCollapsed != self.occurrenceInfoContainerIsCollapsed) {
+        
+        NSLog(@"Is this what is going on??? 1");
+        
+        if (animated) {
+            [UIView animateWithDuration:0.25 animations:occurrenceInfoContainerChangesBlock];
+        } else {
+            occurrenceInfoContainerChangesBlock();
+        }
+        
+        // Interaction
+        self.occurrenceInfoOverlayView.userInteractionEnabled = isCollapsed;        
+        
+        self.occurrenceInfoContainerIsCollapsed = isCollapsed;
+        
+        NSLog(@"Is this what is going on??? 2");
+        
+    }
+    
+}
+
+- (void) setOccurrencesControlsHandleIsAvailable:(BOOL)isAvailable animated:(BOOL)animated {
+
+    void (^occurrencesControlsHandleChangeBlock)(void) = ^{
+        
+        // Show / hide views
+        CGRect occurrencesControlsContainerFrame = self.occurrencesControlsContainer.frame;
+        occurrencesControlsContainerFrame.origin.x = self.scrollView.bounds.size.width;
+        if (isAvailable) {
+            occurrencesControlsContainerFrame.origin.x -= self.occurrencesControlsHandleImageView.bounds.size.width;
+        }
+        self.occurrencesControlsContainer.frame = occurrencesControlsContainerFrame;
         
     };
     
     if (animated) {
-        [UIView animateWithDuration:0.25 animations:occurrenceInfoContainerChangesBlock];
+        if (isAvailable) {
+            self.occurrencesControlsContainer.hidden = NO;
+        }
+        [UIView animateWithDuration:0.25 animations:occurrencesControlsHandleChangeBlock completion:^(BOOL finished){
+            if (!isAvailable) {
+                self.occurrencesControlsContainer.hidden = YES;
+            }
+        }];
     } else {
-        occurrenceInfoContainerChangesBlock();
+        occurrencesControlsHandleChangeBlock();
+        self.occurrencesControlsContainer.hidden = !isAvailable;
     }
     
-    // Interaction
-    self.occurrenceInfoOverlayView.userInteractionEnabled = !isVisible;
-    
+}
+
+- (BOOL)occurrencesControlsHandleIsAvailable {
+    return !self.occurrencesControlsContainer.hidden;
+}
+
+- (void) toggleOccurrencesControls {
+    NSLog(@"toggleOccurrencesControls from %d to %d", self.occurrencesControlsPulledOut, !self.occurrencesControlsPulledOut);
+    self.occurrencesControlsPulledOut = !self.occurrencesControlsPulledOut;
+    self.scrollView.scrollEnabled = !self.occurrencesControlsPulledOut;
+    self.tapToPullInOccurrencesControls.enabled = !self.occurrencesControlsPulledOut;
+    self.darkOverlayViewForScrollView.frame = CGRectMake(0, CGRectGetMaxY(self.titleBar.frame), self.scrollView.bounds.size.width, self.scrollView.bounds.size.height);
+    [UIView animateWithDuration:0.25 delay:0.0 options:UIViewAnimationOptionBeginFromCurrentState animations:^{
+        CGRect occurrencesControlsContainerFrame = self.occurrencesControlsContainer.frame;
+        if (self.occurrencesControlsPulledOut) {
+            occurrencesControlsContainerFrame.origin.x = -self.occurrencesControlsHandleImageView.bounds.size.width;
+            self.darkOverlayViewForMainView.alpha = 1.0;
+            self.darkOverlayViewForScrollView.alpha = 1.0;
+            [[UIApplication sharedApplication] setStatusBarStyle:UIStatusBarStyleBlackOpaque animated:YES];
+        } else {
+            occurrencesControlsContainerFrame.origin.x = self.scrollView.bounds.size.width - self.occurrencesControlsHandleImageView.bounds.size.width;
+            self.darkOverlayViewForMainView.alpha = 0.0;
+            self.darkOverlayViewForScrollView.alpha = 0.0;
+            [[UIApplication sharedApplication] setStatusBarStyle:UIStatusBarStyleDefault animated:YES];
+        }
+        self.occurrencesControlsContainer.frame = occurrencesControlsContainerFrame;
+    } completion:^(BOOL finished){}];
+}
+
+- (void) swipedToPullInOccurrencesControls:(UISwipeGestureRecognizer *)swipeGesture {
+    NSLog(@"swipedToPullInOccurrencesControls");
+    [self userActionOccurredToPullInOccurrencesControls:swipeGesture horizontalForgiveness:30];
+}
+
+- (void) tappedToPullInOccurrencesControls:(UITapGestureRecognizer *)tapGesture {
+    NSLog(@"tappedToPullInOccurrencesControls");
+    CGRect mapButtonFrameInScrollView = [self.scrollView convertRect:self.mapButton.frame fromView:self.mapButton.superview]; // THIS ASSUMES THAT THE MAP BUTTON IS THE RIGHTMOST BUTTON IN OUR VIEW.
+    NSLog(@"%@, %f", NSStringFromCGRect(mapButtonFrameInScrollView), CGRectGetMinX(self.occurrencesControlsContainer.frame) - CGRectGetMaxX(mapButtonFrameInScrollView));
+    [self userActionOccurredToPullInOccurrencesControls:tapGesture horizontalForgiveness:CGRectGetMinX(self.occurrencesControlsContainer.frame) - CGRectGetMaxX(mapButtonFrameInScrollView)];
+}
+
+- (void) userActionOccurredToPullInOccurrencesControls:(UIGestureRecognizer *)gesture horizontalForgiveness:(CGFloat)horizontalForgiveness {
+    CGPoint location = [gesture locationInView:self.scrollView];
+    CGRect acceptableOriginRegion = CGRectMake(CGRectGetMinX(self.occurrencesControlsContainer.frame) - horizontalForgiveness, self.occurrencesControlsContainer.frame.origin.y + 40, horizontalForgiveness + (self.occurrencesControlsContainer.superview.bounds.size.width - CGRectGetMinX(self.occurrencesControlsContainer.frame)), self.occurrencesControlsContainer.frame.size.height - 40 - 5);
+    if (CGRectContainsPoint(acceptableOriginRegion, location) && 
+        !self.occurrencesControlsPulledOut) {
+        [self setOccurrencesControlsToShowTableView:self.occurrencesControlsVenuesTableView animated:NO];
+        [self toggleOccurrencesControls];
+    }
+}
+
+- (void) swipedToPushOutOccurrencesControls:(UISwipeGestureRecognizer *)swipeGesture {
+    NSLog(@"swipedToPushOutOccurrencesControls");
+    if (self.occurrencesControlsPulledOut) {
+        [self toggleOccurrencesControls];
+    }
 }
 
 - (void)displayImage:(UIImage *)image {
@@ -874,64 +992,6 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
 
 - (void) swipedToGoBack:(UISwipeGestureRecognizer *)swipeGesture {
     [self viewControllerIsFinished];
-}
-
-- (void) swipedToPullInOccurrencesControls:(UISwipeGestureRecognizer *)swipeGesture {
-    NSLog(@"swipedToPullInOccurrencesControls");
-    [self userActionOccurredToPullInOccurrencesControls:swipeGesture horizontalForgiveness:30];
-}
-
-- (void) tappedToPullInOccurrencesControls:(UITapGestureRecognizer *)tapGesture {
-    NSLog(@"tappedToPullInOccurrencesControls");
-    CGRect mapButtonFrameInScrollView = [self.scrollView convertRect:self.mapButton.frame fromView:self.mapButton.superview]; // THIS ASSUMES THAT THE MAP BUTTON IS THE RIGHTMOST BUTTON IN OUR VIEW.
-    NSLog(@"%@, %f", NSStringFromCGRect(mapButtonFrameInScrollView), CGRectGetMinX(self.occurrencesControlsContainer.frame) - CGRectGetMaxX(mapButtonFrameInScrollView));
-    [self userActionOccurredToPullInOccurrencesControls:tapGesture horizontalForgiveness:CGRectGetMinX(self.occurrencesControlsContainer.frame) - CGRectGetMaxX(mapButtonFrameInScrollView)];
-}
-
-- (void) userActionOccurredToPullInOccurrencesControls:(UIGestureRecognizer *)gesture horizontalForgiveness:(CGFloat)horizontalForgiveness {
-    CGPoint location = [gesture locationInView:self.scrollView];
-    NSLog(@"userActionOccurredToPullInOccurrencesControls PROPOSED - %@ in %@", NSStringFromCGPoint(location), NSStringFromCGRect(CGRectMake(CGRectGetMinX(self.occurrencesControlsContainer.frame) - horizontalForgiveness, self.occurrencesControlsContainer.frame.origin.y + 40, horizontalForgiveness + (self.occurrencesControlsContainer.superview.bounds.size.width - CGRectGetMinX(self.occurrencesControlsContainer.frame)), self.occurrencesControlsContainer.frame.size.height - 40 - 5)));
-    if (CGRectContainsPoint(CGRectMake(CGRectGetMinX(self.occurrencesControlsContainer.frame) - horizontalForgiveness, 
-                                       self.occurrencesControlsContainer.frame.origin.y + 40, 
-                                       horizontalForgiveness + (self.occurrencesControlsContainer.superview.bounds.size.width - CGRectGetMinX(self.occurrencesControlsContainer.frame)), 
-                                       self.occurrencesControlsContainer.frame.size.height - 40 - 5), location) &&
-        !self.occurrencesControlsVisible) {
-        NSLog(@"userActionOccurredToPullInOccurrencesControls ACCEPTED - %@ in %@", NSStringFromCGPoint(location), NSStringFromCGRect(CGRectMake(CGRectGetMinX(self.occurrencesControlsContainer.frame) - horizontalForgiveness, self.occurrencesControlsContainer.frame.origin.y + 40, horizontalForgiveness + (self.occurrencesControlsContainer.superview.bounds.size.width - CGRectGetMinX(self.occurrencesControlsContainer.frame)), self.occurrencesControlsContainer.frame.size.height - 40 - 5)));
-        [self setOccurrencesControlsToShowTableView:self.occurrencesControlsVenuesTableView animated:NO];
-        [self toggleOccurrencesControls];
-    }
-}
-
-
-- (void) swipedToPushOutOccurrencesControls:(UISwipeGestureRecognizer *)swipeGesture {
-    NSLog(@"swipedToPushOutOccurrencesControls");
-    if (self.occurrencesControlsVisible) {
-        [self toggleOccurrencesControls];
-    }
-}
-
-
-- (void) toggleOccurrencesControls {
-    NSLog(@"toggleOccurrencesControls - switch visible from %d to %d", self.occurrencesControlsVisible, !self.occurrencesControlsVisible);
-    self.occurrencesControlsVisible = !self.occurrencesControlsVisible;
-    self.scrollView.scrollEnabled = !self.occurrencesControlsVisible;
-    self.tapToPullInOccurrencesControls.enabled = !self.occurrencesControlsVisible;
-    self.darkOverlayViewForScrollView.frame = CGRectMake(0, CGRectGetMaxY(self.titleBar.frame), self.scrollView.bounds.size.width, self.scrollView.bounds.size.height);
-    [UIView animateWithDuration:0.25 delay:0.0 options:UIViewAnimationOptionBeginFromCurrentState animations:^{
-        CGRect occurrencesControlsContainerFrame = self.occurrencesControlsContainer.frame;
-        if (self.occurrencesControlsVisible) {
-            occurrencesControlsContainerFrame.origin.x = -self.occurrencesControlsHandleImageView.bounds.size.width;
-            self.darkOverlayViewForMainView.alpha = 1.0;
-            self.darkOverlayViewForScrollView.alpha = 1.0;
-            [[UIApplication sharedApplication] setStatusBarStyle:UIStatusBarStyleBlackOpaque animated:YES];
-        } else {
-            occurrencesControlsContainerFrame.origin.x = self.scrollView.bounds.size.width - self.occurrencesControlsHandleImageView.bounds.size.width;
-            self.darkOverlayViewForMainView.alpha = 0.0;
-            self.darkOverlayViewForScrollView.alpha = 0.0;
-            [[UIApplication sharedApplication] setStatusBarStyle:UIStatusBarStyleDefault animated:YES];
-        }
-        self.occurrencesControlsContainer.frame = occurrencesControlsContainerFrame;
-    } completion:^(BOOL finished){}];
 }
 
 //delete event from core data and revert back to table
@@ -1259,24 +1319,14 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
         // Adjust shadow title bar frame
         CGRect shadowTitleBarFrame = self.shadowTitleBar.frame;
         shadowTitleBarFrame.origin.y = titleBarFrame.origin.y + 1;
-        self.shadowTitleBar.frame = shadowTitleBarFrame;        
-//        CGRect titleBarFrame = self.titleBar.frame;
-//        titleBarFrame.origin.y = CGRectGetMaxY(self.actionBar.frame) - MIN(0, self.scrollView.contentOffset.y);
-//        self.titleBar.frame = titleBarFrame;
-//        CGRect shadowTitleBarFrame = self.shadowTitleBar.frame;
-//        shadowTitleBarFrame.origin.y = titleBarFrame.origin.y + 1;
-//        self.shadowTitleBar.frame = shadowTitleBarFrame;
+        self.shadowTitleBar.frame = shadowTitleBarFrame;
         // Adjust occurrence info container frame
         CGRect occurrenceInfoContainerFrame = self.occurrenceInfoContainer.frame;
         occurrenceInfoContainerFrame.origin.y = MAX(CGRectGetMaxY(self.titleBar.frame), CGRectGetMaxY(self.breadcrumbsBar.frame));
         self.occurrenceInfoContainer.frame = occurrenceInfoContainerFrame;
-//        // Adjust shadow occurrence info container frame
-//        CGRect shadowOccurrenceInfoContainerFrame = self.shadowOccurrenceInfoContainer.frame;
-//        shadowOccurrenceInfoContainerFrame.origin.y = self.occurrenceInfoContainer.frame.origin.y + 10;
-//        self.shadowOccurrenceInfoContainer.frame = shadowOccurrenceInfoContainerFrame;
         // Adjust occurrences controls frame
         CGRect occurrencesControlsContainerFrame = self.occurrencesControlsContainer.frame;
-        occurrencesControlsContainerFrame.origin.y = CGRectGetMinY(self.descriptionContainer.frame) - self.occurrencesControlsContainer.frame.size.height + self.scrollView.contentOffset.y;
+        occurrencesControlsContainerFrame.origin.y = 132 + self.scrollView.contentOffset.y; // HARD CODED VALUE, but honestly it probably should be. Everything else is moving all over the place, and this object is its own entity anyway.
         self.occurrencesControlsContainer.frame = occurrencesControlsContainerFrame;
     }
     

@@ -47,6 +47,7 @@
     IBOutlet UILabel * breadcrumbsLabel;
     
     IBOutlet UIView   * occurrenceInfoContainer;
+    BOOL occurrenceInfoContainerIsCollapsed;
     UIView * shadowOccurrenceInfoContainer;
     OccurrenceInfoOverlayView * occurrenceInfoOverlayView;
     IBOutlet UIView   * dateContainer;
@@ -79,7 +80,7 @@
     UISwipeGestureRecognizer * swipeToPullInOccurrencesControls;
     UISwipeGestureRecognizer * swipeToPushOutOccurrencesControls;
     UITapGestureRecognizer * tapToPullInOccurrencesControls;
-    BOOL occurrencesControlsVisible;
+    BOOL occurrencesControlsPulledOut;
     IBOutlet UIView      * occurrencesControlsContainer;
     IBOutlet UIImageView * occurrencesControlsHandleImageView;
     IBOutlet UIView      * occurrencesControlsNavBar;

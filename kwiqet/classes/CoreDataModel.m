@@ -194,11 +194,11 @@
             }
             
             if (shouldCreateNewCategory) {
-                NSLog(@"Creating new category");
+//                NSLog(@"Creating new category");
                 [self addCategoryWithURI:newConcreteCategoryURI title:newConcreteCategoryTitle color:newConcreteCategoryColor buttonThumb:newConcreteCategoryButtonThumb];
             } else {
                 if (newAndExistingCategoriesMatchURIs) {
-                    NSLog(@"Updating category");
+//                    NSLog(@"Updating category");
                     [self updateCategory:existingCategory withTitle:newConcreteCategoryTitle color:newConcreteCategoryColor buttonThumb:newConcreteCategoryButtonThumb];
                 }
                 existingConcreteCategoriesIndex++;
