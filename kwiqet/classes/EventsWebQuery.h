@@ -1,0 +1,42 @@
+//
+//  EventsWebQuery.h
+//  kwiqet
+//
+//  Created by Dan Bretl on 9/13/11.
+//  Copyright (c) 2011 __MyCompanyName__. All rights reserved.
+//
+
+#import <Foundation/Foundation.h>
+#import <CoreData/CoreData.h>
+
+@class Category, EventResult;
+
+@interface EventsWebQuery : NSManagedObject {
+@private
+}
+@property (nonatomic, retain) NSString * filterTimeBucketString;
+@property (nonatomic, retain) NSString * filterDateBucketString;
+@property (nonatomic, retain) NSString * filterDistanceBucketString;
+@property (nonatomic, retain) NSString * filterPriceBucketString;
+@property (nonatomic, retain) NSString * filterLocationString;
+@property (nonatomic, retain) NSDate * queryDatetime;
+@property (nonatomic, retain) NSString * searchTerm;
+@property (nonatomic, retain) NSSet *eventResults;
+@property (nonatomic, retain) NSSet *filterCategories;
+@end
+
+@interface EventsWebQuery (CoreDataGeneratedAccessors)
+- (void)addEventResultsObject:(EventResult *)value;
+- (void)removeEventResultsObject:(EventResult *)value;
+- (void)addEventResults:(NSSet *)values;
+- (void)removeEventResults:(NSSet *)values;
+- (void)addFilterCategoriesObject:(Category *)value;
+- (void)removeFilterCategoriesObject:(Category *)value;
+- (void)addFilterCategories:(NSSet *)values;
+- (void)removeFilterCategories:(NSSet *)values;
+@end
+
+@interface EventsWebQuery (ConvenienceMethods)
+@property (nonatomic, readonly) NSArray * eventResultsInOrder;
+@property (nonatomic, readonly) NSArray * eventResultsEventsInOrder;
+@end

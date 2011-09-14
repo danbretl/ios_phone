@@ -14,17 +14,12 @@
 #import "DefaultsModel.h"
 #import "WebUtil.h"
 #import "Analytics.h"
+#import "EventResult.h"
 
 static NSString * const EVENTS_OLDFILTER_RECOMMENDED = @"recommended";
 static NSString * const EVENTS_CATEGORY_BUTTON_TOUCH_POSTFIX = @"_touch";
-static NSString * const EVENTS_UPDATED_NOTIFICATION_KEY = @"eventsUpdated";
-static NSString * const EVENTS_UPDATED_USER_INFO_KEY_RESULTS = @"results";
-static NSString * const EVENTS_UPDATED_USER_INFO_KEY_RESULTS_DETAIL = @"resultsDetail";
-static NSString * const EVENTS_UPDATED_USER_INFO_KEY_SOURCE = @"source";
-static NSString * const EVENTS_UPDATED_USER_INFO_RESULTS_POPULATED = @"populated";
-static NSString * const EVENTS_UPDATED_USER_INFO_RESULTS_EMPTY = @"empty";
-static NSString * const EVENTS_UPDATED_USER_INFO_RESULTS_DETAIL_NO_RESULTS = @"noResults";
-static NSString * const EVENTS_UPDATED_USER_INFO_RESULTS_DETAIL_CONNECTION_ERROR = @"connectionError";
+static NSString * const EVENTS_NO_RESULTS_REASON_NO_RESULTS = @"EVENTS_NO_RESULTS_REASON_NO_RESULTS";
+static NSString * const EVENTS_NO_RESULTS_REASON_CONNECTION_ERROR = @"EVENTS_NO_RESULTS_REASON_CONNECTION_ERROR";
 static NSString * const EVENTS_SOURCE_BROWSE = @"EVENTS_SOURCE_BROWSE";
 static NSString * const EVENTS_SOURCE_SEARCH = @"EVENTS_SOURCE_SEARCH";
 
@@ -35,6 +30,9 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 //////////////////////
 // Models properties
 
+@property (retain) EventsWebQuery * eventsWebQuery;
+@property (retain) EventsWebQuery * eventsWebQueryFromSearch;
+@property (nonatomic, readonly) EventsWebQuery * eventsWebQueryForCurrentSource;
 @property (nonatomic, retain) NSMutableArray * events;
 @property (nonatomic, retain) NSMutableArray * eventsFromSearch;
 @property (nonatomic, readonly) NSMutableArray * eventsForCurrentSource;
@@ -195,7 +193,6 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 - (void) behaviorWasReset:(NSNotification *)notification;
 - (void) categoryButtonPressed:(UIButton *)categoryButton;
 - (void) configureCell:(EventTableViewCell *)cell forRowAtIndexPath:(NSIndexPath *)indexPath;
-- (void) dataSourceEventsUpdated:(NSNotification *)notification;
 - (EventsFilter *) filterForFilterButton:(UIButton *)filterButton inFiltersArray:(NSArray *)arrayOfEventsFilters;
 - (EventsFilter *) filterForFilterCode:(NSString *)filterCode inFiltersArray:(NSArray *)arrayOfEventsFilters;
 - (EventsFilter *) filterForPositionX:(CGFloat)x withinViewWidth:(CGFloat)viewWidth fromFiltersArray:(NSArray *)arrayOfEventsFilters;
@@ -236,6 +233,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 - (void) updateFilterOptionButtonStatesOldSelected:(EventsFilterOption *)oldSelectedOption newSelected:(EventsFilterOption *)newSelectedOption;
 - (void) updateFiltersSummaryLabelWithString:(NSString *)summaryString;
 - (void) updateAdjustedSearchFiltersOrderedWithAdjustedFilter:(EventsFilter *)adjustedFilter selectedFilterOption:(EventsFilterOption *)selectedFilterOption;
+- (void) updateViewsFromDataForSource:(NSString *)sourceCode dataShouldBePopulated:(BOOL)dataShouldBePopulated reasonIfNot:(NSString *)reasonIfNotPopulated;
 - (void) webConnectGetEventsListWithCurrentOldFilterAndCategory;
 - (void) webConnectGetEventsListWithOldFilter:(NSString *)theProposedOldFilterString categoryURI:(NSString *)theProposedCategoryURI;
 
@@ -269,8 +267,8 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 @synthesize searchContainerView, searchButton, searchCancelButton, searchGoButton, searchTextField;
 @synthesize tableReloadContainerView;
 @synthesize tapToHideDrawerGR;
-@synthesize eventsFromSearch, events,coreDataModel,webActivityView,concreteParentCategoriesDictionary;
-//@synthesize refreshHeaderView;
+@synthesize eventsWebQuery, eventsWebQueryFromSearch, events, eventsFromSearch;
+@synthesize coreDataModel, webActivityView, concreteParentCategoriesDictionary;
 @synthesize concreteParentCategoriesArray;
 @synthesize oldFilterString, categoryURI;
 @synthesize isSearchOn;
@@ -281,122 +279,111 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 @synthesize problemViewWasShowing;
 
 - (void)dealloc {
-    [filters release];
-    [activeFilterInUI release];
     [activeFilterHighlightsContainerView release];
-    [selectedDateFilterOption release];
-    [selectedLocationFilterOption release];
-    [selectedPriceFilterOption release];
-    [selectedTimeFilterOption release];
-    [filtersSearch release];
+    [activeFilterInUI release];
     [activeSearchFilterInUI release];
     [adjustedSearchFiltersOrdered release];
-    [selectedDateSearchFilterOption release];
-    [selectedTimeSearchFilterOption release];
-    [selectedLocationSearchFilterOption release];
-    [filtersContainerView release];
-    [filtersContainerShadowCheatView release];
-    [filtersContainerShadowCheatWayBelowView release];
-    [filterButtonCategories release];
-    [filterButtonPrice release];
-    [filterButtonDate release];
-    [filterButtonLocation release];
-    [filterButtonTime release];
-    [filterSearchButtonDate release];
-    [filterSearchButtonLocation release];
-    [filterSearchButtonTime release];
-    [pushableContainerView release];
-    [pushableContainerShadowCheatView release];
-    [filtersSummaryContainerView release];
-    [filtersSummaryLabel release];
-    [filtersSummaryStringBrowse release];
-    [filtersSummaryStringSearch release];
-    [searchButton release];
-    [searchCancelButton release];
-    [searchGoButton release];
-    [searchTextField release];
+    [cardPageViewController release];
+    [categoryURI release];
+    [concreteParentCategoriesArray release];
+    [concreteParentCategoriesDictionary release];
+    [connectionErrorOnDeleteAlertView release];
+    [connectionErrorStandardAlertView release];
+    [coreDataModel release];
     [drawerScrollView release];
     [drawerViewsBrowseContainer release];
     [drawerViewsSearchContainer release];
-    // Drawer view price
+    [drawerViewCategories release];
+    [drawerViewDate release];
+    [drawerViewDateSearch release];
+    [drawerViewLocation release];
+    [drawerViewLocationSearch release];
     [drawerViewPrice release];
+    [drawerViewTime release];
+    [drawerViewTimeSearch release];
     [dvPriceButtonFree release];
     [dvPriceButtonUnder20 release];
     [dvPriceButtonUnder50 release];
     [dvPriceButtonAny release];
-    // Drawer view date
-    [drawerViewDate release];
     [dvDateButtonToday release];
     [dvDateButtonThisWeekend release];
     [dvDateButtonThisWeek release];
     [dvDateButtonThisMonth release];
     [dvDateButtonAny release];
-    // Drawer view date search
-    [drawerViewDateSearch release];
     [dvDateSearchButtonToday release];
     [dvDateSearchButtonThisWeekend release];
     [dvDateSearchButtonThisWeek release];
     [dvDateSearchButtonThisMonth release];
     [dvDateSearchButtonAny release];
-    // Drawer view categories
-    [drawerViewCategories release];
-    // Drawer view time
-    [drawerViewTime release];
-    [dvTimeButtonMorning release];
-    [dvTimeButtonAfternoon release];
-    [dvTimeButtonEvening release];
-    [dvTimeButtonNight release];
-    [dvTimeButtonAny release];
-    // Drawer view time search
-    [drawerViewTimeSearch release];
-    [dvTimeSearchButtonMorning release];
-    [dvTimeSearchButtonAfternoon release];
-    [dvTimeSearchButtonEvening release];
-    [dvTimeSearchButtonNight release];
-    [dvTimeSearchButtonAny release];
-    // Drawer view location
-    [drawerViewLocation release];
     [dvLocationTextField release];
     [dvLocationCurrentLocationButton release];
     [dvLocationButtonWalking release];
     [dvLocationButtonNeighborhood release];
     [dvLocationButtonBorough release];
     [dvLocationButtonCity release];
-    // Drawer view location search
-    [drawerViewLocationSearch release];
     [dvLocationSearchTextField release];
     [dvLocationSearchCurrentLocationButton release];
     [dvLocationSearchButtonWalking release];
     [dvLocationSearchButtonNeighborhood release];
     [dvLocationSearchButtonBorough release];
     [dvLocationSearchButtonCity release];
-    // Views
-    [tableView_ release];
-    [tableViewCoverView release];
-    [searchContainerView release];
-    [tableReloadContainerView release];
-    // Gesture recognizers
-    [tapToHideDrawerGR release];
-
-    [concreteParentCategoriesDictionary release];
-    [concreteParentCategoriesArray release];
-	[eventsFromSearch release];
+    [dvTimeButtonMorning release];
+    [dvTimeButtonAfternoon release];
+    [dvTimeButtonEvening release];
+    [dvTimeButtonNight release];
+    [dvTimeButtonAny release];
+    [dvTimeSearchButtonMorning release];
+    [dvTimeSearchButtonAfternoon release];
+    [dvTimeSearchButtonEvening release];
+    [dvTimeSearchButtonNight release];
+    [dvTimeSearchButtonAny release];
 	[events release];
-    [coreDataModel release];
-//	[refreshHeaderView release];
-	[webActivityView release];
-    [oldFilterString release];
-    [categoryURI release];
-    [problemView release];
-    [problemLabel release];
-    [cardPageViewController release];
-    [webConnector release];
-    [webDataTranslator release];
-    [connectionErrorStandardAlertView release];
-    [connectionErrorOnDeleteAlertView release];
+	[eventsFromSearch release];
+    [eventsWebQuery release];
+    [eventsWebQueryFromSearch release];
+    [filterButtonCategories release];
+    [filterButtonPrice release];
+    [filterButtonDate release];
+    [filterButtonLocation release];
+    [filterButtonTime release];
+    [filters release];
+    [filtersContainerShadowCheatView release];
+    [filtersContainerShadowCheatWayBelowView release];
+    [filtersContainerView release];
+    [filtersSearch release];
+    [filterSearchButtonDate release];
+    [filterSearchButtonLocation release];
+    [filterSearchButtonTime release];
+    [filtersSummaryContainerView release];
+    [filtersSummaryLabel release];
+    [filtersSummaryStringBrowse release];
+    [filtersSummaryStringSearch release];
     [indexPathOfRowAttemptingToDelete release];
     [indexPathOfSelectedRow release];
-    [dvLocationButtonCity release];
+    [oldFilterString release];
+    [problemLabel release];
+    [problemView release];
+    [pushableContainerView release];
+    [pushableContainerShadowCheatView release];
+    [searchButton release];
+    [searchCancelButton release];
+    [searchContainerView release];
+    [searchGoButton release];
+    [searchTextField release];
+    [selectedDateFilterOption release];
+    [selectedDateSearchFilterOption release];
+    [selectedLocationFilterOption release];
+    [selectedLocationSearchFilterOption release];
+    [selectedPriceFilterOption release];
+    [selectedTimeFilterOption release];
+    [selectedTimeSearchFilterOption release];
+    [tableView_ release];
+    [tableViewCoverView release];
+    [tableReloadContainerView release];
+    [tapToHideDrawerGR release];
+	[webActivityView release];
+    [webConnector release];
+    [webDataTranslator release];
     [super dealloc];
 }
 
@@ -414,16 +401,12 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     [super viewDidLoad];
     
     // Create categories background view under UITableView
-//    self.categoriesBackgroundView = [[[UIView alloc] initWithFrame:CGRectMake(0, 80, 320, 255)] autorelease];
     self.drawerScrollView.showsHorizontalScrollIndicator = NO;
     self.drawerScrollView.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"cat_overlay.png"]];
-//    self.drawerScrollView.backgroundColor = [UIColor groupTableViewBackgroundColor]; // TESTING PERFORMANCE HIT TESTING PERFORMANCE HIT TESTING PERFORMANCE HIT TESTING PERFORMANCE HIT TESTING PERFORMANCE HIT TESTING PERFORMANCE HIT TESTING PERFORMANCE HIT TESTING PERFORMANCE HIT TESTING PERFORMANCE HIT TESTING PERFORMANCE HIT TESTING PERFORMANCE HIT TESTING PERFORMANCE HIT TESTING PERFORMANCE HIT TESTING PERFORMANCE HIT TESTING PERFORMANCE HIT
     self.drawerScrollView.userInteractionEnabled = NO;
     self.drawerScrollView.layer.masksToBounds = YES;
     self.drawerScrollView.delegate = self;
     self.drawerViewsBrowseContainer.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"cat_overlay.png"]];
-//    self.drawerViewsBrowseContainer.backgroundColor = [UIColor clearColor]; // TESTING PERFORMANCE HIT TESTING PERFORMANCE HIT TESTING PERFORMANCE HIT TESTING PERFORMANCE HIT TESTING PERFORMANCE HIT TESTING PERFORMANCE HIT TESTING PERFORMANCE HIT TESTING PERFORMANCE HIT TESTING PERFORMANCE HIT TESTING PERFORMANCE HIT TESTING PERFORMANCE HIT TESTING PERFORMANCE HIT TESTING PERFORMANCE HIT TESTING PERFORMANCE HIT TESTING PERFORMANCE HIT
-//    self.drawerViewsBrowseContainer.backgroundColor = [UIColor redColor]; // TESTING PERFORMANCE HIT TESTING PERFORMANCE HIT TESTING PERFORMANCE HIT TESTING PERFORMANCE HIT TESTING PERFORMANCE HIT TESTING PERFORMANCE HIT TESTING PERFORMANCE HIT TESTING PERFORMANCE HIT TESTING PERFORMANCE HIT TESTING PERFORMANCE HIT TESTING PERFORMANCE HIT TESTING PERFORMANCE HIT TESTING PERFORMANCE HIT TESTING PERFORMANCE HIT TESTING PERFORMANCE HIT
     self.drawerViewsSearchContainer.backgroundColor = self.drawerViewsBrowseContainer.backgroundColor;
     
     // Shadows
@@ -864,12 +847,6 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     [self.drawerScrollView addSubview:self.drawerViewsBrowseContainer];
     self.drawerScrollView.contentSize = self.drawerViewsBrowseContainer.bounds.size;
     
-    // Register for data updated events
-    [[NSNotificationCenter defaultCenter] addObserver:self
-                                             selector:@selector(dataSourceEventsUpdated:)
-                                                 name:EVENTS_UPDATED_NOTIFICATION_KEY
-                                               object:nil];
-    
     // Register for keyboard events
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardWillShow:) name:UIKeyboardWillShowNotification object:nil];
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardWillHide:) name:UIKeyboardWillHideNotification object:nil];
@@ -976,7 +953,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     
     if (self.webConnector.connectionInProgress) {
         [self showWebLoadingViews];
-    } else if ([self.eventsForCurrentSource count] == 0) {
+    } else if (self.eventsWebQueryForCurrentSource.eventResults.count == 0) {
         if (self.isSearchOn) {
             // Not going to do anything on this path for now... Just leave the list blank?
         } else {
@@ -1010,13 +987,16 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     return YES;
 }
 
-- (NSArray *) filtersForCurrentSource {
-    return self.isSearchOn ? self.filtersSearch : self.filters;
+- (NSMutableArray *)eventsForCurrentSource {
+    return self.isSearchOn ? self.eventsFromSearch : self.events;
 }
 
-- (NSMutableArray *)eventsForCurrentSource {
-    NSMutableArray * eventsArray = self.isSearchOn ? self.eventsFromSearch : self.events;
-    return eventsArray;
+- (EventsWebQuery *)eventsWebQueryForCurrentSource {
+    return self.isSearchOn ? self.eventsWebQueryFromSearch : self.eventsWebQuery;
+}
+
+- (NSArray *) filtersForCurrentSource {
+    return self.isSearchOn ? self.filtersSearch : self.filters;
 }
 
 - (NSDictionary *)concreteParentCategoriesDictionary {
@@ -1070,8 +1050,20 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 
 - (void) webConnectGetEventsListWithOldFilter:(NSString *)theProposedOldFilterString categoryURI:(NSString *)theProposedCategoryURI {
 //    NSLog(@"EventsViewController webConnectGetEventsListWithFilter");
+
+    // Storing and using EventWebQuery objects
+    self.eventsWebQuery = [NSEntityDescription insertNewObjectForEntityForName:@"EventsWebQuery" inManagedObjectContext:self.coreDataModel.managedObjectContext];
+    self.eventsWebQuery.filterDateBucketString = self.selectedDateFilterOption.code;
+    self.eventsWebQuery.filterDistanceBucketString = self.selectedLocationFilterOption.code;
+    self.eventsWebQuery.filterLocationString = self.dvLocationTextField.text;
+    self.eventsWebQuery.filterPriceBucketString = self.selectedPriceFilterOption.code;
+    self.eventsWebQuery.filterTimeBucketString = self.selectedTimeFilterOption.code;
+    Category * filterCategory = [self.coreDataModel getCategoryWithURI:theProposedCategoryURI];
+    if (filterCategory) { [self.eventsWebQuery addFilterCategoriesObject:filterCategory]; }
+    
     self.oldFilterString = theProposedOldFilterString;
     self.categoryURI = theProposedCategoryURI;
+    
     [self setLogoButtonImageForCategoryURI:self.categoryURI];
     [self showWebLoadingViews];
     [self.webConnector getEventsListWithFilter:self.oldFilterString categoryURI:self.categoryURI];
@@ -1102,60 +1094,89 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     NSDictionary * dictionaryFromJSON = [responseString yajl_JSONWithOptions:YAJLParserOptionsAllowComments error:&error];
     NSArray * eventsDictionaries = [dictionaryFromJSON valueForKey:@"objects"];
     
-    // First, delete all previous events in Core Data
-    [self.coreDataModel deleteRegularEvents];
-    
     BOOL haveResults = eventsDictionaries && [eventsDictionaries count] > 0;
     
     if (haveResults) {
         
+        int order = 0;
         // Loop through and process all event dictionaries
         for (NSDictionary * eventSummaryDictionary in eventsDictionaries) {
             
             Event * newEvent = (Event *)[NSEntityDescription insertNewObjectForEntityForName:@"Event" inManagedObjectContext:self.coreDataModel.managedObjectContext];
             [self.coreDataModel updateEvent:newEvent usingEventSummaryDictionary:eventSummaryDictionary featuredOverride:nil fromSearchOverride:nil];
             
+            EventResult * newEventResult = [NSEntityDescription insertNewObjectForEntityForName:@"EventResult" inManagedObjectContext:self.coreDataModel.managedObjectContext];
+            newEventResult.order = [NSNumber numberWithInt:order];
+            order++;
+            newEventResult.event = newEvent;
+            newEventResult.query = self.eventsWebQuery;
+            
         }
         
         // Save the current timestamp as the last time we retrieved events (regardless of filter/category)
         NSDate * now = [NSDate date];
         [DefaultsModel saveLastEventsListGetDate:now];
-//        [self.refreshHeaderView setLastRefreshDate:now];
+        self.eventsWebQuery.queryDatetime = now;
+        // Update events array
+        self.events = [self.eventsWebQuery.eventResultsEventsInOrder.mutableCopy autorelease];
         
-    }
-
-    // Save our core data changes
-    [self.coreDataModel coreDataSave];
-    
-    // Send out a notification that the events in Core Data have been flushed, and there is (maybe) a new set of retrieved events available.
-    NSMutableDictionary * eventsUpdatedInfo = [NSMutableDictionary dictionary];
-    NSString * results;
-    if (haveResults) {
-        results = EVENTS_UPDATED_USER_INFO_RESULTS_POPULATED;
+        // Save our core data changes
+        [self.coreDataModel coreDataSave];
+        
     } else {
-        results = EVENTS_UPDATED_USER_INFO_RESULTS_EMPTY;
-        [eventsUpdatedInfo setObject:EVENTS_UPDATED_USER_INFO_RESULTS_DETAIL_NO_RESULTS forKey:EVENTS_UPDATED_USER_INFO_KEY_RESULTS_DETAIL];
+        self.eventsWebQuery.queryDatetime = [NSDate date];
+        self.events = nil;
     }
-    [eventsUpdatedInfo setObject:results forKey:EVENTS_UPDATED_USER_INFO_KEY_RESULTS];
-    [eventsUpdatedInfo setObject:EVENTS_SOURCE_BROWSE forKey:EVENTS_UPDATED_USER_INFO_KEY_SOURCE];
-    [[NSNotificationCenter defaultCenter] postNotificationName:EVENTS_UPDATED_NOTIFICATION_KEY object:nil userInfo:eventsUpdatedInfo];
+    
+    [self updateViewsFromDataForSource:EVENTS_SOURCE_BROWSE dataShouldBePopulated:haveResults reasonIfNot:EVENTS_NO_RESULTS_REASON_NO_RESULTS];
 
 }
 
 - (void)webConnector:(WebConnector *)webConnector getEventsListFailure:(ASIHTTPRequest *)request withFilter:(NSString *)filterString categoryURI:(NSString *)categoryURI {
-    
-	NSString *statusMessage = [request responseStatusMessage];
+
+    NSString *statusMessage = [request responseStatusMessage];
 	NSLog(@"%@",statusMessage);
 	NSError *error = [request error];
 	NSLog(@"%@",error);
     
-    [self.coreDataModel deleteRegularEvents];
+    self.eventsWebQuery.queryDatetime = [NSDate date];
+    self.events = nil;
+    
+    [self updateViewsFromDataForSource:EVENTS_SOURCE_BROWSE dataShouldBePopulated:NO reasonIfNot:EVENTS_NO_RESULTS_REASON_CONNECTION_ERROR];
+    
+}
+
+- (void) searchExecutionRequestedByUser {
+    
+    NSString * searchTerm = self.searchTextField.text;
+    
+    if (searchTerm && searchTerm.length > 0) {
         
-    // Send out a notification that the events in Core Data have been flushed, and there is (maybe) a new set of retrieved events available.
-    NSString * results = EVENTS_UPDATED_USER_INFO_RESULTS_EMPTY;
-    NSString * resultsDetail = EVENTS_UPDATED_USER_INFO_RESULTS_DETAIL_CONNECTION_ERROR;
-    NSDictionary * eventsUpdatedInfo = [NSDictionary dictionaryWithObjectsAndKeys:results, EVENTS_UPDATED_USER_INFO_KEY_RESULTS, resultsDetail, EVENTS_UPDATED_USER_INFO_KEY_RESULTS_DETAIL, EVENTS_SOURCE_BROWSE, EVENTS_UPDATED_USER_INFO_KEY_SOURCE, nil];
-    [[NSNotificationCenter defaultCenter] postNotificationName:EVENTS_UPDATED_NOTIFICATION_KEY object:nil userInfo:eventsUpdatedInfo];
+        [self.searchTextField resignFirstResponder];
+        if (self.isDrawerOpen) {
+            [self toggleDrawerAnimated];
+        }
+        
+        // Storing and using EventWebQuery objects
+        if (self.eventsWebQueryFromSearch.queryDatetime != nil) {
+            self.eventsWebQueryFromSearch = [NSEntityDescription insertNewObjectForEntityForName:@"EventsWebQuery" inManagedObjectContext:self.coreDataModel.managedObjectContext];            
+        }
+        self.eventsWebQueryFromSearch.searchTerm = searchTerm;
+        self.eventsWebQueryFromSearch.filterDateBucketString = self.selectedDateSearchFilterOption.code;
+        self.eventsWebQueryFromSearch.filterDistanceBucketString = self.selectedLocationSearchFilterOption.code;
+        self.eventsWebQueryFromSearch.filterLocationString = self.dvLocationSearchTextField.text;
+        self.eventsWebQueryFromSearch.filterTimeBucketString = self.selectedTimeSearchFilterOption.code;
+        
+        [self showWebLoadingViews];
+        [self.webConnector getEventsListForSearchString:searchTerm];
+        
+    } else {
+        
+        UIAlertView * noSearchTermAlertView = [[UIAlertView alloc] initWithTitle:@"Missing Search Term" message:@"Please enter at least one search term in the text field above." delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
+        [noSearchTermAlertView show];
+        [noSearchTermAlertView release];
+        
+    }
     
 }
 
@@ -1167,38 +1188,38 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     NSDictionary * dictionaryFromJSON = [responseString yajl_JSONWithOptions:YAJLParserOptionsAllowComments error:&error];
     NSArray * eventsDictionaries = [dictionaryFromJSON valueForKey:@"objects"];
     
-    // First, delete all previous events found from search in Core Data
-    [self.coreDataModel deleteRegularEventsFromSearch];
-    
     BOOL haveResults = eventsDictionaries && [eventsDictionaries count] > 0;
     
     if (haveResults) {
         
+        int order = 0;
         // Loop through and process all event dictionaries
         for (NSDictionary * eventSummaryDictionary in eventsDictionaries) {
             
             Event * newEvent = (Event *)[NSEntityDescription insertNewObjectForEntityForName:@"Event" inManagedObjectContext:self.coreDataModel.managedObjectContext];
             [self.coreDataModel updateEvent:newEvent usingEventSummaryDictionary:eventSummaryDictionary featuredOverride:nil fromSearchOverride:[NSNumber numberWithBool:YES]];
             
+            EventResult * newEventResult = [NSEntityDescription insertNewObjectForEntityForName:@"EventResult" inManagedObjectContext:self.coreDataModel.managedObjectContext];
+            newEventResult.order = [NSNumber numberWithInt:order];
+            order++;
+            newEventResult.event = newEvent;
+            newEventResult.query = self.eventsWebQueryFromSearch;
+            
         }
         
-    }
-    
-    // Save our core data changes
-    [self.coreDataModel coreDataSave];
-    
-    // Send out a notification that the events in Core Data have been flushed, and there is (maybe) a new set of retrieved events available.
-    NSMutableDictionary * eventsUpdatedInfo = [NSMutableDictionary dictionary];
-    NSString * results;
-    if (haveResults) {
-        results = EVENTS_UPDATED_USER_INFO_RESULTS_POPULATED;
+        self.eventsWebQueryFromSearch.queryDatetime = [NSDate date];
+        // Update events array
+        self.eventsFromSearch = [self.eventsWebQueryFromSearch.eventResultsEventsInOrder.mutableCopy autorelease];
+        
+        // Save our core data changes
+        [self.coreDataModel coreDataSave];
+                
     } else {
-        results = EVENTS_UPDATED_USER_INFO_RESULTS_EMPTY;
-        [eventsUpdatedInfo setObject:EVENTS_UPDATED_USER_INFO_RESULTS_DETAIL_NO_RESULTS forKey:EVENTS_UPDATED_USER_INFO_KEY_RESULTS_DETAIL];
+        self.eventsWebQueryFromSearch.queryDatetime = [NSDate date];
+        self.eventsFromSearch = nil;
     }
-    [eventsUpdatedInfo setObject:results forKey:EVENTS_UPDATED_USER_INFO_KEY_RESULTS];
-    [eventsUpdatedInfo setObject:EVENTS_SOURCE_SEARCH forKey:EVENTS_UPDATED_USER_INFO_KEY_SOURCE];
-    [[NSNotificationCenter defaultCenter] postNotificationName:EVENTS_UPDATED_NOTIFICATION_KEY object:nil userInfo:eventsUpdatedInfo];
+        
+    [self updateViewsFromDataForSource:EVENTS_SOURCE_SEARCH dataShouldBePopulated:haveResults reasonIfNot:EVENTS_NO_RESULTS_REASON_NO_RESULTS];
     
 }
 
@@ -1209,43 +1230,33 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 	NSError *error = [request error];
 	NSLog(@"%@",error);
     
-    [self.coreDataModel deleteRegularEventsFromSearch];
+    self.eventsWebQueryFromSearch.queryDatetime = [NSDate date];
+    self.eventsFromSearch = nil;
     
-    // Send out a notification that the events in Core Data have been flushed, and there is (maybe) a new set of retrieved events available.
-    NSString * results = EVENTS_UPDATED_USER_INFO_RESULTS_EMPTY;
-    NSString * resultsDetail = EVENTS_UPDATED_USER_INFO_RESULTS_DETAIL_CONNECTION_ERROR;
-    NSDictionary * eventsUpdatedInfo = [NSDictionary dictionaryWithObjectsAndKeys:results, EVENTS_UPDATED_USER_INFO_KEY_RESULTS, resultsDetail, EVENTS_UPDATED_USER_INFO_KEY_RESULTS_DETAIL, EVENTS_SOURCE_SEARCH, EVENTS_UPDATED_USER_INFO_KEY_SOURCE, nil];
-    [[NSNotificationCenter defaultCenter] postNotificationName:EVENTS_UPDATED_NOTIFICATION_KEY object:nil userInfo:eventsUpdatedInfo];
+    [self updateViewsFromDataForSource:EVENTS_SOURCE_SEARCH dataShouldBePopulated:NO reasonIfNot:EVENTS_NO_RESULTS_REASON_CONNECTION_ERROR];
     
 }
 
-- (void) dataSourceEventsUpdated:(NSNotification *)notification {
-        
-    NSDictionary * userInfo = [notification userInfo];
+- (void) updateViewsFromDataForSource:(NSString *)sourceCode dataShouldBePopulated:(BOOL)dataShouldBePopulated reasonIfNot:(NSString *)reasonIfNotPopulated {
     
-    //NSString * results = [userInfo objectForKey:EVENTS_UPDATED_USER_INFO_KEY_RESULTS]; // Don't need this for now - can just check the number of items in events array.
-    NSString * resultsDetail = [userInfo objectForKey:EVENTS_UPDATED_USER_INFO_KEY_RESULTS_DETAIL];
-    BOOL fromSearch = [[userInfo objectForKey:EVENTS_UPDATED_USER_INFO_KEY_SOURCE] isEqualToString:EVENTS_SOURCE_SEARCH];
+    BOOL fromSearch = [sourceCode isEqualToString:EVENTS_SOURCE_SEARCH];
     
     if (!fromSearch) {
-        self.events = [[[self.coreDataModel getRegularEvents] mutableCopy] autorelease];
         self.filtersSummaryStringBrowse = [self filtersSummaryStringForSource:EVENTS_SOURCE_BROWSE];
         [self updateFiltersSummaryLabelWithString:self.filtersSummaryStringBrowse];
     } else {
-        self.eventsFromSearch = [[[self.coreDataModel getRegularEventsFromSearch] mutableCopy] autorelease];
         self.filtersSummaryStringSearch = [self filtersSummaryStringForSource:EVENTS_SOURCE_SEARCH];
         [self updateFiltersSummaryLabelWithString:self.filtersSummaryStringSearch];
     }
     
-//    [self.tableView reloadSections:[NSIndexSet indexSetWithIndex:0] withRowAnimation:UITableViewRowAnimationFade];
     [self.tableView reloadData];
     if (!self.isSearchOn) {
-        [self.tableView setContentOffset:CGPointMake(0, self.searchContainerView.bounds.size.height) animated:YES];        
+        [self.tableView setContentOffset:CGPointMake(0, self.searchContainerView.bounds.size.height) animated:YES];
     } else {
         [self.tableView scrollRectToVisible:CGRectMake(0, 0, 1, 1) animated:YES];
     }
     
-    BOOL eventsRetrieved = self.eventsForCurrentSource && self.eventsForCurrentSource.count > 0;
+    BOOL eventsRetrieved = self.eventsWebQueryForCurrentSource.eventResults.count > 0;
     BOOL showTableFooterView = eventsRetrieved && !self.isSearchOn;
     self.tableView.tableFooterView.alpha = showTableFooterView ? 1.0 : 0.0;
     self.tableView.tableFooterView.userInteractionEnabled = showTableFooterView;
@@ -1254,7 +1265,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
         [self hideProblemViewAnimated:NO];
     } else {
         // No events were retrieved. Respond accordingly, depending on the reason.
-        if ([resultsDetail isEqualToString:EVENTS_UPDATED_USER_INFO_RESULTS_DETAIL_NO_RESULTS]) {
+        if ([reasonIfNotPopulated isEqualToString:EVENTS_NO_RESULTS_REASON_NO_RESULTS]) {
             if (!fromSearch) {
                 Category * category = (Category *)[self.concreteParentCategoriesDictionary objectForKey:self.categoryURI];
                 [self showProblemViewNoEventsForOldFilter:self.oldFilterString categoryTitle:category.title animated:NO];
@@ -1264,7 +1275,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
                 [alertView release];
                 [self.searchTextField becomeFirstResponder];
             }
-        } else if ([resultsDetail isEqualToString:EVENTS_UPDATED_USER_INFO_RESULTS_DETAIL_CONNECTION_ERROR]) {
+        } else if ([reasonIfNotPopulated isEqualToString:EVENTS_NO_RESULTS_REASON_CONNECTION_ERROR]) {
             if (!fromSearch) {
                 [self showProblemViewBadConnectionAnimated:NO];
             } else {
@@ -1388,66 +1399,10 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     [self webConnectGetEventsListWithCurrentOldFilterAndCategory];
 }
 
-//// Pulling the table down enough triggers a web reload.
-//- (void) scrollViewDidEndDragging:(UIScrollView *)scrollView
-//                   willDecelerate:(BOOL)decelerate {
-//    
-//    NSLog(@"ffffffffffffff -- %f", self.refreshHeaderView.bounds.size.height);
-//    
-//    if (scrollView == self.tableView && 
-//        !self.isSearchOn && 
-//        scrollView.contentOffset.y <= -(self.refreshHeaderView.bounds.size.height + self.filtersSummaryAndSearchContainerView.frame.size.height)) {
-//        
-//        [self.refreshHeaderView setState:EGOOPullRefreshLoading];
-//		[UIView beginAnimations:nil context:NULL];
-//		[UIView setAnimationDuration:0.2];
-//        UIEdgeInsets tableViewContentInset = self.tableView.contentInset;
-//        NSLog(@"inc");
-//        tableViewContentInset.top += self.refreshHeaderView.bounds.size.height;
-//        self.tableView.contentInset = tableViewContentInset;
-//		[UIView commitAnimations];
-//        
-//        [self webConnectGetEventsListWithCurrentOldFilterAndCategory];
-//        
-//	}
-//    
-//}
-
 - (void) scrollViewDidScroll:(UIScrollView *)scrollView {
-    
-//    if (scrollView == self.tableView) {
-//        NSLog(@"\ntableViewOffset: %@ \ntableViewInset: %@ \ntableViewScrollInset: %@ \ntableViewBounds: %@ \ntableViewFrame: %@ \ntabBarBounds: %@",
-//              NSStringFromCGPoint(self.tableView.contentOffset), 
-//              NSStringFromUIEdgeInsets(self.tableView.contentInset), 
-//              NSStringFromUIEdgeInsets(self.tableView.scrollIndicatorInsets),
-//              NSStringFromCGRect(self.tableView.bounds),
-//              NSStringFromCGRect(self.tableView.frame),
-//              NSStringFromCGRect(self.tabBarController.tabBar.bounds));
-//    }
-
-    if (scrollView == self.tableView) {
-        if (!self.isSearchOn) {
-            //        //        NSLog(@"%@", NSStringFromCGPoint(scrollView.contentOffset));
-            //        if (scrollView.contentOffset.y <= -(self.refreshHeaderView.bounds.size.height + self.filtersSummaryAndSearchContainerView.frame.size.height)) {
-            //            [self.refreshHeaderView setState:EGOOPullRefreshPulling];
-            //        } else {
-            //            [self.refreshHeaderView setState:EGOOPullRefreshNormal];
-            //        }
-            //        
-        } else {
-            
-//            CGRect thvf = self.tableView.tableHeaderView.frame;
-//            thvf.origin.y = self.tableView.bounds.origin.y;
-//            self.tableView.tableHeaderView.frame = thvf;
-            
-        }
-        
-    } else if (scrollView == self.drawerScrollView) {
-        
+//    if (scrollView == self.drawerScrollView) {
 //        [self updateActiveFilterHighlights]; // This is killing performance.
-        
-    }
-    
+//    }
 }
 
 - (IBAction) filterButtonTouched:(id)sender {
@@ -1680,8 +1635,8 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     if (self.isSearchOn) {
         // New mode is search on
         // Clear all previous search results / terms etc
-        [self.coreDataModel deleteRegularEventsFromSearch];
-        [self.eventsFromSearch removeAllObjects];
+        self.eventsWebQueryFromSearch = [NSEntityDescription insertNewObjectForEntityForName:@"EventsWebQuery" inManagedObjectContext:self.coreDataModel.managedObjectContext];
+        self.eventsFromSearch = nil;
         self.tableViewCoverView.frame = CGRectMake(self.tableView.frame.origin.x, self.tableView.frame.origin.y + self.tableView.tableHeaderView.bounds.size.height, self.tableView.frame.size.width, self.pushableContainerView.frame.size.height - self.tableView.tableHeaderView.bounds.size.height);
         // Set table view content offset to top
         self.tableView.contentOffset = CGPointMake(0, 0);
@@ -1780,7 +1735,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
                              [self setDrawerScrollViewToDisplayViewsForSource:EVENTS_SOURCE_BROWSE];
                              // Add the table footer view back in
                              self.tableView.tableFooterView = self.tableReloadContainerView;
-                             BOOL showTableFooterView = self.eventsForCurrentSource && self.eventsForCurrentSource.count > 0;
+                             BOOL showTableFooterView = self.eventsWebQueryForCurrentSource.eventResults.count > 0;
                              self.tableView.tableFooterView.alpha = showTableFooterView ? 1.0 : 0.0;
                              // Add the problem view back in if it was showing way back when
                              if (problemViewWasShowing) { [self showProblemViewAnimated:NO]; }
@@ -1835,12 +1790,10 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 }
 
 - (IBAction) searchButtonTouched:(id)sender  {
-    
     if (self.isDrawerOpen) {
         [self toggleDrawerAnimated];
     }
     [self toggleSearchMode];
-
 }
 
 - (BOOL)textFieldShouldReturn:(UITextField *)textField {
@@ -1861,8 +1814,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 
     if (textField == self.searchTextField) {
         
-        if (self.eventsFromSearch &&
-            self.eventsFromSearch.count > 0 &&
+        if (self.eventsWebQueryFromSearch.eventResults.count > 0 &&
             self.adjustedSearchFiltersOrdered.count > 0 &&
             !self.isDrawerOpen) {
             self.activeSearchFilterInUI = self.mostRecentlyAdjustedSearchFilter;
@@ -1881,7 +1833,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
-    return [self.eventsForCurrentSource count];
+    return self.eventsForCurrentSource.count;
 }
 
 // Customize the appearance of table view cells.
@@ -1892,8 +1844,6 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     EventTableViewCell * cell = (EventTableViewCell*)[tableView dequeueReusableCellWithIdentifier:CellIdentifier];
     if (cell == nil) {
         cell = [[[EventTableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier] autorelease];
-    } else {
-//        NSLog(@"Got a dequeued");
     }
     [self configureCell:cell forRowAtIndexPath:indexPath];
     
@@ -2172,17 +2122,6 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 
     // ACTIVITY VIEWS
     [self.webActivityView hideAnimated:NO];
-
-//    // REFRESH HEADER VIEW
-//    if (self.refreshHeaderView.state == EGOOPullRefreshLoading) {
-//        [self.refreshHeaderView setState:EGOOPullRefreshNormal];
-//        [UIView beginAnimations:nil context:NULL];
-//        [UIView setAnimationDuration:.3];
-//        UIEdgeInsets contentInset = self.tableView.contentInset;
-//        contentInset.top -= self.refreshHeaderView.bounds.size.height;
-//        self.tableView.contentInset = contentInset;
-//        [UIView commitAnimations];
-//    }
     
     // USER INTERACTION
     self.tableView.userInteractionEnabled = YES; // Enable user interaction
@@ -2527,7 +2466,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     UIEdgeInsets tableViewInset = self.tableView.contentInset;
     tableViewInset.bottom = self.filtersSummaryContainerView.bounds.size.height;
     self.tableView.contentInset = tableViewInset;
-    if (!self.eventsForCurrentSource || self.eventsForCurrentSource.count == 0) {
+    if (!(self.eventsWebQueryForCurrentSource.eventResults.count > 0)) {
         self.tableView.contentOffset = tableViewContentOffset; // Fixing a very slight bug, which would result in the search bar being scrolled into view when there were no results in the table.
     }
 
@@ -2590,8 +2529,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 
 - (void)searchCancelButtonTouched:(id)sender {
     if ([self.searchTextField isFirstResponder]) {
-        if (self.eventsFromSearch &&
-            self.eventsFromSearch.count > 0) {
+        if (self.eventsWebQueryFromSearch.eventResults.count > 0) {
             [self.searchTextField resignFirstResponder];
         } else {
             [self toggleSearchMode];
@@ -2603,29 +2541,6 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 
 - (void)searchGoButtonTouched:(id)sender {
     [self searchExecutionRequestedByUser];
-}
-
-- (void) searchExecutionRequestedByUser {
-    
-    NSString * searchTerm = self.searchTextField.text;
-    
-    if (searchTerm && searchTerm.length > 0) {
-        
-        [self.searchTextField resignFirstResponder];
-        if (self.isDrawerOpen) {
-            [self toggleDrawerAnimated];
-        }
-        [self showWebLoadingViews];
-        [self.webConnector getEventsListForSearchString:self.searchTextField.text];
-        
-    } else {
-        
-        UIAlertView * noSearchTermAlertView = [[UIAlertView alloc] initWithTitle:@"Missing Search Term" message:@"Please enter at least one search term in the text field above." delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
-        [noSearchTermAlertView show];
-        [noSearchTermAlertView release];
-        
-    }
-    
 }
 
 #pragma mark -

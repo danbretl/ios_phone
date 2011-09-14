@@ -9,7 +9,7 @@
 #import <Foundation/Foundation.h>
 #import <CoreData/CoreData.h>
 
-@class Category, CategoryBreadcrumb, EventSummary, Occurrence, Place;
+@class Category, CategoryBreadcrumb, EventSummary, Occurrence, Place, EventResult;
 
 @interface Event : NSManagedObject {
 @private
@@ -25,6 +25,7 @@
 @property (nonatomic, retain) Category *concreteParentCategory;
 @property (nonatomic, retain) NSSet * occurrences;
 @property (nonatomic, retain) NSSet * concreteCategoryBreadcrumbs;
+@property (nonatomic, retain) NSSet *queryResultInclusions;
 
 @property (nonatomic, readonly) NSArray * occurrencesChronological;
 @property (nonatomic, readonly) NSArray * occurrencesByDateVenueTime;
@@ -35,7 +36,6 @@
 @end
 
 @interface Event (CoreDataGeneratedAccessors)
-
 - (void)addOccurrencesObject:(Occurrence *)value;
 - (void)removeOccurrencesObject:(Occurrence *)value;
 - (void)addOccurrences:(NSSet *)values;
@@ -44,4 +44,8 @@
 - (void)removeConcreteCategoryBreadcrumbsObject:(CategoryBreadcrumb *)value;
 - (void)addConcreteCategoryBreadcrumbs:(NSSet *)values;
 - (void)removeConcreteCategoryBreadcrumbs:(NSSet *)values;
+- (void)addQueryResultInclusionsObject:(EventResult *)value;
+- (void)removeQueryResultInclusionsObject:(EventResult *)value;
+- (void)addQueryResultInclusions:(NSSet *)values;
+- (void)removeQueryResultInclusions:(NSSet *)values;
 @end

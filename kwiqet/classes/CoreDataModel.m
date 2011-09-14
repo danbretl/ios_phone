@@ -13,6 +13,7 @@
 - (Event *) getFeaturedEventCreateIfDoesNotExist:(BOOL)createIfDoesNotExist;
 - (NSArray *) getEventsForPredicate:(NSPredicate *)predicate;
 - (void) deleteEventsForPredicate:(NSPredicate *)predicate;
+- (EventsWebQuery *) getMostRecentEventsWebQueryWithPredicate:(NSPredicate *)predicate;
 @end
 
 @implementation CoreDataModel
@@ -270,6 +271,27 @@
         [categoriesDictionary setObject:category forKey:category.uri];
     }
     return categoriesDictionary;
+}
+
+//////////////////////////////
+// EVENTS WEB QUERY RECORDS //
+//////////////////////////////
+
+- (EventsWebQuery *) getMostRecentEventsWebQueryWithPredicate:(NSPredicate *)predicate {
+    EventsWebQuery * mostRecentEventWebQuery = nil;
+    NSArray * eventsWebQueries = [self getAllObjectsForEntityName:@"EventsWebQuery" predicate:predicate sortDescriptors:[NSArray arrayWithObject:[NSSortDescriptor sortDescriptorWithKey:@"queryDatetime" ascending:NO]]];
+    if (eventsWebQueries && eventsWebQueries.count > 0) {
+        mostRecentEventWebQuery = [eventsWebQueries objectAtIndex:0];
+    }
+    return mostRecentEventWebQuery;
+}
+
+- (EventsWebQuery *) getMostRecentEventsWebQuery {
+    return [self getMostRecentEventsWebQueryWithPredicate:[NSPredicate predicateWithFormat:@"searchTerm == nil"]];
+}
+
+- (EventsWebQuery *) getMostRecentEventsWebQueryForSearchTerm:(NSString *)searchTerm {
+    return [self getMostRecentEventsWebQueryWithPredicate:[NSPredicate predicateWithFormat:@"searchTerm == %@", searchTerm]];
 }
 
 //////////////////////

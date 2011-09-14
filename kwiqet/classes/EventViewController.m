@@ -319,6 +319,7 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
     self.breadcrumbsLabel.font = [UIFont kwiqetFontOfType:RegularNormal size:12];
     
     // Occurrence info container
+    self.occurrenceInfoContainerIsCollapsed = NO;
     occurrenceInfoOverlayView = [[OccurrenceInfoOverlayView alloc] initWithFrame:CGRectMake(5, 5, self.occurrenceInfoContainer.bounds.size.width - 5 * 2, self.dateContainer.bounds.size.height - 5 * 2)];
     self.occurrenceInfoOverlayView.autoresizingMask = UIViewAutoresizingFlexibleBottomMargin | UIViewAutoresizingFlexibleWidth;
     [self.occurrenceInfoContainer addSubview:self.occurrenceInfoOverlayView];
@@ -431,6 +432,7 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
             self.event.occurrencesByDateVenueTime.count > 0) {
             [self processOccurrencesFromEvent:self.event];
             [self reloadOccurrencesTableViews];
+            [self setOccurrenceInfoContainerIsCollapsed:YES animated:NO];
         }
         [self updateViewsFromDataAnimated:NO];
     }

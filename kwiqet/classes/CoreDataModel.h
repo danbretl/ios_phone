@@ -16,6 +16,7 @@
 #import "Occurrence.h"
 #import "Place.h"
 #import "Price.h"
+#import "EventsWebQuery.h"
 
 @interface CoreDataModel : NSObject {
     
@@ -57,6 +58,20 @@
 - (NSArray *) getAllCategories;
 - (NSArray *) getAllCategoriesWithColor;
 - (NSDictionary *) getAllCategoriesWithColorInDictionaryWithURIKeys;
+
+// Events Web Query Records
+- (EventsWebQuery *) getMostRecentEventsWebQuery;
+- (EventsWebQuery *) getMostRecentEventsWebQueryForSearchTerm:(NSString *)searchTerm;
+//- (void) updateEventsWebQuery:(EventsWebQuery *)eventsWebQuery
+//               WithSearchTerm:(NSSet *)searchTerm
+//             filterCategories:(NSSet *)filterCategories
+//       filterDateBucketString:(NSString *)filterDateBucketString
+//   filterDistanceBucketString:(NSString *)filterDistanceBucketString
+//   filterLocationBucketString:(NSString *)filterLocationBucketString
+//      filterPriceBucketString:(NSString *)filterPriceBucketString
+//       filterTimeBucketString:(NSString *)filterTimeBucketString;
+//- (void) updateEventsWebQuery:(EventsWebQuery *)eventsWebQuery 
+//                   withEvents:(NSSet *)events;
 
 // Regular Events
 - (void) updateEvent:(Event *)event usingEventSummaryDictionary:(NSDictionary *)eventSummaryDictionary featuredOverride:(NSNumber *)featuredOverride fromSearchOverride:(NSNumber *)fromSearchOverride;

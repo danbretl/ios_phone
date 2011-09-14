@@ -9,7 +9,6 @@
 
 #import <UIKit/UIKit.h>
 #import "CoreDataModel.h"
-#import "EGORefreshTableHeaderView.h"
 #import "WebConnector.h"
 #import "EventViewController.h"
 #import "EventTableViewCell.h"
@@ -19,12 +18,15 @@
 #import "EventsFilterOption.h"
 #import "SegmentedHighlighterView.h"
 #import "UIButtonWithOverlayView.h"
+#import "EventsWebQuery.h"
 
 @interface EventsViewController : UIViewController <UITableViewDelegate, UITableViewDataSource, UIAlertViewDelegate, CardPageViewControllerDelegate, WebConnectorDelegate, UIScrollViewDelegate, UITextFieldDelegate> {
     
     ///////////
     // Models
     
+    EventsWebQuery * eventsWebQuery;
+    EventsWebQuery * eventsWebQueryFromSearch;
 	NSMutableArray * events;
 	NSMutableArray * eventsFromSearch;
     NSArray * concreteParentCategoriesArray;

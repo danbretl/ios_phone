@@ -18,6 +18,7 @@
 @dynamic displayOrder;
 @dynamic breadcrumbs;
 @dynamic events;
+@dynamic queryLinks;
 
 - (void)addBreadcrumbsObject:(CategoryBreadcrumb *)value {    
     NSSet *changedObjects = [[NSSet alloc] initWithObjects:&value count:1];

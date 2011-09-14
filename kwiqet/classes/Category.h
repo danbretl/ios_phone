@@ -10,7 +10,7 @@
 #import <CoreData/CoreData.h>
 
 @class EventInfo;
-@class CategoryBreadcrumb;
+@class CategoryBreadcrumb, EventsWebQuery;
 
 @interface Category : NSManagedObject {
 @private
@@ -23,5 +23,12 @@
 @property (nonatomic, retain) NSSet* breadcrumbs;
 @property (nonatomic, retain) NSSet* events;
 @property (nonatomic, retain) NSString * iconThumb;
+@property (nonatomic, retain) NSSet *queryLinks;
+@end
 
+@interface Category (CoreDataGeneratedAccessors)
+- (void)addQueryLinksObject:(EventsWebQuery *)value;
+- (void)removeQueryLinksObject:(EventsWebQuery *)value;
+- (void)addQueryLinks:(NSSet *)values;
+- (void)removeQueryLinks:(NSSet *)values;
 @end
