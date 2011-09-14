@@ -22,12 +22,14 @@ CGFloat const OIOV_SECONDARY_PROMPT_HORIZONTAL_SPACING = 5.0;
     self = [super initWithFrame:frame];
     if (self) {
         
+        self.layer.cornerRadius = 10.0;
+        
         self.backgroundColor = [UIColor colorWithWhite:53.0/255.0 alpha:0.9];
         self.layer.shadowColor = [UIColor colorWithWhite:53.0/255.0 alpha:.6].CGColor;
         self.layer.shadowOpacity = 1.0;
         self.layer.shadowOffset = CGSizeMake(0, 1);
         self.layer.shadowRadius = 1.0;
-        self.layer.shadowPath = [UIBezierPath bezierPathWithRect:self.bounds].CGPath;
+        self.layer.shadowPath = [UIBezierPath bezierPathWithRoundedRect:self.bounds cornerRadius:self.layer.cornerRadius].CGPath;
         
         messagePrimary = [[UILabel alloc] initWithFrame:CGRectMake(0, 7, frame.size.width, 19)];
         self.messagePrimary.font = [UIFont kwiqetFontOfType:BoldNormal size:15];
