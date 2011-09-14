@@ -15,6 +15,7 @@
 #import "WebUtil.h"
 #import "Analytics.h"
 #import "EventResult.h"
+#import "UIFont+Kwiqet.h"
 
 static NSString * const EVENTS_OLDFILTER_RECOMMENDED = @"recommended";
 static NSString * const EVENTS_CATEGORY_BUTTON_TOUCH_POSTFIX = @"_touch";
@@ -866,11 +867,11 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
         filter.drawerView.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"cat_overlay.png"]];
         filter.drawerView.backgroundColor = [UIColor clearColor]; // TESTING PERFORMANCE HIT TESTING PERFORMANCE HIT TESTING PERFORMANCE HIT TESTING PERFORMANCE HIT TESTING PERFORMANCE HIT TESTING PERFORMANCE HIT TESTING PERFORMANCE HIT TESTING PERFORMANCE HIT TESTING PERFORMANCE HIT TESTING PERFORMANCE HIT TESTING PERFORMANCE HIT TESTING PERFORMANCE HIT TESTING PERFORMANCE HIT TESTING PERFORMANCE HIT TESTING PERFORMANCE HIT
         [filter.button setTitle:[filter.buttonText uppercaseString] forState:UIControlStateNormal];
-        filter.button.titleLabel.font = [UIFont fontWithName:@"HelveticaNeueLTStd-MdCn" size:12.0];
+        filter.button.titleLabel.font = [UIFont kwiqetFontOfType:RegularCondensed size:12.0];
         filter.button.adjustsImageWhenHighlighted = NO;
         if (![filter.code isEqualToString:EVENTS_FILTER_CATEGORIES]) {
             filter.button.contentVerticalAlignment = UIControlContentVerticalAlignmentBottom;
-            filter.button.titleEdgeInsets = UIEdgeInsetsMake(0, 0, 12, 0);
+            filter.button.titleEdgeInsets = UIEdgeInsetsMake(0, 0, 16, 0);
             filter.button.imageEdgeInsets = UIEdgeInsetsMake(0, 0, 16, 0);
         }
         [filter.button setTitleColor:[UIColor colorWithWhite:53.0/255.0 alpha:1.0] forState:UIControlStateNormal];
@@ -1718,8 +1719,10 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
                              // Reload table data
                              [self.tableView reloadData];
                              NSLog(@"EventsViewController tableView reloadData");
-                             // Set table view content offset to top
-                             self.tableView.contentOffset = CGPointMake(0, 0);
+                             // Set table view content offset to the top (but use a scroll... method because this seems to effect the scrolling and thus acceleration of the table, whereas contentOffset methods do not).
+                             if (self.events.count > 0) {
+                                 [self.tableView scrollToRowAtIndexPath:[NSIndexPath indexPathForRow:0 inSection:0] atScrollPosition:UITableViewScrollPositionTop animated:NO];
+                             }
                              // Hide filters bar off screen, ready to come back on
                              [self setFiltersBarViewsOriginY:-self.filtersContainerView.frame.size.height adjustDrawerViewsAccordingly:NO];
                              // Move pushable container up
@@ -2535,7 +2538,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
             [self toggleSearchMode];
         }
     } else {
-        [self toggleSearchMode];        
+        [self toggleSearchMode];
     }
 }
 
