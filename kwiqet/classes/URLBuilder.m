@@ -288,11 +288,11 @@ static NSString * const URL_BUILDER_GET_EVENTS_LIST_FILTER_POPULAR = @"popular";
     NSDictionary * urlDictionary = [NSDictionary dictionaryWithContentsOfFile:urlPList];
     
     // Remove spaces in search string
-    NSString * searchParameterSafe = [searchString stringByReplacingOccurrencesOfString:@" " withString:@"+"]; // NOTE - THIS DOES NOT SEEM EVEN REMOTELY ROBUST ENOUGH TO HANDLE STRANGE INPUT FROM USERS. THIS WILL ALMOST UNQUESTIONABLY NEED TO BE GREATLY IMPROVEN UPON IN THE FUTURE.
+    NSString * searchParameterSafe = [searchString stringByReplacingOccurrencesOfString:@" " withString:@"%20"]; // NOTE - THIS DOES NOT SEEM EVEN REMOTELY ROBUST ENOUGH TO HANDLE STRANGE INPUT FROM USERS. THIS WILL ALMOST UNQUESTIONABLY NEED TO BE GREATLY IMPROVED UPON IN THE FUTURE.
     NSString * searchVariableForURL = [NSString stringWithFormat:@"&q=%@", searchParameterSafe];
     
     NSString * baseURL = [urlDictionary valueForKey:self.baseURLKey];
-    NSString * searchURI = [urlDictionary valueForKey:@"event_summary_uri"];
+    NSString * searchURI = [urlDictionary valueForKey:@"event_summary_search_uri"];
     NSString * credentials = [self buildCredentialString];
     
     NSURL * url = [NSURL URLWithString:[NSString stringWithFormat:@"%@%@%@%@", baseURL, searchURI, credentials, searchVariableForURL]];
