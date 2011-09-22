@@ -34,11 +34,11 @@ typedef enum {
     
 }
 
-- (void) setMessagesToShowMessageType:(EventsFeedbackMessageType)messageType withEventsString:(NSString *)eventsString;
+- (void) setMessagesToShowMessageType:(EventsFeedbackMessageType)messageType withEventsString:(NSString *)eventsString searchString:(NSString *)searchString;
 - (void) setMessagesToShowCustomMessageSolo:(NSString *)messageSoloString;
 - (void) setMessagesToShowCustomMessageHeader:(NSString *)messageHeaderString messageMain:(NSString *)messageMainString messageFollowup:(NSString *)messageFollowupString;
 
-- (CGSize) sizeForMessagesWithMessageType:(EventsFeedbackMessageType)messageType withEventsString:(NSString *)eventsString;
+- (CGSize) sizeForMessagesWithMessageType:(EventsFeedbackMessageType)messageType withEventsString:(NSString *)eventsString searchString:(NSString *)searchString;
 - (CGSize) sizeForMessagesWithMessageSolo:(NSString *)messageSoloString;
 - (CGSize) sizeForMessagesWithMessageHeader:(NSString *)messageHeaderString messageMain:(NSString *)messageMainString messageFollowup:(NSString *)messageFollowupString;
 

@@ -17,10 +17,10 @@
 - (CGSize) sizeForComplexMessage:(BOOL)complexMessage shouldMakeAdjustments:(BOOL)shouldMakeAdjustments withMessageHeader:(NSString *)messageHeaderString messageMain:(NSString *)messageMainString messageFollowup:(NSString *)messageFollowupString messageSolo:(NSString *)messageSoloString;
 - (CGSize) sizeForComplexMessage:(BOOL)complexMessage shouldMakeAdjustments:(BOOL)shouldMakeAdjustments withMessageHeaderSize:(CGSize)messageHeaderSize messageMainSize:(CGSize)messageMainSize messageFollowupSize:(CGSize)messageFollowupSize messageSoloSize:(CGSize)messageSoloSize;
 - (void) setMessagesToShowComplexMessage:(BOOL)complexMessage withMessageHeader:(NSString *)messageHeaderString messageMain:(NSString *)messageMainString messageFollowup:(NSString *)messageFollowupString messageSolo:(NSString *)messageSoloString;
-- (NSString *) messageSoloForMessageType:(EventsFeedbackMessageType)messageType withEventsString:(NSString *)eventsString;
-- (NSString *) messageHeaderForMessageType:(EventsFeedbackMessageType)messageType withEventsString:(NSString *)eventsString;
-- (NSString *) messageMainForMessageType:(EventsFeedbackMessageType)messageType withEventsString:(NSString *)eventsString;
-- (NSString *) messageFollowupForMessageType:(EventsFeedbackMessageType)messageType withEventsString:(NSString *)eventsString;
+- (NSString *) messageSoloForMessageType:(EventsFeedbackMessageType)messageType withEventsString:(NSString *)eventsString searchString:(NSString *)searchString;
+- (NSString *) messageHeaderForMessageType:(EventsFeedbackMessageType)messageType withEventsString:(NSString *)eventsString searchString:(NSString *)searchString;
+- (NSString *) messageMainForMessageType:(EventsFeedbackMessageType)messageType withEventsString:(NSString *)eventsString searchString:(NSString *)searchString;
+- (NSString *) messageFollowupForMessageType:(EventsFeedbackMessageType)messageType withEventsString:(NSString *)eventsString searchString:(NSString *)searchString;
 @property (readonly) UIView * backgroundView;
 @property (readonly) UILabel * messageHeader;
 @property (readonly) UILabel * messageMain;
@@ -231,12 +231,12 @@
     return [self sizeForComplexMessage:YES shouldMakeAdjustments:NO withMessageHeader:messageHeaderString messageMain:messageMainString messageFollowup:messageFollowupString messageSolo:nil];
 }
 
-- (CGSize) sizeForMessagesWithMessageType:(EventsFeedbackMessageType)messageType withEventsString:(NSString *)eventsString {
+- (CGSize) sizeForMessagesWithMessageType:(EventsFeedbackMessageType)messageType withEventsString:(NSString *)eventsString searchString:(NSString *)searchString {
     BOOL complexMessage = [EventsFeedbackView doesMessageTypeRequireComplexMessage:messageType];
-    NSString * messageHeader = complexMessage ? [self messageHeaderForMessageType:messageType withEventsString:eventsString] : nil;
-    NSString * messageMain = complexMessage ? [self messageMainForMessageType:messageType withEventsString:eventsString] : nil;
-    NSString * messageFollowup = complexMessage ? [self messageFollowupForMessageType:messageType withEventsString:eventsString] : nil;
-    NSString * messageSolo = complexMessage ? nil : [self messageSoloForMessageType:messageType withEventsString:eventsString];
+    NSString * messageHeader = complexMessage ? [self messageHeaderForMessageType:messageType withEventsString:eventsString searchString:searchString] : nil;
+    NSString * messageMain = complexMessage ? [self messageMainForMessageType:messageType withEventsString:eventsString searchString:searchString] : nil;
+    NSString * messageFollowup = complexMessage ? [self messageFollowupForMessageType:messageType withEventsString:eventsString searchString:searchString] : nil;
+    NSString * messageSolo = complexMessage ? nil : [self messageSoloForMessageType:messageType withEventsString:eventsString searchString:searchString];
     return [self sizeForComplexMessage:complexMessage 
                  shouldMakeAdjustments:NO 
                      withMessageHeader:messageHeader
@@ -278,7 +278,7 @@
     [self setMessagesToShowComplexMessage:NO withMessageHeader:nil messageMain:nil messageFollowup:nil messageSolo:messageSoloString];
 }
 
-- (NSString *) messageSoloForMessageType:(EventsFeedbackMessageType)messageType withEventsString:(NSString *)eventsString {
+- (NSString *) messageSoloForMessageType:(EventsFeedbackMessageType)messageType withEventsString:(NSString *)eventsString searchString:(NSString *)searchString {
     NSString * messageSolo = nil;
     if (![EventsFeedbackView doesMessageTypeRequireComplexMessage:messageType]) {
         if (messageType == LoadingEvents ||
@@ -286,9 +286,9 @@
             messageType == CloseDrawerToLoadPrompt) {
             NSString * leadIn = nil;
             switch (messageType) {
-                case LoadingEvents: /*leadIn = @"Loading recommended"; break;*/ // The feedback view is getting a little busy with extremely frequent string updates. For now, I'm going to just make "Loading" messages the same as "Displaying" messages - effectively eliminating the former.
-                case LookingAtEvents: leadIn = @"Displaying recommended"; break;
-                case CloseDrawerToLoadPrompt: leadIn = @"Swipe up to load recommended"; break;                    
+                case LoadingEvents: /*leadIn = @"Loading"; break;*/ // The feedback view is getting a little busy with extremely frequent string updates. For now, I'm going to just make "Loading" messages the same as "Displaying" messages - effectively eliminating the former.
+                case LookingAtEvents: leadIn = @"Displaying"; break;
+                case CloseDrawerToLoadPrompt: leadIn = @"Swipe up to load"; break;                    
                 default:break;
             }
             messageSolo = [NSString stringWithFormat:@"%@ %@.", leadIn, eventsString];            
@@ -303,7 +303,7 @@
     return messageSolo;
 }
 
-- (NSString *) messageHeaderForMessageType:(EventsFeedbackMessageType)messageType withEventsString:(NSString *)eventsString {
+- (NSString *) messageHeaderForMessageType:(EventsFeedbackMessageType)messageType withEventsString:(NSString *)eventsString searchString:(NSString *)searchString {
     NSString * message = nil;
     if ([EventsFeedbackView doesMessageTypeRequireComplexMessage:messageType]) {
         message = @"Sorry!";
@@ -313,7 +313,7 @@
     return message;
 }
 
-- (NSString *) messageMainForMessageType:(EventsFeedbackMessageType)messageType withEventsString:(NSString *)eventsString {
+- (NSString *) messageMainForMessageType:(EventsFeedbackMessageType)messageType withEventsString:(NSString *)eventsString searchString:(NSString *)searchString {
     NSString * message = nil;
     if ([EventsFeedbackView doesMessageTypeRequireComplexMessage:messageType]) {
         NSString * mainLeadIn = (messageType == NoEventsFound) ? @"We couldn't find any" : @"There was a connection error while trying to load";
@@ -325,7 +325,7 @@
     return message;
 }
 
-- (NSString *) messageFollowupForMessageType:(EventsFeedbackMessageType)messageType withEventsString:(NSString *)eventsString {
+- (NSString *) messageFollowupForMessageType:(EventsFeedbackMessageType)messageType withEventsString:(NSString *)eventsString searchString:(NSString *)searchString {
     NSString * message = nil;
     if ([EventsFeedbackView doesMessageTypeRequireComplexMessage:messageType]) {
         message = @"Or, touch here to try again.";
@@ -335,7 +335,7 @@
     return message;
 }
 
-- (void) setMessagesToShowMessageType:(EventsFeedbackMessageType)messageType withEventsString:(NSString *)eventsString {
+- (void) setMessagesToShowMessageType:(EventsFeedbackMessageType)messageType withEventsString:(NSString *)eventsString searchString:(NSString *)searchString {
     if (messageType == CustomSolo || 
         messageType == CustomComplex) {
         NSLog(@"ERROR in EventsFeedbackView - trying to show a custom message with setMessagesToShowMessageType. Should be using setMessagesToShowCustomMessage... methods instead. Ignoring this method call.");
@@ -352,12 +352,12 @@
             messageType == LookingAtEvents ||
             messageType == SetFiltersPrompt ||
             messageType == CloseDrawerToLoadPrompt) {
-            messageSolo = [self messageSoloForMessageType:messageType withEventsString:eventsString];
+            messageSolo = [self messageSoloForMessageType:messageType withEventsString:eventsString searchString:searchString];
         } else if (messageType == NoEventsFound ||
                    messageType == ConnectionError) {
-            messageHeader = [self messageHeaderForMessageType:messageType withEventsString:eventsString];
-            messageMain = [self messageMainForMessageType:messageType withEventsString:eventsString];
-            messageFollowup = [self messageFollowupForMessageType:messageType withEventsString:eventsString];
+            messageHeader = [self messageHeaderForMessageType:messageType withEventsString:eventsString searchString:searchString];
+            messageMain = [self messageMainForMessageType:messageType withEventsString:eventsString searchString:searchString];
+            messageFollowup = [self messageFollowupForMessageType:messageType withEventsString:eventsString searchString:searchString];
         } else {
             NSLog(@"ERROR in EventsFeedbackView - undefined message type.");
         }
