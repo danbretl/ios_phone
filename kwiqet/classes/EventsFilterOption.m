@@ -31,6 +31,23 @@ static NSString * const EFO_ICON_EXT = @".png";
     return self;
 }
 
++ (NSString *) eventsFilterOptionCategoryCodeForCategoryURI:(NSString *)categoryURI {
+    NSString * postfix = EFO_CODE_CATEGORY_POSTFIX_ALL;
+    if (categoryURI != nil) {
+        postfix = categoryURI;
+    }
+    return [NSString stringWithFormat:@"%@%@", EFO_CODE_CATEGORY_PREFIX, postfix];
+}
+
++ (NSString *) categoryURIForEventsFilterOptionCategoryCode:(NSString *)codeForCategoryEFO {
+    NSString * categoryURI = nil;
+    NSString * strippedString = [codeForCategoryEFO stringByReplacingOccurrencesOfString:EFO_CODE_CATEGORY_PREFIX withString:@""];
+    if (![strippedString isEqualToString:EFO_CODE_CATEGORY_POSTFIX_ALL]) {
+        categoryURI = strippedString;
+    }
+    return categoryURI;
+}
+
 + (EventsFilterOption *) eventsFilterOptionWithCode:(NSString *)code readableString:(NSString *)readable buttonText:(NSString *)buttonText buttonView:(UIButtonWithOverlayView *)buttonView {
     
     EventsFilterOption * option = [[EventsFilterOption alloc] init];
@@ -43,7 +60,8 @@ static NSString * const EFO_ICON_EXT = @".png";
     option.isMostGeneralOption = ([code isEqualToString:EFO_CODE_PRICE_ANY] ||
                                   [code isEqualToString:EFO_CODE_DATE_ANY] ||
                                   [code isEqualToString:EFO_CODE_LOCATION_CITY] ||
-                                  [code isEqualToString:EFO_CODE_TIME_ANY]);
+                                  [code isEqualToString:EFO_CODE_TIME_ANY] ||
+                                  [code isEqualToString:[NSString stringWithFormat:@"%@%@", EFO_CODE_CATEGORY_PREFIX, EFO_CODE_CATEGORY_POSTFIX_ALL]]);
     return [option autorelease];
     
 }

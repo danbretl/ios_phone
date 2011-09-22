@@ -96,6 +96,7 @@
 		32164D7F140D924800CAD71F /* btn_occurrence_venue_touch@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 32164D6B140D924800CAD71F /* btn_occurrence_venue_touch@2x.png */; };
 		32164D80140D924800CAD71F /* btn_occurrence_venue.png in Resources */ = {isa = PBXBuildFile; fileRef = 32164D6C140D924800CAD71F /* btn_occurrence_venue.png */; };
 		32164D81140D924800CAD71F /* btn_occurrence_venue@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 32164D6D140D924800CAD71F /* btn_occurrence_venue@2x.png */; };
+		321A87AE1423AB7C0012EA4A /* EventsFeedbackView.m in Sources */ = {isa = PBXBuildFile; fileRef = 321A87AD1423AB7C0012EA4A /* EventsFeedbackView.m */; };
 		3220DFB113B233470032C205 /* ElasticUILabel.m in Sources */ = {isa = PBXBuildFile; fileRef = 3220DFB013B233470032C205 /* ElasticUILabel.m */; };
 		3220DFB513B23B390032C205 /* GradientView.m in Sources */ = {isa = PBXBuildFile; fileRef = 3220DFB413B23B390032C205 /* GradientView.m */; };
 		32253F4413C36884004FBDD6 /* FacebookViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 32253F4213C36884004FBDD6 /* FacebookViewController.m */; };
@@ -599,6 +600,8 @@
 		32164D6B140D924800CAD71F /* btn_occurrence_venue_touch@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "btn_occurrence_venue_touch@2x.png"; sourceTree = "<group>"; };
 		32164D6C140D924800CAD71F /* btn_occurrence_venue.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = btn_occurrence_venue.png; sourceTree = "<group>"; };
 		32164D6D140D924800CAD71F /* btn_occurrence_venue@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "btn_occurrence_venue@2x.png"; sourceTree = "<group>"; };
+		321A87AC1423AB7C0012EA4A /* EventsFeedbackView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EventsFeedbackView.h; sourceTree = "<group>"; };
+		321A87AD1423AB7C0012EA4A /* EventsFeedbackView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EventsFeedbackView.m; sourceTree = "<group>"; };
 		3220DFAF13B233470032C205 /* ElasticUILabel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ElasticUILabel.h; sourceTree = "<group>"; };
 		3220DFB013B233470032C205 /* ElasticUILabel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ElasticUILabel.m; sourceTree = "<group>"; };
 		3220DFB313B23B390032C205 /* GradientView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GradientView.h; sourceTree = "<group>"; };
@@ -1720,6 +1723,8 @@
 				323D4B0413E1BDAC0091D8A6 /* EventsFilterOption.m */,
 				32FD383C13AFF52F007549B6 /* EventTableViewCell.h */,
 				32FD383D13AFF52F007549B6 /* EventTableViewCell.m */,
+				321A87AC1423AB7C0012EA4A /* EventsFeedbackView.h */,
+				321A87AD1423AB7C0012EA4A /* EventsFeedbackView.m */,
 			);
 			name = EventsViewController;
 			sourceTree = "<group>";
@@ -2644,6 +2649,7 @@
 				326A2C91141ACCC200F44E22 /* OccurrenceInfoOverlayView.m in Sources */,
 				32C85F241420011F00D3F475 /* EventResult.m in Sources */,
 				32C85F271420011F00D3F475 /* EventsWebQuery.m in Sources */,
+				321A87AE1423AB7C0012EA4A /* EventsFeedbackView.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

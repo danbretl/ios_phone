@@ -180,46 +180,10 @@
 					<object class="IBUIView" id="1013917416">
 						<reference key="NSNextResponder" ref="191373211"/>
 						<int key="NSvFlags">266</int>
-						<object class="NSMutableArray" key="NSSubviews">
-							<bool key="EncodedWithXMLCoder">YES</bool>
-							<object class="IBUILabel" id="678199929">
-								<reference key="NSNextResponder" ref="1013917416"/>
-								<int key="NSvFlags">295</int>
-								<string key="NSFrame">{{5, 5}, {292, 45}}</string>
-								<reference key="NSSuperview" ref="1013917416"/>
-								<reference key="NSWindow"/>
-								<reference key="NSNextKeyView"/>
-								<string key="NSReuseIdentifierKey">_NS:311</string>
-								<object class="NSColor" key="IBUIBackgroundColor">
-									<int key="NSColorSpace">3</int>
-									<bytes key="NSWhite">MC45ODIyMDgwMjkyIDAAA</bytes>
-								</object>
-								<bool key="IBUIOpaque">NO</bool>
-								<bool key="IBUIClipsSubviews">YES</bool>
-								<int key="IBUIContentMode">7</int>
-								<bool key="IBUIUserInteractionEnabled">NO</bool>
-								<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
-								<string key="IBUIText">You are looking at free events at night this weekend within 5 blocks of your current location. This string could be really long, so I'm rambling.</string>
-								<object class="NSFont" key="IBUIFont" id="233835301">
-									<string key="NSName">Helvetica</string>
-									<double key="NSSize">12</double>
-									<int key="NSfFlags">16</int>
-								</object>
-								<object class="NSColor" key="IBUITextColor">
-									<int key="NSColorSpace">3</int>
-									<bytes key="NSWhite">MQA</bytes>
-									<reference key="NSCustomColorSpace" ref="386540379"/>
-								</object>
-								<nil key="IBUIHighlightedColor"/>
-								<int key="IBUIBaselineAdjustment">1</int>
-								<float key="IBUIMinimumFontSize">6</float>
-								<int key="IBUINumberOfLines">0</int>
-							</object>
-						</object>
 						<string key="NSFrame">{{9, 405}, {302, 55}}</string>
 						<reference key="NSSuperview" ref="191373211"/>
 						<reference key="NSWindow"/>
-						<reference key="NSNextKeyView" ref="678199929"/>
+						<reference key="NSNextKeyView"/>
 						<string key="NSReuseIdentifierKey">_NS:180</string>
 						<object class="NSColor" key="IBUIBackgroundColor">
 							<int key="NSColorSpace">3</int>
@@ -507,7 +471,11 @@
 										<bool key="IBUIUserInteractionEnabled">NO</bool>
 										<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
 										<string key="IBUIText">Any</string>
-										<reference key="IBUIFont" ref="233835301"/>
+										<object class="NSFont" key="IBUIFont" id="233835301">
+											<string key="NSName">Helvetica</string>
+											<double key="NSSize">12</double>
+											<int key="NSfFlags">16</int>
+										</object>
 										<reference key="IBUITextColor" ref="666834515"/>
 										<nil key="IBUIHighlightedColor"/>
 										<int key="IBUIBaselineAdjustment">1</int>
@@ -2276,14 +2244,6 @@
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBCocoaTouchOutletConnection" key="connection">
-						<string key="label">filtersSummaryLabel</string>
-						<reference key="source" ref="372490531"/>
-						<reference key="destination" ref="678199929"/>
-					</object>
-					<int key="connectionID">24</int>
-				</object>
-				<object class="IBConnectionRecord">
-					<object class="IBCocoaTouchOutletConnection" key="connection">
 						<string key="label">pushableContainerView</string>
 						<reference key="source" ref="372490531"/>
 						<reference key="destination" ref="263086087"/>
@@ -2562,14 +2522,6 @@
 						<int key="IBEventType">7</int>
 					</object>
 					<int key="connectionID">211</int>
-				</object>
-				<object class="IBConnectionRecord">
-					<object class="IBCocoaTouchOutletConnection" key="connection">
-						<string key="label">filtersSummaryContainerView</string>
-						<reference key="source" ref="372490531"/>
-						<reference key="destination" ref="1013917416"/>
-					</object>
-					<int key="connectionID">212</int>
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBCocoaTouchOutletConnection" key="connection">
@@ -2973,6 +2925,14 @@
 						<int key="IBEventType">7</int>
 					</object>
 					<int key="connectionID">351</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBCocoaTouchOutletConnection" key="connection">
+						<string key="label">feedbackView</string>
+						<reference key="source" ref="372490531"/>
+						<reference key="destination" ref="1013917416"/>
+					</object>
+					<int key="connectionID">359</int>
 				</object>
 			</object>
 			<object class="IBMutableOrderedSet" key="objectRecords">
@@ -3447,15 +3407,9 @@
 						<reference key="object" ref="1013917416"/>
 						<object class="NSMutableArray" key="children">
 							<bool key="EncodedWithXMLCoder">YES</bool>
-							<reference ref="678199929"/>
 						</object>
 						<reference key="parent" ref="191373211"/>
 						<string key="objectName">Filters Summary Container</string>
-					</object>
-					<object class="IBObjectRecord">
-						<int key="objectID">5</int>
-						<reference key="object" ref="678199929"/>
-						<reference key="parent" ref="1013917416"/>
 					</object>
 					<object class="IBObjectRecord">
 						<int key="objectID">213</int>
@@ -3959,10 +3913,10 @@
 					<string>37.IBPluginDependency</string>
 					<string>38.IBPluginDependency</string>
 					<string>39.IBPluginDependency</string>
+					<string>4.CustomClassName</string>
 					<string>4.IBPluginDependency</string>
 					<string>40.IBPluginDependency</string>
 					<string>48.IBPluginDependency</string>
-					<string>5.IBPluginDependency</string>
 					<string>52.IBPluginDependency</string>
 				</object>
 				<object class="NSMutableArray" key="dict.values">
@@ -4124,7 +4078,7 @@
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
-					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
+					<string>EventsFeedbackView</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
@@ -4143,11 +4097,19 @@
 				<reference key="dict.values" ref="0"/>
 			</object>
 			<nil key="sourceID"/>
-			<int key="maxID">358</int>
+			<int key="maxID">359</int>
 		</object>
 		<object class="IBClassDescriber" key="IBDocument.Classes">
 			<object class="NSMutableArray" key="referencedPartialClassDescriptions">
 				<bool key="EncodedWithXMLCoder">YES</bool>
+				<object class="IBPartialClassDescription">
+					<string key="className">EventsFeedbackView</string>
+					<string key="superclassName">UIView</string>
+					<object class="IBClassDescriptionSource" key="sourceIdentifier">
+						<string key="majorKey">IBProjectSource</string>
+						<string key="minorKey">./Classes/EventsFeedbackView.h</string>
+					</object>
+				</object>
 				<object class="IBPartialClassDescription">
 					<string key="className">EventsViewController</string>
 					<string key="superclassName">UIViewController</string>
@@ -4201,6 +4163,7 @@
 							<string>dvTimeSearchButtonEvening</string>
 							<string>dvTimeSearchButtonMorning</string>
 							<string>dvTimeSearchButtonNight</string>
+							<string>feedbackView</string>
 							<string>filterButtonCategories</string>
 							<string>filterButtonDate</string>
 							<string>filterButtonLocation</string>
@@ -4214,8 +4177,6 @@
 							<string>filtersContainerShadowCheatView</string>
 							<string>filtersContainerShadowCheatWayBelowView</string>
 							<string>filtersContainerView</string>
-							<string>filtersSummaryContainerView</string>
-							<string>filtersSummaryLabel</string>
 							<string>filtersSummaryStringBrowse</string>
 							<string>filtersSummaryStringSearch</string>
 							<string>pushableContainerShadowCheatView</string>
@@ -4276,6 +4237,7 @@
 							<string>UIButtonWithOverlayView</string>
 							<string>UIButtonWithOverlayView</string>
 							<string>UIButtonWithOverlayView</string>
+							<string>EventsFeedbackView</string>
 							<string>UIButton</string>
 							<string>UIButton</string>
 							<string>UIButton</string>
@@ -4289,8 +4251,6 @@
 							<string>UIView</string>
 							<string>UIView</string>
 							<string>UIView</string>
-							<string>UIView</string>
-							<string>UILabel</string>
 							<string>NSString</string>
 							<string>NSString</string>
 							<string>UIView</string>
@@ -4354,6 +4314,7 @@
 							<string>dvTimeSearchButtonEvening</string>
 							<string>dvTimeSearchButtonMorning</string>
 							<string>dvTimeSearchButtonNight</string>
+							<string>feedbackView</string>
 							<string>filterButtonCategories</string>
 							<string>filterButtonDate</string>
 							<string>filterButtonLocation</string>
@@ -4367,8 +4328,6 @@
 							<string>filtersContainerShadowCheatView</string>
 							<string>filtersContainerShadowCheatWayBelowView</string>
 							<string>filtersContainerView</string>
-							<string>filtersSummaryContainerView</string>
-							<string>filtersSummaryLabel</string>
 							<string>filtersSummaryStringBrowse</string>
 							<string>filtersSummaryStringSearch</string>
 							<string>pushableContainerShadowCheatView</string>
@@ -4568,6 +4527,10 @@
 								<string key="candidateClassName">UIButtonWithOverlayView</string>
 							</object>
 							<object class="IBToOneOutletInfo">
+								<string key="name">feedbackView</string>
+								<string key="candidateClassName">EventsFeedbackView</string>
+							</object>
+							<object class="IBToOneOutletInfo">
 								<string key="name">filterButtonCategories</string>
 								<string key="candidateClassName">UIButton</string>
 							</object>
@@ -4618,14 +4581,6 @@
 							<object class="IBToOneOutletInfo">
 								<string key="name">filtersContainerView</string>
 								<string key="candidateClassName">UIView</string>
-							</object>
-							<object class="IBToOneOutletInfo">
-								<string key="name">filtersSummaryContainerView</string>
-								<string key="candidateClassName">UIView</string>
-							</object>
-							<object class="IBToOneOutletInfo">
-								<string key="name">filtersSummaryLabel</string>
-								<string key="candidateClassName">UILabel</string>
 							</object>
 							<object class="IBToOneOutletInfo">
 								<string key="name">filtersSummaryStringBrowse</string>

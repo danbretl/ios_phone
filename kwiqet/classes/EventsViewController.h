@@ -19,6 +19,7 @@
 #import "SegmentedHighlighterView.h"
 #import "UIButtonWithOverlayView.h"
 #import "EventsWebQuery.h"
+#import "EventsFeedbackView.h"
 
 @interface EventsViewController : UIViewController <UITableViewDelegate, UITableViewDataSource, UIAlertViewDelegate, CardPageViewControllerDelegate, WebConnectorDelegate, UIScrollViewDelegate, UITextFieldDelegate> {
     
@@ -42,6 +43,7 @@
     EventsFilterOption * selectedDateFilterOption;
     EventsFilterOption * selectedTimeFilterOption;
     EventsFilterOption * selectedLocationFilterOption;
+    EventsFilterOption * selectedCategoryFilterOption;
     NSMutableArray * filtersSearch;
     EventsFilter * activeSearchFilterInUI;
     NSMutableArray * adjustedSearchFiltersOrdered; // Ordered most recently adjusted to least recently adjusted. If a filter does not exist in this array, then it has not been adjusted from its "most general" option.
@@ -51,7 +53,8 @@
     BOOL isDrawerOpen;
     BOOL shouldReloadOnDrawerClose;
     BOOL isSearchOn;
-    BOOL problemViewWasShowing;
+    EventsFeedbackMessageType feedbackMessageTypeBrowseRemembered;
+    EventsFeedbackMessageType feedbackMessageTypeSearchRemembered;
     NSString * oldFilterString;
     NSString * categoryURI;
     NSIndexPath * indexPathOfRowAttemptingToDelete;
@@ -71,10 +74,10 @@
     IBOutlet UIView   * pushableContainerView;
     IBOutlet UIView   * pushableContainerShadowCheatView;
     //
-    IBOutlet UIView   * filtersSummaryContainerView;
-    IBOutlet UILabel  * filtersSummaryLabel;
-    IBOutlet NSString * filtersSummaryStringBrowse;
-    IBOutlet NSString * filtersSummaryStringSearch;
+    IBOutlet EventsFeedbackView * feedbackView;
+    BOOL feedbackViewIsVisible;
+    NSString * eventsSummaryStringBrowse;
+    NSString * eventsSummaryStringSearch;
     //
     IBOutlet UIView   * filtersContainerView;
     IBOutlet UIView   * filtersContainerShadowCheatView;
@@ -150,8 +153,6 @@
     IBOutlet UIButtonWithOverlayView * dvLocationSearchButtonCity;
     // Assorted views
     WebActivityView * webActivityView;
-    UIView * problemView;
-    UILabel * problemLabel;
     EventViewController * cardPageViewController;
     UIAlertView * connectionErrorStandardAlertView;
     UIAlertView * connectionErrorOnDeleteAlertView;

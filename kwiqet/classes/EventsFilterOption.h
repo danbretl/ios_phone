@@ -8,6 +8,7 @@
 
 #import <Foundation/Foundation.h>
 #import "UIButtonWithOverlayView.h"
+#import "Category.h"
 
 // Price filter option codes
 static NSString * const EFO_CODE_PRICE_FREE = @"free";
@@ -31,6 +32,9 @@ static NSString * const EFO_CODE_TIME_AFTERNOON = @"afternoon";
 static NSString * const EFO_CODE_TIME_EVENING = @"evening";
 static NSString * const EFO_CODE_TIME_NIGHT = @"night";
 static NSString * const EFO_CODE_TIME_ANY = @"anytime"; // Most general time
+// Category filter option codes
+static NSString * const EFO_CODE_CATEGORY_PREFIX = @"category_";
+static NSString * const EFO_CODE_CATEGORY_POSTFIX_ALL = @"all"; // Most general category
 
 @interface EventsFilterOption : NSObject {
  
@@ -48,6 +52,8 @@ static NSString * const EFO_CODE_TIME_ANY = @"anytime"; // Most general time
 @property (retain) UIButtonWithOverlayView * buttonView;
 @property BOOL isMostGeneralOption;
 
++ (NSString *) eventsFilterOptionCategoryCodeForCategoryURI:(NSString *)categoryURI;
++ (NSString *) categoryURIForEventsFilterOptionCategoryCode:(NSString *)codeForCategoryEFO;
 + (EventsFilterOption *) eventsFilterOptionWithCode:(NSString *)code readableString:(NSString *)readable buttonText:(NSString *)buttonText buttonView:(UIButtonWithOverlayView *)buttonView;
 + (NSString *)eventsFilterOptionIconFilenameForCode:(NSString *)code grayscale:(BOOL)grayscale larger:(BOOL)larger;
 
