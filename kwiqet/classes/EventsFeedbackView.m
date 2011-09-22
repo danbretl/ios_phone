@@ -109,8 +109,11 @@
     button_ = [[UIButton buttonWithType:UIButtonTypeCustom] retain];
     self.button.frame = self.bounds;
     self.button.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+    self.button.enabled = YES;
     [self addSubview:self.button];
     [self bringSubviewToFront:self.button];
+    
+    self.userInteractionEnabled = NO;
     
 }
 
@@ -246,6 +249,7 @@
     
     isMessageSet_ = YES; // We could make this more complex, to check if the string to be set was nil or empty, but, we're not going to for now.
     isCurrentMessageComplex_ = complexMessage;
+    self.userInteractionEnabled = complexMessage;
     if (complexMessage) {
         self.messageHeader.text = messageHeaderString;
         self.messageMain.text = messageMainString;

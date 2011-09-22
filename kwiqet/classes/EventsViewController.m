@@ -188,6 +188,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 - (IBAction) searchButtonTouched:(id)sender;
 - (IBAction) searchCancelButtonTouched:(id)sender;
 - (IBAction) searchGoButtonTouched:(id)sender;
+- (void) feedbackViewRetryButtonTouched:(UIButton *)button;
 
 - (IBAction) reloadEventsListButtonTouched:(id)sender;
 
@@ -442,6 +443,9 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     self.tableView.tableFooterView.alpha = 0.0;
     self.tableView.tableFooterView.userInteractionEnabled = NO;
     self.tableView.tableFooterView.backgroundColor = [UIColor colorWithWhite:EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT alpha:1.0];
+    
+    // Feedback view
+    [self.feedbackView.button addTarget:self action:@selector(feedbackViewRetryButtonTouched:) forControlEvents:UIControlEventTouchUpInside];
     
     UISwipeGestureRecognizer * swipeDownFiltersGR = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(swipeDownToShowDrawer:)];
     swipeDownFiltersGR.direction = UISwipeGestureRecognizerDirectionDown;
@@ -824,7 +828,6 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     [self setLogoButtonImageForCategoryURI:self.categoryURI];
     self.eventsSummaryStringBrowse = [self eventsSummaryStringForSource:EVENTS_SOURCE_BROWSE];
     self.eventsSummaryStringSearch = [self eventsSummaryStringForSource:EVENTS_SOURCE_SEARCH];
-    [self setFeedbackViewIsVisible:YES adjustMessages:YES withMessageType:LoadingEvents eventsSummaryString:self.eventsSummaryStringBrowse animated:NO];
     
     // Start things off with browse filters (as opposed to search ones)
     [self.filtersContainerView addSubview:self.filtersBarBrowse];
@@ -840,6 +843,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(behaviorWasReset:) name:@"learningBehaviorWasReset" object:nil];
     
     // Connect to web
+    [self setFeedbackViewIsVisible:YES adjustMessages:YES withMessageType:LoadingEvents eventsSummaryString:self.eventsSummaryStringBrowse animated:NO];
     [self webConnectGetEventsListWithCurrentOldFilterAndCategory]; // Don't need to reloadData until we get a response back from this web connection attempt.
     
 }
@@ -948,6 +952,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
             // Not going to do anything on this path for now... Just leave the list blank?
         } else {
             NSLog(@"No events for current source, going to web-get events. No events for current source, going to web-get events. No events for current source, going to web-get events. No events for current source, going to web-get events. No events for current source, going to web-get events. No events for current source, going to web-get events. No events for current source, going to web-get events. No events for current source, going to web-get events. No events for current source, going to web-get events. No events for current source, going to web-get events.");
+            [self setFeedbackViewIsVisible:self.feedbackViewIsVisible adjustMessages:YES withMessageType:LoadingEvents eventsSummaryString:self.eventsSummaryStringForCurrentSource animated:YES];
             [self webConnectGetEventsListWithCurrentOldFilterAndCategory];
         }
     } else {
@@ -968,6 +973,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     if (event.type == UIEventSubtypeMotionShake) {
         if (!self.isSearchOn) {
             NSLog(@"Shake to reload");
+            [self setFeedbackViewIsVisible:self.feedbackViewIsVisible adjustMessages:YES withMessageType:LoadingEvents eventsSummaryString:self.eventsSummaryStringForCurrentSource animated:YES];
             [self webConnectGetEventsListWithCurrentOldFilterAndCategory];
         }
     }
@@ -1060,7 +1066,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     
     [self setLogoButtonImageForCategoryURI:self.categoryURI];
     [self showWebLoadingViews];
-    [self setFeedbackViewIsVisible:YES adjustMessages:YES withMessageType:LoadingEvents eventsSummaryString:self.eventsSummaryStringForCurrentSource animated:YES];
+//    [self setFeedbackViewIsVisible:YES adjustMessages:YES withMessageType:LoadingEvents eventsSummaryString:self.eventsSummaryStringForCurrentSource animated:YES];
     [self.webConnector getEventsListWithFilter:self.oldFilterString categoryURI:self.categoryURI];
     
     /////////////////////
@@ -1269,12 +1275,15 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     } else {
         // No events were retrieved. Respond accordingly, depending on the reason.
         if ([reasonIfNotPopulated isEqualToString:EVENTS_NO_RESULTS_REASON_NO_RESULTS]) {
-            [self setFeedbackViewIsVisible:YES adjustMessages:YES withMessageType:NoEventsFound eventsSummaryString:self.eventsSummaryStringForCurrentSource animated:YES];
             if (self.isSearchOn) {
                 UIAlertView * alertView = [[UIAlertView alloc] initWithTitle:@"No results" message:@"Sorry, we couldn't find any events matching your search." delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
                 [alertView show];
                 [alertView release];
                 [self.searchTextField becomeFirstResponder];
+                [self setFeedbackViewIsVisible:NO adjustMessages:NO withMessageType:0 eventsSummaryString:nil animated:YES];
+            } else {
+                NSLog(@"here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here");
+                [self setFeedbackViewIsVisible:YES adjustMessages:YES withMessageType:NoEventsFound eventsSummaryString:self.eventsSummaryStringForCurrentSource animated:YES];
             }
         } else if ([reasonIfNotPopulated isEqualToString:EVENTS_NO_RESULTS_REASON_CONNECTION_ERROR]) {
             [self setFeedbackViewIsVisible:YES adjustMessages:YES withMessageType:ConnectionError eventsSummaryString:self.eventsSummaryStringForCurrentSource animated:YES];
@@ -1282,6 +1291,8 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
                 UIAlertView * alertView = [[UIAlertView alloc] initWithTitle:@"Connection Error" message:WEB_CONNECTION_ERROR_MESSAGE_STANDARD delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
                 [alertView show];
                 [alertView release];
+            } else {
+                // ...
             }
         } else {
             NSLog(@"ERROR in EventsViewController - events array is empty for unknown reason.");
@@ -1400,6 +1411,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 }
 
 - (void) forceToReloadEventsList {
+    [self setFeedbackViewIsVisible:self.feedbackViewIsVisible adjustMessages:YES withMessageType:LoadingEvents eventsSummaryString:self.eventsSummaryStringForCurrentSource animated:YES];
     [self webConnectGetEventsListWithCurrentOldFilterAndCategory];
 }
 
@@ -1431,6 +1443,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 }
 
 - (IBAction) reloadEventsListButtonTouched:(id)sender {
+    [self setFeedbackViewIsVisible:self.feedbackViewIsVisible adjustMessages:YES withMessageType:LoadingEvents eventsSummaryString:self.eventsSummaryStringForCurrentSource animated:YES];
     [self webConnectGetEventsListWithCurrentOldFilterAndCategory];
 }
 
@@ -1452,14 +1465,15 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
         if (!self.isSearchOn && self.tableView.contentOffset.y < self.searchContainerView.bounds.size.height) {
             [self.tableView setContentOffset:CGPointMake(0, self.searchContainerView.bounds.size.height) animated:YES];
         }
-        self.shouldReloadOnDrawerClose = NO;
+        BOOL hadResults = self.eventsWebQueryForCurrentSource.eventResults.count > 0;
+        self.shouldReloadOnDrawerClose = !hadResults;
         [self setDrawerReloadIndicatorViewIsVisible:self.shouldReloadOnDrawerClose animated:NO];
         if (!self.isSearchOn) {
             self.feedbackMessageTypeBrowseRemembered = self.feedbackView.messageType;
         } else {
             self.feedbackMessageTypeSearchRemembered = self.feedbackView.messageType;
         }
-        [self setFeedbackViewIsVisible:self.feedbackViewIsVisible adjustMessages:YES withMessageType:SetFiltersPrompt eventsSummaryString:self.eventsSummaryStringForCurrentSource animated:YES];
+        [self setFeedbackViewIsVisible:self.feedbackViewIsVisible adjustMessages:YES withMessageType:(hadResults ? SetFiltersPrompt : CloseDrawerToLoadPrompt) eventsSummaryString:self.eventsSummaryStringForCurrentSource animated:YES];
     } else {
         self.isDrawerOpen = NO;
         self.tapToHideDrawerGR.enabled = NO;
@@ -1671,7 +1685,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
                                  // Move pushable container down
                                  [self setPushableContainerViewsOriginY:CGRectGetMaxY(self.filtersContainerView.frame) adjustHeightToFillMainView:YES];
                                  // Move summary string on screen
-                                 [self setFeedbackViewIsVisible:YES adjustMessages:YES withMessageType:LoadingEvents eventsSummaryString:self.eventsSummaryStringSearch animated:YES];
+//                                 [self setFeedbackViewIsVisible:YES adjustMessages:YES withMessageType:LoadingEvents eventsSummaryString:self.eventsSummaryStringSearch animated:YES];
                                  // Fade table view in
                                  self.tableViewCoverView.alpha = 0.0;
                              }];
@@ -2072,6 +2086,9 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     if (self.isDrawerOpen) {
         [self toggleDrawerAnimated];
     }
+    if (self.view.window) {
+        [self setFeedbackViewIsVisible:self.feedbackViewIsVisible adjustMessages:YES withMessageType:LoadingEvents eventsSummaryString:self.eventsSummaryStringForCurrentSource animated:YES];
+    }
     [self webConnectGetEventsListWithOldFilter:EVENTS_OLDFILTER_RECOMMENDED categoryURI:nil];
 }
 
@@ -2081,6 +2098,9 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     }
     if (self.isDrawerOpen) {
         [self toggleDrawerAnimated];
+    }
+    if (self.view.window) {
+        [self setFeedbackViewIsVisible:self.feedbackViewIsVisible adjustMessages:YES withMessageType:LoadingEvents eventsSummaryString:self.eventsSummaryStringForCurrentSource animated:YES];
     }
     [self webConnectGetEventsListWithOldFilter:EVENTS_OLDFILTER_RECOMMENDED categoryURI:nil];
 }
@@ -2634,6 +2654,21 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 
 - (void)searchGoButtonTouched:(id)sender {
     [self searchExecutionRequestedByUser];
+}
+
+- (void) feedbackViewRetryButtonTouched:(UIButton *)button {
+    NSLog(@"EventsViewController feedbackViewRetryButtonTouched");
+    if (button == self.feedbackView.button) {
+//        [self setFeedbackViewIsVisible:self.feedbackViewIsVisible adjustMessages:YES withMessageType:LoadingEvents eventsSummaryString:self.eventsSummaryStringForCurrentSource animated:YES];
+        [self showWebLoadingViews];
+        if (!self.isSearchOn) {
+            [self webConnectGetEventsListWithCurrentOldFilterAndCategory];
+        } else {
+            [self searchExecutionRequestedByUser];
+        }
+    } else {
+        NSLog(@"ERROR in EventsViewController - unrecognized button sending message feedbackViewRetryButtonTouched");
+    }
 }
 
 #pragma mark -
