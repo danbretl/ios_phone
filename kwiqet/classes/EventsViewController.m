@@ -44,14 +44,14 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 // "View models" properties
 
 @property (nonatomic, readonly) NSArray * filtersForCurrentSource;
-@property (retain) NSMutableArray * filters;
+@property (retain) NSArray * filters;
 @property (retain) EventsFilter * activeFilterInUI;
 @property (retain) EventsFilterOption * selectedPriceFilterOption;
 @property (retain) EventsFilterOption * selectedDateFilterOption;
 @property (retain) EventsFilterOption * selectedTimeFilterOption;
 @property (retain) EventsFilterOption * selectedLocationFilterOption;
 @property (retain) EventsFilterOption * selectedCategoryFilterOption;
-@property (retain) NSMutableArray * filtersSearch;
+@property (retain) NSArray * filtersSearch;
 @property (retain) EventsFilter * activeSearchFilterInUI;
 @property (retain) NSMutableArray * adjustedSearchFiltersOrdered;
 @property (nonatomic, readonly) EventsFilter * mostRecentlyAdjustedSearchFilter; // Currently, in search mode, after a prior search, if search text field becomes active, if prior search had filters applied, then the drawer automatically opens and displays the UI for the most recently adjusted search filter. This should maybe be changed to just the most recently viewed search filter. Not sure.
@@ -67,6 +67,10 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 @property (copy) NSString * categoryURI;
 @property (retain) NSIndexPath * indexPathOfRowAttemptingToDelete;
 @property (retain) NSIndexPath * indexPathOfSelectedRow;
+@property (readonly) BOOL feedbackViewIsVisible;
+@property (retain) NSString * eventsSummaryStringBrowse;
+@property (retain) NSString * eventsSummaryStringSearch;
+@property (nonatomic, readonly) NSString * eventsSummaryStringForCurrentSource;
 
 /////////////////////
 // Views properties
@@ -83,10 +87,6 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 @property (retain) IBOutlet UIView   * pushableContainerShadowCheatView;
 //
 @property (retain) IBOutlet EventsFeedbackView * feedbackView;
-@property (readonly) BOOL feedbackViewIsVisible;
-@property (retain) NSString * eventsSummaryStringBrowse;
-@property (retain) NSString * eventsSummaryStringSearch;
-@property (nonatomic, readonly) NSString * eventsSummaryStringForCurrentSource;
 //
 @property (retain) IBOutlet UIView   * filtersContainerView;
 @property (retain) IBOutlet UIView   * filtersContainerShadowCheatView;
@@ -162,11 +162,15 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 @property (retain) IBOutlet UIButtonWithOverlayView * dvLocationSearchButtonCity;
 // Assorted views
 @property (nonatomic, retain) WebActivityView * webActivityView;
-@property (nonatomic, retain) EventViewController * cardPageViewController;
 @property (nonatomic, readonly) UIAlertView * connectionErrorStandardAlertView;
 @property (nonatomic, readonly) UIAlertView * connectionErrorOnDeleteAlertView;
 // Gesture recognizers
 @property (retain) UITapGestureRecognizer * tapToHideDrawerGR;
+
+/////////////////////
+// View Controllers
+
+@property (nonatomic, retain) EventViewController * cardPageViewController;
 
 ///////////////////
 // Web properties
@@ -206,6 +210,8 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 - (void) keyboardWillHide:(NSNotification *)notification;
 - (void) keyboardWillShow:(NSNotification *)notification;
 - (void) loginActivity:(NSNotification *)notification;
+- (void) releaseReconstructableViews;
+- (void) releaseReconstructableViewModels;
 - (void) resetSearchFilters;
 - (void) searchExecutionRequestedByUser;
 - (void) setDrawerScrollViewToDisplayViewsForSource:(NSString *)sourceString;
@@ -238,10 +244,9 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 @end
 
 @implementation EventsViewController
-@synthesize filters;
 @synthesize activeFilterInUI;
 @synthesize selectedPriceFilterOption, selectedDateFilterOption, selectedTimeFilterOption, selectedLocationFilterOption, selectedCategoryFilterOption;
-@synthesize filtersSearch;
+@synthesize filters, filtersSearch;
 @synthesize activeSearchFilterInUI, adjustedSearchFiltersOrdered;
 @synthesize selectedDateSearchFilterOption, selectedTimeSearchFilterOption, selectedLocationSearchFilterOption;
 @synthesize filtersContainerView, filtersContainerShadowCheatView, filtersContainerShadowCheatWayBelowView;
@@ -276,109 +281,23 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 @synthesize feedbackMessageTypeBrowseRemembered, feedbackMessageTypeSearchRemembered;
 
 - (void)dealloc {
-    [activeFilterHighlightsContainerView release];
-    [activeFilterInUI release];
-    [activeSearchFilterInUI release];
-    [adjustedSearchFiltersOrdered release];
+    NSLog(@"--- --- --- --- --- EventsViewController dealloc --- --- --- --- ---");
     [cardPageViewController release];
-    [categoryURI release];
     [concreteParentCategoriesArray release];
     [concreteParentCategoriesDictionary release];
-    [connectionErrorOnDeleteAlertView release];
-    [connectionErrorStandardAlertView release];
     [coreDataModel release];
-    [drawerScrollView release];
-    [drawerViewsBrowseContainer release];
-    [drawerViewsSearchContainer release];
-    [drawerViewCategories release];
-    [drawerViewDate release];
-    [drawerViewDateSearch release];
-    [drawerViewLocation release];
-    [drawerViewLocationSearch release];
-    [drawerViewPrice release];
-    [drawerViewTime release];
-    [drawerViewTimeSearch release];
-    [dvPriceButtonFree release];
-    [dvPriceButtonUnder20 release];
-    [dvPriceButtonUnder50 release];
-    [dvPriceButtonAny release];
-    [dvDateButtonToday release];
-    [dvDateButtonThisWeekend release];
-    [dvDateButtonThisWeek release];
-    [dvDateButtonThisMonth release];
-    [dvDateButtonAny release];
-    [dvDateSearchButtonToday release];
-    [dvDateSearchButtonThisWeekend release];
-    [dvDateSearchButtonThisWeek release];
-    [dvDateSearchButtonThisMonth release];
-    [dvDateSearchButtonAny release];
-    [dvLocationTextField release];
-    [dvLocationCurrentLocationButton release];
-    [dvLocationButtonWalking release];
-    [dvLocationButtonNeighborhood release];
-    [dvLocationButtonBorough release];
-    [dvLocationButtonCity release];
-    [dvLocationSearchTextField release];
-    [dvLocationSearchCurrentLocationButton release];
-    [dvLocationSearchButtonWalking release];
-    [dvLocationSearchButtonNeighborhood release];
-    [dvLocationSearchButtonBorough release];
-    [dvLocationSearchButtonCity release];
-    [dvTimeButtonMorning release];
-    [dvTimeButtonAfternoon release];
-    [dvTimeButtonEvening release];
-    [dvTimeButtonNight release];
-    [dvTimeButtonAny release];
-    [dvTimeSearchButtonMorning release];
-    [dvTimeSearchButtonAfternoon release];
-    [dvTimeSearchButtonEvening release];
-    [dvTimeSearchButtonNight release];
-    [dvTimeSearchButtonAny release];
 	[events release];
 	[eventsFromSearch release];
     [eventsWebQuery release];
     [eventsWebQueryFromSearch release];
-    [filterButtonCategories release];
-    [filterButtonPrice release];
-    [filterButtonDate release];
-    [filterButtonLocation release];
-    [filterButtonTime release];
-    [filters release];
-    [filtersContainerShadowCheatView release];
-    [filtersContainerShadowCheatWayBelowView release];
-    [filtersContainerView release];
-    [filtersSearch release];
-    [filterSearchButtonDate release];
-    [filterSearchButtonLocation release];
-    [filterSearchButtonTime release];
-    [feedbackView release];
     [eventsSummaryStringBrowse release];
     [eventsSummaryStringSearch release];
     [indexPathOfRowAttemptingToDelete release];
     [indexPathOfSelectedRow release];
-    [oldFilterString release];
-    [pushableContainerView release];
-    [pushableContainerShadowCheatView release];
-    [searchButton release];
-    [searchCancelButton release];
-    [searchContainerView release];
-    [searchGoButton release];
-    [searchTextField release];
-    [selectedCategoryFilterOption release];
-    [selectedDateFilterOption release];
-    [selectedDateSearchFilterOption release];
-    [selectedLocationFilterOption release];
-    [selectedLocationSearchFilterOption release];
-    [selectedPriceFilterOption release];
-    [selectedTimeFilterOption release];
-    [selectedTimeSearchFilterOption release];
-    [tableView_ release];
-    [tableViewCoverView release];
-    [tableReloadContainerView release];
-    [tapToHideDrawerGR release];
-	[webActivityView release];
     [webConnector release];
     [webDataTranslator release];
+    [self releaseReconstructableViews];
+    [self releaseReconstructableViewModels];
     [super dealloc];
 }
 
@@ -395,94 +314,104 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 - (void)viewDidLoad {
     [super viewDidLoad];
     
-    // Create categories background view under UITableView
-    self.drawerScrollView.showsHorizontalScrollIndicator = NO;
+    // Views settings - Drawer scroll view
     self.drawerScrollView.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"cat_overlay.png"]];
-    self.drawerScrollView.userInteractionEnabled = NO;
     self.drawerScrollView.layer.masksToBounds = YES;
-    self.drawerScrollView.delegate = self;
     self.drawerViewsBrowseContainer.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"cat_overlay.png"]];
     self.drawerViewsSearchContainer.backgroundColor = self.drawerViewsBrowseContainer.backgroundColor;
     
-    // Shadows
+    // Views settings - Shadows
+    // Filters container
     self.filtersContainerShadowCheatView.layer.shadowColor = [UIColor blackColor].CGColor;
     self.filtersContainerShadowCheatView.layer.shadowOffset = CGSizeMake(0, 0);
     self.filtersContainerShadowCheatView.layer.shadowOpacity = 0.5;
     self.filtersContainerShadowCheatView.layer.shadowPath = [UIBezierPath bezierPathWithRect:self.filtersContainerShadowCheatView.bounds].CGPath;
-    // More shadows
+    // Filters container
     self.filtersContainerShadowCheatWayBelowView.layer.shadowColor = [UIColor blackColor].CGColor;
     self.filtersContainerShadowCheatWayBelowView.layer.shadowOffset = CGSizeMake(0, 0);
     self.filtersContainerShadowCheatWayBelowView.layer.shadowOpacity = 0.5;
     self.filtersContainerShadowCheatWayBelowView.layer.shadowPath = [UIBezierPath bezierPathWithRect:self.filtersContainerShadowCheatWayBelowView.bounds].CGPath;
     self.filtersContainerShadowCheatWayBelowView.alpha = 0.0;
-    // More shadows
+    // Pushable container
     self.pushableContainerShadowCheatView.layer.shadowColor = [UIColor blackColor].CGColor;
     self.pushableContainerShadowCheatView.layer.shadowOffset = CGSizeMake(0, 0);
     self.pushableContainerShadowCheatView.layer.shadowOpacity = 0.5;
     self.pushableContainerShadowCheatView.layer.shadowPath = [UIBezierPath bezierPathWithRect:self.pushableContainerShadowCheatView.bounds].CGPath;
     self.pushableContainerShadowCheatView.layer.shouldRasterize = YES;
-    // More shadows
-//    self.filtersSummaryContainerView.layer.shadowColor = [UIColor blackColor].CGColor;
-//    self.filtersSummaryContainerView.layer.shadowOffset = CGSizeMake(0, 0);
-//    self.filtersSummaryContainerView.layer.shadowOpacity = 0.5;
-//    self.filtersSummaryContainerView.layer.shadowPath = [UIBezierPath bezierPathWithRect:CGRectMake(0, 10, self.filtersSummaryContainerView.bounds.size.width, self.filtersSummaryContainerView.bounds.size.height - 10)].CGPath;
         
-	// Set up the tableView
+    // Views settings - Table view
     self.tableView.backgroundColor = [UIColor colorWithWhite:EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT alpha:1.0];
     
-    // Set up the tableViewCoverView
-    tableViewCoverView = [[UIView alloc] initWithFrame:self.tableView.frame];
-    self.tableViewCoverView.backgroundColor = [UIColor whiteColor];
-    self.tableViewCoverView.autoresizingMask = self.tableView.autoresizingMask;
-    self.tableViewCoverView.alpha = 0.0;
-    [self.pushableContainerView insertSubview:self.tableViewCoverView aboveSubview:self.tableView];
-        
-    // Table header & footer
+    // Views settings - Table header & footer
     self.tableView.tableHeaderView = self.searchContainerView;
     self.tableView.tableFooterView = self.tableReloadContainerView;
     self.tableView.tableFooterView.alpha = 0.0;
     self.tableView.tableFooterView.userInteractionEnabled = NO;
     self.tableView.tableFooterView.backgroundColor = [UIColor colorWithWhite:EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT alpha:1.0];
     
-    // Feedback view
+    // Views allocation and settings - Table view cover view
+    tableViewCoverView = [[UIView alloc] initWithFrame:self.tableView.frame];
+    self.tableViewCoverView.backgroundColor = [UIColor whiteColor];
+    self.tableViewCoverView.autoresizingMask = self.tableView.autoresizingMask;
+    self.tableViewCoverView.alpha = 0.0;
+    [self.pushableContainerView insertSubview:self.tableViewCoverView aboveSubview:self.tableView];
+
+    // Views settings - Feedback view
     [self.feedbackView.button addTarget:self action:@selector(feedbackViewRetryButtonTouched:) forControlEvents:UIControlEventTouchUpInside];
     
+    // Views allocation and settings - Web activity view
+    CGFloat webActivityViewSize = 60.0;
+    self.webActivityView = [[[WebActivityView alloc] initWithSize:CGSizeMake(webActivityViewSize, webActivityViewSize) centeredInFrame:self.view.bounds] autorelease];
+    [self.view addSubview:self.webActivityView];
+    
+    // Views allocation and settings - Gesture recognizers
+    // Swipe down to open drawer
     UISwipeGestureRecognizer * swipeDownFiltersGR = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(swipeDownToShowDrawer:)];
     swipeDownFiltersGR.direction = UISwipeGestureRecognizerDirectionDown;
     [self.filtersContainerView addGestureRecognizer:swipeDownFiltersGR];
     [swipeDownFiltersGR release];
-//    UISwipeGestureRecognizer * swipeDownFiltersGRSupplemental = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(swipeDownToShowDrawer:)];
-//    swipeDownFiltersGRSupplemental.direction = UISwipeGestureRecognizerDirectionDown;
-//    [self.filtersSummaryContainerView addGestureRecognizer:swipeDownFiltersGRSupplemental];
-//    [swipeDownFiltersGRSupplemental release];
-    
+    // Swipe up to close drawer
     UISwipeGestureRecognizer * swipeUpToHideDrawerGR = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(swipeUpToHideDrawer:)];
     swipeUpToHideDrawerGR.direction = UISwipeGestureRecognizerDirectionUp;
     [self.pushableContainerView addGestureRecognizer:swipeUpToHideDrawerGR];
     [swipeUpToHideDrawerGR release];
-    
-    tapToHideDrawerGR = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(tapToHideDrawer:)];
-    [self.pushableContainerView addGestureRecognizer:self.tapToHideDrawerGR];
-    self.tapToHideDrawerGR.enabled = NO;
-    
+    // Swipe up to close drawer (from within drawer)
     UISwipeGestureRecognizer * swipeUpToHideDrawerFromWithinDrawerGR = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(swipeUpToHideDrawer:)];
     swipeUpToHideDrawerFromWithinDrawerGR.direction = UISwipeGestureRecognizerDirectionUp;
     [self.drawerScrollView addGestureRecognizer:swipeUpToHideDrawerFromWithinDrawerGR];
     [swipeUpToHideDrawerFromWithinDrawerGR release];
-    
+    // Tap to close drawer
+    tapToHideDrawerGR = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(tapToHideDrawer:)];
+    [self.pushableContainerView addGestureRecognizer:self.tapToHideDrawerGR];
+    self.tapToHideDrawerGR.enabled = NO;
+    // 
     UISwipeGestureRecognizer * swipeAcrossFiltersStringGR = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(swipeAcrossFiltersStrip:)];
     swipeAcrossFiltersStringGR.direction = UISwipeGestureRecognizerDirectionLeft | UISwipeGestureRecognizerDirectionRight;
     [self.filtersContainerView addGestureRecognizer:swipeAcrossFiltersStringGR];
     [swipeAcrossFiltersStringGR release];
     
-
-    // Web activity view
-    CGFloat webActivityViewSize = 60.0;
-    self.webActivityView = [[[WebActivityView alloc] initWithSize:CGSizeMake(webActivityViewSize, webActivityViewSize) centeredInFrame:self.view.bounds] autorelease];
-    [self.view addSubview:self.webActivityView];
+    // Views settings - active filter highlighter
+    self.activeFilterHighlightsContainerView.showColor = NO;
+    self.activeFilterHighlightsContainerView.showImage = YES;
+    self.activeFilterHighlightsContainerView.highlightImage = [UIImage imageNamed:@"filter_select_glow.png"];
+    self.activeFilterHighlightsContainerView.numberOfSegments = self.filtersForCurrentSource.count;
     
+    // Views allocations and settings - Location drawer view & its subviews
+    // Current location button
+    self.dvLocationCurrentLocationButton = [UIButton buttonWithType:UIButtonTypeCustom];
+    self.dvLocationCurrentLocationButton.frame = CGRectMake(0, 0, 23, 15);
+    self.dvLocationCurrentLocationButton.contentHorizontalAlignment = UIControlContentHorizontalAlignmentRight;
+    [self.dvLocationCurrentLocationButton setImage:[UIImage imageNamed:@"ico_locationsearch.png"] forState:UIControlStateNormal];
+    [self.dvLocationCurrentLocationButton addTarget:self action:@selector(locationFilterCurrentLocationButtonTouched) forControlEvents:UIControlEventTouchUpInside];
+    // Location text field
+    self.dvLocationTextField.leftView = self.dvLocationCurrentLocationButton;
+    self.dvLocationTextField.leftViewMode = UITextFieldViewModeAlways;
+    self.dvLocationSearchTextField.leftView = self.dvLocationCurrentLocationButton;
+    self.dvLocationSearchTextField.leftViewMode = UITextFieldViewModeAlways;
+    
+    // Views allocation and settings - categories drawer view & its subviews
     int categoryOptionsCount = 9;
-    NSMutableArray * categoryOptions = [NSMutableArray arrayWithCapacity:categoryOptionsCount];
+    NSMutableArray * categoryFilterOptions = [NSMutableArray arrayWithCapacity:categoryOptionsCount];
     // Category buttons
     CGSize categoryButtonImageSize = CGSizeMake(51, 51);
     CGSize categoryButtonContainerSize = CGSizeMake(99, 81);
@@ -523,14 +452,9 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
         [categoryButtonsContainer addSubview:categoryButtonContainer];
         // EventsFilterOption object
         NSString * efoCategoryURI = (y == 0 && x == 0) ? nil : category.uri;
-        [categoryOptions addObject:[EventsFilterOption
-                                    eventsFilterOptionWithCode:[EventsFilterOption eventsFilterOptionCategoryCodeForCategoryURI:efoCategoryURI] 
-                                    readableString:nil 
-                                    buttonText:nil 
-                                    buttonView:categoryButton]];
+        [categoryFilterOptions addObject:[EventsFilterOption eventsFilterOptionWithCode:[EventsFilterOption eventsFilterOptionCategoryCodeForCategoryURI:efoCategoryURI] readableString:nil buttonText:nil buttonView:categoryButton]];
     }
 
-    
     NSArray * priceOptions = [NSArray arrayWithObjects:
                               [EventsFilterOption 
                                eventsFilterOptionWithCode: EFO_CODE_PRICE_FREE
@@ -580,33 +504,6 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
                               buttonText: @"All Dates" 
                               buttonView: self.dvDateButtonAny],
                              nil];
-    NSArray * dateSearchOptions = [NSArray arrayWithObjects:
-                                   [EventsFilterOption 
-                                    eventsFilterOptionWithCode: EFO_CODE_DATE_TODAY 
-                                    readableString: @"Today" 
-                                    buttonText: @"Today"
-                                    buttonView: self.dvDateSearchButtonToday],
-                                   [EventsFilterOption 
-                                    eventsFilterOptionWithCode: EFO_CODE_DATE_WEEKEND 
-                                    readableString: @"This Weekend" 
-                                    buttonText: @"Weekend"
-                                    buttonView: self.dvDateSearchButtonThisWeekend],
-                                   [EventsFilterOption 
-                                    eventsFilterOptionWithCode: EFO_CODE_DATE_NEXT7DAYS
-                                    readableString: @"In the next 7 Days" 
-                                    buttonText: @"7 Days"
-                                    buttonView: self.dvDateSearchButtonThisWeek],
-                                   [EventsFilterOption 
-                                    eventsFilterOptionWithCode: EFO_CODE_DATE_NEXT30DAYS 
-                                    readableString: @"In the next 30 Days" 
-                                    buttonText: @"30 Days"
-                                    buttonView: self.dvDateSearchButtonThisMonth],
-                                   [EventsFilterOption 
-                                    eventsFilterOptionWithCode: EFO_CODE_DATE_ANY 
-                                    readableString: nil 
-                                    buttonText: @"All Dates" 
-                                    buttonView: self.dvDateSearchButtonAny],
-                                   nil];
     NSArray * timeOptions = [NSArray arrayWithObjects:
                              [EventsFilterOption 
                               eventsFilterOptionWithCode: EFO_CODE_TIME_MORNING 
@@ -634,6 +531,95 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
                               buttonText: @"Any Time of Day" 
                               buttonView: self.dvTimeButtonAny],
                              nil];
+    NSArray * locationOptions = [NSArray arrayWithObjects:
+                                 [EventsFilterOption 
+                                  eventsFilterOptionWithCode: EFO_CODE_LOCATION_WALKING 
+                                  readableString: @"Within Walking Distance of" 
+                                  buttonText: @"Within Walking Distance"
+                                  buttonView: self.dvLocationButtonWalking],
+                                 [EventsFilterOption 
+                                  eventsFilterOptionWithCode: EFO_CODE_LOCATION_NEIGHBORHOOD 
+                                  readableString: @"In the Same Neighborhood as" 
+                                  buttonText: @"In the Neighborhood"
+                                  buttonView: self.dvLocationButtonNeighborhood],
+                                 [EventsFilterOption 
+                                  eventsFilterOptionWithCode: EFO_CODE_LOCATION_BOROUGH 
+                                  readableString: @"In the Same Borough as" 
+                                  buttonText: @"In the Borough"
+                                  buttonView: self.dvLocationButtonBorough],
+                                 [EventsFilterOption 
+                                  eventsFilterOptionWithCode: EFO_CODE_LOCATION_CITY 
+                                  readableString: nil
+                                  buttonText: @"In the City"
+                                  buttonView: self.dvLocationButtonCity],
+                                 nil];
+    
+        // New filter "view models"
+    self.filters = [NSMutableArray arrayWithObjects:
+                    [EventsFilter 
+                     eventsFilterWithCode:EVENTS_FILTER_PRICE 
+                     buttonText:@"Price"
+                     button:self.filterButtonPrice 
+                     drawerView:self.drawerViewPrice 
+                     options:priceOptions
+                     mostGeneralOption:priceOptions.lastObject],
+                    [EventsFilter 
+                     eventsFilterWithCode:EVENTS_FILTER_DATE 
+                     buttonText:@"Date"
+                     button:self.filterButtonDate 
+                     drawerView:self.drawerViewDate 
+                     options:dateOptions
+                     mostGeneralOption:dateOptions.lastObject],
+                    [EventsFilter 
+                     eventsFilterWithCode:EVENTS_FILTER_CATEGORIES 
+                     buttonText:nil
+                     button:self.filterButtonCategories 
+                     drawerView:self.drawerViewCategories 
+                     options:categoryFilterOptions
+                     mostGeneralOption:[categoryFilterOptions objectAtIndex:0]],
+                    [EventsFilter 
+                     eventsFilterWithCode:EVENTS_FILTER_TIME 
+                     buttonText:@"Time"
+                     button:self.filterButtonTime 
+                     drawerView:self.drawerViewTime 
+                     options:timeOptions
+                     mostGeneralOption:timeOptions.lastObject],
+                    [EventsFilter 
+                     eventsFilterWithCode:EVENTS_FILTER_LOCATION 
+                     buttonText:@"Location"
+                     button:self.filterButtonLocation 
+                     drawerView:self.drawerViewLocation 
+                     options:locationOptions
+                     mostGeneralOption:locationOptions.lastObject],
+                    nil];
+    
+    NSArray * dateSearchOptions = [NSArray arrayWithObjects:
+                                   [EventsFilterOption 
+                                    eventsFilterOptionWithCode: EFO_CODE_DATE_TODAY 
+                                    readableString: @"Today" 
+                                    buttonText: @"Today"
+                                    buttonView: self.dvDateSearchButtonToday],
+                                   [EventsFilterOption 
+                                    eventsFilterOptionWithCode: EFO_CODE_DATE_WEEKEND 
+                                    readableString: @"This Weekend" 
+                                    buttonText: @"Weekend"
+                                    buttonView: self.dvDateSearchButtonThisWeekend],
+                                   [EventsFilterOption 
+                                    eventsFilterOptionWithCode: EFO_CODE_DATE_NEXT7DAYS
+                                    readableString: @"In the next 7 Days" 
+                                    buttonText: @"7 Days"
+                                    buttonView: self.dvDateSearchButtonThisWeek],
+                                   [EventsFilterOption 
+                                    eventsFilterOptionWithCode: EFO_CODE_DATE_NEXT30DAYS 
+                                    readableString: @"In the next 30 Days" 
+                                    buttonText: @"30 Days"
+                                    buttonView: self.dvDateSearchButtonThisMonth],
+                                   [EventsFilterOption 
+                                    eventsFilterOptionWithCode: EFO_CODE_DATE_ANY 
+                                    readableString: nil 
+                                    buttonText: @"All Dates" 
+                                    buttonView: self.dvDateSearchButtonAny],
+                                   nil];
     NSArray * timeSearchOptions = [NSArray arrayWithObjects:
                                    [EventsFilterOption 
                                     eventsFilterOptionWithCode: EFO_CODE_TIME_MORNING 
@@ -661,28 +647,6 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
                                     buttonText: @"Any Time of Day" 
                                     buttonView: self.dvTimeSearchButtonAny],
                                    nil];
-    NSArray * locationOptions = [NSArray arrayWithObjects:
-                                 [EventsFilterOption 
-                                  eventsFilterOptionWithCode: EFO_CODE_LOCATION_WALKING 
-                                  readableString: @"Within Walking Distance of" 
-                                  buttonText: @"Within Walking Distance"
-                                  buttonView: self.dvLocationButtonWalking],
-                                 [EventsFilterOption 
-                                  eventsFilterOptionWithCode: EFO_CODE_LOCATION_NEIGHBORHOOD 
-                                  readableString: @"In the Same Neighborhood as" 
-                                  buttonText: @"In the Neighborhood"
-                                  buttonView: self.dvLocationButtonNeighborhood],
-                                 [EventsFilterOption 
-                                  eventsFilterOptionWithCode: EFO_CODE_LOCATION_BOROUGH 
-                                  readableString: @"In the Same Borough as" 
-                                  buttonText: @"In the Borough"
-                                  buttonView: self.dvLocationButtonBorough],
-                                 [EventsFilterOption 
-                                  eventsFilterOptionWithCode: EFO_CODE_LOCATION_CITY 
-                                  readableString: nil
-                                  buttonText: @"In the City"
-                                  buttonView: self.dvLocationButtonCity],
-                                 nil];
     NSArray * locationSearchOptions = [NSArray arrayWithObjects:
                                        [EventsFilterOption 
                                         eventsFilterOptionWithCode: EFO_CODE_LOCATION_WALKING 
@@ -706,44 +670,6 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
                                         buttonView: self.dvLocationSearchButtonCity],
                                        nil];
     
-    // New filter "view models"
-    self.filters = [NSMutableArray arrayWithObjects:
-                    [EventsFilter 
-                     eventsFilterWithCode:EVENTS_FILTER_PRICE 
-                     buttonText:@"Price"
-                     button:self.filterButtonPrice 
-                     drawerView:self.drawerViewPrice 
-                     options:priceOptions
-                     mostGeneralOption:priceOptions.lastObject],
-                    [EventsFilter 
-                     eventsFilterWithCode:EVENTS_FILTER_DATE 
-                     buttonText:@"Date"
-                     button:self.filterButtonDate 
-                     drawerView:self.drawerViewDate 
-                     options:dateOptions
-                     mostGeneralOption:dateOptions.lastObject],
-                    [EventsFilter 
-                     eventsFilterWithCode:EVENTS_FILTER_CATEGORIES 
-                     buttonText:nil
-                     button:self.filterButtonCategories 
-                     drawerView:self.drawerViewCategories 
-                     options:categoryOptions
-                     mostGeneralOption:[categoryOptions objectAtIndex:0]],
-                    [EventsFilter 
-                     eventsFilterWithCode:EVENTS_FILTER_TIME 
-                     buttonText:@"Time"
-                     button:self.filterButtonTime 
-                     drawerView:self.drawerViewTime 
-                     options:timeOptions
-                     mostGeneralOption:timeOptions.lastObject],
-                    [EventsFilter 
-                     eventsFilterWithCode:EVENTS_FILTER_LOCATION 
-                     buttonText:@"Location"
-                     button:self.filterButtonLocation 
-                     drawerView:self.drawerViewLocation 
-                     options:locationOptions
-                     mostGeneralOption:locationOptions.lastObject],
-                    nil];
     // Search filter view models
     self.filtersSearch = [NSMutableArray arrayWithObjects:
                           [EventsFilter 
@@ -784,38 +710,98 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     
     [self setUpFiltersUI:self.filters withOptionButtonSelectors:filterOptionButtonSelectors compressedOptionButtons:NO];
     [self setUpFiltersUI:self.filtersSearch withOptionButtonSelectors:filterOptionButtonSelectors compressedOptionButtons:YES];
-     
-    self.dvLocationCurrentLocationButton = [UIButton buttonWithType:UIButtonTypeCustom];
-    self.dvLocationCurrentLocationButton.frame = CGRectMake(0, 0, 23, 15);
-    self.dvLocationCurrentLocationButton.contentHorizontalAlignment = UIControlContentHorizontalAlignmentRight;
-    [self.dvLocationCurrentLocationButton setImage:[UIImage imageNamed:@"ico_locationsearch.png"] forState:UIControlStateNormal];
-    [self.dvLocationCurrentLocationButton addTarget:self action:@selector(locationFilterCurrentLocationButtonTouched) forControlEvents:UIControlEventTouchUpInside];
     
-    self.dvLocationTextField.leftView = self.dvLocationCurrentLocationButton;
-    self.dvLocationTextField.leftViewMode = UITextFieldViewModeAlways;
-    self.dvLocationSearchTextField.leftView = self.dvLocationCurrentLocationButton;
-    self.dvLocationSearchTextField.leftViewMode = UITextFieldViewModeAlways;
+    // To create/recreate EventsViewController, we need to figure out / do...
+    // - Is there a prior EventsWebQuery object? If so, what is the most recent one? Is it a search query, or just regular? What are the specifics of that query?
+    // - Set all our filters accordingly, and set our appropriate events array accordingly as well.
+    // - Finally, set all our views to match that data that we just (possibly re)created.
     
-    self.activeFilterHighlightsContainerView.showColor = NO;
-    self.activeFilterHighlightsContainerView.showImage = YES;
-    self.activeFilterHighlightsContainerView.highlightImage = [UIImage imageNamed:@"filter_select_glow.png"];
-    self.activeFilterHighlightsContainerView.numberOfSegments = self.filtersForCurrentSource.count;
-    // Default browse filter settings
-    self.activeFilterInUI = [self.filters objectAtIndex:0];
-    [self setDrawerToShowFilter:self.activeFilterInUI animated:NO];
-    self.selectedCategoryFilterOption = [categoryOptions objectAtIndex:0];
-    self.selectedPriceFilterOption = priceOptions.lastObject;
-    self.selectedDateFilterOption = dateOptions.lastObject;
-    self.selectedTimeFilterOption = timeOptions.lastObject;
-    self.selectedLocationFilterOption = locationOptions.lastObject;
-    // Default search filter settings
-    self.activeSearchFilterInUI = [self.filtersSearch objectAtIndex:0];
-    self.selectedDateSearchFilterOption = dateSearchOptions.lastObject;
-    self.selectedLocationSearchFilterOption = locationSearchOptions.lastObject;
-    self.selectedTimeSearchFilterOption = timeSearchOptions.lastObject;
+    // Get the most recent events web queries, if they exist
+    self.eventsWebQuery = [self.coreDataModel getMostRecentEventsWebQueryWithoutSearchTerm];
+    self.eventsWebQueryFromSearch = [self.coreDataModel getMostRecentEventsWebQueryWithSearchTerm];
+    
+    // Do some initial setup
+    int indexOfActiveBrowseFilter = 0;
+    NSString * categoryFilterURI = nil;
+    int indexOfSelectedCategoryFilterOption = 0;
+    int indexOfSelectedPriceFilterOption = priceOptions.count - 1;
+    int indexOfSelectedDateFilterOption = dateOptions.count - 1;
+    int indexOfSelectedTimeFilterOption = timeOptions.count - 1;
+    int indexOfSelectedLocationFilterOption = locationOptions.count - 1;
+    int indexOfActiveSearchFilter = 0;
+    int indexOfSelectedDateSearchFilterOption = dateSearchOptions.count - 1;
+    int indexOfSelectedLocationSearchFilterOption = locationSearchOptions.count - 1;
+    int indexOfSelectedTimeSearchFilterOption = timeSearchOptions.count - 1;
+    NSString * locationStringBrowse = nil;
+    NSString * locationStringSearch = nil;
+    NSString * searchTerm = nil;
+    // Figure out which events web query is the most recent (if either exists)
+    BOOL priorEventsWebQueryExists = NO;
+    BOOL mostRecentEventsWebQueryWasFromSearch = NO;
+    EventsWebQuery * mostRecentEventsWebQuery = nil;
+    if (self.eventsWebQuery != nil ||
+        self.eventsWebQueryFromSearch != nil) {
+        // Basic variables setup
+        priorEventsWebQueryExists = YES;
+        mostRecentEventsWebQueryWasFromSearch = [self.eventsWebQuery.queryDatetime compare:self.eventsWebQueryFromSearch.queryDatetime] == NSOrderedAscending;
+        mostRecentEventsWebQuery = mostRecentEventsWebQueryWasFromSearch ? self.eventsWebQueryFromSearch : self.eventsWebQuery;
+        // Set events arrays, both browse and search
+        self.events = [self.eventsWebQuery.eventResultsEventsInOrder.mutableCopy autorelease]; // If the query is nil, the events array will be set to nil. Not a problem.
+        self.eventsFromSearch = [self.eventsWebQueryFromSearch.eventResultsEventsInOrder.mutableCopy autorelease]; // If the query is nil, the events array will be set to nil. Not a problem.
+        NSUInteger(^indexOfEventsFilterOptionBlock)(NSString *, NSArray *, NSString *)=^(NSString * filterCode, NSArray * filtersArray, NSString * filterOptionCode){
+            EventsFilter * filter = [self filterForFilterCode:filterCode inFiltersArray:filtersArray];
+            EventsFilterOption * foundFO = [[filter.options filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"SELF.code == %@", filterOptionCode]] objectAtIndex:0];
+            return [filter.options indexOfObject:foundFO];
+        };
+        // Set a bunch of indexes from above
+        if (self.eventsWebQuery != nil) {
+            // indexOfActiveBrowseFilter... // Skipping for now. Not that important.
+            categoryFilterURI = ((Category *)[self.eventsWebQuery.filterCategories anyObject]).uri; // THIS WILL NEED TO CHANGE WHEN WE START SUPPORTING MULTIPLE SELECTED CATEGORIES. THIS WILL NEED TO CHANGE WHEN WE START SUPPORTING MULTIPLE SELECTED CATEGORIES. THIS WILL NEED TO CHANGE WHEN WE START SUPPORTING MULTIPLE SELECTED CATEGORIES.
+            indexOfSelectedCategoryFilterOption = indexOfEventsFilterOptionBlock(EVENTS_FILTER_CATEGORIES, self.filters, [EventsFilterOption eventsFilterOptionCategoryCodeForCategoryURI:categoryFilterURI]);
+            indexOfSelectedPriceFilterOption = indexOfEventsFilterOptionBlock(EVENTS_FILTER_PRICE, self.filters, self.eventsWebQuery.filterPriceBucketString);
+            indexOfSelectedDateFilterOption = indexOfEventsFilterOptionBlock(EVENTS_FILTER_DATE, self.filters, self.eventsWebQuery.filterDateBucketString);
+            indexOfSelectedTimeFilterOption = indexOfEventsFilterOptionBlock(EVENTS_FILTER_TIME, self.filters, self.eventsWebQuery.filterTimeBucketString);
+            indexOfSelectedLocationFilterOption = indexOfEventsFilterOptionBlock(EVENTS_FILTER_LOCATION, self.filters, self.eventsWebQuery.filterDistanceBucketString);
+            locationStringBrowse = self.eventsWebQuery.filterLocationString;
+        }
+        if (self.eventsWebQueryFromSearch != nil) {
+            // indexOfActiveSearchFilter... // Skipping for now. Not that important.
+            indexOfSelectedDateFilterOption = indexOfEventsFilterOptionBlock(EVENTS_FILTER_DATE, self.filtersSearch, self.eventsWebQueryFromSearch.filterDateBucketString);
+            indexOfSelectedTimeFilterOption = indexOfEventsFilterOptionBlock(EVENTS_FILTER_TIME, self.filtersSearch, self.eventsWebQueryFromSearch.filterTimeBucketString);
+            indexOfSelectedLocationFilterOption = indexOfEventsFilterOptionBlock(EVENTS_FILTER_LOCATION, self.filtersSearch, self.eventsWebQueryFromSearch.filterDistanceBucketString);
+            locationStringSearch = self.eventsWebQueryFromSearch.filterLocationString;
+            searchTerm = self.eventsWebQueryFromSearch.searchTerm;
+        }
+    }
+    
+    // Set the browse filter settings
+    self.activeFilterInUI = [self.filters objectAtIndex:indexOfActiveBrowseFilter];
+    self.selectedCategoryFilterOption = [categoryFilterOptions objectAtIndex:indexOfSelectedCategoryFilterOption];
+    self.selectedPriceFilterOption = [priceOptions objectAtIndex:indexOfSelectedPriceFilterOption];
+    self.selectedDateFilterOption = [dateOptions objectAtIndex:indexOfSelectedDateFilterOption];
+    self.selectedTimeFilterOption = [timeOptions objectAtIndex:indexOfSelectedTimeFilterOption];
+    self.selectedLocationFilterOption = [locationOptions objectAtIndex:indexOfSelectedLocationFilterOption];
+    // More browse filter settings
+    self.oldFilterString = EVENTS_OLDFILTER_RECOMMENDED; // This is deprecated, and constant.
+    self.categoryURI = categoryFilterURI;
+    
+    // Set the search filter settings
+    self.activeSearchFilterInUI = [self.filtersSearch objectAtIndex:indexOfActiveSearchFilter];
+    self.selectedDateSearchFilterOption = [dateSearchOptions objectAtIndex:indexOfSelectedDateSearchFilterOption];
+    self.selectedLocationSearchFilterOption = [locationSearchOptions objectAtIndex:indexOfSelectedLocationSearchFilterOption];
+    self.selectedTimeSearchFilterOption = [timeSearchOptions objectAtIndex:indexOfSelectedTimeSearchFilterOption];
+    // Adjusted search filters... Sort of faking it for now. If any of the search filters were adjusted, we'll just pick one (that was adjusted) to be the most recently adjusted.
     self.adjustedSearchFiltersOrdered = [NSMutableArray arrayWithCapacity:self.filtersSearch.count];
+    [self updateAdjustedSearchFiltersOrderedWithAdjustedFilter:[self filterForFilterCode:EVENTS_FILTER_LOCATION inFiltersArray:self.filtersSearch] selectedFilterOption:self.selectedLocationSearchFilterOption];
+    [self updateAdjustedSearchFiltersOrderedWithAdjustedFilter:[self filterForFilterCode:EVENTS_FILTER_TIME inFiltersArray:self.filtersSearch] selectedFilterOption:self.selectedTimeFilterOption];
+    [self updateAdjustedSearchFiltersOrderedWithAdjustedFilter:[self filterForFilterCode:EVENTS_FILTER_DATE inFiltersArray:self.filtersSearch] selectedFilterOption:self.selectedDateFilterOption];
     
-    // Update filter option button states
+    // Set the feedback strings
+    self.eventsSummaryStringBrowse = [self eventsSummaryStringForSource:EVENTS_SOURCE_BROWSE];
+    self.eventsSummaryStringSearch = [self eventsSummaryStringForSource:EVENTS_SOURCE_SEARCH];
+    
+    // Update views
+    // Update filter option button states - both browse and search
     [self updateFilterOptionButtonStatesOldSelected:nil newSelected:self.selectedPriceFilterOption];
     [self updateFilterOptionButtonStatesOldSelected:nil newSelected:self.selectedDateFilterOption];
     [self updateFilterOptionButtonStatesOldSelected:nil newSelected:self.selectedTimeFilterOption];
@@ -823,16 +809,28 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     [self updateFilterOptionButtonStatesOldSelected:nil newSelected:self.selectedDateSearchFilterOption];
     [self updateFilterOptionButtonStatesOldSelected:nil newSelected:self.selectedLocationSearchFilterOption];
     [self updateFilterOptionButtonStatesOldSelected:nil newSelected:self.selectedTimeSearchFilterOption];
-    self.oldFilterString = EVENTS_OLDFILTER_RECOMMENDED;
-    self.categoryURI = nil;
+    // Update category filter option button state
     [self setLogoButtonImageForCategoryURI:self.categoryURI];
-    self.eventsSummaryStringBrowse = [self eventsSummaryStringForSource:EVENTS_SOURCE_BROWSE];
-    self.eventsSummaryStringSearch = [self eventsSummaryStringForSource:EVENTS_SOURCE_SEARCH];
     
-    // Start things off with browse filters (as opposed to search ones)
+    // Start things off in browse mode, with browse filters. Then, if we should be in search mode, just call our toggleSearchMode method. All the views start in browse mode positions anyway, so we kind of have to do this.
+    self.isSearchOn = NO;
     [self.filtersContainerView addSubview:self.filtersBarBrowse];
     [self.drawerScrollView addSubview:self.drawerViewsBrowseContainer];
     self.drawerScrollView.contentSize = self.drawerViewsBrowseContainer.bounds.size;
+    [self setDrawerToShowFilter:self.activeFilterInUI animated:NO];
+    if (priorEventsWebQueryExists &&
+        mostRecentEventsWebQueryWasFromSearch) {
+        [self toggleSearchMode]; // COME BACK TO THIS. CURRENTLY THIS WILL BE A PROBLEM, BECAUSE IT WILL BE ANIMATED. COME BACK TO THIS. CURRENTLY THIS WILL BE A PROBLEM, BECAUSE IT WILL BE ANIMATED. COME BACK TO THIS. CURRENTLY THIS WILL BE A PROBLEM, BECAUSE IT WILL BE ANIMATED. COME BACK TO THIS. CURRENTLY THIS WILL BE A PROBLEM, BECAUSE IT WILL BE ANIMATED. COME BACK TO THIS. CURRENTLY THIS WILL BE A PROBLEM, BECAUSE IT WILL BE ANIMATED. COME BACK TO THIS. CURRENTLY THIS WILL BE A PROBLEM, BECAUSE IT WILL BE ANIMATED. COME BACK TO THIS. CURRENTLY THIS WILL BE A PROBLEM, BECAUSE IT WILL BE ANIMATED. COME BACK TO THIS. CURRENTLY THIS WILL BE A PROBLEM, BECAUSE IT WILL BE ANIMATED. COME BACK TO THIS. CURRENTLY THIS WILL BE A PROBLEM, BECAUSE IT WILL BE ANIMATED. COME BACK TO THIS. CURRENTLY THIS WILL BE A PROBLEM, BECAUSE IT WILL BE ANIMATED. COME BACK TO THIS. CURRENTLY THIS WILL BE A PROBLEM, BECAUSE IT WILL BE ANIMATED.
+        self.searchTextField.text = searchTerm;
+    }
+    
+    if (!priorEventsWebQueryExists ||
+        (!mostRecentEventsWebQueryWasFromSearch &&
+         mostRecentEventsWebQuery.eventResults.count == 0)) {
+        // Connect to web and try to get a new set of results (IF we are in browse mode - if we're in search mode, just sit tight).
+        [self setFeedbackViewIsVisible:YES adjustMessages:YES withMessageType:LoadingEvents eventsSummaryString:self.eventsSummaryStringBrowse searchString:nil animated:NO];
+        [self webConnectGetEventsListWithCurrentOldFilterAndCategory]; // Don't need to reloadData until we get a response back from this web connection attempt.
+    }
     
     // Register for keyboard events
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardWillShow:) name:UIKeyboardWillShowNotification object:nil];
@@ -842,10 +840,135 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(loginActivity:) name:@"loginActivity" object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(behaviorWasReset:) name:@"learningBehaviorWasReset" object:nil];
     
-    // Connect to web
-    [self setFeedbackViewIsVisible:YES adjustMessages:YES withMessageType:LoadingEvents eventsSummaryString:self.eventsSummaryStringBrowse searchString:nil animated:NO];
-    [self webConnectGetEventsListWithCurrentOldFilterAndCategory]; // Don't need to reloadData until we get a response back from this web connection attempt.
+}
+
+- (void) releaseReconstructableViews {
+    self.tableView = nil;
+    self.tableViewCoverView = nil;
+    self.searchContainerView = nil;
+    self.searchButton = nil;
+    self.searchCancelButton = nil;
+    self.searchGoButton = nil;
+    self.searchTextField = nil;
+    self.tableReloadContainerView = nil;
+    self.pushableContainerView = nil;
+    self.pushableContainerShadowCheatView = nil;
     
+    self.feedbackView = nil;
+    
+    self.filtersContainerView = nil;
+    self.filtersContainerShadowCheatView = nil;
+    self.filtersContainerShadowCheatWayBelowView = nil;
+    self.activeFilterHighlightsContainerView = nil;
+    self.drawerScrollView = nil;
+    
+    self.filtersBarBrowse = nil;
+    self.filterButtonCategories = nil;
+    self.filterButtonPrice = nil;
+    self.filterButtonDate = nil;
+    self.filterButtonLocation = nil;
+    self.filterButtonTime = nil;
+    
+    self.filtersBarSearch = nil;
+    self.filterSearchButtonDate = nil;
+    self.filterSearchButtonLocation = nil;
+    self.filterSearchButtonTime = nil;
+    
+    self.drawerViewsBrowseContainer = nil;
+    self.drawerViewsSearchContainer = nil;
+    
+    self.drawerViewPrice = nil;
+    self.dvPriceButtonFree = nil;
+    self.dvPriceButtonUnder20 = nil;
+    self.dvPriceButtonUnder50 = nil;
+    self.dvPriceButtonAny = nil;
+    
+    self.drawerViewDate = nil;
+    self.dvDateButtonToday = nil;
+    self.dvDateButtonThisWeekend = nil;
+    self.dvDateButtonThisWeek = nil;
+    self.dvDateButtonThisMonth = nil;
+    self.dvDateButtonAny = nil;
+    
+    self.drawerViewDateSearch = nil;
+    self.dvDateSearchButtonToday = nil;
+    self.dvDateSearchButtonThisWeekend = nil;
+    self.dvDateSearchButtonThisWeek = nil;
+    self.dvDateSearchButtonThisMonth = nil;
+    self.dvDateSearchButtonAny = nil;
+    
+    self.drawerViewCategories = nil;
+    
+    self.drawerViewTime = nil;
+    self.dvTimeButtonMorning = nil;
+    self.dvTimeButtonAfternoon = nil;
+    self.dvTimeButtonEvening = nil;
+    self.dvTimeButtonNight = nil;
+    self.dvTimeButtonAny = nil;
+    
+    self.drawerViewTimeSearch = nil;
+    self.dvTimeSearchButtonMorning = nil;
+    self.dvTimeSearchButtonAfternoon = nil;
+    self.dvTimeSearchButtonEvening = nil;
+    self.dvTimeSearchButtonNight = nil;
+    self.dvTimeSearchButtonAny = nil;
+    
+    self.drawerViewLocation = nil;
+    self.dvLocationTextField = nil;
+    self.dvLocationCurrentLocationButton = nil;
+    self.dvLocationButtonWalking = nil;
+    self.dvLocationButtonNeighborhood = nil;
+    self.dvLocationButtonBorough = nil;
+    self.dvLocationButtonCity = nil;
+    
+    self.drawerViewLocationSearch = nil;
+    self.dvLocationSearchTextField = nil;
+    self.dvLocationSearchCurrentLocationButton = nil;
+    self.dvLocationSearchButtonWalking = nil;
+    self.dvLocationSearchButtonNeighborhood = nil;
+    self.dvLocationSearchButtonBorough = nil;
+    self.dvLocationSearchButtonCity = nil;
+    
+    self.webActivityView = nil;
+    [connectionErrorStandardAlertView release];
+    connectionErrorStandardAlertView = nil;
+    [connectionErrorOnDeleteAlertView release];
+    connectionErrorOnDeleteAlertView = nil;
+    self.tapToHideDrawerGR = nil;
+}
+
+- (void) releaseReconstructableViewModels {
+    self.filters = nil;
+    self.filtersSearch = nil;
+    self.activeFilterInUI = nil;
+    self.activeSearchFilterInUI = nil;
+    self.selectedCategoryFilterOption = nil;
+    self.selectedDateFilterOption = nil;
+    self.selectedDateSearchFilterOption = nil;
+    self.selectedLocationFilterOption = nil;
+    self.selectedLocationSearchFilterOption = nil;
+    self.selectedPriceFilterOption = nil;
+    self.selectedTimeFilterOption = nil;
+    self.selectedTimeSearchFilterOption = nil;
+    self.adjustedSearchFiltersOrdered = nil;
+    self.oldFilterString = nil;
+    self.categoryURI = nil;
+}
+
+- (void)didReceiveMemoryWarning {
+    NSLog(@"--- --- --- --- --- EventsViewController didReceiveMemoryWarning --- --- --- --- ---");
+	// Releases the view if it doesn't have a superview.
+    [super didReceiveMemoryWarning];
+	// Release any cached data, images, etc that aren't in use.
+}
+
+- (void)viewDidUnload {
+    NSLog(@"--- --- --- --- --- EventsViewController viewDidUnload --- --- --- --- ---");
+    [super viewDidUnload];
+    [self releaseReconstructableViews];
+    [self releaseReconstructableViewModels];
+	// Release any retained subviews of the main view.
+	// e.g. self.myOutlet = nil;
 }
 
 - (void) setUpFiltersUI:(NSArray *)arrayOfEventsFilters withOptionButtonSelectors:(NSDictionary *)dictionaryOfEventFilterOptionSelectors compressedOptionButtons:(BOOL)compressed {
@@ -1052,7 +1175,9 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 //    NSLog(@"EventsViewController webConnectGetEventsListWithFilter");
 
     // Storing and using EventWebQuery objects
-    self.eventsWebQuery = [NSEntityDescription insertNewObjectForEntityForName:@"EventsWebQuery" inManagedObjectContext:self.coreDataModel.managedObjectContext];
+    if (self.eventsWebQuery.queryDatetime != nil) {
+        self.eventsWebQuery = [NSEntityDescription insertNewObjectForEntityForName:@"EventsWebQuery" inManagedObjectContext:self.coreDataModel.managedObjectContext];            
+    }
     self.eventsWebQuery.filterDateBucketString = self.selectedDateFilterOption.code;
     self.eventsWebQuery.filterDistanceBucketString = self.selectedLocationFilterOption.code;
     self.eventsWebQuery.filterLocationString = self.dvLocationTextField.text;
@@ -1060,6 +1185,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     self.eventsWebQuery.filterTimeBucketString = self.selectedTimeFilterOption.code;
     Category * filterCategory = [self.coreDataModel getCategoryWithURI:theProposedCategoryURI];
     if (filterCategory) { [self.eventsWebQuery addFilterCategoriesObject:filterCategory]; }
+    [self.coreDataModel coreDataSave];
     
     self.oldFilterString = theProposedOldFilterString;
     self.categoryURI = theProposedCategoryURI;
@@ -1171,6 +1297,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
         self.eventsWebQueryFromSearch.filterDistanceBucketString = self.selectedLocationSearchFilterOption.code;
         self.eventsWebQueryFromSearch.filterLocationString = self.dvLocationSearchTextField.text;
         self.eventsWebQueryFromSearch.filterTimeBucketString = self.selectedTimeSearchFilterOption.code;
+        [self.coreDataModel coreDataSave];
         
         [self setFeedbackViewIsVisible:YES adjustMessages:YES withMessageType:LoadingEvents eventsSummaryString:self.eventsSummaryStringSearch searchString:self.searchTextField.text animated:YES];
         [self showWebLoadingViews];
@@ -2709,23 +2836,6 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     } else {
         NSLog(@"ERROR in EventsViewController - unrecognized button sending message feedbackViewRetryButtonTouched");
     }
-}
-
-#pragma mark -
-#pragma mark Memory management
-
-- (void)didReceiveMemoryWarning {
-	// Releases the view if it doesn't have a superview.
-    [super didReceiveMemoryWarning];
-	
-	// Release any cached data, images, etc that aren't in use.
-}
-
-- (void)viewDidUnload {
-    [dvLocationButtonCity release];
-    dvLocationButtonCity = nil;
-	// Release any retained subviews of the main view.
-	// e.g. self.myOutlet = nil;
 }
 
 @end

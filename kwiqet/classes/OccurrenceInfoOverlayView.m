@@ -105,7 +105,7 @@ CGFloat const OIOV_SECONDARY_PROMPT_HORIZONTAL_SPACING = 5.0;
     CGRect messagePromptFrame = self.messagePrompt.frame;
     messagePromptFrame.origin.x = CGRectGetMaxX(self.messageSecondary.frame) + secondaryPromptSpacing;
     self.messagePrompt.frame = messagePromptFrame;
-    NSLog(@"-------- -------- -------- -------- %@ %@", NSStringFromCGRect(self.messageSecondary.frame), NSStringFromCGRect(self.messagePrompt.frame));
+//    NSLog(@"-------- -------- -------- -------- %@ %@", NSStringFromCGRect(self.messageSecondary.frame), NSStringFromCGRect(self.messagePrompt.frame));
 }
 
 - (void)dealloc {

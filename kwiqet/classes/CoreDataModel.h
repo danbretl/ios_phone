@@ -61,6 +61,8 @@
 
 // Events Web Query Records
 - (EventsWebQuery *) getMostRecentEventsWebQuery;
+- (EventsWebQuery *) getMostRecentEventsWebQueryWithoutSearchTerm;
+- (EventsWebQuery *) getMostRecentEventsWebQueryWithSearchTerm;
 - (EventsWebQuery *) getMostRecentEventsWebQueryForSearchTerm:(NSString *)searchTerm;
 //- (void) updateEventsWebQuery:(EventsWebQuery *)eventsWebQuery
 //               WithSearchTerm:(NSSet *)searchTerm

@@ -57,8 +57,10 @@
 						<string key="NSReuseIdentifierKey">_NS:174</string>
 						<bool key="IBUIClipsSubviews">YES</bool>
 						<bool key="IBUIMultipleTouchEnabled">YES</bool>
+						<bool key="IBUIUserInteractionEnabled">NO</bool>
 						<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
 						<bool key="IBUIPagingEnabled">YES</bool>
+						<bool key="IBUIShowsHorizontalScrollIndicator">NO</bool>
 						<bool key="IBUIShowsVerticalScrollIndicator">NO</bool>
 					</object>
 					<object class="IBUIView" id="632289368">
@@ -183,7 +185,6 @@
 						<string key="NSFrame">{{9, 405}, {302, 55}}</string>
 						<reference key="NSSuperview" ref="191373211"/>
 						<reference key="NSWindow"/>
-						<reference key="NSNextKeyView"/>
 						<string key="NSReuseIdentifierKey">_NS:180</string>
 						<object class="NSColor" key="IBUIBackgroundColor">
 							<int key="NSColorSpace">3</int>
@@ -334,7 +335,6 @@
 						<string key="NSFrame">{{256, 0}, {64, 44}}</string>
 						<reference key="NSSuperview" ref="53609385"/>
 						<reference key="NSWindow"/>
-						<reference key="NSNextKeyView"/>
 						<string key="NSReuseIdentifierKey">_NS:222</string>
 						<reference key="IBUIBackgroundColor" ref="758380872"/>
 						<bool key="IBUIOpaque">NO</bool>
@@ -1001,7 +1001,6 @@
 										<string key="NSFrame">{{0, 10}, {250, 15}}</string>
 										<reference key="NSSuperview" ref="990260503"/>
 										<reference key="NSWindow"/>
-										<reference key="NSNextKeyView"/>
 										<string key="NSReuseIdentifierKey">_NS:311</string>
 										<bool key="IBUIOpaque">NO</bool>
 										<bool key="IBUIClipsSubviews">YES</bool>
@@ -1347,7 +1346,6 @@
 						<string key="NSFrame">{{213, 0}, {107, 44}}</string>
 						<reference key="NSSuperview" ref="361859864"/>
 						<reference key="NSWindow"/>
-						<reference key="NSNextKeyView"/>
 						<string key="NSReuseIdentifierKey">_NS:222</string>
 						<object class="NSColor" key="IBUIBackgroundColor">
 							<int key="NSColorSpace">1</int>
@@ -1980,7 +1978,6 @@
 										<string key="NSFrame">{{0, 14}, {51, 21}}</string>
 										<reference key="NSSuperview" ref="335492248"/>
 										<reference key="NSWindow"/>
-										<reference key="NSNextKeyView"/>
 										<string key="NSReuseIdentifierKey">_NS:311</string>
 										<bool key="IBUIOpaque">NO</bool>
 										<bool key="IBUIClipsSubviews">YES</bool>
@@ -2122,7 +2119,6 @@
 						<string key="NSFrame">{{320, 7}, {61, 31}}</string>
 						<reference key="NSSuperview" ref="249820771"/>
 						<reference key="NSWindow"/>
-						<reference key="NSNextKeyView"/>
 						<string key="NSReuseIdentifierKey">_NS:222</string>
 						<bool key="IBUIOpaque">NO</bool>
 						<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
@@ -2188,7 +2184,6 @@
 						<string key="NSFrame">{{18, 10}, {284, 44}}</string>
 						<reference key="NSSuperview" ref="157363908"/>
 						<reference key="NSWindow"/>
-						<reference key="NSNextKeyView"/>
 						<string key="NSReuseIdentifierKey">_NS:222</string>
 						<bool key="IBUIOpaque">NO</bool>
 						<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
@@ -2933,6 +2928,14 @@
 						<reference key="destination" ref="1013917416"/>
 					</object>
 					<int key="connectionID">359</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBCocoaTouchOutletConnection" key="connection">
+						<string key="label">delegate</string>
+						<reference key="source" ref="251999342"/>
+						<reference key="destination" ref="372490531"/>
+					</object>
+					<int key="connectionID">360</int>
 				</object>
 			</object>
 			<object class="IBMutableOrderedSet" key="objectRecords">
@@ -4097,7 +4100,7 @@
 				<reference key="dict.values" ref="0"/>
 			</object>
 			<nil key="sourceID"/>
-			<int key="maxID">359</int>
+			<int key="maxID">360</int>
 		</object>
 		<object class="IBClassDescriber" key="IBDocument.Classes">
 			<object class="NSMutableArray" key="referencedPartialClassDescriptions">
@@ -4177,8 +4180,6 @@
 							<string>filtersContainerShadowCheatView</string>
 							<string>filtersContainerShadowCheatWayBelowView</string>
 							<string>filtersContainerView</string>
-							<string>filtersSummaryStringBrowse</string>
-							<string>filtersSummaryStringSearch</string>
 							<string>pushableContainerShadowCheatView</string>
 							<string>pushableContainerView</string>
 							<string>searchButton</string>
@@ -4251,8 +4252,6 @@
 							<string>UIView</string>
 							<string>UIView</string>
 							<string>UIView</string>
-							<string>NSString</string>
-							<string>NSString</string>
 							<string>UIView</string>
 							<string>UIView</string>
 							<string>UIButton</string>
@@ -4328,8 +4327,6 @@
 							<string>filtersContainerShadowCheatView</string>
 							<string>filtersContainerShadowCheatWayBelowView</string>
 							<string>filtersContainerView</string>
-							<string>filtersSummaryStringBrowse</string>
-							<string>filtersSummaryStringSearch</string>
 							<string>pushableContainerShadowCheatView</string>
 							<string>pushableContainerView</string>
 							<string>searchButton</string>
@@ -4581,14 +4578,6 @@
 							<object class="IBToOneOutletInfo">
 								<string key="name">filtersContainerView</string>
 								<string key="candidateClassName">UIView</string>
-							</object>
-							<object class="IBToOneOutletInfo">
-								<string key="name">filtersSummaryStringBrowse</string>
-								<string key="candidateClassName">NSString</string>
-							</object>
-							<object class="IBToOneOutletInfo">
-								<string key="name">filtersSummaryStringSearch</string>
-								<string key="candidateClassName">NSString</string>
 							</object>
 							<object class="IBToOneOutletInfo">
 								<string key="name">pushableContainerShadowCheatView</string>

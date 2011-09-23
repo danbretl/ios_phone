@@ -56,7 +56,8 @@ static NSString * const WEB_CONNECTOR_SEND_LEARNED_DATA_ABOUT_EVENT_USER_INFO_KE
     return self;
 }
 
-- (void)dealloc {
+- (void)dealloc {    
+    [connectionsInProgress release];
     [urlBuilder release];
     [super dealloc];
 }

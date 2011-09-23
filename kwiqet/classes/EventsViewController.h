@@ -36,15 +36,15 @@
     
     //////////////////
     // "View models"
-
-    NSMutableArray * filters;
+    
+    NSArray * filters;
     EventsFilter * activeFilterInUI;
     EventsFilterOption * selectedPriceFilterOption;
     EventsFilterOption * selectedDateFilterOption;
     EventsFilterOption * selectedTimeFilterOption;
     EventsFilterOption * selectedLocationFilterOption;
     EventsFilterOption * selectedCategoryFilterOption;
-    NSMutableArray * filtersSearch;
+    NSArray * filtersSearch;
     EventsFilter * activeSearchFilterInUI;
     NSMutableArray * adjustedSearchFiltersOrdered; // Ordered most recently adjusted to least recently adjusted. If a filter does not exist in this array, then it has not been adjusted from its "most general" option.
     EventsFilterOption * selectedDateSearchFilterOption;
@@ -59,6 +59,9 @@
     NSString * categoryURI;
     NSIndexPath * indexPathOfRowAttemptingToDelete;
     NSIndexPath * indexPathOfSelectedRow;
+    BOOL feedbackViewIsVisible;
+    NSString * eventsSummaryStringBrowse;
+    NSString * eventsSummaryStringSearch;
 
     //////////
     // Views
@@ -75,9 +78,6 @@
     IBOutlet UIView   * pushableContainerShadowCheatView;
     //
     IBOutlet EventsFeedbackView * feedbackView;
-    BOOL feedbackViewIsVisible;
-    NSString * eventsSummaryStringBrowse;
-    NSString * eventsSummaryStringSearch;
     //
     IBOutlet UIView   * filtersContainerView;
     IBOutlet UIView   * filtersContainerShadowCheatView;
@@ -153,11 +153,15 @@
     IBOutlet UIButtonWithOverlayView * dvLocationSearchButtonCity;
     // Assorted views
     WebActivityView * webActivityView;
-    EventViewController * cardPageViewController;
     UIAlertView * connectionErrorStandardAlertView;
     UIAlertView * connectionErrorOnDeleteAlertView;
     // Gesture Recognizers
     UITapGestureRecognizer * tapToHideDrawerGR;
+    
+    /////////////////////
+    // View Controllers
+    
+    EventViewController * cardPageViewController;
     
     ////////
     // Web

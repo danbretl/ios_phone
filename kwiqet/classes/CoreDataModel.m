@@ -286,8 +286,16 @@
     return mostRecentEventWebQuery;
 }
 
-- (EventsWebQuery *) getMostRecentEventsWebQuery {
+- (EventsWebQuery *)getMostRecentEventsWebQuery {
+    return [self getMostRecentEventsWebQueryWithPredicate:nil];
+}
+
+- (EventsWebQuery *) getMostRecentEventsWebQueryWithoutSearchTerm {
     return [self getMostRecentEventsWebQueryWithPredicate:[NSPredicate predicateWithFormat:@"searchTerm == nil"]];
+}
+
+- (EventsWebQuery *) getMostRecentEventsWebQueryWithSearchTerm {
+    return [self getMostRecentEventsWebQueryWithPredicate:[NSPredicate predicateWithFormat:@"searchTerm != nil"]];
 }
 
 - (EventsWebQuery *) getMostRecentEventsWebQueryForSearchTerm:(NSString *)searchTerm {
