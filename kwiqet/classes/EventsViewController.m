@@ -945,8 +945,8 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     [self.tableView deselectRowAtIndexPath:self.tableView.indexPathForSelectedRow animated:YES]; // There is something weird going on with the animation - it is going really slowly. Figure this out later. It doesn't look horrible right now though, so, I'm just going to leave it.
     
     if (self.webConnector.connectionInProgress) {
-        [self showWebLoadingViews];
         [self setFeedbackViewIsVisible:YES adjustMessages:YES withMessageType:LoadingEvents eventsSummaryString:self.eventsSummaryStringForCurrentSource searchString:(self.isSearchOn ? self.searchTextField.text : nil) animated:animated];
+        [self showWebLoadingViews];
     } else if (self.eventsWebQueryForCurrentSource.eventResults.count == 0) {
         if (self.isSearchOn) {
             // Not going to do anything on this path for now... Just leave the list blank?
@@ -1065,8 +1065,8 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     self.categoryURI = theProposedCategoryURI;
     
     [self setLogoButtonImageForCategoryURI:self.categoryURI];
-    [self showWebLoadingViews];
 //    [self setFeedbackViewIsVisible:YES adjustMessages:YES withMessageType:LoadingEvents eventsSummaryString:self.eventsSummaryStringForCurrentSource animated:YES]; // Moving this outside of this method, because we don't always want to do it when doing a web call. We could do it within this method conditionally using some sort of parameter, but I don't have the patience to make that kind of change right now. I also don't really think that would be appropriate, despite being easier.
+    [self showWebLoadingViews];
     [self.webConnector getEventsListWithFilter:self.oldFilterString categoryURI:self.categoryURI];
     
     /////////////////////
@@ -1172,8 +1172,8 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
         self.eventsWebQueryFromSearch.filterLocationString = self.dvLocationSearchTextField.text;
         self.eventsWebQueryFromSearch.filterTimeBucketString = self.selectedTimeSearchFilterOption.code;
         
-        [self showWebLoadingViews];
         [self setFeedbackViewIsVisible:YES adjustMessages:YES withMessageType:LoadingEvents eventsSummaryString:self.eventsSummaryStringSearch searchString:self.searchTextField.text animated:YES];
+        [self showWebLoadingViews];
         [self.webConnector getEventsListForSearchString:searchTerm];
         
     } else {
@@ -2120,7 +2120,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 
 #pragma mark color
 
--(void) showWebLoadingViews  {
+- (void) showWebLoadingViews  {
     if (self.view.window) {
         
         // WE COULD MAKE THE FOLLOWING RECENTERING APPLY TO A LOT MORE SITUATIONS / BECOME A LOT MORE INTELLIGENT WITHOUT TOO MUCH EFFORT. COME BACK TO THIS SOMETIME WHEN YOU HAVE SOME FREE TIME. JUST FIGURE OUT WHAT UI ELEMENT IS FARTHEST DOWN (FROM THE TOP OF THE VIEW) THAT YOU'D LIKE TO AVOID, AND WHAT UI ELEMENT IS FARTHEST UP (FROM THE BOTTOM OF THE VIEW) THAT YOU'D LIKE TO AVOID, AND RECENTER THE WEB ACTIVITY VIEW USING THE RESULTING CALCULATED RECT, JUST LIKE WE'RE DOING BELOW.
