@@ -357,7 +357,7 @@ CGFloat const FEV_DESCRIPTION_LABEL_PADDING_HORIZONTAL = 20.0;
     [self.scrollView addSubview:refreshHeaderView];
     
     // Web activity view
-    self.webActivityView = [[[WebActivityView alloc] initWithSize:CGSizeMake(60.0, 60.0) centeredInFrame:self.view.frame] autorelease];
+    self.webActivityView = [[[WebActivityView alloc] initWithSize:CGSizeMake(60.0, 60.0) centeredInFrame:self.view.bounds] autorelease];
     [self.view addSubview:self.webActivityView];
     [self.view bringSubviewToFront:self.webActivityView];
     

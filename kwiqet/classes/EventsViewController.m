@@ -478,7 +478,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 
     // Web activity view
     CGFloat webActivityViewSize = 60.0;
-    self.webActivityView = [[[WebActivityView alloc] initWithSize:CGSizeMake(webActivityViewSize, webActivityViewSize) centeredInFrame:self.view.frame] autorelease];
+    self.webActivityView = [[[WebActivityView alloc] initWithSize:CGSizeMake(webActivityViewSize, webActivityViewSize) centeredInFrame:self.view.bounds] autorelease];
     [self.view addSubview:self.webActivityView];
     
     int categoryOptionsCount = 9;
@@ -1282,7 +1282,6 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
                 [self.searchTextField becomeFirstResponder];
                 [self setFeedbackViewIsVisible:NO adjustMessages:NO withMessageType:0 eventsSummaryString:nil searchString:nil animated:YES];
             } else {
-                NSLog(@"here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here here");
                 [self setFeedbackViewIsVisible:YES adjustMessages:YES withMessageType:NoEventsFound eventsSummaryString:self.eventsSummaryStringForCurrentSource searchString:(self.isSearchOn ? self.searchTextField.text : nil) animated:YES];
             }
         } else if ([reasonIfNotPopulated isEqualToString:EVENTS_NO_RESULTS_REASON_CONNECTION_ERROR]) {
@@ -1801,7 +1800,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
         [self.dvLocationTextField resignFirstResponder];
         [self.dvLocationSearchTextField resignFirstResponder];
         
-        /* THE FOLLOWING CODE IS COPIED FROM THE METHOD ...filterOptionButtonTouched...*/
+        /* WARNING: THE FOLLOWING CODE IS COPIED FROM THE METHOD ...filterOptionButtonTouched...*/
         self.shouldReloadOnDrawerClose = YES;
         [self setDrawerReloadIndicatorViewIsVisible:self.shouldReloadOnDrawerClose animated:self.isDrawerOpen];
         
@@ -1812,7 +1811,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
             self.eventsSummaryStringSearch = [self eventsSummaryStringForSource:EVENTS_SOURCE_SEARCH];
             [self setFeedbackViewIsVisible:self.feedbackViewIsVisible adjustMessages:YES withMessageType:CloseDrawerToLoadPrompt eventsSummaryString:self.eventsSummaryStringSearch searchString:self.searchTextField.text animated:YES];
         }
-        /* THE CODE ABOVE IS COPIED FROM THE METHOD ...filterOptionButtonTouched...*/
+        /* WARNING: THE CODE ABOVE IS COPIED FROM THE METHOD ...filterOptionButtonTouched...*/
         
         shouldReturn = NO;
     }
@@ -2124,6 +2123,23 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 -(void) showWebLoadingViews  {
     if (self.view.window) {
         
+        // WE COULD MAKE THE FOLLOWING RECENTERING APPLY TO A LOT MORE SITUATIONS / BECOME A LOT MORE INTELLIGENT WITHOUT TOO MUCH EFFORT. COME BACK TO THIS SOMETIME WHEN YOU HAVE SOME FREE TIME. JUST FIGURE OUT WHAT UI ELEMENT IS FARTHEST DOWN (FROM THE TOP OF THE VIEW) THAT YOU'D LIKE TO AVOID, AND WHAT UI ELEMENT IS FARTHEST UP (FROM THE BOTTOM OF THE VIEW) THAT YOU'D LIKE TO AVOID, AND RECENTER THE WEB ACTIVITY VIEW USING THE RESULTING CALCULATED RECT, JUST LIKE WE'RE DOING BELOW.
+//        NSLog(@"wlvOrigin = %@", NSStringFromCGPoint(self.webActivityView.frame.origin));
+        CGRect webActivityViewSpaceFrame = self.view.bounds;
+        if (self.feedbackViewIsVisible && 
+            self.feedbackView.isCurrentMessageComplex) {
+//            NSLog(@"Doing something tricky...");
+            CGRect searchContainerViewFrameConvertedToMainView = [self.searchContainerView convertRect:self.searchContainerView.frame toView:self.view];
+//            NSLog(@"searchContainerViewFrameConvertedToMainView=%@", NSStringFromCGRect(searchContainerViewFrameConvertedToMainView));
+            CGRect feedbackViewFrameConvertedToMainView = [self.view convertRect:self.feedbackView.frame fromView:self.feedbackView.superview];
+//            NSLog(@"feedbackViewFrameConvertedToMainView=%@", NSStringFromCGRect(feedbackViewFrameConvertedToMainView));
+            webActivityViewSpaceFrame = CGRectMake(0, CGRectGetMaxY(searchContainerViewFrameConvertedToMainView), self.view.bounds.size.width, CGRectGetMinY(feedbackViewFrameConvertedToMainView) - CGRectGetMaxY(searchContainerViewFrameConvertedToMainView));
+//            NSLog(@"webActivityViewSpaceFrame=%@", NSStringFromCGRect(webActivityViewSpaceFrame));
+//            webActivityViewSpaceFrame.size.height -= self.feedbackView.bounds.size.height;
+        }
+        [self.webActivityView recenterInFrame:webActivityViewSpaceFrame];
+        NSLog(@"wlvOrigin = %@", NSStringFromCGPoint(self.webActivityView.frame.origin));
+        
         // ACTIVITY VIEWS
         [self.webActivityView showAnimated:NO];
         
@@ -2347,7 +2363,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
         }
         
         
-        /* THE FOLLOWING CODE HAS BEEN COPIED TO THE METHOD ...textFieldShouldReturn... */
+        /* WARNING: THE FOLLOWING CODE HAS BEEN COPIED TO THE METHOD ...textFieldShouldReturn... */
         self.shouldReloadOnDrawerClose = YES;
         [self setDrawerReloadIndicatorViewIsVisible:self.shouldReloadOnDrawerClose animated:self.isDrawerOpen];
         
@@ -2358,7 +2374,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
             self.eventsSummaryStringSearch = [self eventsSummaryStringForSource:EVENTS_SOURCE_SEARCH];
             [self setFeedbackViewIsVisible:self.feedbackViewIsVisible adjustMessages:YES withMessageType:CloseDrawerToLoadPrompt eventsSummaryString:self.eventsSummaryStringSearch searchString:self.searchTextField.text animated:YES];
         }
-        /* THE CODE ABOVE HAS BEEN COPIED TO THE METHOD ...textFieldShouldReturn... */
+        /* WARNING: THE CODE ABOVE HAS BEEN COPIED TO THE METHOD ...textFieldShouldReturn... */
 
     }
 }

@@ -422,7 +422,7 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
     [self.scrollView insertSubview:self.shadowDescriptionContainer belowSubview:self.descriptionContainer];
     
     CGFloat webActivityViewSize = 60.0;
-    webActivityView = [[WebActivityView alloc] initWithSize:CGSizeMake(webActivityViewSize, webActivityViewSize) centeredInFrame:self.view.frame];
+    webActivityView = [[WebActivityView alloc] initWithSize:CGSizeMake(webActivityViewSize, webActivityViewSize) centeredInFrame:self.view.bounds];
     [self.view addSubview:self.webActivityView];
     [self.view bringSubviewToFront:self.webActivityView];
     

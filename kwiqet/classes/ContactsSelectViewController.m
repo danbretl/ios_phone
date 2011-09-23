@@ -154,7 +154,7 @@ float const CSVC_TAB_BUTTON_ANIMATION_DURATION = .25;
     [self setShowSelectedTabButtonVisible:(self.contactsSelected && [self.contactsSelected count] > 0) animated:NO];
     
     CGFloat webActivityViewSize = 60.0;
-    webActivityView = [[WebActivityView alloc] initWithSize:CGSizeMake(webActivityViewSize, webActivityViewSize) centeredInFrame:self.view.frame];
+    webActivityView = [[WebActivityView alloc] initWithSize:CGSizeMake(webActivityViewSize, webActivityViewSize) centeredInFrame:self.view.bounds];
     [self.view addSubview:self.webActivityView];
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(contactsUpdatedLocally:) name:FBM_FRIENDS_LOCAL_DATA_UPDATED_KEY object:nil];

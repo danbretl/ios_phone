@@ -15,6 +15,7 @@ float const WEB_ACTIVITY_VIEW_DEFAULT_BACKGROUND_ALPHA = 0.15;
 @interface WebActivityView()
 @property (retain) UIActivityIndicatorView * activityView;
 - (void)setVisible:(BOOL)visible animated:(BOOL)animated;
++ (CGPoint) originNeededToCenterChildFrameOfSize:(CGSize)childFrameSize withinParentFrame:(CGRect)parentFrame;
 @end
 
 @implementation WebActivityView
@@ -45,8 +46,19 @@ float const WEB_ACTIVITY_VIEW_DEFAULT_BACKGROUND_ALPHA = 0.15;
 - (id) initWithSize:(CGSize)size centeredInFrame:(CGRect)parentFrame {
     CGRect webActivityViewFrame;
     webActivityViewFrame.size = size;
-    webActivityViewFrame.origin = CGPointMake(roundf((parentFrame.size.width - size.width) / 2), roundf((parentFrame.size.height - size.height) / 2));
+    webActivityViewFrame.origin = [WebActivityView originNeededToCenterChildFrameOfSize:size withinParentFrame:parentFrame];
     return [self initWithFrame:webActivityViewFrame];
+}
+
++ (CGPoint) originNeededToCenterChildFrameOfSize:(CGSize)childFrameSize withinParentFrame:(CGRect)parentFrame {
+    return CGPointMake(parentFrame.origin.x + roundf((parentFrame.size.width - childFrameSize.width) / 2.0), 
+                       parentFrame.origin.y +roundf((parentFrame.size.height - childFrameSize.height) / 2.0));
+}
+
+- (void) recenterInFrame:(CGRect)parentFrame {
+    CGRect selfFrame = self.frame;
+    selfFrame.origin = [WebActivityView originNeededToCenterChildFrameOfSize:selfFrame.size withinParentFrame:parentFrame];
+    self.frame = selfFrame;
 }
 
 - (void)showAnimated:(BOOL)animated {
