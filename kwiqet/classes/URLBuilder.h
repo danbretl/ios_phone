@@ -40,10 +40,12 @@
 -(NSURL*)buildGetCategoryTreeURL;
 
 // Events List
-- (NSURL *) buildGetEventsListURLWithFilter:(NSString *)filterString categoryURI:(NSString *)categoryURI;
-- (NSURL *) buildGetEventsListRecommendedURL;
-- (NSURL *) buildGetEventsListFreeURL;
-- (NSURL *) buildGetEventsListPopularURL;
+//- (NSURL *) buildGetEventsListURLWithFilter:(NSString *)filterString categoryURI:(NSString *)categoryURI;
+//- (NSString *) buildGetRecommendedEventsURLBasicString;
+//- (NSURL *) buildGetEventsListRecommendedURL;
+- (NSURL *) buildGetRecommendedEventsURLWithMinPrice:(NSNumber *)minPrice maxPrice:(NSNumber *)maxPrice categoryURI:(NSString *)categoryURI;
+//- (NSURL *) buildGetEventsListFreeURL;
+//- (NSURL *) buildGetEventsListPopularURL;
 - (NSURL *) buildGetEventsListSearchURLWithSearchString:(NSString *)searchString;
 
 // Event

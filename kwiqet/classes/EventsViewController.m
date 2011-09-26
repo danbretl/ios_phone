@@ -808,6 +808,14 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     [self updateFilterOptionButtonStatesOldSelected:nil newSelected:self.selectedDateSearchFilterOption];
     [self updateFilterOptionButtonStatesOldSelected:nil newSelected:self.selectedLocationSearchFilterOption];
     [self updateFilterOptionButtonStatesOldSelected:nil newSelected:self.selectedTimeSearchFilterOption];
+    // Update filter button states - both browse and search
+    [self updateFilter:[self filterForFilterCode:EVENTS_FILTER_PRICE inFiltersArray:self.filters]buttonImageForFilterOption:self.selectedPriceFilterOption];
+    [self updateFilter:[self filterForFilterCode:EVENTS_FILTER_DATE inFiltersArray:self.filters]buttonImageForFilterOption:self.selectedDateFilterOption];
+    [self updateFilter:[self filterForFilterCode:EVENTS_FILTER_TIME inFiltersArray:self.filters]buttonImageForFilterOption:self.selectedTimeFilterOption];
+    [self updateFilter:[self filterForFilterCode:EVENTS_FILTER_LOCATION inFiltersArray:self.filters]buttonImageForFilterOption:self.selectedLocationFilterOption];
+    [self updateFilter:[self filterForFilterCode:EVENTS_FILTER_DATE inFiltersArray:self.filtersSearch]buttonImageForFilterOption:self.selectedDateSearchFilterOption];
+    [self updateFilter:[self filterForFilterCode:EVENTS_FILTER_TIME inFiltersArray:self.filtersSearch]buttonImageForFilterOption:self.selectedTimeSearchFilterOption];
+    [self updateFilter:[self filterForFilterCode:EVENTS_FILTER_LOCATION inFiltersArray:self.filtersSearch]buttonImageForFilterOption:self.selectedLocationSearchFilterOption];
     // Update category filter option button state
     [self setLogoButtonImageForCategoryURI:self.categoryURI];
     
@@ -834,6 +842,8 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
         [self setFeedbackViewIsVisible:YES adjustMessages:YES withMessageType:LoadingEvents eventsSummaryString:self.eventsSummaryStringBrowse searchString:nil animated:NO];
         [self webConnectGetEventsListWithCurrentOldFilterAndCategory]; // Don't need to reloadData until we get a response back from this web connection attempt.
     }
+    
+    NSLog(@"%@"/* - %@ %@ %@ %@ %@ %@ %@ %@ %@"*/, self.eventsWebQueryForCurrentSource/*, self.eventsWebQueryForCurrentSource.filterDateBucketString, self.eventsWebQueryForCurrentSource.filterDistanceBucketString, self.eventsWebQueryForCurrentSource.filterLocationString, self.eventsWebQueryForCurrentSource.filterPriceBucketString, self.eventsWebQueryForCurrentSource.filterTimeBucketString, self.eventsWebQueryForCurrentSource.queryDatetime, self.eventsWebQueryForCurrentSource.searchTerm, self.eventsWebQueryForCurrentSource.eventResults, self.eventsWebQueryForCurrentSource.filterCategories*/);
     
     // Register for keyboard events
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardWillShow:) name:UIKeyboardWillShowNotification object:nil];
@@ -1197,7 +1207,8 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     [self setLogoButtonImageForCategoryURI:self.categoryURI];
 //    [self setFeedbackViewIsVisible:YES adjustMessages:YES withMessageType:LoadingEvents eventsSummaryString:self.eventsSummaryStringForCurrentSource animated:YES]; // Moving this outside of this method, because we don't always want to do it when doing a web call. We could do it within this method conditionally using some sort of parameter, but I don't have the patience to make that kind of change right now. I also don't really think that would be appropriate, despite being easier.
     [self showWebLoadingViews];
-    [self.webConnector getEventsListWithFilter:self.oldFilterString categoryURI:self.categoryURI];
+    [self.webConnector getRecommendedEventsWithMinPrice:self.eventsWebQuery.filterPriceMinimum maxPrice:self.eventsWebQuery.filterPriceMaximum categoryURI:self.categoryURI];
+//    [self.webConnector getEventsListWithFilter:self.oldFilterString categoryURI:self.categoryURI];
     
     /////////////////////
     // Localytics below

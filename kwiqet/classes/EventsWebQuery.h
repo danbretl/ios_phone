@@ -40,3 +40,8 @@
 @property (nonatomic, readonly) NSArray * eventResultsInOrder;
 @property (nonatomic, readonly) NSArray * eventResultsEventsInOrder;
 @end
+
+@interface EventsWebQuery (Translations)
+@property (nonatomic, readonly) NSNumber * filterPriceMinimum;
+@property (nonatomic, readonly) NSNumber * filterPriceMaximum;
+@end

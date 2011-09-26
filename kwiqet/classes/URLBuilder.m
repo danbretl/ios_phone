@@ -240,47 +240,103 @@ static NSString * const URL_BUILDER_GET_EVENTS_LIST_FILTER_POPULAR = @"popular";
 ////////////////
 // EVENTS LIST
 
-- (NSURL *) buildGetEventsListURLWithFilter:(NSString *)filterString categoryURI:(NSString *)categoryURI {
+//- (NSURL *) buildGetEventsListURLWithFilter:(NSString *)filterString categoryURI:(NSString *)categoryURI {
+//    
+//    NSString * urlPList = [[NSBundle mainBundle] pathForResource:@"urls" ofType:@"plist"];
+//    NSDictionary * urlDictionary = [NSDictionary dictionaryWithContentsOfFile:urlPList];
+//    
+//    NSString * baseURL = [urlDictionary valueForKey:self.baseURLKey];
+//    NSString * listURI = [urlDictionary valueForKey:@"list_uri"];
+//    NSString * credentials = [self buildCredentialString];
+//    
+//    // Filters - recommended (default), free, popular
+//    filterString = [filterString lowercaseString];
+//    NSString * filterVariableForURL = @""; // Straight up "recommended" events lists are our bread and butter, and API calls for those don't require any variable.
+//    if (filterString && ![filterString isEqualToString:URL_BUILDER_GET_EVENTS_LIST_FILTER_RECOMMENDED]) {
+//        filterVariableForURL = [NSString stringWithFormat:@"&view=%@", filterString];
+//    }
+//    
+//    // Categories
+//    NSString * categoryVariableForURL = @"";
+//    if (categoryURI && [categoryURI length] > 0) {
+//        categoryVariableForURL = [NSString stringWithFormat:@"&concrete_parent_category=%@", categoryURI];
+//    }
+//    
+//    
+//    NSURL * url = [NSURL URLWithString:[NSString stringWithFormat:@"%@%@%@%@%@", baseURL, listURI, credentials, filterVariableForURL, categoryVariableForURL]];
+//    
+//    NSLog(@"URLBuilder buildGetEventsListURLWithFilter - url is %@", url);
+//    return url;
+//    
+//}
+
+//- (NSString *) buildGetRecommendedEventsURLBasicString {
+//    
+//    NSString * urlPList = [[NSBundle mainBundle] pathForResource:@"urls" ofType:@"plist"];
+//    NSDictionary * urlDictionary = [NSDictionary dictionaryWithContentsOfFile:urlPList];
+//    
+//    NSString * baseURL = [urlDictionary valueForKey:self.baseURLKey];
+//    NSString * listURI = [urlDictionary valueForKey:@"list_uri"];
+//    NSString * credentials = [self buildCredentialString];
+//    
+//    NSString * basicURLString = [NSString stringWithFormat:@"%@%@%@", baseURL, listURI, credentials];
+//    
+//    return basicURLString;
+//
+//}
+
+//- (NSURL *) buildGetEventsListRecommendedURL {
+//    return [self buildGetEventsListURLWithFilter:@"recommended" categoryURI:nil];
+//}
+
+- (NSURL *)buildGetRecommendedEventsURLWithMinPrice:(NSNumber *)minPrice maxPrice:(NSNumber *)maxPrice categoryURI:(NSString *)categoryURI {
     
     NSString * urlPList = [[NSBundle mainBundle] pathForResource:@"urls" ofType:@"plist"];
     NSDictionary * urlDictionary = [NSDictionary dictionaryWithContentsOfFile:urlPList];
     
     NSString * baseURL = [urlDictionary valueForKey:self.baseURLKey];
     NSString * listURI = [urlDictionary valueForKey:@"list_uri"];
-    NSString * credentials = [self buildCredentialString];
     
-    // Filters - recommended (default), free, popular
-    filterString = [filterString lowercaseString];
-    NSString * filterVariableForURL = @""; // Straight up "recommended" events lists are our bread and butter, and API calls for those don't require any variable.
-    if (filterString && ![filterString isEqualToString:URL_BUILDER_GET_EVENTS_LIST_FILTER_RECOMMENDED]) {
-        filterVariableForURL = [NSString stringWithFormat:@"&view=%@", filterString];
-    }
+    NSMutableString * urlString = [NSMutableString stringWithFormat:@"%@%@", baseURL, listURI];
+    
+    // Credentials - defer adding this to the URL string
+    NSString * credentials = [self buildCredentialString];
+    [urlString appendString:credentials];
+    
+    // Price filters
+    NSString * (^priceStringBlock)(NSNumber *, NSString *)=^(NSNumber * price, NSString * minOrMax){
+        NSString * priceString = nil;
+        if (price != nil) {
+            priceString = [NSString stringWithFormat:@"&%@=%d", [urlDictionary valueForKey:[NSString stringWithFormat:@"filter_price_%@_key", minOrMax]], price.intValue];
+        }
+        return priceString;
+    };
+    NSString * minPriceString = priceStringBlock(minPrice, @"min");
+    NSString * maxPriceString = priceStringBlock(maxPrice, @"max");
+    if (minPriceString != nil) { [urlString appendString:minPriceString]; }
+    if (maxPriceString != nil) { [urlString appendString:maxPriceString]; }
     
     // Categories
-    NSString * categoryVariableForURL = @"";
+    NSString * categoryVariableForURL = nil;
     if (categoryURI && [categoryURI length] > 0) {
         categoryVariableForURL = [NSString stringWithFormat:@"&concrete_parent_category=%@", categoryURI];
     }
+    if (categoryVariableForURL != nil) { [urlString appendString:categoryVariableForURL]; }
     
+    NSURL * url = [NSURL URLWithString:urlString];
+    NSLog(@"%@", url);
     
-    NSURL * url = [NSURL URLWithString:[NSString stringWithFormat:@"%@%@%@%@%@", baseURL, listURI, credentials, filterVariableForURL, categoryVariableForURL]];
-    
-    NSLog(@"URLBuilder buildGetEventsListURLWithFilter - url is %@", url);
     return url;
-    
+
 }
 
-- (NSURL *) buildGetEventsListRecommendedURL {
-    return [self buildGetEventsListURLWithFilter:@"recommended" categoryURI:nil];
-}
+//- (NSURL *) buildGetEventsListFreeURL {
+//    return [self buildGetEventsListURLWithFilter:@"free" categoryURI:nil];
+//}
 
-- (NSURL *) buildGetEventsListFreeURL {
-    return [self buildGetEventsListURLWithFilter:@"free" categoryURI:nil];
-}
-
-- (NSURL *) buildGetEventsListPopularURL {
-    return [self buildGetEventsListURLWithFilter:@"popular" categoryURI:nil];
-}
+//- (NSURL *) buildGetEventsListPopularURL {
+//    return [self buildGetEventsListURLWithFilter:@"popular" categoryURI:nil];
+//}
 
 - (NSURL *) buildGetEventsListSearchURLWithSearchString:(NSString *)searchString {
     

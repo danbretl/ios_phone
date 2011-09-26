@@ -37,7 +37,8 @@ extern BOOL const WEB_CONNECTOR_ALLOW_SIMULTANEOUS_CONNECTIONS_DEFAULT;
 - (void) getEventWithURI:(NSString *)eventURI;
 - (void) getAllOccurrencesForEventWithURI:(NSString *)eventURI;
 - (void) getFeaturedEvent;
-- (void) getEventsListWithFilter:(NSString *)filterString categoryURI:(NSString *)categoryURI;
+- (void) getRecommendedEventsWithMinPrice:(NSNumber *)minPrice maxPrice:(NSNumber *)maxPrice categoryURI:(NSString *)categoryURI;
+//- (void) getEventsListWithFilter:(NSString *)filterString categoryURI:(NSString *)categoryURI;
 - (void) getEventsListForSearchString:(NSString *)searchString;
 - (void) sendLearnedDataAboutEvent:(NSString *)eventURI withUserAction:(NSString *)userAction;
 

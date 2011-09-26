@@ -18,6 +18,8 @@ static NSString * const WEB_CONNECTOR_USER_INFO_KEY_EVENT_URI = @"WEB_CONNECTOR_
 static NSString * const WEB_CONNECTOR_GET_EVENTS_LIST_USER_INFO_KEY_FILTER = @"filterString";
 static NSString * const WEB_CONNECTOR_GET_EVENTS_LIST_USER_INFO_KEY_CATEGORY = @"categoryURI";
 static NSString * const WEB_CONNECTOR_GET_EVENTS_LIST_USER_INFO_KEY_SEARCH_STRING = @"searchString";
+static NSString * const WEB_CONNECTOR_GET_EVENTS_LIST_USER_INFO_KEY_FILTER_PRICE_MIN = @"filterPriceMin";
+static NSString * const WEB_CONNECTOR_GET_EVENTS_LIST_USER_INFO_KEY_FILTER_PRICE_MAX = @"filterPriceMax";
 static NSString * const WEB_CONNECTOR_SEND_LEARNED_DATA_ABOUT_EVENT_USER_INFO_KEY_EVENT_URI = @"eventURI";
 static NSString * const WEB_CONNECTOR_SEND_LEARNED_DATA_ABOUT_EVENT_USER_INFO_KEY_ACTION = @"action";
 
@@ -239,20 +241,35 @@ static NSString * const WEB_CONNECTOR_SEND_LEARNED_DATA_ABOUT_EVENT_USER_INFO_KE
 // EVENTS LISTS //
 //////////////////
 
-- (void) getEventsListWithFilter:(NSString *)filterString categoryURI:(NSString *)categoryURI {
+- (void) getRecommendedEventsWithMinPrice:(NSNumber *)minPrice maxPrice:(NSNumber *)maxPrice categoryURI:(NSString *)categoryURI {
     if (self.availableToMakeWebConnection) {
-        ASIHTTPRequest * request = [ASIHTTPRequest requestWithURL:[self.urlBuilder buildGetEventsListURLWithFilter:filterString categoryURI:categoryURI]];
+        ASIHTTPRequest * request = [ASIHTTPRequest requestWithURL:[self.urlBuilder buildGetRecommendedEventsURLWithMinPrice:minPrice maxPrice:maxPrice categoryURI:categoryURI]];
         [self.connectionsInProgress addObject:request];
         [request setRequestMethod:@"GET"];
         [request setDelegate:self];
         [request setDidFinishSelector:@selector(getEventsListSuccess:)];
         [request setDidFailSelector:@selector(getEventsListFailure:)];
         [request setTimeOutSeconds:self.timeoutLength];
-        NSDictionary * userInfo = [NSDictionary dictionaryWithObjectsAndKeys:filterString, WEB_CONNECTOR_GET_EVENTS_LIST_USER_INFO_KEY_FILTER, categoryURI, WEB_CONNECTOR_GET_EVENTS_LIST_USER_INFO_KEY_CATEGORY, nil];
+        NSDictionary * userInfo = [NSDictionary dictionaryWithObjectsAndKeys:@"recommended", WEB_CONNECTOR_GET_EVENTS_LIST_USER_INFO_KEY_FILTER, categoryURI, WEB_CONNECTOR_GET_EVENTS_LIST_USER_INFO_KEY_CATEGORY, minPrice, WEB_CONNECTOR_GET_EVENTS_LIST_USER_INFO_KEY_FILTER_PRICE_MIN, maxPrice, WEB_CONNECTOR_GET_EVENTS_LIST_USER_INFO_KEY_FILTER_PRICE_MAX, nil];
         request.userInfo = userInfo;
         [request startAsynchronous];
     }
 }
+
+//- (void) getEventsListWithFilter:(NSString *)filterString categoryURI:(NSString *)categoryURI {
+//    if (self.availableToMakeWebConnection) {
+//        ASIHTTPRequest * request = [ASIHTTPRequest requestWithURL:[self.urlBuilder buildGetEventsListURLWithFilter:filterString categoryURI:categoryURI]];
+//        [self.connectionsInProgress addObject:request];
+//        [request setRequestMethod:@"GET"];
+//        [request setDelegate:self];
+//        [request setDidFinishSelector:@selector(getEventsListSuccess:)];
+//        [request setDidFailSelector:@selector(getEventsListFailure:)];
+//        [request setTimeOutSeconds:self.timeoutLength];
+//        NSDictionary * userInfo = [NSDictionary dictionaryWithObjectsAndKeys:filterString, WEB_CONNECTOR_GET_EVENTS_LIST_USER_INFO_KEY_FILTER, categoryURI, WEB_CONNECTOR_GET_EVENTS_LIST_USER_INFO_KEY_CATEGORY, nil];
+//        request.userInfo = userInfo;
+//        [request startAsynchronous];
+//    }
+//}
 
 - (void) getEventsListSuccess:(ASIHTTPRequest *)request {
 
