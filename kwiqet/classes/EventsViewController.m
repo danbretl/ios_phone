@@ -819,6 +819,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     self.activeFilterHighlightsContainerView.numberOfSegments = self.filtersForCurrentSource.count;
     [self setDrawerToShowFilter:self.activeFilterInUI animated:NO];
     
+    feedbackViewIsVisible = YES; // THIS IS A TOTAL HACK, TO GET THE BALL ROLLING ON THE FEEDBACK VIEW BEING VISIBLE. REALLY, THIS VALUE SHOULD BE COMING FROM SOMEWHERE ELSE, PERHAPS A PREFERENCE, OR IT SHOULD JUST BE SET TO YES ALWAYS IN A MORE INTELLIGENT WAY.
     [self updateViewsFromCurrentSourceDataWhichShouldBePopulated:mostRecentEventsWebQuery.eventResults.count > 0 reasonIfNot:EVENTS_NO_RESULTS_REASON_NO_RESULTS];
     
     // ...Now, if we should be in search mode, just call our toggleSearchMode method. All the views start in browse mode positions anyway, so we kind of have to do this.
@@ -829,11 +830,9 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     }
     
     if (!priorEventsWebQueryExists || (!mostRecentEventsWebQueryWasFromSearch && mostRecentEventsWebQuery.eventResults.count == 0)) {
-            
         // Connect to web and try to get a new set of results (IF we are in browse mode - if we're in search mode, just sit tight).
         [self setFeedbackViewIsVisible:YES adjustMessages:YES withMessageType:LoadingEvents eventsSummaryString:self.eventsSummaryStringBrowse searchString:nil animated:NO];
         [self webConnectGetEventsListWithCurrentOldFilterAndCategory]; // Don't need to reloadData until we get a response back from this web connection attempt.
-            
     }
     
     // Register for keyboard events
