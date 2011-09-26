@@ -88,15 +88,15 @@ static NSString * const FBM_REQUEST_PROFILE_PICTURE = @"FBM_REQUEST_PROFILE_PICT
 }
 
 - (void)pullAuthenticationInfoFromDefaults {
-    NSLog(@"FacebookManager pullAuthenticationInfoFromDefaults");
+//    NSLog(@"FacebookManager pullAuthenticationInfoFromDefaults");
     NSString * kwiqetIdentifier = [DefaultsModel retrieveKwiqetUserIdentifierFromUserDefaults];
     if (!kwiqetIdentifier) {
-        NSLog(@"no kwiqet id available");
+//        NSLog(@"no kwiqet id available");
         kwiqetIdentifier = FBM_NO_ASSOCIATED_KWIQET_IDENTIFIER;
     }
     NSDictionary * accessInfo = [DefaultsModel retrieveFacebookAccessInfoAttachedToKwiqetIdentifier:kwiqetIdentifier];
     if (accessInfo) {
-        NSLog(@"accessInfo exists? = %@", accessInfo);
+//        NSLog(@"accessInfo exists? = %@", accessInfo);
         self.fb.accessToken = [accessInfo objectForKey:DM_FACEBOOK_ACCESS_INFO_DICTIONARY_ACCESS_TOKEN_KEY];
         self.fb.expirationDate = [accessInfo objectForKey:DM_FACEBOOK_ACCESS_INFO_DICTIONARY_EXPIRATION_DATE_KEY];
     }

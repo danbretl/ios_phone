@@ -194,7 +194,7 @@
 //        self.frame = selfFrame;
 //    }
     
-    NSLog(@"EventsFeedbackView, calculated %@compositeMessageSize of %@ (built up from %@)", shouldMakeAdjustments ? @"(and implemented) " : @"", NSStringFromCGSize(compositeMessageSize), complexMessage ? [NSString stringWithFormat:@"headerFrame=%@ mainFrame=%@ followupFrame=%@", NSStringFromCGRect(self.messageHeader.frame), NSStringFromCGRect(self.messageMain.frame), NSStringFromCGRect(self.messageFollowup.frame)] : [NSString stringWithFormat:@"soloFrame=%@", NSStringFromCGRect(self.messageSolo.frame)]);
+//    NSLog(@"EventsFeedbackView, calculated %@compositeMessageSize of %@ (built up from %@)", shouldMakeAdjustments ? @"(and implemented) " : @"", NSStringFromCGSize(compositeMessageSize), complexMessage ? [NSString stringWithFormat:@"headerFrame=%@ mainFrame=%@ followupFrame=%@", NSStringFromCGRect(self.messageHeader.frame), NSStringFromCGRect(self.messageMain.frame), NSStringFromCGRect(self.messageFollowup.frame)] : [NSString stringWithFormat:@"soloFrame=%@", NSStringFromCGRect(self.messageSolo.frame)]);
 
     return compositeMessageSize;
 }

@@ -394,7 +394,6 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     self.activeFilterHighlightsContainerView.showColor = NO;
     self.activeFilterHighlightsContainerView.showImage = YES;
     self.activeFilterHighlightsContainerView.highlightImage = [UIImage imageNamed:@"filter_select_glow.png"];
-    self.activeFilterHighlightsContainerView.numberOfSegments = self.filtersForCurrentSource.count;
     
     // Views allocations and settings - Location drawer view & its subviews
     // Current location button
@@ -812,24 +811,29 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     // Update category filter option button state
     [self setLogoButtonImageForCategoryURI:self.categoryURI];
     
-    // Start things off in browse mode, with browse filters. Then, if we should be in search mode, just call our toggleSearchMode method. All the views start in browse mode positions anyway, so we kind of have to do this.
+    // Start things off in browse mode, with browse filters... (Note continued after updating views.)
     self.isSearchOn = NO;
     [self.filtersContainerView addSubview:self.filtersBarBrowse];
     [self.drawerScrollView addSubview:self.drawerViewsBrowseContainer];
     self.drawerScrollView.contentSize = self.drawerViewsBrowseContainer.bounds.size;
+    self.activeFilterHighlightsContainerView.numberOfSegments = self.filtersForCurrentSource.count;
     [self setDrawerToShowFilter:self.activeFilterInUI animated:NO];
+    
+    [self updateViewsFromCurrentSourceDataWhichShouldBePopulated:mostRecentEventsWebQuery.eventResults.count > 0 reasonIfNot:EVENTS_NO_RESULTS_REASON_NO_RESULTS];
+    
+    // ...Now, if we should be in search mode, just call our toggleSearchMode method. All the views start in browse mode positions anyway, so we kind of have to do this.
     if (priorEventsWebQueryExists &&
         mostRecentEventsWebQueryWasFromSearch) {
         [self toggleSearchMode]; // COME BACK TO THIS. CURRENTLY THIS WILL BE A PROBLEM, BECAUSE IT WILL BE ANIMATED. COME BACK TO THIS. CURRENTLY THIS WILL BE A PROBLEM, BECAUSE IT WILL BE ANIMATED. COME BACK TO THIS. CURRENTLY THIS WILL BE A PROBLEM, BECAUSE IT WILL BE ANIMATED. COME BACK TO THIS. CURRENTLY THIS WILL BE A PROBLEM, BECAUSE IT WILL BE ANIMATED. COME BACK TO THIS. CURRENTLY THIS WILL BE A PROBLEM, BECAUSE IT WILL BE ANIMATED. COME BACK TO THIS. CURRENTLY THIS WILL BE A PROBLEM, BECAUSE IT WILL BE ANIMATED. COME BACK TO THIS. CURRENTLY THIS WILL BE A PROBLEM, BECAUSE IT WILL BE ANIMATED. COME BACK TO THIS. CURRENTLY THIS WILL BE A PROBLEM, BECAUSE IT WILL BE ANIMATED. COME BACK TO THIS. CURRENTLY THIS WILL BE A PROBLEM, BECAUSE IT WILL BE ANIMATED. COME BACK TO THIS. CURRENTLY THIS WILL BE A PROBLEM, BECAUSE IT WILL BE ANIMATED. COME BACK TO THIS. CURRENTLY THIS WILL BE A PROBLEM, BECAUSE IT WILL BE ANIMATED.
         self.searchTextField.text = searchTerm;
     }
     
-    if (!priorEventsWebQueryExists ||
-        (!mostRecentEventsWebQueryWasFromSearch &&
-         mostRecentEventsWebQuery.eventResults.count == 0)) {
+    if (!priorEventsWebQueryExists || (!mostRecentEventsWebQueryWasFromSearch && mostRecentEventsWebQuery.eventResults.count == 0)) {
+            
         // Connect to web and try to get a new set of results (IF we are in browse mode - if we're in search mode, just sit tight).
         [self setFeedbackViewIsVisible:YES adjustMessages:YES withMessageType:LoadingEvents eventsSummaryString:self.eventsSummaryStringBrowse searchString:nil animated:NO];
         [self webConnectGetEventsListWithCurrentOldFilterAndCategory]; // Don't need to reloadData until we get a response back from this web connection attempt.
+            
     }
     
     // Register for keyboard events
@@ -1175,8 +1179,9 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 //    NSLog(@"EventsViewController webConnectGetEventsListWithFilter");
 
     // Storing and using EventWebQuery objects
-    if (self.eventsWebQuery.queryDatetime != nil) {
-        self.eventsWebQuery = [NSEntityDescription insertNewObjectForEntityForName:@"EventsWebQuery" inManagedObjectContext:self.coreDataModel.managedObjectContext];            
+    if (self.eventsWebQuery == nil || 
+        self.eventsWebQuery.queryDatetime != nil) {
+        self.eventsWebQuery = [NSEntityDescription insertNewObjectForEntityForName:@"EventsWebQuery" inManagedObjectContext:self.coreDataModel.managedObjectContext];
     }
     self.eventsWebQuery.filterDateBucketString = self.selectedDateFilterOption.code;
     self.eventsWebQuery.filterDistanceBucketString = self.selectedLocationFilterOption.code;
@@ -1289,7 +1294,8 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
         }
         
         // Storing and using EventWebQuery objects
-        if (self.eventsWebQueryFromSearch.queryDatetime != nil) {
+        if (self.eventsWebQueryFromSearch == nil ||
+            self.eventsWebQueryFromSearch.queryDatetime != nil) {
             self.eventsWebQueryFromSearch = [NSEntityDescription insertNewObjectForEntityForName:@"EventsWebQuery" inManagedObjectContext:self.coreDataModel.managedObjectContext];            
         }
         self.eventsWebQueryFromSearch.searchTerm = searchTerm;
@@ -2265,7 +2271,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 //            webActivityViewSpaceFrame.size.height -= self.feedbackView.bounds.size.height;
         }
         [self.webActivityView recenterInFrame:webActivityViewSpaceFrame];
-        NSLog(@"wlvOrigin = %@", NSStringFromCGPoint(self.webActivityView.frame.origin));
+//        NSLog(@"wlvOrigin = %@", NSStringFromCGPoint(self.webActivityView.frame.origin));
         
         // ACTIVITY VIEWS
         [self.webActivityView showAnimated:NO];
@@ -2640,7 +2646,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 }
 
 - (void) setFeedbackViewIsVisible:(BOOL)makeVisible adjustMessages:(BOOL)shouldAdjustMessages withMessageType:(EventsFeedbackMessageType)messageType eventsSummaryString:(NSString *)eventsSummaryString searchString:(NSString *)searchString animated:(BOOL)animated {
-    NSLog(@"EventsViewController setFeedbackViewIsVisible:(BOOL)%d adjustMessages:(BOOL)%d withMessageType:(EventsFeedbackMessageType)%d eventsSummaryString:(NSString *)%@ animated:(BOOL)%d", makeVisible, shouldAdjustMessages, messageType, eventsSummaryString, animated);
+//    NSLog(@"EventsViewController setFeedbackViewIsVisible:(BOOL)%d adjustMessages:(BOOL)%d withMessageType:(EventsFeedbackMessageType)%d eventsSummaryString:(NSString *)%@ animated:(BOOL)%d", makeVisible, shouldAdjustMessages, messageType, eventsSummaryString, animated);
 
     void(^setMessagesTextBlock)(void) = ^{
         [self.feedbackView setMessagesToShowMessageType:messageType withEventsString:eventsSummaryString searchString:searchString];
@@ -2723,7 +2729,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
         feedbackViewVisibilityBlock();
     }
     
-    NSLog(@"feedbackView.frame = %@ (so that bottom edge of feedbackView is %f points away from the bottom edge of the main view itself)", NSStringFromCGRect(self.feedbackView.frame), self.view.bounds.size.height - CGRectGetMaxY(self.feedbackView.frame));
+//    NSLog(@"feedbackView.frame = %@ (so that bottom edge of feedbackView is %f points away from the bottom edge of the main view itself)", NSStringFromCGRect(self.feedbackView.frame), self.view.bounds.size.height - CGRectGetMaxY(self.feedbackView.frame));
     
 }
 
@@ -2824,7 +2830,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 }
 
 - (void) feedbackViewRetryButtonTouched:(UIButton *)button {
-    NSLog(@"EventsViewController feedbackViewRetryButtonTouched");
+//    NSLog(@"EventsViewController feedbackViewRetryButtonTouched");
     if (button == self.feedbackView.button) {
 //        [self setFeedbackViewIsVisible:self.feedbackViewIsVisible adjustMessages:YES withMessageType:LoadingEvents eventsSummaryString:self.eventsSummaryStringForCurrentSource animated:YES];
         [self showWebLoadingViews];

@@ -60,7 +60,7 @@ static NSString * const URL_BUILDER_GET_EVENTS_LIST_FILTER_POPULAR = @"popular";
         url = [NSURL URLWithString:urlString];
 //        NSLog(@"EventViewController imageURLForEvent %@", urlString);        
     }
-    NSLog(@"URLBuilder imageURLForImageLocation %@", urlString);
+//    NSLog(@"URLBuilder imageURLForImageLocation %@", urlString);
     return url;
 }
 
