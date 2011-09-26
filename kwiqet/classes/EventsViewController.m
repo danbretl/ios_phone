@@ -548,11 +548,13 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     
     if (haveResults) {
         
+        int i = 0;
         // Loop through and process all event dictionaries
         for (NSDictionary * eventSummaryDictionary in eventsDictionaries) {
             
             Event * newEvent = (Event *)[NSEntityDescription insertNewObjectForEntityForName:@"Event" inManagedObjectContext:self.coreDataModel.managedObjectContext];
-            [self.coreDataModel updateEvent:newEvent usingEventSummaryDictionary:eventSummaryDictionary featuredOverride:nil fromSearchOverride:nil];
+            [self.coreDataModel updateEvent:newEvent usingEventSummaryDictionary:eventSummaryDictionary featuredOverride:nil fromSearchOverride:nil orderBrowse:[NSNumber numberWithInt:i] orderSearch:nil];
+            i++;
             
         }
         
@@ -629,11 +631,13 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     
     if (haveResults) {
         
+        int i = 0;
         // Loop through and process all event dictionaries
         for (NSDictionary * eventSummaryDictionary in eventsDictionaries) {
             
             Event * newEvent = (Event *)[NSEntityDescription insertNewObjectForEntityForName:@"Event" inManagedObjectContext:self.coreDataModel.managedObjectContext];
-            [self.coreDataModel updateEvent:newEvent usingEventSummaryDictionary:eventSummaryDictionary featuredOverride:nil fromSearchOverride:[NSNumber numberWithBool:YES]];
+            [self.coreDataModel updateEvent:newEvent usingEventSummaryDictionary:eventSummaryDictionary featuredOverride:nil fromSearchOverride:[NSNumber numberWithBool:YES] orderBrowse:nil orderSearch:[NSNumber numberWithInt:i]];
+            i++;
             
         }
         

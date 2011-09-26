@@ -56,4 +56,7 @@
 @property (nonatomic, readonly) NSDate * startDateDatetime;
 @property (nonatomic, readonly) NSDate * endDateDatetime;
 
+@property (nonatomic, retain) NSNumber * orderBrowse;
+@property (nonatomic, retain) NSNumber * orderSearch;
+
 @end

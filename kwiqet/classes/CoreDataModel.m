@@ -11,7 +11,7 @@
 
 @interface CoreDataModel()
 - (Event *) getFeaturedEventCreateIfDoesNotExist:(BOOL)createIfDoesNotExist;
-- (NSArray *) getEventsForPredicate:(NSPredicate *)predicate;
+- (NSArray *) getEventsForPredicate:(NSPredicate *)predicate sortDescriptors:(NSArray *)sortDescriptors;
 - (void) deleteEventsForPredicate:(NSPredicate *)predicate;
 @end
 
@@ -276,8 +276,8 @@
 // EVENTS - GENERAL //
 //////////////////////
 
-- (NSArray *) getEventsForPredicate:(NSPredicate *)predicate {
-    return [self getAllObjectsForEntityName:@"Event" predicate:predicate sortDescriptors:nil];
+- (NSArray *) getEventsForPredicate:(NSPredicate *)predicate sortDescriptors:(NSArray *)sortDescriptors {
+    return [self getAllObjectsForEntityName:@"Event" predicate:predicate sortDescriptors:sortDescriptors];
 }
 
 - (void) deleteEventsForPredicate:(NSPredicate *)predicate {
@@ -305,7 +305,7 @@
 // REGULAR EVENTS //
 ////////////////////
 
-- (void) updateEvent:(Event *)event usingEventSummaryDictionary:(NSDictionary *)eventSummaryDictionary featuredOverride:(NSNumber *)featuredOverride fromSearchOverride:(NSNumber *)fromSearchOverride {
+- (void) updateEvent:(Event *)event usingEventSummaryDictionary:(NSDictionary *)eventSummaryDictionary featuredOverride:(NSNumber *)featuredOverride fromSearchOverride:(NSNumber *)fromSearchOverride orderBrowse:(NSNumber *)orderBrowse orderSearch:(NSNumber *)orderSearch {
     
     // Get the rest of the raw event data
     NSString * uri = [WebUtil stringOrNil:[eventSummaryDictionary valueForKey:@"event"]];
@@ -330,6 +330,9 @@
     NSNumber * summaryStartTimeDistinctCount = [WebUtil numberOrNil:[eventSummaryDictionary valueForKey:@"start_time_distinct_count"]];
     NSNumber * summaryPlaceDistinctCount = [WebUtil numberOrNil:[eventSummaryDictionary valueForKey:@"place_distinct_count"]];
     NSString * concreteParentCategoryURI = [WebUtil stringOrNil:[eventSummaryDictionary valueForKey:@"concrete_parent_category"]];
+    
+    if (orderBrowse) { event.orderBrowse = orderBrowse; }
+    if (orderSearch) { event.orderSearch = orderSearch; }
     
     event.uri = uri ? uri : event.uri;
     event.title = title ? title : event.title;
@@ -478,14 +481,14 @@
 - (NSArray *) getRegularEvents {
     
     NSPredicate * predicate = [NSPredicate predicateWithFormat:@"featured == %@ && fromSearch == %@", self.coreDataNo, self.coreDataNo];
-    return [self getEventsForPredicate:predicate];
+    return [self getEventsForPredicate:predicate sortDescriptors:[NSArray arrayWithObject:[NSSortDescriptor sortDescriptorWithKey:@"orderBrowse" ascending:YES]]];
     
 }
 
 - (NSArray *) getRegularEventsFromSearch {
     
     NSPredicate * predicate = [NSPredicate predicateWithFormat:@"featured == %@ && fromSearch == %@", self.coreDataNo, self.coreDataYes];
-    return [self getEventsForPredicate:predicate];
+    return [self getEventsForPredicate:predicate sortDescriptors:[NSArray arrayWithObject:[NSSortDescriptor sortDescriptorWithKey:@"orderSearch" ascending:YES]]];
     
 }
 

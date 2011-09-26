@@ -55,7 +55,7 @@
 - (NSDictionary *) getAllCategoriesWithColorInDictionaryWithURIKeys;
 
 // Regular Events
-- (void) updateEvent:(Event *)event usingEventSummaryDictionary:(NSDictionary *)eventSummaryDictionary featuredOverride:(NSNumber *)featuredOverride fromSearchOverride:(NSNumber *)fromSearchOverride;
+- (void) updateEvent:(Event *)event usingEventSummaryDictionary:(NSDictionary *)eventSummaryDictionary featuredOverride:(NSNumber *)featuredOverride fromSearchOverride:(NSNumber *)fromSearchOverride orderBrowse:(NSNumber *)orderBrowse orderSearch:(NSNumber *)orderSearch; // This way of handling "order" is such a hack it's not even funny. Just getting the job done for this old deprecated version of the app.
 - (void) updateEvent:(Event *)event usingEventDictionary:(NSDictionary *)eventDictionary featuredOverride:(NSNumber *)featuredOverride fromSearchOverride:(NSNumber *)fromSearchOverride;
 - (NSArray *) getRegularEvents;
 - (NSArray *) getRegularEventsFromSearch;

@@ -36,6 +36,9 @@
 @dynamic fromSearch;
 @dynamic url;
 
+@dynamic orderBrowse;
+@dynamic orderSearch;
+
 @dynamic summaryAddress;
 @dynamic summaryStartDateEarliestString;
 @dynamic summaryStartTimeEarliestString;

@@ -400,6 +400,7 @@
 		32041B6813AFFD5D0072F95C /* kwiqetAppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = kwiqetAppDelegate.m; sourceTree = "<group>"; };
 		32041B6A13AFFE330072F95C /* YAJL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = YAJL.framework; path = kwiqet/YAJL.framework; sourceTree = "<group>"; };
 		32041B6C13AFFE7B0072F95C /* Entitlements.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Entitlements.plist; sourceTree = "<group>"; };
+		320DC82E1430E71100C456D3 /* kwiqet 008 old.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "kwiqet 008 old.xcdatamodel"; sourceTree = "<group>"; };
 		3211538D13B4E56500DE5163 /* FacebookManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FacebookManager.h; sourceTree = "<group>"; };
 		3211538E13B4E56500DE5163 /* FacebookManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FacebookManager.m; sourceTree = "<group>"; };
 		3211539013B5252600DE5163 /* Contact.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Contact.h; path = classes/Contact.h; sourceTree = "<group>"; };
@@ -1857,9 +1858,10 @@
 				325FE11F13BCD103005BEF4B /* kwiqet 005.xcdatamodel */,
 				32E2C1B013CDEE67001B7EA5 /* kwiqet 006.xcdatamodel */,
 				329CC46D13D5FEA90077C748 /* kwiqet 007.xcdatamodel */,
+				320DC82E1430E71100C456D3 /* kwiqet 008 old.xcdatamodel */,
 				32FD364E13AFF3B6007549B6 /* kwiqet 001.xcdatamodel */,
 			);
-			currentVersion = 329CC46D13D5FEA90077C748 /* kwiqet 007.xcdatamodel */;
+			currentVersion = 320DC82E1430E71100C456D3 /* kwiqet 008 old.xcdatamodel */;
 			path = kwiqet.xcdatamodeld;
 			sourceTree = "<group>";
 			versionGroupType = wrapper.xcdatamodel;
