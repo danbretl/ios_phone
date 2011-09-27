@@ -6,7 +6,6 @@
 //  Copyright 2011 N/A. All rights reserved.
 //
 
-
 #import <UIKit/UIKit.h>
 #import "CoreDataModel.h"
 #import "WebConnector.h"
@@ -157,6 +156,8 @@
     UIAlertView * connectionErrorOnDeleteAlertView;
     // Gesture Recognizers
     UITapGestureRecognizer * tapToHideDrawerGR;
+    // Debugging
+    UITextView * debugTextView;
     
     /////////////////////
     // View Controllers

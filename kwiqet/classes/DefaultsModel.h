@@ -11,6 +11,12 @@
 static NSString * const DM_FACEBOOK_ACCESS_INFO_DICTIONARY_ACCESS_TOKEN_KEY = @"DM_FACEBOOK_ACCESS_INFO_DICTIONARY_ACCESS_TOKEN_KEY";
 static NSString * const DM_FACEBOOK_ACCESS_INFO_DICTIONARY_EXPIRATION_DATE_KEY = @"DM_FACEBOOK_ACCESS_INFO_DICTIONARY_EXPIRATION_DATE_KEY";
 
+typedef enum {
+    ModeNotSet = 0,
+    ModeBrowse = 1,
+    ModeSearch = 2
+} EventsListMode;
+
 @interface DefaultsModel : NSObject {
     
 }
@@ -35,6 +41,9 @@ static NSString * const DM_FACEBOOK_ACCESS_INFO_DICTIONARY_EXPIRATION_DATE_KEY =
 
 + (void) saveCategoryTreeHasBeenRetrieved:(BOOL)hasBeenRetrieved;
 + (BOOL) loadCategoryTreeHasBeenRetrieved;
+
++ (void) saveEventsListMostRecentMode:(EventsListMode)eventsListMode;
++ (EventsListMode) loadEventsListMostRecentMode;
 
 + (void) saveCategoryTreeMostRecentRetrievalDate:(NSDate *)date;
 + (NSDate *) loadCategoryTreeMostRecentRetrievalDate;

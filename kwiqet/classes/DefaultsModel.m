@@ -112,6 +112,24 @@ static NSString * const DM_TAB_BAR_SELECTED_INDEX_KEY = @"DM_TAB_BAR_SELECTED_IN
     return value;
 }
 
++ (void) saveEventsListMostRecentMode:(EventsListMode)eventsListMode {
+    NSUserDefaults * standardUserDefaults = [NSUserDefaults standardUserDefaults];
+    if (standardUserDefaults) {
+        [standardUserDefaults setInteger:eventsListMode forKey:@"EventsListMostRecentMode"];
+    }
+    NSLog(@"DefaultsModel saveEventsListMostRecentMode:%d", eventsListMode);
+}
++ (EventsListMode) loadEventsListMostRecentMode {
+    NSUserDefaults * standardUserDefaults = [NSUserDefaults standardUserDefaults];
+    EventsListMode eventsListMode = ModeNotSet;
+    if (standardUserDefaults) {
+        eventsListMode = [standardUserDefaults integerForKey:@"EventsListMostRecentMode"];
+    }
+    NSLog(@"DefaultsModel loadEventsListMostRecentMode %d", eventsListMode);
+    return eventsListMode;
+}
+
+
 + (void) saveCategoryTreeMostRecentRetrievalDate:(NSDate *)date {
     [self saveDate:date withKey:@"CategoryTreeMostRecentRetrievalDate"];
 }
