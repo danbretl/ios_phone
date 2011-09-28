@@ -9,19 +9,19 @@
 	<key>base_category_uri</key>
 	<string>/api/v1/category/?</string>
 	<key>base_skip_url</key>
-	<string>http://testsv.abextratech.com:8000/tapi/v1/user/?</string>
+	<string>http://kwiqet.com:8000/tapi/v1/user/?</string>
 	<key>base_url</key>
-	<string>http://testsv.abextratech.com</string>
+	<string>http://kwiqet.com</string>
 	<key>base_url_local</key>
 	<string>http://localhost:8000</string>
 	<key>consumer_key</key>
 	<string>rngQ5ZSe3FmzYJ3cgL</string>
 	<key>consumer_secret</key>
 	<string>7fb49b90f41a832f3d5cc12f1b9ed56795c5748a</string>
-	<key>event_summary_uri</key>
-	<string>/api/v1/eventsummary/?</string>
 	<key>event_summary_search_uri</key>
 	<string>/api/v1/eventsummary/search/?</string>
+	<key>event_summary_uri</key>
+	<string>/api/v1/eventsummary/?</string>
 	<key>featured_uri</key>
 	<string>/api/v1/event_featured/?</string>
 	<key>forgot_password_uri</key>
