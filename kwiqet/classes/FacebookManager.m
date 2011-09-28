@@ -56,7 +56,7 @@ static NSString * const FBM_REQUEST_PROFILE_PICTURE = @"FBM_REQUEST_PROFILE_PICT
 
 - (Facebook *)facebook {
     if (facebook == nil) {
-        facebook = [[Facebook alloc] initWithAppId:FB_FACEBOOK_APP_ID];
+        facebook = [[Facebook alloc] initWithAppId:FB_FACEBOOK_APP_ID andDelegate:self];
     }
     return facebook;
 }
@@ -108,7 +108,7 @@ static NSString * const FBM_REQUEST_PROFILE_PICTURE = @"FBM_REQUEST_PROFILE_PICT
 - (void)authorizeWithStandardPermissionsAndDelegate:(id<FBSessionDelegate>)delegate {
     NSLog(@"FacebookManager authorizeWithStandardPermissionsAndDelegate");
     NSArray * permissions = [NSArray arrayWithObjects:@"user_events", @"create_event", @"rsvp_event", @"user_likes", @"user_interests", @"user_religion_politics", @"offline_access", nil];
-    [self.fb authorize:permissions delegate:delegate];
+    [self.fb authorize:permissions];
 }
 
 - (void)fbDidLogin {
@@ -195,7 +195,8 @@ static NSString * const FBM_REQUEST_PROFILE_PICTURE = @"FBM_REQUEST_PROFILE_PICT
     }
     
     self.currentRequestType = FBM_REQUEST_INVITE_FRIENDS_TO_EVENT;
-    self.currentRequest = [self.fb requestWithMethodName:@"events.invite" andParams:[NSMutableDictionary dictionaryWithObjectsAndKeys:eventID, @"eid", friendIDs, @"uids", personalMessage, @"personal_message", nil] andHttpMethod:@"POST" andDelegate:self];
+//    self.currentRequest = [self.fb requestWithMethodName:@"events.invite" andParams:[NSMutableDictionary dictionaryWithObjectsAndKeys:eventID, @"eid", friendIDs, @"uids", personalMessage, @"personal_message", nil] andHttpMethod:@"POST" andDelegate:self];
+    self.currentRequest = [self.fb requestWithGraphPath:[NSString stringWithFormat:@"/%@/invited", eventID] andParams:[NSMutableDictionary dictionaryWithObjectsAndKeys:friendIDs, @"users", nil] andHttpMethod:@"POST" andDelegate:self];
     
 }
 
