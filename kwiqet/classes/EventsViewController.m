@@ -232,7 +232,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 - (void) swipeUpToHideDrawer:(UISwipeGestureRecognizer *)swipeGesture;
 - (void) tapToHideDrawer:(UITapGestureRecognizer *)tapGesture;
 - (void) toggleDrawerAnimated:(BOOL)animated;
-- (void) toggleSearchModeAnimated:(BOOL)animated;
+- (void) toggleSearchModeAnimated:(BOOL)animated shouldMakeSearchTextFieldActiveWhenTogglingOn:(BOOL)shouldMakeSearchTextFieldActive shouldFlushQueryAndFiltersWhenTogglingOff:(BOOL)shouldFlushQueryAndFilters; // What an ugly method! Should be split up into two, one for on, one for off.
 - (void) updateActiveFilterHighlights;
 - (void) updateFilter:(EventsFilter *)filter buttonImageForFilterOption:(EventsFilterOption *)filterOption;
 - (void) updateFilterOptionButtonStatesOldSelected:(EventsFilterOption *)oldSelectedOption newSelected:(EventsFilterOption *)newSelectedOption;
@@ -724,6 +724,8 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     self.events = [self.eventsWebQuery.eventResultsEventsInOrder.mutableCopy autorelease];
     self.eventsWebQueryFromSearch = [self.coreDataModel getMostRecentEventsWebQueryWithSearchTerm];
     self.eventsFromSearch = [self.eventsWebQueryFromSearch.eventResultsEventsInOrder.mutableCopy autorelease];
+    NSLog(@"eventsWebQueryFromSearch was just updated in viewDidLoad and is now %@", self.eventsWebQueryFromSearch);
+    NSLog(@"eventsWebQueryFromSearch was actually just pulled in for the first time and it is %@ which is notable right now *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***", self.eventsWebQueryFromSearch);
     
     // Make some decisions about showing browse mode vs. search mode
     EventsListMode mostRecentEventsListMode = [DefaultsModel loadEventsListMostRecentMode];
@@ -735,9 +737,16 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
         
     // Block with which to find the index of a given filter option in a filter's options array, given ann array of filters and the desired filter code
     NSUInteger(^indexOfEventsFilterOptionBlock)(NSString *, NSArray *, NSString *)=^(NSString * filterCode, NSArray * filtersArray, NSString * filterOptionCode){
+        NSLog(@"indexOfEventsFilterOptionBlock with filterCode=%@, filtersArray=%@, filterOptionCode=%@", filterCode, filtersArray, filterOptionCode);
         EventsFilter * filter = [self filterForFilterCode:filterCode inFiltersArray:filtersArray];
-        EventsFilterOption * foundFO = [[filter.options filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"SELF.code == %@", filterOptionCode]] objectAtIndex:0];
-        return [filter.options indexOfObject:foundFO];
+        NSArray * filterOptionsFound = [filter.options filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"SELF.code == %@", filterOptionCode]];
+        EventsFilterOption * foundFO = nil;
+        NSUInteger foundIndex = 0;
+        if (filterOptionsFound && filterOptionsFound.count > 0) {
+            foundFO = [filterOptionsFound objectAtIndex:0];
+            foundIndex = [filter.options indexOfObject:foundFO];
+        }
+        return foundIndex;
     };
     
     // Do some initial setup for browse mode
@@ -752,6 +761,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     
     // Set a bunch of indexes from above
     if (self.eventsWebQuery != nil) {
+        NSLog(@"Figuring out indexes for selected filter options for BROWSE");
         // indexOfActiveBrowseFilter... // Skipping for now. Not that important.
         categoryFilterURI = ((Category *)[self.eventsWebQuery.filterCategories anyObject]).uri; // THIS WILL NEED TO CHANGE WHEN WE START SUPPORTING MULTIPLE SELECTED CATEGORIES. THIS WILL NEED TO CHANGE WHEN WE START SUPPORTING MULTIPLE SELECTED CATEGORIES. THIS WILL NEED TO CHANGE WHEN WE START SUPPORTING MULTIPLE SELECTED CATEGORIES.
         indexOfSelectedCategoryFilterOption = indexOfEventsFilterOptionBlock(EVENTS_FILTER_CATEGORIES, self.filters, [EventsFilterOption eventsFilterOptionCategoryCodeForCategoryURI:categoryFilterURI]);
@@ -803,66 +813,75 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     
     [self updateViewsFromCurrentSourceDataWhichShouldBePopulated:self.events.count > 0 reasonIfNot:EVENTS_NO_RESULTS_REASON_NO_RESULTS animated:NO];
     
-    if (shouldDisplaySearchMode) {
-        [self toggleSearchModeAnimated:NO];
+    // Search setup
+    int indexOfActiveSearchFilter = 0;
+    int indexOfSelectedDateSearchFilterOption = dateSearchOptions.count - 1;
+    int indexOfSelectedLocationSearchFilterOption = locationSearchOptions.count - 1;
+    int indexOfSelectedTimeSearchFilterOption = timeSearchOptions.count - 1;
+    NSString * locationStringSearch = nil;
+    NSString * searchTerm = nil;
+    
+    // indexOfActiveSearchFilter... // Skipping for now. Not that important.
+    if (self.eventsWebQueryFromSearch != nil) {
+        NSLog(@"Figuring out indexes for selected filter options for SEARCH");
+        NSLog(@"Using eventsWebQueryFromSearch=%@", self.eventsWebQueryFromSearch);
+        indexOfSelectedDateSearchFilterOption = indexOfEventsFilterOptionBlock(EVENTS_FILTER_DATE, self.filtersSearch, self.eventsWebQueryFromSearch.filterDateBucketString);
+        indexOfSelectedTimeSearchFilterOption = indexOfEventsFilterOptionBlock(EVENTS_FILTER_TIME, self.filtersSearch, self.eventsWebQueryFromSearch.filterTimeBucketString);
+        indexOfSelectedLocationSearchFilterOption = indexOfEventsFilterOptionBlock(EVENTS_FILTER_LOCATION, self.filtersSearch, self.eventsWebQueryFromSearch.filterDistanceBucketString);
+        locationStringSearch = self.eventsWebQueryFromSearch.filterLocationString;
+        searchTerm = self.eventsWebQueryFromSearch.searchTerm;
     }
     
+    // Set the search filter settings
+    self.activeSearchFilterInUI = [self.filtersSearch objectAtIndex:indexOfActiveSearchFilter];
+    self.selectedDateSearchFilterOption = [dateSearchOptions objectAtIndex:indexOfSelectedDateSearchFilterOption];
+    self.selectedLocationSearchFilterOption = [locationSearchOptions objectAtIndex:indexOfSelectedLocationSearchFilterOption];
+    self.selectedTimeSearchFilterOption = [timeSearchOptions objectAtIndex:indexOfSelectedTimeSearchFilterOption];
     
+    if (self.eventsWebQueryFromSearch == nil) {
+        self.eventsWebQueryFromSearch = [NSEntityDescription insertNewObjectForEntityForName:@"EventsWebQuery" inManagedObjectContext:self.coreDataModel.managedObjectContext];
+        /* THE FOLLOWING CODE IS DUPLICATED IN ...viewDidLoad..., ...toggleSearchMode..., and ...searchExecutionRequestedByUser... */
+        self.eventsWebQueryFromSearch.searchTerm = searchTerm;
+        self.eventsWebQueryFromSearch.filterDateBucketString = self.selectedDateSearchFilterOption.code;
+        self.eventsWebQueryFromSearch.filterDistanceBucketString = self.selectedLocationSearchFilterOption.code;
+        self.eventsWebQueryFromSearch.filterLocationString = self.dvLocationSearchTextField.text;
+        self.eventsWebQueryFromSearch.filterTimeBucketString = self.selectedTimeSearchFilterOption.code;
+        [self.coreDataModel coreDataSave];
+        self.eventsFromSearch = [self.eventsWebQueryFromSearch.eventResultsEventsInOrder.mutableCopy autorelease];
+        /* THE PREVIOUS CODE IS DUPLICATED IN ...viewDidLoad..., ...toggleSearchMode..., and ...searchExecutionRequestedByUser... */
+        NSLog(@"eventsWebQueryFromSearch was just updated in viewDidLoad and is now %@", self.eventsWebQueryFromSearch);
+    }
     
+    // Adjusted search filters... Sort of faking it for now. If any of the search filters were adjusted, we'll just pick one (that was adjusted) to be the most recently adjusted.
+    self.adjustedSearchFiltersOrdered = [NSMutableArray arrayWithCapacity:self.filtersSearch.count];
+    [self updateAdjustedSearchFiltersOrderedWithAdjustedFilter:[self filterForFilterCode:EVENTS_FILTER_LOCATION inFiltersArray:self.filtersSearch] selectedFilterOption:self.selectedLocationSearchFilterOption];
+    [self updateAdjustedSearchFiltersOrderedWithAdjustedFilter:[self filterForFilterCode:EVENTS_FILTER_TIME inFiltersArray:self.filtersSearch] selectedFilterOption:self.selectedTimeFilterOption];
+    [self updateAdjustedSearchFiltersOrderedWithAdjustedFilter:[self filterForFilterCode:EVENTS_FILTER_DATE inFiltersArray:self.filtersSearch] selectedFilterOption:self.selectedDateFilterOption];
     
+    // Set the feedback strings
+    self.eventsSummaryStringSearch = [self eventsSummaryStringForSource:EVENTS_SOURCE_SEARCH];
     
-//    // Search setup
-//    int indexOfActiveSearchFilter = 0;
-//    int indexOfSelectedDateSearchFilterOption = dateSearchOptions.count - 1;
-//    int indexOfSelectedLocationSearchFilterOption = locationSearchOptions.count - 1;
-//    int indexOfSelectedTimeSearchFilterOption = timeSearchOptions.count - 1;
-//    NSString * locationStringSearch = nil;
-//    NSString * searchTerm = nil;
-//
-//    if (self.eventsWebQueryFromSearch != nil) {
-//        // indexOfActiveSearchFilter... // Skipping for now. Not that important.
-//        indexOfSelectedDateSearchFilterOption = indexOfEventsFilterOptionBlock(EVENTS_FILTER_DATE, self.filtersSearch, self.eventsWebQueryFromSearch.filterDateBucketString);
-//        indexOfSelectedTimeSearchFilterOption = indexOfEventsFilterOptionBlock(EVENTS_FILTER_TIME, self.filtersSearch, self.eventsWebQueryFromSearch.filterTimeBucketString);
-//        indexOfSelectedLocationSearchFilterOption = indexOfEventsFilterOptionBlock(EVENTS_FILTER_LOCATION, self.filtersSearch, self.eventsWebQueryFromSearch.filterDistanceBucketString);
-//        locationStringSearch = self.eventsWebQueryFromSearch.filterLocationString;
-//        searchTerm = self.eventsWebQueryFromSearch.searchTerm;
-//    }
-//    
-//    // Set the search filter settings
-//    self.activeSearchFilterInUI = [self.filtersSearch objectAtIndex:indexOfActiveSearchFilter];
-//    self.selectedDateSearchFilterOption = [dateSearchOptions objectAtIndex:indexOfSelectedDateSearchFilterOption];
-//    self.selectedLocationSearchFilterOption = [locationSearchOptions objectAtIndex:indexOfSelectedLocationSearchFilterOption];
-//    self.selectedTimeSearchFilterOption = [timeSearchOptions objectAtIndex:indexOfSelectedTimeSearchFilterOption];
-//    
-//    // Adjusted search filters... Sort of faking it for now. If any of the search filters were adjusted, we'll just pick one (that was adjusted) to be the most recently adjusted.
-//    self.adjustedSearchFiltersOrdered = [NSMutableArray arrayWithCapacity:self.filtersSearch.count];
-//    [self updateAdjustedSearchFiltersOrderedWithAdjustedFilter:[self filterForFilterCode:EVENTS_FILTER_LOCATION inFiltersArray:self.filtersSearch] selectedFilterOption:self.selectedLocationSearchFilterOption];
-//    [self updateAdjustedSearchFiltersOrderedWithAdjustedFilter:[self filterForFilterCode:EVENTS_FILTER_TIME inFiltersArray:self.filtersSearch] selectedFilterOption:self.selectedTimeFilterOption];
-//    [self updateAdjustedSearchFiltersOrderedWithAdjustedFilter:[self filterForFilterCode:EVENTS_FILTER_DATE inFiltersArray:self.filtersSearch] selectedFilterOption:self.selectedDateFilterOption];
-//    
-//    // Set the feedback strings
-//    self.eventsSummaryStringSearch = [self eventsSummaryStringForSource:EVENTS_SOURCE_SEARCH];
-//    
-//
-//    
-//    // ...Now, if we should be in search mode, just call our toggleSearchMode method. All the views start in browse mode positions anyway, so we kind of have to do this.
-//    if (priorEventsWebQueryExists &&
-//        shouldDisplaySearchMode) {
-//        [self toggleSearchModeAnimated:NO];
-//        self.searchTextField.text = searchTerm;
-////        self.eventsFromSearch = [self.eventsWebQueryFromSearch.eventResultsEventsInOrder.mutableCopy autorelease];
-//        [self updateViewsFromCurrentSourceDataWhichShouldBePopulated:self.eventsFromSearch.count > 0 reasonIfNot:EVENTS_NO_RESULTS_REASON_NO_RESULTS];
-//        NSLog(@"Just set self.searchTextField.text to %@, so its value is reported now as %@", searchTerm, self.searchTextField.text);
-//        // Update filter option button states for search
-//        [self updateFilterOptionButtonStatesOldSelected:nil newSelected:self.selectedDateSearchFilterOption];
-//        [self updateFilterOptionButtonStatesOldSelected:nil newSelected:self.selectedLocationSearchFilterOption];
-//        [self updateFilterOptionButtonStatesOldSelected:nil newSelected:self.selectedTimeSearchFilterOption];
-//        // Update filter button states for search
-//        [self updateFilter:[self filterForFilterCode:EVENTS_FILTER_DATE inFiltersArray:self.filtersSearch]buttonImageForFilterOption:self.selectedDateSearchFilterOption];
-//        [self updateFilter:[self filterForFilterCode:EVENTS_FILTER_TIME inFiltersArray:self.filtersSearch]buttonImageForFilterOption:self.selectedTimeSearchFilterOption];
-//        [self updateFilter:[self filterForFilterCode:EVENTS_FILTER_LOCATION inFiltersArray:self.filtersSearch]buttonImageForFilterOption:self.selectedLocationSearchFilterOption];
-//    }
-//    
+    if (shouldDisplaySearchMode) {
+                
+        // Update filter option button states for search
+        [self updateFilterOptionButtonStatesOldSelected:nil newSelected:self.selectedDateSearchFilterOption];
+        [self updateFilterOptionButtonStatesOldSelected:nil newSelected:self.selectedLocationSearchFilterOption];
+        [self updateFilterOptionButtonStatesOldSelected:nil newSelected:self.selectedTimeSearchFilterOption];
+        // Update filter button states for search
+        [self updateFilter:[self filterForFilterCode:EVENTS_FILTER_DATE inFiltersArray:self.filtersSearch]buttonImageForFilterOption:self.selectedDateSearchFilterOption];
+        [self updateFilter:[self filterForFilterCode:EVENTS_FILTER_TIME inFiltersArray:self.filtersSearch]buttonImageForFilterOption:self.selectedTimeSearchFilterOption];
+        [self updateFilter:[self filterForFilterCode:EVENTS_FILTER_LOCATION inFiltersArray:self.filtersSearch]buttonImageForFilterOption:self.selectedLocationSearchFilterOption];
+        
+        // Switch to search mode.
+        [self toggleSearchModeAnimated:NO shouldMakeSearchTextFieldActiveWhenTogglingOn:(self.eventsFromSearch.count == 0) shouldFlushQueryAndFiltersWhenTogglingOff:YES];
+        
+        // Set the search text field term
+        self.searchTextField.text = searchTerm;
+        
+        [self updateViewsFromCurrentSourceDataWhichShouldBePopulated:self.eventsFromSearch.count > 0 reasonIfNot:EVENTS_NO_RESULTS_REASON_NO_RESULTS animated:NO];
+        
+    }
+    
 //    if (!priorEventsWebQueryExists || (!mostRecentEventsWebQueryWasFromSearch && eventsWebQueryToShow.eventResults.count == 0)) {
 //        // Connect to web and try to get a new set of results (IF we are in browse mode - if we're in search mode, just sit tight).
 //        [self setFeedbackViewIsVisible:YES adjustMessages:YES withMessageType:LoadingEvents eventsSummaryString:self.eventsSummaryStringBrowse searchString:nil animated:NO];
@@ -877,14 +896,10 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(loginActivity:) name:@"loginActivity" object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(behaviorWasReset:) name:@"learningBehaviorWasReset" object:nil];
     
-    
-    
-    
-    
-    
-    
     ////////////////////
     // DEBUGGING BELOW
+    
+    BOOL debugging = NO;
     
     debugTextView = [[UITextView alloc] initWithFrame:CGRectMake(self.tableView.bounds.size.width / 2.0, 0, self.tableView.bounds.size.width / 2.0, self.tableView.bounds.size.height)];
     self.debugTextView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
@@ -901,6 +916,8 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     [debugText appendFormat:@"--- %@\n", self.eventsWebQueryForCurrentSource];
     self.debugTextView.text = debugText;
     NSLog(@"%@", debugText);
+    
+    self.debugTextView.hidden = !debugging;
     
     // DEBUGGING ABOVE
     ////////////////////
@@ -1141,9 +1158,9 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
         if (self.isSearchOn) {
             // Not going to do anything on this path for now... Just leave the list blank?
         } else {
-            NSLog(@"No events for current source, going to web-get events. No events for current source, going to web-get events. No events for current source, going to web-get events. No events for current source, going to web-get events. No events for current source, going to web-get events. No events for current source, going to web-get events. No events for current source, going to web-get events. No events for current source, going to web-get events. No events for current source, going to web-get events. No events for current source, going to web-get events.");
-            [self setFeedbackViewIsVisible:self.feedbackViewIsVisible adjustMessages:YES withMessageType:LoadingEvents eventsSummaryString:self.eventsSummaryStringBrowse searchString:nil animated:YES];
-            [self webConnectGetEventsListWithCurrentOldFilterAndCategory];
+//            NSLog(@"No events for current source, going to web-get events. No events for current source, going to web-get events. No events for current source, going to web-get events. No events for current source, going to web-get events. No events for current source, going to web-get events. No events for current source, going to web-get events. No events for current source, going to web-get events. No events for current source, going to web-get events. No events for current source, going to web-get events. No events for current source, going to web-get events.");
+//            [self setFeedbackViewIsVisible:self.feedbackViewIsVisible adjustMessages:YES withMessageType:LoadingEvents eventsSummaryString:self.eventsSummaryStringBrowse searchString:nil animated:YES];
+//            [self webConnectGetEventsListWithCurrentOldFilterAndCategory];
         }
     } else {
         // Not worried about this path currently...
@@ -1362,12 +1379,16 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
             self.eventsWebQueryFromSearch.queryDatetime != nil) {
             self.eventsWebQueryFromSearch = [NSEntityDescription insertNewObjectForEntityForName:@"EventsWebQuery" inManagedObjectContext:self.coreDataModel.managedObjectContext];            
         }
+        /* THE FOLLOWING CODE IS DUPLICATED IN ...viewDidLoad..., ...toggleSearchMode..., and ...searchExecutionRequestedByUser... */
         self.eventsWebQueryFromSearch.searchTerm = searchTerm;
         self.eventsWebQueryFromSearch.filterDateBucketString = self.selectedDateSearchFilterOption.code;
         self.eventsWebQueryFromSearch.filterDistanceBucketString = self.selectedLocationSearchFilterOption.code;
         self.eventsWebQueryFromSearch.filterLocationString = self.dvLocationSearchTextField.text;
         self.eventsWebQueryFromSearch.filterTimeBucketString = self.selectedTimeSearchFilterOption.code;
         [self.coreDataModel coreDataSave];
+        self.eventsFromSearch = [self.eventsWebQueryFromSearch.eventResultsEventsInOrder.mutableCopy autorelease];
+        /* THE PREVIOUS CODE IS DUPLICATED IN ...viewDidLoad..., ...toggleSearchMode..., and ...searchExecutionRequestedByUser... */
+        NSLog(@"eventsWebQueryFromSearch was just updated in searchExecutionRequestedByUser and is now %@", self.eventsWebQueryFromSearch);
         
         [self setFeedbackViewIsVisible:YES adjustMessages:YES withMessageType:LoadingEvents eventsSummaryString:self.eventsSummaryStringSearch searchString:self.searchTextField.text animated:YES];
         [self showWebLoadingViews];
@@ -1465,11 +1486,14 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     BOOL showTableFooterView = eventsRetrieved && !self.isSearchOn;
     self.tableView.tableFooterView.alpha = showTableFooterView ? 1.0 : 0.0;
     self.tableView.tableFooterView.userInteractionEnabled = showTableFooterView;
+    NSLog(@"setTableViewScrollable from updateViews, could be sending NO");
     [self setTableViewScrollable:eventsRetrieved selectable:eventsRetrieved];
     if (eventsRetrieved) {
         // Events were retrieved... They will be displayed.
+        NSLog(@"foo foo foo foo foo foo foo foo foo foo foo foo foo foo foo foo foo foo foo foo foo foo foo foo foo foo foo foo foo foo foo foo foo foo foo foo foo foo foo foo foo foo foo foo foo foo foo foo foo foo foo foo foo foo foo foo foo foo foo foo foo foo foo foo foo foo foo foo foo foo %d", self.feedbackViewIsVisible);
         [self setFeedbackViewIsVisible:self.feedbackViewIsVisible adjustMessages:YES withMessageType:LookingAtEvents eventsSummaryString:self.eventsSummaryStringForCurrentSource searchString:(self.isSearchOn ? self.searchTextField.text : nil) animated:animated];
     } else {
+        NSLog(@"oh no oh no oh no oh no oh no oh no oh no oh no oh no oh no oh no oh no oh no oh no oh no oh no oh no oh no oh no oh no oh no oh no oh no oh no oh no oh no oh no oh no oh no oh no oh no oh no oh no oh no oh no oh no oh no oh no oh no oh no oh no oh no oh no oh no oh no oh no oh no oh no oh no oh no oh no oh no oh no oh no oh no oh no oh no oh no oh no oh no ");
         // No events were retrieved. Respond accordingly, depending on the reason.
         if ([reasonIfNotPopulated isEqualToString:EVENTS_NO_RESULTS_REASON_NO_RESULTS]) {
             if (self.isSearchOn) {
@@ -1502,73 +1526,6 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     [self hideWebLoadingViews];
     
 }
-
-//- (void) showProblemViewNoEventsForOldFilter:(NSString *)forOldFilterString categoryTitle:(NSString *)categoryTitle animated:(BOOL)animated {
-//    
-//    NSString * message = nil;
-//    
-//    if (forOldFilterString && categoryTitle) {
-//        message = [NSString stringWithFormat:@"Sorry, we couldn't find any\n%@ events for you\nin %@.\nTry a different combination.", forOldFilterString/*[forFilterString capitalizedString]*/, categoryTitle];
-//    } else if (forOldFilterString || categoryTitle) {
-//        NSString * modifier = forOldFilterString ? forOldFilterString : categoryTitle;
-//        message = [NSString stringWithFormat:@"Sorry, we couldn't find any\n%@ events for you.\nPlease try again.", modifier];        
-//    } else {
-//        message = @"Sorry, we couldn't find any events for you at this time. Please try again.";
-//    }
-//    
-//    [self setProblemViewVisible:YES withMessage:message animated:animated];
-//    
-//}
-//
-//- (void) showProblemViewBadConnectionAnimated:(BOOL)animated {
-//    NSString * message = WEB_CONNECTION_ERROR_MESSAGE_STANDARD;
-//    [self setProblemViewVisible:YES withMessage:message animated:animated];
-//}
-//
-//- (void) hideProblemViewAnimated:(BOOL)animated {
-//    [self setProblemViewVisible:NO withMessage:nil animated:animated];
-//}
-//
-//- (void) showProblemViewAnimated:(BOOL)animated {
-//    [self setProblemViewVisible:YES withMessage:nil animated:animated];
-//}
-//
-//- (void) setProblemViewVisible:(BOOL)showView withMessage:(NSString *)message animated:(BOOL)animated {
-//
-//    void (^replaceTextBlock)(void) = ^{
-//        if (message) {
-//            self.problemLabel.text = message;
-//            CGRect tempFrame = self.problemLabel.frame;
-//            tempFrame.size.width = self.problemView.frame.size.width;
-//            self.problemLabel.frame = tempFrame;
-//            [self.problemLabel sizeToFit];
-//            tempFrame = self.problemLabel.frame;
-//            tempFrame.origin.x = floorf((self.problemView.frame.size.width - tempFrame.size.width) / 2.0);
-//            self.problemLabel.frame = tempFrame;
-//        }
-//    };
-//    
-//    void (^alphaChangeBlock)(void) = ^{
-//        self.problemView.alpha = showView ? 1.0 : 0.0;
-//    };
-//    
-//    if (animated) {
-//        if (showView) {
-//            replaceTextBlock();
-//        }
-//        [UIView animateWithDuration:0.25 animations:alphaChangeBlock completion:^(BOOL finished) {
-//            if (!showView) { replaceTextBlock(); }
-//        }];
-//    } else {
-//        // Order shouldn't matter when not animated...
-//        replaceTextBlock();
-//        alphaChangeBlock();
-//    }
-//    
-//    self.problemView.userInteractionEnabled = showView;
-////    [self setTableViewScrollable:!showView selectable:!showView];
-//    
-//}
 
 - (void) setDrawerReloadIndicatorViewIsVisible:(BOOL)isVisible animated:(BOOL)animated { // This method actually can't animate currently, given our new reload indicator style. We could update this later, although I'm not even sure we want to. A hard transition is fine for now.
 
@@ -1646,6 +1603,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 }
 
 - (void) setTableViewScrollable:(BOOL)scrollable selectable:(BOOL)selectable {
+    NSLog(@"setTableViewScrollable:(BOOL)scrollable=%d selectable:(BOOL)selectable=%d", scrollable, selectable);
     self.tableView.scrollEnabled = scrollable;
     self.tableView.allowsSelection = selectable;
 }
@@ -1765,6 +1723,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
             pushableContainerViewFrame.origin.y += self.drawerScrollView.contentSize.height;
             self.pushableContainerView.frame = pushableContainerViewFrame;
             self.pushableContainerShadowCheatView.frame = self.pushableContainerView.frame;
+            NSLog(@"setTableViewScrollable from toggleSearch, sending NO");
             [self setTableViewScrollable:NO selectable:NO];
             self.filtersContainerShadowCheatView.alpha = 0.0;
             self.filtersContainerShadowCheatWayBelowView.alpha = 1.0;
@@ -1788,6 +1747,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
             self.pushableContainerView.frame = pushableContainerViewFrame;
             self.pushableContainerShadowCheatView.frame = self.pushableContainerView.frame;
             BOOL haveEvents = self.eventsForCurrentSource.count > 0;
+            NSLog(@"setTableViewScrollable from toggleDrawer, could be sending NO");
             [self setTableViewScrollable:haveEvents selectable:haveEvents];
             self.filtersContainerShadowCheatView.alpha = 1.0;
             self.filtersContainerShadowCheatWayBelowView.alpha = 0.0;
@@ -1822,7 +1782,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     
 }
 
-- (void) toggleSearchModeAnimated:(BOOL)animated {
+- (void) toggleSearchModeAnimated:(BOOL)animated shouldMakeSearchTextFieldActiveWhenTogglingOn:(BOOL)shouldMakeSearchTextFieldActive shouldFlushQueryAndFiltersWhenTogglingOff:(BOOL)shouldFlushQueryAndFilters {
     
     float duration = animated ? 0.25 : 0.0;
     
@@ -1837,10 +1797,6 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     NSLog(@"saveEventsListMostRecentMode %d", (self.isSearchOn ? ModeSearch : ModeBrowse));
     
     if (self.isSearchOn) {
-        // New mode is search on
-        // Clear all previous search results / terms etc
-        self.eventsWebQueryFromSearch = [NSEntityDescription insertNewObjectForEntityForName:@"EventsWebQuery" inManagedObjectContext:self.coreDataModel.managedObjectContext];
-        self.eventsFromSearch = nil;
         self.tableViewCoverView.frame = CGRectMake(self.tableView.frame.origin.x, self.tableView.frame.origin.y + self.tableView.tableHeaderView.bounds.size.height, self.tableView.frame.size.width, self.pushableContainerView.frame.size.height - self.tableView.tableHeaderView.bounds.size.height);
         // Set table view content offset to top
         self.tableView.contentOffset = CGPointMake(0, 0);
@@ -1882,7 +1838,9 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
                              [UIView animateWithDuration:duration animations:^{
                                  // Make the search text field first responder, thus bringing the keyboard up
                                  [self resignFirstResponder];
-                                 [self.searchTextField becomeFirstResponder];
+                                 if (shouldMakeSearchTextFieldActive) {
+                                     [self.searchTextField becomeFirstResponder];
+                                 }
                                  [self adjustSearchViewsToShowButtons:YES];
                                  // Reveal filters bar on screen
                                  [self setFiltersBarViewsOriginY:CGRectGetMaxY(self.searchContainerView.frame) adjustDrawerViewsAccordingly:YES];
@@ -1891,7 +1849,10 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
                                  // Move pushable container down
                                  [self setPushableContainerViewsOriginY:CGRectGetMaxY(self.filtersContainerView.frame) adjustHeightToFillMainView:YES];
                                  // Move summary string on screen
-//                                 [self setFeedbackViewIsVisible:YES adjustMessages:YES withMessageType:LoadingEvents eventsSummaryString:self.eventsSummaryStringSearch animated:animated];
+                                 if (!shouldMakeSearchTextFieldActive && 
+                                     self.eventsFromSearch.count > 0) {
+                                     [self setFeedbackViewIsVisible:YES adjustMessages:YES withMessageType:LookingAtEvents eventsSummaryString:self.eventsSummaryStringSearch searchString:self.searchTextField.text animated:animated];
+                                 }
                                  // Fade table view in
                                  self.tableViewCoverView.alpha = 0.0;
                              }];
@@ -1953,10 +1914,29 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
                                  // Fade table view in
                                  self.tableViewCoverView.alpha = 0.0;
                                  BOOL haveResult = self.eventsForCurrentSource.count > 0;
+                                 NSLog(@"setTableViewScrollable from toggleSearch, could be sending NO");
                                  [self setTableViewScrollable:haveResult selectable:haveResult];
                              }];
                              // Search filters clean-up
-                             [self resetSearchFilters];
+                             if (shouldFlushQueryAndFilters) {
+                                 [self resetSearchFilters];
+                                 if (self.eventsWebQueryFromSearch == nil ||
+                                     self.eventsWebQueryFromSearch.queryDatetime != nil) {
+                                     self.eventsWebQueryFromSearch = [NSEntityDescription insertNewObjectForEntityForName:@"EventsWebQuery" inManagedObjectContext:self.coreDataModel.managedObjectContext];
+                                     NSLog(@"eventsWebQueryFromSearch was just made anew in toggleSearchMode");
+                                 }
+                                 NSString * searchTerm = self.searchTextField.text;
+                                 /* THE FOLLOWING CODE IS DUPLICATED IN ...viewDidLoad..., ...toggleSearchMode..., and ...searchExecutionRequestedByUser... */
+                                 self.eventsWebQueryFromSearch.searchTerm = searchTerm;
+                                 self.eventsWebQueryFromSearch.filterDateBucketString = self.selectedDateSearchFilterOption.code;
+                                 self.eventsWebQueryFromSearch.filterDistanceBucketString = self.selectedLocationSearchFilterOption.code;
+                                 self.eventsWebQueryFromSearch.filterLocationString = self.dvLocationSearchTextField.text;
+                                 self.eventsWebQueryFromSearch.filterTimeBucketString = self.selectedTimeSearchFilterOption.code;
+                                 [self.coreDataModel coreDataSave];
+                                 self.eventsFromSearch = [self.eventsWebQueryFromSearch.eventResultsEventsInOrder.mutableCopy autorelease];
+                                 /* THE PREVIOUS CODE IS DUPLICATED IN ...viewDidLoad..., ...toggleSearchMode..., and ...searchExecutionRequestedByUser... */
+                                 NSLog(@"eventsWebQueryFromSearch was just updated in toggleSearchMode and is now %@", self.eventsWebQueryFromSearch);
+                             }
                          }];
     }
 }
@@ -1972,8 +1952,11 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     EventsFilter * timeFilter = [self filterForFilterCode:EVENTS_FILTER_TIME inFiltersArray:self.filtersSearch];
     // Set the new selected filter options (all to most general option)
     self.selectedDateSearchFilterOption = dateFilter.mostGeneralOption;
+    NSLog(@"resetSearchFilters set selectedDateSearchFilterOption to %@ (code %@)", self.selectedDateSearchFilterOption, self.selectedDateSearchFilterOption.code);
     self.selectedLocationSearchFilterOption = locationFilter.mostGeneralOption;
+    NSLog(@"resetSearchFilters set selectedLocationSearchFilterOption to %@ (code %@)", self.selectedLocationSearchFilterOption, self.selectedLocationSearchFilterOption.code);
     self.selectedTimeSearchFilterOption = timeFilter.mostGeneralOption;
+    NSLog(@"resetSearchFilters set selectedTimeSearchFilterOption to %@ (code %@)", self.selectedTimeSearchFilterOption, self.selectedTimeSearchFilterOption.code);
     // Update the filter option buttons UI
     [self updateFilterOptionButtonStatesOldSelected:oldDateSFO newSelected:self.selectedDateSearchFilterOption];
     [self updateFilterOptionButtonStatesOldSelected:oldLocationSFO newSelected:self.selectedLocationSearchFilterOption];
@@ -1994,7 +1977,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     if (self.isDrawerOpen) {
         [self toggleDrawerAnimated:YES];
     }
-    [self toggleSearchModeAnimated:YES];
+    [self toggleSearchModeAnimated:YES shouldMakeSearchTextFieldActiveWhenTogglingOn:YES shouldFlushQueryAndFiltersWhenTogglingOff:YES];
 }
 
 - (BOOL)textFieldShouldReturn:(UITextField *)textField {
@@ -2048,6 +2031,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
+    NSLog(@"%d rows in section %d", self.eventsForCurrentSource.count, section);
     return self.eventsForCurrentSource.count;
 }
 
@@ -2066,6 +2050,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 }
 
 - (void) configureCell:(EventTableViewCell *)cell forRowAtIndexPath:(NSIndexPath *)indexPath {
+    NSLog(@"configureCell for %d-%d", indexPath.section, indexPath.row);
     
     Event * event = (Event *)[self.eventsForCurrentSource objectAtIndex:indexPath.row];
     
@@ -2302,7 +2287,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     //NSString * action = [[notification userInfo] valueForKey:@"action"]; // We don't really care whether the user just logged in or logged out - we should get new events list no matter what.
     BOOL animated = self.view.window != nil;
     if (self.isSearchOn) {
-        [self toggleSearchModeAnimated:animated];
+        [self toggleSearchModeAnimated:animated shouldMakeSearchTextFieldActiveWhenTogglingOn:YES shouldFlushQueryAndFiltersWhenTogglingOff:YES];
     }
     if (self.isDrawerOpen) {
         [self toggleDrawerAnimated:animated];
@@ -2316,7 +2301,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 - (void) behaviorWasReset:(NSNotification *)notification {
     BOOL animated = self.view.window != nil;
     if (self.isSearchOn) {
-        [self toggleSearchModeAnimated:animated];
+        [self toggleSearchModeAnimated:animated shouldMakeSearchTextFieldActiveWhenTogglingOn:YES shouldFlushQueryAndFiltersWhenTogglingOff:YES];
     }
     if (self.isDrawerOpen) {
         [self toggleDrawerAnimated:animated];
@@ -2898,10 +2883,10 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
         if (self.eventsFromSearch.count > 0) {
             [self.searchTextField resignFirstResponder];
         } else {
-            [self toggleSearchModeAnimated:YES];
+            [self toggleSearchModeAnimated:YES shouldMakeSearchTextFieldActiveWhenTogglingOn:YES shouldFlushQueryAndFiltersWhenTogglingOff:YES];
         }
     } else {
-        [self toggleSearchModeAnimated:YES];
+        [self toggleSearchModeAnimated:YES shouldMakeSearchTextFieldActiveWhenTogglingOn:YES shouldFlushQueryAndFiltersWhenTogglingOff:YES];
     }
 }
 
