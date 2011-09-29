@@ -339,7 +339,7 @@ static NSString * const URL_BUILDER_GET_EVENTS_LIST_FILTER_POPULAR = @"popular";
     };
     // Date filters
     NSString * earliestDateString = dateOrTimeStringBlock(startDateEarliestInclusive, YES, YES);
-    NSString * latestDateString = dateOrTimeStringBlock(startDateEarliestInclusive, YES, NO);
+    NSString * latestDateString = dateOrTimeStringBlock(startDateLatestInclusive, YES, NO);
     if (earliestDateString != nil) { [urlString appendString:earliestDateString]; }
     if (latestDateString != nil) { [urlString appendString:latestDateString]; }
     // Time filters
