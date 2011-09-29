@@ -1278,7 +1278,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     [self setLogoButtonImageForCategoryURI:self.categoryURI];
 //    [self setFeedbackViewIsVisible:YES adjustMessages:YES withMessageType:LoadingEvents eventsSummaryString:self.eventsSummaryStringForCurrentSource animated:YES]; // Moving this outside of this method, because we don't always want to do it when doing a web call. We could do it within this method conditionally using some sort of parameter, but I don't have the patience to make that kind of change right now. I also don't really think that would be appropriate, despite being easier.
     [self showWebLoadingViews];
-    [self.webConnector getRecommendedEventsWithMinPrice:self.eventsWebQuery.filterPriceMinimum maxPrice:self.eventsWebQuery.filterPriceMaximum categoryURI:self.categoryURI];
+    [self.webConnector getRecommendedEventsWithCategoryURI:self.categoryURI minPrice:self.eventsWebQuery.filterPriceMinimum maxPrice:self.eventsWebQuery.filterPriceMaximum startDateEarliest:self.eventsWebQuery.filterDateEarliest startDateLatest:self.eventsWebQuery.filterDateLatest startTimeEarliest:self.eventsWebQuery.filterTimeEarliest startTimeLatest:self.eventsWebQuery.filterTimeLatest];
 //    [self.webConnector getEventsListWithFilter:self.oldFilterString categoryURI:self.categoryURI];
     
     /////////////////////
@@ -1298,11 +1298,11 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     
 }
 
-// Process the new retrieved events (if there are indeed successfully retrieved events) and get htem into Core Data
-- (void)webConnector:(WebConnector *)theWebConnector getEventsListSuccess:(ASIHTTPRequest *)request withFilter:(NSString *)theFilterString categoryURI:(NSString *)theCategoryURI {
+// Process the new retrieved events (if there are indeed successfully retrieved events) and get them into Core Data
+- (void) webConnector:(WebConnector *)webConnector getRecommendedEventsSuccess:(ASIHTTPRequest *)request withCategoryURI:(NSString *)categoryURI minPrice:(NSNumber *)minPriceInclusive maxPrice:(NSNumber *)maxPriceInclusive startDateEarliest:(NSDate *)startDateEarliestInclusive startDateLatest:(NSDate *)startDateLatestInclusive startTimeEarliest:(NSDate *)startTimeEarliestInclusive startTimeLatest:(NSDate *)startTimeLatestInclusive {
 
     NSString * responseString = [request responseString];
-//    NSLog(@"EventsViewController webConnector:getEventsListSuccess:withFilter:categoryURI: - response is %@", responseString);
+    //    NSLog(@"EventsViewController webConnector:getEventsListSuccess:withFilter:categoryURI: - response is %@", responseString);
     NSError * error = nil;
     NSDictionary * dictionaryFromJSON = [responseString yajl_JSONWithOptions:YAJLParserOptionsAllowComments error:&error];
     NSArray * eventsDictionaries = [dictionaryFromJSON valueForKey:@"objects"];
@@ -1344,14 +1344,14 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     if (!self.isSearchOn) {
         [self updateViewsFromCurrentSourceDataWhichShouldBePopulated:haveResults reasonIfNot:EVENTS_NO_RESULTS_REASON_NO_RESULTS animated:YES];
     }
-
+    
 }
 
-- (void)webConnector:(WebConnector *)webConnector getEventsListFailure:(ASIHTTPRequest *)request withFilter:(NSString *)filterString categoryURI:(NSString *)categoryURI {
-
-    NSString *statusMessage = [request responseStatusMessage];
+- (void)webConnector:(WebConnector *)webConnector getRecommendedEventsFailure:(ASIHTTPRequest *)request withCategoryURI:(NSString *)categoryURI minPrice:(NSNumber *)minPriceInclusive maxPrice:(NSNumber *)maxPriceInclusive startDateEarliest:(NSDate *)startDateEarliestInclusive startDateLatest:(NSDate *)startDateLatestInclusive startTimeEarliest:(NSDate *)startTimeEarliestInclusive startTimeLatest:(NSDate *)startTimeLatestInclusive {
+    
+    NSString * statusMessage = [request responseStatusMessage];
 	NSLog(@"%@",statusMessage);
-	NSError *error = [request error];
+	NSError * error = [request error];
 	NSLog(@"%@",error);
     
     self.eventsWebQuery.queryDatetime = [NSDate date];
@@ -1490,10 +1490,8 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     [self setTableViewScrollable:eventsRetrieved selectable:eventsRetrieved];
     if (eventsRetrieved) {
         // Events were retrieved... They will be displayed.
-        NSLog(@"foo foo foo foo foo foo foo foo foo foo foo foo foo foo foo foo foo foo foo foo foo foo foo foo foo foo foo foo foo foo foo foo foo foo foo foo foo foo foo foo foo foo foo foo foo foo foo foo foo foo foo foo foo foo foo foo foo foo foo foo foo foo foo foo foo foo foo foo foo foo %d", self.feedbackViewIsVisible);
         [self setFeedbackViewIsVisible:self.feedbackViewIsVisible adjustMessages:YES withMessageType:LookingAtEvents eventsSummaryString:self.eventsSummaryStringForCurrentSource searchString:(self.isSearchOn ? self.searchTextField.text : nil) animated:animated];
     } else {
-        NSLog(@"oh no oh no oh no oh no oh no oh no oh no oh no oh no oh no oh no oh no oh no oh no oh no oh no oh no oh no oh no oh no oh no oh no oh no oh no oh no oh no oh no oh no oh no oh no oh no oh no oh no oh no oh no oh no oh no oh no oh no oh no oh no oh no oh no oh no oh no oh no oh no oh no oh no oh no oh no oh no oh no oh no oh no oh no oh no oh no oh no oh no ");
         // No events were retrieved. Respond accordingly, depending on the reason.
         if ([reasonIfNotPopulated isEqualToString:EVENTS_NO_RESULTS_REASON_NO_RESULTS]) {
             if (self.isSearchOn) {

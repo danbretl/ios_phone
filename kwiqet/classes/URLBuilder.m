@@ -289,7 +289,7 @@ static NSString * const URL_BUILDER_GET_EVENTS_LIST_FILTER_POPULAR = @"popular";
 //    return [self buildGetEventsListURLWithFilter:@"recommended" categoryURI:nil];
 //}
 
-- (NSURL *)buildGetRecommendedEventsURLWithMinPrice:(NSNumber *)minPrice maxPrice:(NSNumber *)maxPrice categoryURI:(NSString *)categoryURI {
+- (NSURL *) buildGetRecommendedEventsURLWithCategoryURI:(NSString *)categoryURI minPrice:(NSNumber *)minPriceInclusive maxPrice:(NSNumber *)maxPriceInclusive startDateEarliest:(NSDate *)startDateEarliestInclusive startDateLatest:(NSDate *)startDateLatestInclusive startTimeEarliest:(NSDate *)startTimeEarliestInclusive startTimeLatest:(NSDate *)startTimeLatestInclusive {
     
     NSString * urlPList = [[NSBundle mainBundle] pathForResource:@"urls" ofType:@"plist"];
     NSDictionary * urlDictionary = [NSDictionary dictionaryWithContentsOfFile:urlPList];
@@ -303,6 +303,13 @@ static NSString * const URL_BUILDER_GET_EVENTS_LIST_FILTER_POPULAR = @"popular";
     NSString * credentials = [self buildCredentialString];
     [urlString appendString:credentials];
     
+    // Categories
+    NSString * categoryVariableForURL = nil;
+    if (categoryURI && [categoryURI length] > 0) {
+        categoryVariableForURL = [NSString stringWithFormat:@"&concrete_parent_category=%@", categoryURI];
+    }
+    if (categoryVariableForURL != nil) { [urlString appendString:categoryVariableForURL]; }
+    
     // Price filters
     NSString * (^priceStringBlock)(NSNumber *, NSString *)=^(NSNumber * price, NSString * minOrMax){
         NSString * priceString = nil;
@@ -311,17 +318,35 @@ static NSString * const URL_BUILDER_GET_EVENTS_LIST_FILTER_POPULAR = @"popular";
         }
         return priceString;
     };
-    NSString * minPriceString = priceStringBlock(minPrice, @"min");
-    NSString * maxPriceString = priceStringBlock(maxPrice, @"max");
+    NSString * minPriceString = priceStringBlock(minPriceInclusive, @"min");
+    NSString * maxPriceString = priceStringBlock(maxPriceInclusive, @"max");
     if (minPriceString != nil) { [urlString appendString:minPriceString]; }
     if (maxPriceString != nil) { [urlString appendString:maxPriceString]; }
     
-    // Categories
-    NSString * categoryVariableForURL = nil;
-    if (categoryURI && [categoryURI length] > 0) {
-        categoryVariableForURL = [NSString stringWithFormat:@"&concrete_parent_category=%@", categoryURI];
-    }
-    if (categoryVariableForURL != nil) { [urlString appendString:categoryVariableForURL]; }
+    // Date and time filters
+    NSString * (^dateOrTimeStringBlock)(NSDate *, BOOL, BOOL) = ^(NSDate * datetime, BOOL isDate, BOOL isEarliest) {
+        NSDateFormatter * dateFormatter = [[NSDateFormatter alloc] init];
+        NSString * dateFormat = isDate ? @"YYYY-MM-dd" : @"HHmm";
+        [dateFormatter setDateFormat:dateFormat];
+        NSString * dateString = nil;
+        if (datetime != nil) {
+            NSString * prefix = isDate ? @"dt" : @"t";
+            NSString * earliestLatest = isEarliest ? @"earliest" : @"latest";
+            dateString = [NSString stringWithFormat:@"&%@start_%@=%@", prefix, earliestLatest, [dateFormatter stringFromDate:datetime]];
+        }
+        [dateFormatter release];
+        return dateString;
+    };
+    // Date filters
+    NSString * earliestDateString = dateOrTimeStringBlock(startDateEarliestInclusive, YES, YES);
+    NSString * latestDateString = dateOrTimeStringBlock(startDateEarliestInclusive, YES, NO);
+    if (earliestDateString != nil) { [urlString appendString:earliestDateString]; }
+    if (latestDateString != nil) { [urlString appendString:latestDateString]; }
+    // Time filters
+    NSString * earliestTimeString = dateOrTimeStringBlock(startTimeEarliestInclusive, NO, YES);
+    NSString * latestTimeString = dateOrTimeStringBlock(startTimeLatestInclusive, NO, NO);
+    if (earliestTimeString != nil) { [urlString appendString:earliestTimeString]; }
+    if (latestTimeString != nil) { [urlString appendString:latestTimeString]; }
     
     NSURL * url = [NSURL URLWithString:urlString];
     NSLog(@"%@", url);

@@ -21,8 +21,8 @@
 @property (nonatomic, retain) NSString * filterLocationString;
 @property (nonatomic, retain) NSDate * queryDatetime;
 @property (nonatomic, retain) NSString * searchTerm;
-@property (nonatomic, retain) NSSet *eventResults;
-@property (nonatomic, retain) NSSet *filterCategories;
+@property (nonatomic, retain) NSSet * eventResults;
+@property (nonatomic, retain) NSSet * filterCategories;
 @end
 
 @interface EventsWebQuery (CoreDataGeneratedAccessors)
@@ -44,4 +44,8 @@
 @interface EventsWebQuery (Translations)
 @property (nonatomic, readonly) NSNumber * filterPriceMinimum;
 @property (nonatomic, readonly) NSNumber * filterPriceMaximum;
+@property (nonatomic, readonly) NSDate * filterDateEarliest;
+@property (nonatomic, readonly) NSDate * filterDateLatest;
+@property (nonatomic, readonly) NSDate * filterTimeEarliest;
+@property (nonatomic, readonly) NSDate * filterTimeLatest;
 @end

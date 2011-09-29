@@ -43,7 +43,8 @@
 //- (NSURL *) buildGetEventsListURLWithFilter:(NSString *)filterString categoryURI:(NSString *)categoryURI;
 //- (NSString *) buildGetRecommendedEventsURLBasicString;
 //- (NSURL *) buildGetEventsListRecommendedURL;
-- (NSURL *) buildGetRecommendedEventsURLWithMinPrice:(NSNumber *)minPrice maxPrice:(NSNumber *)maxPrice categoryURI:(NSString *)categoryURI;
+- (NSURL *) buildGetRecommendedEventsURLWithCategoryURI:(NSString *)categoryURI minPrice:(NSNumber *)minPriceInclusive maxPrice:(NSNumber *)maxPriceInclusive startDateEarliest:(NSDate *)startDateEarliestInclusive startDateLatest:(NSDate *)startDateLatestInclusive startTimeEarliest:(NSDate *)startTimeEarliestInclusive startTimeLatest:(NSDate *)startTimeLatestInclusive;
+//- (NSURL *) buildGetRecommendedEventsURLWithMinPrice:(NSNumber *)minPrice maxPrice:(NSNumber *)maxPrice categoryURI:(NSString *)categoryURI;
 //- (NSURL *) buildGetEventsListFreeURL;
 //- (NSURL *) buildGetEventsListPopularURL;
 - (NSURL *) buildGetEventsListSearchURLWithSearchString:(NSString *)searchString;

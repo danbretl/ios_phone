@@ -15,11 +15,14 @@ static NSString * const WEB_CONNECTOR_GET_EVENTS_LIST_FILTER_RECOMMENDED = @"rec
 static NSString * const WEB_CONNECTOR_GET_EVENTS_LIST_FILTER_FREE = @"free";
 static NSString * const WEB_CONNECTOR_GET_EVENTS_LIST_FILTER_POPULAR = @"popular";
 static NSString * const WEB_CONNECTOR_USER_INFO_KEY_EVENT_URI = @"WEB_CONNECTOR_USER_INFO_KEY_EVENT_URI";
-static NSString * const WEB_CONNECTOR_GET_EVENTS_LIST_USER_INFO_KEY_FILTER = @"filterString";
 static NSString * const WEB_CONNECTOR_GET_EVENTS_LIST_USER_INFO_KEY_CATEGORY = @"categoryURI";
 static NSString * const WEB_CONNECTOR_GET_EVENTS_LIST_USER_INFO_KEY_SEARCH_STRING = @"searchString";
 static NSString * const WEB_CONNECTOR_GET_EVENTS_LIST_USER_INFO_KEY_FILTER_PRICE_MIN = @"filterPriceMin";
 static NSString * const WEB_CONNECTOR_GET_EVENTS_LIST_USER_INFO_KEY_FILTER_PRICE_MAX = @"filterPriceMax";
+static NSString * const WEB_CONNECTOR_GET_EVENTS_LIST_USER_INFO_KEY_FILTER_DATE_EARLIEST = @"filterDateEarliest";
+static NSString * const WEB_CONNECTOR_GET_EVENTS_LIST_USER_INFO_KEY_FILTER_DATE_LATEST = @"filterDateLatest";
+static NSString * const WEB_CONNECTOR_GET_EVENTS_LIST_USER_INFO_KEY_FILTER_TIME_EARLIEST = @"filterTimeEarliest";
+static NSString * const WEB_CONNECTOR_GET_EVENTS_LIST_USER_INFO_KEY_FILTER_TIME_LATEST = @"filterTimeLatest";
 static NSString * const WEB_CONNECTOR_SEND_LEARNED_DATA_ABOUT_EVENT_USER_INFO_KEY_EVENT_URI = @"eventURI";
 static NSString * const WEB_CONNECTOR_SEND_LEARNED_DATA_ABOUT_EVENT_USER_INFO_KEY_ACTION = @"action";
 
@@ -33,8 +36,8 @@ static NSString * const WEB_CONNECTOR_SEND_LEARNED_DATA_ABOUT_EVENT_USER_INFO_KE
 - (void) getAllOccurrencesForEventFailure:(ASIHTTPRequest *)request;
 - (void) getFeaturedEventSuccess:(ASIHTTPRequest *)request;
 - (void) getFeaturedEventFailure:(ASIHTTPRequest *)request;
-- (void) getEventsListSuccess:(ASIHTTPRequest *)request;
-- (void) getEventsListFailure:(ASIHTTPRequest *)request;
+- (void) getRecommendedEventsSuccess:(ASIHTTPRequest *)request;
+- (void) getRecommendedEventsFailure:(ASIHTTPRequest *)request;
 - (void) getEventsListForSearchStringSuccess:(ASIHTTPRequest *)request;
 - (void) getEventsListForSearchStringFailure:(ASIHTTPRequest *)request;
 - (void) sendLearnedDataAboutEventSuccess:(ASIHTTPRequest *)request;
@@ -241,19 +244,42 @@ static NSString * const WEB_CONNECTOR_SEND_LEARNED_DATA_ABOUT_EVENT_USER_INFO_KE
 // EVENTS LISTS //
 //////////////////
 
-- (void) getRecommendedEventsWithMinPrice:(NSNumber *)minPrice maxPrice:(NSNumber *)maxPrice categoryURI:(NSString *)categoryURI {
+- (void)getRecommendedEventsWithCategoryURI:(NSString *)categoryURI minPrice:(NSNumber *)minPriceInclusive maxPrice:(NSNumber *)maxPriceInclusive startDateEarliest:(NSDate *)startDateEarliestInclusive startDateLatest:(NSDate *)startDateLatestInclusive startTimeEarliest:(NSDate *)startTimeEarliestInclusive startTimeLatest:(NSDate *)startTimeLatestInclusive {
+    
     if (self.availableToMakeWebConnection) {
-        ASIHTTPRequest * request = [ASIHTTPRequest requestWithURL:[self.urlBuilder buildGetRecommendedEventsURLWithMinPrice:minPrice maxPrice:maxPrice categoryURI:categoryURI]];
+        ASIHTTPRequest * request = [ASIHTTPRequest requestWithURL:[self.urlBuilder buildGetRecommendedEventsURLWithCategoryURI:categoryURI minPrice:minPriceInclusive maxPrice:maxPriceInclusive startDateEarliest:startDateEarliestInclusive startDateLatest:startDateLatestInclusive startTimeEarliest:startTimeEarliestInclusive startTimeLatest:startTimeLatestInclusive]];
         [self.connectionsInProgress addObject:request];
         [request setRequestMethod:@"GET"];
         [request setDelegate:self];
-        [request setDidFinishSelector:@selector(getEventsListSuccess:)];
-        [request setDidFailSelector:@selector(getEventsListFailure:)];
+        [request setDidFinishSelector:@selector(getRecommendedEventsSuccess:)];
+        [request setDidFailSelector:@selector(getRecommendedEventsFailure:)];
         [request setTimeOutSeconds:self.timeoutLength];
-        NSDictionary * userInfo = [NSDictionary dictionaryWithObjectsAndKeys:@"recommended", WEB_CONNECTOR_GET_EVENTS_LIST_USER_INFO_KEY_FILTER, categoryURI, WEB_CONNECTOR_GET_EVENTS_LIST_USER_INFO_KEY_CATEGORY, minPrice, WEB_CONNECTOR_GET_EVENTS_LIST_USER_INFO_KEY_FILTER_PRICE_MIN, maxPrice, WEB_CONNECTOR_GET_EVENTS_LIST_USER_INFO_KEY_FILTER_PRICE_MAX, nil];
+        NSMutableDictionary * userInfo = [NSMutableDictionary dictionary];
+        if (categoryURI != nil) { 
+            [userInfo setObject:categoryURI forKey:WEB_CONNECTOR_GET_EVENTS_LIST_USER_INFO_KEY_CATEGORY];
+        }
+        if (minPriceInclusive != nil) { 
+            [userInfo setObject:minPriceInclusive forKey:WEB_CONNECTOR_GET_EVENTS_LIST_USER_INFO_KEY_FILTER_PRICE_MIN];
+        }
+        if (maxPriceInclusive != nil) { 
+            [userInfo setObject:maxPriceInclusive forKey:WEB_CONNECTOR_GET_EVENTS_LIST_USER_INFO_KEY_FILTER_PRICE_MAX];
+        }
+        if (startDateEarliestInclusive != nil) { 
+            [userInfo setObject:startDateEarliestInclusive forKey:WEB_CONNECTOR_GET_EVENTS_LIST_USER_INFO_KEY_FILTER_DATE_EARLIEST];
+        }
+        if (startDateLatestInclusive != nil) { 
+            [userInfo setObject:startDateLatestInclusive forKey:WEB_CONNECTOR_GET_EVENTS_LIST_USER_INFO_KEY_FILTER_DATE_LATEST];
+        }
+        if (startTimeEarliestInclusive != nil) { 
+            [userInfo setObject:startTimeEarliestInclusive forKey:WEB_CONNECTOR_GET_EVENTS_LIST_USER_INFO_KEY_FILTER_TIME_EARLIEST];
+        }
+        if (startTimeLatestInclusive != nil) { 
+            [userInfo setObject:startTimeLatestInclusive forKey:WEB_CONNECTOR_GET_EVENTS_LIST_USER_INFO_KEY_FILTER_TIME_LATEST];
+        }
         request.userInfo = userInfo;
         [request startAsynchronous];
     }
+    
 }
 
 //- (void) getEventsListWithFilter:(NSString *)filterString categoryURI:(NSString *)categoryURI {
@@ -271,31 +297,41 @@ static NSString * const WEB_CONNECTOR_SEND_LEARNED_DATA_ABOUT_EVENT_USER_INFO_KE
 //    }
 //}
 
-- (void) getEventsListSuccess:(ASIHTTPRequest *)request {
+- (void) getRecommendedEventsSuccess:(ASIHTTPRequest *)request {
 
     [self.connectionsInProgress removeObject:request];
 
     NSDictionary * userInfo = request.userInfo;
-    NSString * filterString = [userInfo objectForKey:WEB_CONNECTOR_GET_EVENTS_LIST_USER_INFO_KEY_FILTER];
     NSString * categoryURI = [userInfo objectForKey:WEB_CONNECTOR_GET_EVENTS_LIST_USER_INFO_KEY_CATEGORY];
+    NSNumber * minPriceInclusive = [userInfo objectForKey:WEB_CONNECTOR_GET_EVENTS_LIST_USER_INFO_KEY_FILTER_PRICE_MIN];
+    NSNumber * maxPriceInclusive = [userInfo objectForKey:WEB_CONNECTOR_GET_EVENTS_LIST_USER_INFO_KEY_FILTER_PRICE_MAX];
+    NSDate * startDateEarliestInclusive = [userInfo objectForKey:WEB_CONNECTOR_GET_EVENTS_LIST_USER_INFO_KEY_FILTER_DATE_EARLIEST];
+    NSDate * startDateLatestInclusive = [userInfo objectForKey:WEB_CONNECTOR_GET_EVENTS_LIST_USER_INFO_KEY_FILTER_DATE_LATEST];
+    NSDate * startTimeEarliestInclusive = [userInfo objectForKey:WEB_CONNECTOR_GET_EVENTS_LIST_USER_INFO_KEY_FILTER_TIME_EARLIEST];
+    NSDate * startTimeLatestInclusive = [userInfo objectForKey:WEB_CONNECTOR_GET_EVENTS_LIST_USER_INFO_KEY_FILTER_TIME_LATEST];
     
     // There is still a possibility that we successfully got a response, but that that response is nil. We should check for this, and switch our assessment to "failure" if necessary.
     if (request) {
-        [self.delegate webConnector:self getEventsListSuccess:request withFilter:filterString categoryURI:categoryURI];
+        [self.delegate webConnector:self getRecommendedEventsSuccess:request withCategoryURI:categoryURI minPrice:minPriceInclusive maxPrice:maxPriceInclusive startDateEarliest:startDateEarliestInclusive startDateLatest:startDateLatestInclusive startTimeEarliest:startTimeEarliestInclusive startTimeLatest:startTimeLatestInclusive];
     } else {
-        [self.delegate webConnector:self getEventsListFailure:request withFilter:filterString categoryURI:categoryURI];
+        [self.delegate webConnector:self getRecommendedEventsFailure:request withCategoryURI:categoryURI minPrice:minPriceInclusive maxPrice:maxPriceInclusive startDateEarliest:startDateEarliestInclusive startDateLatest:startDateLatestInclusive startTimeEarliest:startTimeEarliestInclusive startTimeLatest:startTimeLatestInclusive];
     }
 }
 
-- (void) getEventsListFailure:(ASIHTTPRequest *)request {
+- (void) getRecommendedEventsFailure:(ASIHTTPRequest *)request {
     
     [self.connectionsInProgress removeObject:request];
     
     NSDictionary * userInfo = request.userInfo;
-    NSString * filterString = [userInfo objectForKey:WEB_CONNECTOR_GET_EVENTS_LIST_USER_INFO_KEY_FILTER];
     NSString * categoryURI = [userInfo objectForKey:WEB_CONNECTOR_GET_EVENTS_LIST_USER_INFO_KEY_CATEGORY];
+    NSNumber * minPriceInclusive = [userInfo objectForKey:WEB_CONNECTOR_GET_EVENTS_LIST_USER_INFO_KEY_FILTER_PRICE_MIN];
+    NSNumber * maxPriceInclusive = [userInfo objectForKey:WEB_CONNECTOR_GET_EVENTS_LIST_USER_INFO_KEY_FILTER_PRICE_MAX];
+    NSDate * startDateEarliestInclusive = [userInfo objectForKey:WEB_CONNECTOR_GET_EVENTS_LIST_USER_INFO_KEY_FILTER_DATE_EARLIEST];
+    NSDate * startDateLatestInclusive = [userInfo objectForKey:WEB_CONNECTOR_GET_EVENTS_LIST_USER_INFO_KEY_FILTER_DATE_LATEST];
+    NSDate * startTimeEarliestInclusive = [userInfo objectForKey:WEB_CONNECTOR_GET_EVENTS_LIST_USER_INFO_KEY_FILTER_TIME_EARLIEST];
+    NSDate * startTimeLatestInclusive = [userInfo objectForKey:WEB_CONNECTOR_GET_EVENTS_LIST_USER_INFO_KEY_FILTER_TIME_LATEST];
     
-    [self.delegate webConnector:self getEventsListFailure:request withFilter:filterString categoryURI:categoryURI];
+    [self.delegate webConnector:self getRecommendedEventsFailure:request withCategoryURI:categoryURI minPrice:minPriceInclusive maxPrice:maxPriceInclusive startDateEarliest:startDateEarliestInclusive startDateLatest:startDateLatestInclusive startTimeEarliest:startTimeEarliestInclusive startTimeLatest:startTimeLatestInclusive];
     
 }
 
