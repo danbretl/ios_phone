@@ -92,6 +92,16 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
 @property (retain) IBOutlet UIView * occurrencesControlsDatesVenuesSeparatorView;
 @property (retain) IBOutlet UIView * occurrencesControlsVenuesTimesSeparatorView;
 @property (retain) IBOutlet UITableView * occurrencesControlsTimesTableView;
+@property (retain) IBOutlet UIView * occurrencesControlsNavBarsContainer;
+@property (retain) IBOutlet UIView * occurrencesControlsDatesVenuesNavBar;
+@property (retain) IBOutlet UIView * occurrencesControlsTimesNavBar;
+@property (retain) IBOutlet UILabel * occurrencesControlsVenuesNearHeaderLabel;
+@property (retain) IBOutlet UILabel * occurrencesControlsVenuesNearLocationLabel;
+@property (retain) IBOutlet UILabel * occurrencesControlsTimesOnDateLabel;
+@property (retain) IBOutlet UILabel * occurrencesControlsTimesAtVenueLabel;
+@property (retain) IBOutlet UIButton * occurrencesControlsCancelButton;
+@property (retain) IBOutlet UIButton * occurrencesControlsBackButton;
+
 
 @property (retain) NSMutableArray * eventOccurrencesSummaryArray;
 @property (retain) Occurrence * eventOccurrenceCurrent;
@@ -104,6 +114,7 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
 @property (nonatomic, readonly) WebConnector * webConnector;
 @property (nonatomic, readonly) WebDataTranslator * webDataTranslator;
 @property (nonatomic, readonly) NSDateFormatter * occurrenceTimeFormatter;
+@property (nonatomic, readonly) NSDateFormatter * occurrencesControlsNavBarDateFormatter;
 @property (nonatomic, readonly) UIAlertView * connectionErrorOnUserActionRequestAlertView;
 @property (retain) UIActionSheet  * letsGoChoiceActionSheet;
 @property (retain) NSMutableArray * letsGoChoiceActionSheetSelectors;
@@ -117,9 +128,11 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
 - (IBAction) deleteButtonTouched;
 - (IBAction) phoneButtonTouched;
 - (IBAction) mapButtonTouched;
+- (IBAction) occurrencesControlsCancelButtonTouched:(id)sender;
+- (IBAction) occurrencesControlsBackButtonTouched:(id)sender;
 - (void) occurrenceInfoRetryButtonTouched;
 - (IBAction) occurrenceInfoButtonTouched:(UIButton *)occurrenceInfoButton;
-- (void) setOccurrencesControlsToShowTableView:(UITableView *)tableView animated:(BOOL)animated;
+- (void) setOccurrencesControlsToShowGroup:(OccurrencesControlsGroup)ocGroup animated:(BOOL)animated;
 - (void) swipedToGoBack:(UISwipeGestureRecognizer *)swipeGesture;
 - (void) swipedToPullInOccurrencesControls:(UISwipeGestureRecognizer *)swipeGesture;
 - (void) tappedToPullInOccurrencesControls:(UITapGestureRecognizer *)tapGesture;
@@ -149,6 +162,9 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
 - (void) facebookEventInviteFailure:(NSNotification *)notification;
 - (void) facebookAuthFailure:(NSNotification *)notification;
 
+@property (retain) CLLocation * userLocation;
+@property (retain) NSString * userLocationString;
+
 @end
 
 @implementation EventViewController
@@ -157,8 +173,10 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
 @synthesize darkOverlayViewForMainView, darkOverlayViewForScrollView;
 @synthesize swipeToPullInOccurrencesControls, swipeToPushOutOccurrencesControls, tapToPullInOccurrencesControls;
 @synthesize occurrencesControlsPulledOut;
-@synthesize occurrencesControlsContainer, occurrencesControlsHandleImageView, occurrencesControlsNavBar, occurrencesControlsTableViewContainer, occurrencesControlsTableViewOverlay, occurrencesControlsTableViewsContainer, occurrencesControlsDatesTableView, occurrencesControlsVenuesTableView, occurrencesControlsDatesVenuesSeparatorView, occurrencesControlsVenuesTimesSeparatorView, occurrencesControlsTimesTableView;
+@synthesize occurrencesControlsContainer, occurrencesControlsHandleImageView, occurrencesControlsNavBar, occurrencesControlsTableViewContainer, occurrencesControlsTableViewOverlay, occurrencesControlsTableViewsContainer, occurrencesControlsDatesTableView, occurrencesControlsVenuesTableView, occurrencesControlsDatesVenuesSeparatorView, occurrencesControlsVenuesTimesSeparatorView, occurrencesControlsTimesTableView, occurrencesControlsNavBarsContainer, occurrencesControlsDatesVenuesNavBar, occurrencesControlsTimesNavBar, occurrencesControlsVenuesNearHeaderLabel, occurrencesControlsVenuesNearLocationLabel, occurrencesControlsTimesOnDateLabel, occurrencesControlsTimesAtVenueLabel, occurrencesControlsCancelButton, occurrencesControlsBackButton;
+;
 
+@synthesize userLocation=userLocation_, userLocationString=userLocationString_;
 @synthesize event;
 @synthesize eventOccurrenceCurrent;
 @synthesize eventOccurrenceCurrentDateIndex, eventOccurrenceCurrentVenueIndex, eventOccurrenceCurrentTimeIndex;
@@ -225,9 +243,20 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
     [occurrencesControlsDatesVenuesSeparatorView release];
     [occurrencesControlsVenuesTimesSeparatorView release];
     [occurrencesControlsTimesTableView release];
+    [occurrencesControlsNavBarsContainer release];
+    [occurrencesControlsDatesVenuesNavBar release];
+    [occurrencesControlsTimesNavBar release];
+    [occurrencesControlsVenuesNearHeaderLabel release];
+    [occurrencesControlsVenuesNearLocationLabel release];
+    [occurrencesControlsTimesOnDateLabel release];
+    [occurrencesControlsTimesAtVenueLabel release];
+    [occurrencesControlsCancelButton release];
+    [occurrencesControlsBackButton release];
     [swipeToPullInOccurrencesControls release];
     [swipeToPushOutOccurrencesControls release];
     [tapToPullInOccurrencesControls release];
+    [userLocation_ release];
+    [userLocationString_ release];
     [event release];
     [eventOccurrenceCurrent release];
     [eventOccurrencesSummaryArray release];
@@ -236,6 +265,7 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
     [mapViewController release];
     [webConnector release];
     [webDataTranslator release];
+    [occurrencesControlsNavBarDateFormatter release];
     [occurrenceTimeFormatter release];
     [facebookManager release];
     [letsGoChoiceActionSheet release];
@@ -252,6 +282,7 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
     if (self) {
         self.deleteAllowed = YES;
         self.eventOccurrencesSummaryArray = [NSMutableArray array];
+        debuggingOccurrencesPicker = YES;
     }
     return self;
 }
@@ -360,15 +391,32 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
     // Occurrences controls
     [self.scrollView insertSubview:self.occurrencesControlsContainer belowSubview:self.titleBar];
     self.occurrencesControlsContainer.frame = CGRectMake(self.scrollView.bounds.size.width - self.occurrencesControlsHandleImageView.bounds.size.width, CGRectGetMaxY(self.occurrenceInfoContainer.frame) - self.occurrencesControlsContainer.frame.size.height, self.occurrencesControlsContainer.frame.size.width, self.occurrencesControlsContainer.frame.size.height);
+    // Set up occurrences controls nav bars
+    [self.occurrencesControlsNavBar addSubview:self.occurrencesControlsNavBarsContainer];
+    // Occurrences controls nav bar labels
+    self.occurrencesControlsVenuesNearHeaderLabel.font = [UIFont kwiqetFontOfType:RegularCondensed size:11.0];
+    self.occurrencesControlsVenuesNearLocationLabel.font = [UIFont kwiqetFontOfType:RegularNormal size:17.0];
+    self.occurrencesControlsTimesOnDateLabel.font = self.occurrencesControlsVenuesNearHeaderLabel.font;
+    self.occurrencesControlsTimesAtVenueLabel.font = self.occurrencesControlsVenuesNearLocationLabel.font;
+    // Adjust occurrences controls nav bar to have rounded top corners
+    CGRect ocnbFrame = self.occurrencesControlsNavBar.frame;
+    ocnbFrame.size.height += 10;
+    self.occurrencesControlsNavBar.frame = ocnbFrame;
+    self.occurrencesControlsNavBar.layer.cornerRadius = 10.0;
+    // Set occurrences controls nav bar to have proper background color/image
     self.occurrencesControlsNavBar.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"navbar.png"]];
+    self.occurrencesControlsDatesVenuesNavBar.backgroundColor = self.occurrencesControlsNavBar.backgroundColor;
+    self.occurrencesControlsTimesNavBar.backgroundColor = self.occurrencesControlsNavBar.backgroundColor;
+    // Set up occurrences controls table view overlay
     self.occurrencesControlsTableViewOverlay.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"occurrence_faceplate.png"]];
     self.occurrencesControlsTableViewOverlay.opaque = NO;
     self.occurrencesControlsTableViewOverlay.layer.opaque = NO;
     [self.occurrencesControlsTableViewContainer insertSubview:self.occurrencesControlsTableViewsContainer belowSubview:self.occurrencesControlsTableViewOverlay];
+    // Set up occurrences controls table views
     CGRect occurrencesControlsTableViewsContainerFrame = self.occurrencesControlsTableViewsContainer.frame;
     occurrencesControlsTableViewsContainerFrame.size.height = self.occurrencesControlsTableViewContainer.bounds.size.height;
     self.occurrencesControlsTableViewsContainer.frame = occurrencesControlsTableViewsContainerFrame;
-    [self setOccurrencesControlsToShowTableView:self.occurrencesControlsDatesTableView animated:NO];
+    [self setOccurrencesControlsToShowGroup:OCGroupDatesVenues animated:NO];
     self.occurrencesControlsVenuesTableView.backgroundColor = [UIColor colorWithWhite:241.0/255.0 alpha:1.0];
     self.occurrencesControlsTimesTableView.backgroundColor = [UIColor colorWithWhite:241.0/255.0 alpha:1.0];
     
@@ -408,7 +456,7 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
     [self.scrollView insertSubview:self.darkOverlayViewForScrollView belowSubview:self.occurrencesControlsContainer];
     
     // Event description views
-    self.descriptionLabel.font = [UIFont kwiqetFontOfType:LightNormal size:14];
+    self.descriptionLabel.font = [UIFont kwiqetFontOfType:LightNormal size:16];
     shadowDescriptionContainer = [[UIView alloc] initWithFrame:
                                   CGRectMake(self.descriptionContainer.frame.origin.x, 
                                              self.descriptionContainer.frame.origin.y, 
@@ -430,6 +478,7 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
     if (self.event) {
         if (self.event.occurrencesByDateVenueTime && 
             self.event.occurrencesByDateVenueTime.count > 0) {
+            NSLog(@"About to process occurrences from viewDidLoad");
             [self processOccurrencesFromEvent:self.event];
             [self reloadOccurrencesTableViews];
             [self setOccurrenceInfoContainerIsCollapsed:YES animated:NO];
@@ -501,6 +550,11 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
         }
         [self.webConnector getAllOccurrencesForEventWithURI:event.uri];
     }
+}
+
+- (void)setUserLocation:(CLLocation *)userLocation withUserLocationString:(NSString *)userLocationString {
+    self.userLocation = userLocation;
+    self.userLocationString = userLocationString;
 }
 
 - (void)setDeleteAllowed:(BOOL)deleteAllowed {
@@ -579,6 +633,7 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
     
     if (self.event.occurrencesByDateVenueTime && 
         self.event.occurrencesByDateVenueTime.count > 0) {
+        NSLog(@"About to process occurrences from getAllOccurrencesSuccess");
         [self processOccurrencesFromEvent:self.event];
         [self reloadOccurrencesTableViews];
     }
@@ -684,12 +739,40 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
         
         NSArray * occurrencesByDateVenueTime = self.event.occurrencesByDateVenueTime;
         
+        // Show or hide occurrences controls handle
         if (!self.occurrencesControlsPulledOut) {
-            [self setOccurrencesControlsHandleIsAvailable:(occurrencesByDateVenueTime.count > 1) animated:animated];
+            [self setOccurrencesControlsHandleIsAvailable:debuggingOccurrencesPicker || (occurrencesByDateVenueTime.count > 1) animated:animated];
         }
+
+        // Adjust labels (price & venue) according to whether occurrences controls handle is showing
+        CGFloat hardCodedHackValueLabelWidthAdjustment = 13; // HARD CODED VALUE! SHOULD BE MORE FLEXIBLE THAN THIS, BASED ON THE WIDTH OF THE HANDLE, OR SOMETHING LIKE THAT.
         CGRect priceLabelFrame = self.priceLabel.frame;
-        priceLabelFrame.size.width = self.occurrencesControlsHandleIsAvailable ? self.priceContainer.bounds.size.width - 2 * priceLabelFrame.origin.x - 20 /* HARD CODED VALUE! */ : self.priceContainer.bounds.size.width - 2 * priceLabelFrame.origin.x;
+        CGRect venueLabelFrame = self.venueLabel.frame;
+        priceLabelFrame.size.width = self.priceContainer.bounds.size.width - 2 * priceLabelFrame.origin.x;
+        venueLabelFrame.size.width = self.locationContainer.bounds.size.width - 2 * venueLabelFrame.origin.x;
+        if (self.occurrencesControlsHandleIsAvailable) {
+            priceLabelFrame.size.width -= hardCodedHackValueLabelWidthAdjustment;
+            venueLabelFrame.size.width -= hardCodedHackValueLabelWidthAdjustment;
+        }
         self.priceLabel.frame = priceLabelFrame;
+        self.venueLabel.frame = venueLabelFrame;
+        
+        // Adjust the labels in the occurrences controls
+        self.occurrencesControlsVenuesNearLocationLabel.text = self.userLocationString; // THIS IS NONFUNCTIONAL CURRENTLY. WE ARE CURRENTLY TAKING THE LOCATION FROM THE EVENTS LIST AND USING IT HERE. SOON, WE OBVIOUSLY NEED TO LET THE USER CHANGE (OR DEVICE UPDATE) THEIR LOCATION WITHIN THE EVENT CARD.
+        self.occurrencesControlsTimesOnDateLabel.text = [NSString stringWithFormat:@"Times on %@ at", [self.occurrencesControlsNavBarDateFormatter stringFromDate:self.eventOccurrenceCurrent.startDate]]; // THIS ONLY WORKS SO LONG AS THE CURRENT EVENT OCCURRENCE IS UPDATED WITH EVERY TABLE VIEW CELL SELECTION. ONCE WE CHANGE THIS, WE WILL NEED TO INTRODUCE A NEW NSDate VARIABLE THAT STORES THE CURRENTLY SELECTED TABLE VIEW DATE.
+        self.occurrencesControlsTimesAtVenueLabel.text = self.eventOccurrenceCurrent.place.title; // THIS ONLY WORKS SO LONG AS THE CURRENT EVENT OCCURRENCE IS UPDATED WITH EVERY TABLE VIEW CELL SELECTION. ONCE WE CHANGE THIS, WE WILL NEED TO INTRODUCE A NEW NSString VARIABLE THAT STORES THE CURRENTLY SELECTED TABLE VIEW VENUE TITLE.
+        CGFloat maximumWidth = self.occurrencesControlsNavBar.bounds.size.width - self.occurrencesControlsTimesAtVenueLabel.frame.origin.x - self.occurrencesControlsBackButton.frame.origin.x;
+        CGSize venueTextSize = [self.occurrencesControlsTimesAtVenueLabel.text sizeWithFont:self.occurrencesControlsTimesAtVenueLabel.font constrainedToSize:CGSizeMake(self.occurrencesControlsNavBar.bounds.size.width - self.occurrencesControlsTimesAtVenueLabel.frame.origin.x, self.occurrencesControlsTimesAtVenueLabel.bounds.size.height)];
+        CGFloat normalCenteredWidth = self.occurrencesControlsNavBar.bounds.size.width - 2 * self.occurrencesControlsTimesAtVenueLabel.frame.origin.x;
+        CGRect occurrencesControlsTimesAtVenueLabelFrame = self.occurrencesControlsTimesAtVenueLabel.frame;
+        if (venueTextSize.width > normalCenteredWidth) {
+            occurrencesControlsTimesAtVenueLabelFrame.size.width = maximumWidth;
+            self.occurrencesControlsTimesAtVenueLabel.textAlignment = UITextAlignmentLeft;
+        } else {
+            occurrencesControlsTimesAtVenueLabelFrame.size.width = normalCenteredWidth;
+            self.occurrencesControlsTimesAtVenueLabel.textAlignment = UITextAlignmentCenter;
+        }
+        self.occurrencesControlsTimesAtVenueLabel.frame = occurrencesControlsTimesAtVenueLabelFrame;
 
 //        NSLog(@"before the crash");
         self.swipeToPullInOccurrencesControls.enabled = self.occurrencesControlsHandleIsAvailable;
@@ -951,7 +1034,7 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
     CGRect acceptableOriginRegion = CGRectMake(CGRectGetMinX(self.occurrencesControlsContainer.frame) - horizontalForgiveness, self.occurrencesControlsContainer.frame.origin.y + 40, horizontalForgiveness + (self.occurrencesControlsContainer.superview.bounds.size.width - CGRectGetMinX(self.occurrencesControlsContainer.frame)), self.occurrencesControlsContainer.frame.size.height - 40 - 5);
     if (CGRectContainsPoint(acceptableOriginRegion, location) && 
         !self.occurrencesControlsPulledOut) {
-        [self setOccurrencesControlsToShowTableView:self.occurrencesControlsVenuesTableView animated:NO];
+        [self setOccurrencesControlsToShowGroup:OCGroupDatesVenues animated:NO];
         [self toggleOccurrencesControls];
     }
 }
@@ -991,6 +1074,14 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
         [occurrenceTimeFormatter setDateFormat:@"h:mm a"];
     }
     return occurrenceTimeFormatter;
+}
+
+- (NSDateFormatter *) occurrencesControlsNavBarDateFormatter {
+    if (occurrencesControlsNavBarDateFormatter == nil) {
+        occurrencesControlsNavBarDateFormatter = [[NSDateFormatter alloc] init];
+        [occurrencesControlsNavBarDateFormatter setDateFormat:@"MMM d"];
+    }
+    return occurrencesControlsNavBarDateFormatter;
 }
 
 - (void) swipedToGoBack:(UISwipeGestureRecognizer *)swipeGesture {
@@ -1294,11 +1385,11 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
 
 - (void) occurrenceInfoButtonTouched:(UIButton *)occurrenceInfoButton {
     if (occurrenceInfoButton == self.dateOccurrenceInfoButton) {
-        [self setOccurrencesControlsToShowTableView:self.occurrencesControlsDatesTableView animated:NO];
+        [self setOccurrencesControlsToShowGroup:OCGroupDatesVenues animated:NO];
     } else if (occurrenceInfoButton == self.locationOccurrenceInfoButton) {
-        [self setOccurrencesControlsToShowTableView:self.occurrencesControlsVenuesTableView animated:NO];
+        [self setOccurrencesControlsToShowGroup:OCGroupDatesVenues animated:NO];
     } else if (occurrenceInfoButton == self.timeOccurrenceInfoButton) {
-        [self setOccurrencesControlsToShowTableView:self.occurrencesControlsTimesTableView animated:NO];
+        [self setOccurrencesControlsToShowGroup:OCGroupTimes animated:NO];
     } else {
         NSLog(@"ERROR in EventViewController - unrecognized occurrenceInfoButton");
     }
@@ -1454,6 +1545,9 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
             Occurrence * occurrence = [occurrenceSummaryVenue.occurrences objectAtIndex:indexPath.row];
             OccurrenceTimeCell * tableViewCellCast = (OccurrenceTimeCell *)tableViewCell;
             tableViewCellCast.timeLabel.text = [self.occurrenceTimeFormatter stringFromDate:occurrence.startTime];
+            if (tableViewCellCast.timeLabel.text.length == 0) {
+                tableViewCellCast.timeLabel.text = @"--";
+            }
             NSArray * pricesLowToHigh = occurrence.pricesLowToHigh;
             NSNumber * minPrice = nil;
             NSNumber * maxPrice = nil;
@@ -1526,7 +1620,7 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
         
         updateSelectedTime = YES;
         
-        [self setOccurrencesControlsToShowTableView:self.occurrencesControlsTimesTableView animated:YES];
+        [self setOccurrencesControlsToShowGroup:OCGroupTimes animated:YES];
         
     } else if (tableView == self.occurrencesControlsTimesTableView) {
         
@@ -1621,39 +1715,56 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
     return indexMatched;
 }
 
-- (void) setOccurrencesControlsToShowTableView:(UITableView *)tableView animated:(BOOL)animated {
+- (void) setOccurrencesControlsToShowGroup:(OccurrencesControlsGroup)ocGroup animated:(BOOL)animated {
     
-    void(^changesBlock)(void) = ^{
+    void(^tableViewsChangesBlock)(void) = ^{
         CGRect tableViewsContainerFrame = self.occurrencesControlsTableViewsContainer.frame;
         CGFloat tableViewsContainerOriginX = 0;
-//        CGFloat occurrencesControlsVenuesTimesSeparatorViewAlpha = 0.0;
+        //        CGFloat occurrencesControlsVenuesTimesSeparatorViewAlpha = 0.0;
         
-        if (tableView == self.occurrencesControlsDatesTableView ||
-            tableView == self.occurrencesControlsVenuesTableView) {
+        if (ocGroup == OCGroupDatesVenues) {
             
             tableViewsContainerOriginX = 0;
-//            occurrencesControlsVenuesTimesSeparatorViewAlpha = 1.0;
+            //            occurrencesControlsVenuesTimesSeparatorViewAlpha = 1.0;
             
-        } else if (tableView == self.occurrencesControlsTimesTableView) {
+        } else if (ocGroup == OCGroupTimes) {
             
             tableViewsContainerOriginX = -self.occurrencesControlsTimesTableView.frame.origin.x + 5;
-//            occurrencesControlsVenuesTimesSeparatorViewAlpha = 0.0;
+            //            occurrencesControlsVenuesTimesSeparatorViewAlpha = 0.0;
             
         } else {
-            NSLog(@"ERROR in EventViewController - unrecognized table view");
+            NSLog(@"ERROR in EventViewController - unrecognized occurrences controls group value");
         }
         
         tableViewsContainerFrame.origin.x = tableViewsContainerOriginX;
         self.occurrencesControlsTableViewsContainer.frame = tableViewsContainerFrame;
-//        self.occurrencesControlsVenuesTimesSeparatorView.alpha = occurrencesControlsVenuesTimesSeparatorViewAlpha;
+        //        self.occurrencesControlsVenuesTimesSeparatorView.alpha = occurrencesControlsVenuesTimesSeparatorViewAlpha;
+    };
+    
+    void(^navBarChangesBlock)(void) = ^{
+        CGRect navBarsContainerFrame = self.occurrencesControlsNavBarsContainer.frame;
+        navBarsContainerFrame.origin.x = (ocGroup == OCGroupTimes) ? -CGRectGetMinX(self.occurrencesControlsTimesNavBar.frame) : 0;
+        self.occurrencesControlsNavBarsContainer.frame = navBarsContainerFrame;
     };
     
     if (animated) {
-        [UIView animateWithDuration:.25 animations:changesBlock];
+        [UIView animateWithDuration:0.25 animations:^{
+            tableViewsChangesBlock();
+            navBarChangesBlock();
+        }];
     } else {
-        changesBlock();
+        tableViewsChangesBlock();
+        navBarChangesBlock();
     }
     
+}
+
+- (void)occurrencesControlsCancelButtonTouched:(id)sender {
+    [self toggleOccurrencesControls];
+}
+
+- (void)occurrencesControlsBackButtonTouched:(id)sender {
+    [self setOccurrencesControlsToShowGroup:OCGroupDatesVenues animated:YES];
 }
 
 @end

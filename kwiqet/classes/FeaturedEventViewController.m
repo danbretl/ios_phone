@@ -198,12 +198,14 @@ CGFloat const FEV_DESCRIPTION_LABEL_PADDING_HORIZONTAL = 20.0;
         // Let's go button
         self.letsGoButton = [[[UIButton alloc] initWithFrame:CGRectMake(FEV_ACTION_BAR_PADDING, FEV_ACTION_BAR_PADDING, FEV_ACTION_BUTTON_WIDTH, FEV_ACTION_BUTTON_HEIGHT)] autorelease];
         [self.letsGoButton setBackgroundImage:[UIImage imageNamed:@"btn_letsgo.png"] forState: UIControlStateNormal];
+        [self.letsGoButton setBackgroundImage:[UIImage imageNamed:@"btn_letsgo_touch.png"] forState:UIControlStateHighlighted];
         [self.letsGoButton addTarget:self action:@selector(letsGoButtonTouched) forControlEvents:UIControlEventTouchUpInside];
         [self.actionBarView addSubview:self.letsGoButton];
         
         // Share button
         self.shareButton = [[[UIButton alloc]initWithFrame:CGRectMake(self.actionBarView.bounds.size.width - FEV_ACTION_BUTTON_WIDTH - FEV_ACTION_BAR_PADDING, FEV_ACTION_BAR_PADDING, FEV_ACTION_BUTTON_WIDTH, FEV_ACTION_BUTTON_HEIGHT)] autorelease];
         [self.shareButton setBackgroundImage:[UIImage imageNamed:@"btn_share.png"] forState: UIControlStateNormal];
+        [self.shareButton setBackgroundImage:[UIImage imageNamed:@"btn_share_touch.png"] forState:UIControlStateHighlighted];
         [self.shareButton addTarget:self action:@selector(shareButtonTouched) forControlEvents:UIControlEventTouchUpInside];
         [self.actionBarView addSubview:self.shareButton];
     }

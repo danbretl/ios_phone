@@ -41,9 +41,12 @@
     self.occurrencesPrivate = occurrences;
     NSMutableString * developingTimesString = [NSMutableString string];
     for (Occurrence * occurrence in self.occurrences) {
-        [developingTimesString appendFormat:@"%@, ", [timeFormatter stringFromDate:occurrence.startTime]];
+        if (occurrence.startTime != nil) {
+            [developingTimesString appendFormat:@"%@, ", [timeFormatter stringFromDate:occurrence.startTime]];
+        }
     }
-    self.timesStringPrivate = [developingTimesString substringToIndex:developingTimesString.length - 2];
+    int endCharactersToSubtract = developingTimesString.length > 0 ? 2 : 0;
+    self.timesStringPrivate = [developingTimesString substringToIndex:developingTimesString.length - endCharactersToSubtract];
 }
 
 - (void)dealloc {

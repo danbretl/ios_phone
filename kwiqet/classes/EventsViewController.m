@@ -844,7 +844,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
         self.eventsWebQueryFromSearch.searchTerm = searchTerm;
         self.eventsWebQueryFromSearch.filterDateBucketString = self.selectedDateSearchFilterOption.code;
         self.eventsWebQueryFromSearch.filterDistanceBucketString = self.selectedLocationSearchFilterOption.code;
-        self.eventsWebQueryFromSearch.filterLocationString = self.dvLocationSearchTextField.text;
+        self.eventsWebQueryFromSearch.filterLocationString = self.dvLocationSearchTextField.text.length > 0 ? self.dvLocationSearchTextField.text : @"Current Location"; // LOCATION HACK
         self.eventsWebQueryFromSearch.filterTimeBucketString = self.selectedTimeSearchFilterOption.code;
         [self.coreDataModel coreDataSave];
         self.eventsFromSearch = [self.eventsWebQueryFromSearch.eventResultsEventsInOrder.mutableCopy autorelease];
@@ -1265,7 +1265,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     }
     self.eventsWebQuery.filterDateBucketString = self.selectedDateFilterOption.code;
     self.eventsWebQuery.filterDistanceBucketString = self.selectedLocationFilterOption.code;
-    self.eventsWebQuery.filterLocationString = self.dvLocationTextField.text;
+    self.eventsWebQuery.filterLocationString = self.dvLocationTextField.text.length > 0 ? self.dvLocationTextField.text : @"Current Location"; // LOCATION HACK
     self.eventsWebQuery.filterPriceBucketString = self.selectedPriceFilterOption.code;
     self.eventsWebQuery.filterTimeBucketString = self.selectedTimeFilterOption.code;
     Category * filterCategory = [self.coreDataModel getCategoryWithURI:theProposedCategoryURI];
@@ -1383,7 +1383,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
         self.eventsWebQueryFromSearch.searchTerm = searchTerm;
         self.eventsWebQueryFromSearch.filterDateBucketString = self.selectedDateSearchFilterOption.code;
         self.eventsWebQueryFromSearch.filterDistanceBucketString = self.selectedLocationSearchFilterOption.code;
-        self.eventsWebQueryFromSearch.filterLocationString = self.dvLocationSearchTextField.text;
+        self.eventsWebQueryFromSearch.filterLocationString = self.dvLocationSearchTextField.text.length > 0 ? self.dvLocationSearchTextField.text : @"Current Location"; // LOCATION HACK
         self.eventsWebQueryFromSearch.filterTimeBucketString = self.selectedTimeSearchFilterOption.code;
         [self.coreDataModel coreDataSave];
         self.eventsFromSearch = [self.eventsWebQueryFromSearch.eventResultsEventsInOrder.mutableCopy autorelease];
@@ -1928,7 +1928,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
                                  self.eventsWebQueryFromSearch.searchTerm = searchTerm;
                                  self.eventsWebQueryFromSearch.filterDateBucketString = self.selectedDateSearchFilterOption.code;
                                  self.eventsWebQueryFromSearch.filterDistanceBucketString = self.selectedLocationSearchFilterOption.code;
-                                 self.eventsWebQueryFromSearch.filterLocationString = self.dvLocationSearchTextField.text;
+                                self.eventsWebQueryFromSearch.filterLocationString = self.dvLocationSearchTextField.text.length > 0 ? self.dvLocationSearchTextField.text : @"Current Location"; // LOCATION HACK
                                  self.eventsWebQueryFromSearch.filterTimeBucketString = self.selectedTimeSearchFilterOption.code;
                                  [self.coreDataModel coreDataSave];
                                  self.eventsFromSearch = [self.eventsWebQueryFromSearch.eventResultsEventsInOrder.mutableCopy autorelease];
@@ -2029,7 +2029,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
-    NSLog(@"%d rows in section %d", self.eventsForCurrentSource.count, section);
+//    NSLog(@"%d rows in section %d", self.eventsForCurrentSource.count, section);
     return self.eventsForCurrentSource.count;
 }
 
@@ -2048,7 +2048,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 }
 
 - (void) configureCell:(EventTableViewCell *)cell forRowAtIndexPath:(NSIndexPath *)indexPath {
-    NSLog(@"configureCell for %d-%d", indexPath.section, indexPath.row);
+//    NSLog(@"configureCell for %d-%d", indexPath.section, indexPath.row);
     
     Event * event = (Event *)[self.eventsForCurrentSource objectAtIndex:indexPath.row];
     
@@ -2119,6 +2119,8 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     self.cardPageViewController.delegate = self;
     self.cardPageViewController.hidesBottomBarWhenPushed = YES;
     self.cardPageViewController.deleteAllowed = !self.isSearchOn;
+    NSLog(@"self.eventsWebQueryForCurrentSource.filterLocationString = %@", self.eventsWebQueryForCurrentSource.filterLocationString);
+    [self.cardPageViewController setUserLocation:nil withUserLocationString:self.eventsWebQueryForCurrentSource.filterLocationString]; // THIS NEEDS TO BE UPDATED SO THAT WE ACTUALLY PASS ON THE USER'S LOCATION. THAT COULD JUST BE A STARTING POINT THOUGH - REALLY, THE EVENT VIEW CONTROLLER SHOULD CONTINUE DOING ITS OWN LOCATION UPDATING ETC.
     
     [self.webConnector sendLearnedDataAboutEvent:event.uri withUserAction:@"V"]; // Attempt to send the learning to our server.
     [self.webConnector getEventWithURI:event.uri]; // Attempt to get the full event info

@@ -24,6 +24,11 @@
 #import "SDWebImageManager.h"
 #import "OccurrenceInfoOverlayView.h"
 
+typedef enum {
+    OCGroupDatesVenues = 1,
+    OCGroupTimes = 2
+} OccurrencesControlsGroup;
+
 @protocol CardPageViewControllerDelegate;
 
 @interface EventViewController : UIViewController <MFMailComposeViewControllerDelegate, WebConnectorDelegate, MapViewControllerDelegate, UIScrollViewDelegate, UIActionSheetDelegate, ContactsSelectViewControllerDelegate, SDWebImageManagerDelegate, UITableViewDelegate, UITableViewDataSource> {
@@ -92,8 +97,19 @@
     IBOutlet UIView      * occurrencesControlsDatesVenuesSeparatorView;
     IBOutlet UIView      * occurrencesControlsVenuesTimesSeparatorView;
     IBOutlet UITableView * occurrencesControlsTimesTableView;
+    IBOutlet UIView      * occurrencesControlsNavBarsContainer;
+    IBOutlet UIView      * occurrencesControlsDatesVenuesNavBar;
+    IBOutlet UIView      * occurrencesControlsTimesNavBar;
+    IBOutlet UILabel     * occurrencesControlsVenuesNearHeaderLabel;
+    IBOutlet UILabel     * occurrencesControlsVenuesNearLocationLabel;
+    IBOutlet UILabel     * occurrencesControlsTimesOnDateLabel;
+    IBOutlet UILabel     * occurrencesControlsTimesAtVenueLabel;
+    IBOutlet UIButton    * occurrencesControlsCancelButton;
+    IBOutlet UIButton    * occurrencesControlsBackButton;
     
     WebActivityView * webActivityView;
+    CLLocation * userLocation_; // Currently, this variable is just passed on from the events list. This will obviously need to change, so that the user's location can be changed / updated while the event card is showing.
+    NSString * userLocationString_; // Currently, this variable is just passed on from the events list. This will obviously need to change, so that the user's location can be changed / updated while the event card is showing.
     Event * event;
     Occurrence * eventOccurrenceCurrent;
     int eventOccurrenceCurrentDateIndex;
@@ -105,6 +121,7 @@
     MapViewController * mapViewController;    
     WebDataTranslator * webDataTranslator;
     NSDateFormatter * occurrenceTimeFormatter;
+    NSDateFormatter * occurrencesControlsNavBarDateFormatter;
     WebConnector * webConnector;
     UIAlertView * connectionErrorOnUserActionRequestAlertView;
     BOOL deleteAllowed_;
@@ -115,9 +132,12 @@
     NSMutableArray * letsGoChoiceActionSheetSelectors;
     UIActionSheet  * shareChoiceActionSheet;
     NSMutableArray * shareChoiceActionSheetSelectors;
+    
+    BOOL debuggingOccurrencesPicker;
 
 }
 
+- (void) setUserLocation:(CLLocation *)userLocation withUserLocationString:(NSString *)userLocationString;
 @property (nonatomic, retain) Event * event;
 @property (assign) id<CardPageViewControllerDelegate> delegate;
 @property (nonatomic, retain) CoreDataModel * coreDataModel;

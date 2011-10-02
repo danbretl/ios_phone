@@ -62,6 +62,9 @@
         self.dayNumberLabel.backgroundColor = [UIColor clearColor];
         self.dayNameLabel.backgroundColor = [UIColor clearColor];
         
+        self.monthLabel.textColor = [UIColor colorWithWhite:0.20 alpha:1.0];
+        self.dayNameLabel.textColor = [UIColor colorWithWhite:0.20 alpha:1.0];
+        
     }
     return self;
 }

@@ -59,6 +59,9 @@ float const OVC_TIMES_LABEL_ORIGIN_Y = 42;
         self.timesLabel.numberOfLines = 0;
         [self.contentView addSubview:self.timesLabel];
         
+        self.addressLabel.textColor = [UIColor colorWithWhite:0.20 alpha:1.0];
+        self.timesLabel.textColor = [UIColor colorWithWhite:0.20 alpha:1.0];
+        
         // Debugging...
         // ...
         

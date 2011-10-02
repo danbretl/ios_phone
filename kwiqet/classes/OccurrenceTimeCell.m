@@ -7,6 +7,7 @@
 //
 
 #import "OccurrenceTimeCell.h"
+#import "UIFont+Kwiqet.h"
 
 @implementation OccurrenceTimeCell
 
@@ -27,21 +28,25 @@
         self.selectedBackgroundView = selectedBackgroundView;
         [selectedBackgroundView release];
         
-        timeLabel_ = [[UILabel alloc] initWithFrame:CGRectMake(10, 10, 90, self.contentView.bounds.size.height - 10)];
+        timeLabel_ = [[UILabel alloc] initWithFrame:CGRectMake(20, 0, 90, self.contentView.bounds.size.height)];
         self.timeLabel.backgroundColor = [UIColor clearColor];//[UIColor redColor];
         self.timeLabel.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleRightMargin;
-        self.timeLabel.font = [UIFont fontWithName:@"HelveticaNeueLTStd-BdCn" size:24];
+        self.timeLabel.font = [UIFont kwiqetFontOfType:BoldCondensed size:24.0];
         self.timeLabel.textAlignment = UITextAlignmentRight;
+        self.timeLabel.adjustsFontSizeToFitWidth = YES;
         [self.contentView addSubview:self.timeLabel];
         
-        priceAndInfoLabel_ = [[UILabel alloc] initWithFrame:CGRectMake(CGRectGetMaxX(self.timeLabel.frame) + 23, 0, self.contentView.bounds.size.width - (CGRectGetMaxX(self.timeLabel.frame) + 23) - 10, self.contentView.bounds.size.height)];
+        priceAndInfoLabel_ = [[UILabel alloc] initWithFrame:CGRectMake(CGRectGetMaxX(self.timeLabel.frame) + 15, 0, self.contentView.bounds.size.width - (CGRectGetMaxX(self.timeLabel.frame) + 15) - 10, self.contentView.bounds.size.height)];
         self.priceAndInfoLabel.backgroundColor = [UIColor clearColor];//[UIColor yellowColor];
         self.priceAndInfoLabel.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth;
-        self.priceAndInfoLabel.font = [UIFont fontWithName:@"HelveticaNeue" size:14];
+        self.priceAndInfoLabel.font = [UIFont kwiqetFontOfType:LightNormal size:14.0];
         self.priceAndInfoLabel.textAlignment = UITextAlignmentLeft;
         self.priceAndInfoLabel.numberOfLines = 0;
         self.priceAndInfoLabel.adjustsFontSizeToFitWidth = NO; // We're just hoping that we can fit all the multi-line text for now...
         [self.contentView addSubview:self.priceAndInfoLabel];
+        
+        self.timeLabel.textColor = [UIColor colorWithWhite:0.20 alpha:1.0];
+        self.priceAndInfoLabel.textColor = [UIColor colorWithWhite:0.20 alpha:1.0];
 
     }
     return self;
