@@ -1807,6 +1807,8 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
     [self.occurrencesControlsTimesTableView reloadData];
     [self.occurrencesControlsTimesTableView selectRowAtIndexPath:[NSIndexPath indexPathForRow:self.eventOccurrenceCurrentTimeIndex inSection:0] animated:NO scrollPosition:UITableViewScrollPositionMiddle];
     
+    [self updateOccurrencesControlsInternalViewsFromData];
+    
 }
 
 - (void)occurrencesControlsCancelButtonTouched:(id)sender {
