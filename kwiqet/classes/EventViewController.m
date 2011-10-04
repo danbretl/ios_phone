@@ -102,7 +102,6 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
 @property (retain) IBOutlet UIButton * occurrencesControlsCancelButton;
 @property (retain) IBOutlet UIButton * occurrencesControlsBackButton;
 
-
 @property (retain) NSMutableArray * eventOccurrencesSummaryArray;
 @property (retain) Occurrence * eventOccurrenceCurrent;
 @property int eventOccurrenceCurrentDateIndex;
@@ -138,7 +137,7 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
 - (void) tappedToPullInOccurrencesControls:(UITapGestureRecognizer *)tapGesture;
 - (void) userActionOccurredToPullInOccurrencesControls:(UIGestureRecognizer *)gesture horizontalForgiveness:(CGFloat)horizontalForgiveness;
 - (void) swipedToPushOutOccurrencesControls:(UISwipeGestureRecognizer *)swipeGesture;
-- (void) toggleOccurrencesControls;
+- (void) toggleOccurrencesControlsAndResetTableViewsWhenClosing:(BOOL)shouldResetTableViewsWhenClosing;
 - (void) displayImage:(UIImage *)image;
 - (void) pushedToAddToCalendar;
 - (void) pushedToCreateFacebookEvent;
@@ -147,10 +146,12 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
 - (void) processOccurrencesFromEvent:(Event *)theEvent;
 - (void) reloadOccurrencesTableViews;
 - (void) updateOccurrenceInfoViewsFromDataAnimated:(BOOL)animated;
+- (void) updateOccurrencesControlsInternalViewsFromData;
 - (NSString *) debugOccurrencesTableViewNameForTableViewTag:(int)tag;
 - (void) setTimeLabelTextToTimeString:(NSString *)timeLabelString containsTwoTimes:(BOOL)doesContainTwoTimes usingSeparatorString:(NSString *)separatorString;
 - (void) setOccurrenceInfoContainerIsCollapsed:(BOOL)isCollapsed animated:(BOOL)animated;
 - (void) setOccurrencesControlsHandleIsAvailable:(BOOL)isAvailable animated:(BOOL)animated;
+- (void) resetOccurrencesControlsTableViewsToCurrentEventOccurrence;
 @property (nonatomic, readonly) OccurrenceSummaryDate * eventOccurrenceCurrentDateSummaryObject;
 @property (nonatomic, readonly) OccurrenceSummaryVenue * eventOccurrenceCurrentVenueSummaryObject;
 - (NSUInteger) indexOfDate:(NSDate *)date inSummaryDates:(NSArray *)arrayOfSummaryDates; // Returns the index of summary date matching the given date. If a match does not exist, returns NSNotFound.
@@ -174,7 +175,6 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
 @synthesize swipeToPullInOccurrencesControls, swipeToPushOutOccurrencesControls, tapToPullInOccurrencesControls;
 @synthesize occurrencesControlsPulledOut;
 @synthesize occurrencesControlsContainer, occurrencesControlsHandleImageView, occurrencesControlsNavBar, occurrencesControlsTableViewContainer, occurrencesControlsTableViewOverlay, occurrencesControlsTableViewsContainer, occurrencesControlsDatesTableView, occurrencesControlsVenuesTableView, occurrencesControlsDatesVenuesSeparatorView, occurrencesControlsVenuesTimesSeparatorView, occurrencesControlsTimesTableView, occurrencesControlsNavBarsContainer, occurrencesControlsDatesVenuesNavBar, occurrencesControlsTimesNavBar, occurrencesControlsVenuesNearHeaderLabel, occurrencesControlsVenuesNearLocationLabel, occurrencesControlsTimesOnDateLabel, occurrencesControlsTimesAtVenueLabel, occurrencesControlsCancelButton, occurrencesControlsBackButton;
-;
 
 @synthesize userLocation=userLocation_, userLocationString=userLocationString_;
 @synthesize event;
@@ -436,6 +436,7 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
     swipeToPushOutOccurrencesControls = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(swipedToPushOutOccurrencesControls:)];
     self.swipeToPushOutOccurrencesControls.direction = UISwipeGestureRecognizerDirectionRight;
     [self.occurrencesControlsContainer addGestureRecognizer:self.swipeToPushOutOccurrencesControls];
+    self.swipeToPushOutOccurrencesControls.enabled = NO; // DISABLING THIS GESTURE FOR NOW, BECAUSE IT SEEMS UNCLEAR TO THE USER THAT SWIPING THE OCCURRENCES CONTROLS AWAY WOULD RESULT IN A CANCEL, ESPECIALLY SINCE THEY COULD SWIPE AWAY AFTER HAVING SELECTED A VENUE (BUT NOT YET A TIME).
     // Tap to pull in
     tapToPullInOccurrencesControls = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(tappedToPullInOccurrencesControls:)];
     self.tapToPullInOccurrencesControls.cancelsTouchesInView = NO;
@@ -774,26 +775,11 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
         self.priceLabel.frame = priceLabelFrame;
         self.venueLabel.frame = venueLabelFrame;
         
-        // Adjust the labels in the occurrences controls
-        self.occurrencesControlsVenuesNearLocationLabel.text = self.userLocationString; // THIS IS NONFUNCTIONAL CURRENTLY. WE ARE CURRENTLY TAKING THE LOCATION FROM THE EVENTS LIST AND USING IT HERE. SOON, WE OBVIOUSLY NEED TO LET THE USER CHANGE (OR DEVICE UPDATE) THEIR LOCATION WITHIN THE EVENT CARD.
-        self.occurrencesControlsTimesOnDateLabel.text = [NSString stringWithFormat:@"Times on %@ at", [self.occurrencesControlsNavBarDateFormatter stringFromDate:self.eventOccurrenceCurrent.startDate]]; // THIS ONLY WORKS SO LONG AS THE CURRENT EVENT OCCURRENCE IS UPDATED WITH EVERY TABLE VIEW CELL SELECTION. ONCE WE CHANGE THIS, WE WILL NEED TO INTRODUCE A NEW NSDate VARIABLE THAT STORES THE CURRENTLY SELECTED TABLE VIEW DATE.
-        self.occurrencesControlsTimesAtVenueLabel.text = self.eventOccurrenceCurrent.place.title; // THIS ONLY WORKS SO LONG AS THE CURRENT EVENT OCCURRENCE IS UPDATED WITH EVERY TABLE VIEW CELL SELECTION. ONCE WE CHANGE THIS, WE WILL NEED TO INTRODUCE A NEW NSString VARIABLE THAT STORES THE CURRENTLY SELECTED TABLE VIEW VENUE TITLE.
-        CGFloat maximumWidth = self.occurrencesControlsNavBar.bounds.size.width - self.occurrencesControlsTimesAtVenueLabel.frame.origin.x - self.occurrencesControlsBackButton.frame.origin.x;
-        CGSize venueTextSize = [self.occurrencesControlsTimesAtVenueLabel.text sizeWithFont:self.occurrencesControlsTimesAtVenueLabel.font constrainedToSize:CGSizeMake(self.occurrencesControlsNavBar.bounds.size.width - self.occurrencesControlsTimesAtVenueLabel.frame.origin.x, self.occurrencesControlsTimesAtVenueLabel.bounds.size.height)];
-        CGFloat normalCenteredWidth = self.occurrencesControlsNavBar.bounds.size.width - 2 * self.occurrencesControlsTimesAtVenueLabel.frame.origin.x;
-        CGRect occurrencesControlsTimesAtVenueLabelFrame = self.occurrencesControlsTimesAtVenueLabel.frame;
-        if (venueTextSize.width > normalCenteredWidth) {
-            occurrencesControlsTimesAtVenueLabelFrame.size.width = maximumWidth;
-            self.occurrencesControlsTimesAtVenueLabel.textAlignment = UITextAlignmentLeft;
-        } else {
-            occurrencesControlsTimesAtVenueLabelFrame.size.width = normalCenteredWidth;
-            self.occurrencesControlsTimesAtVenueLabel.textAlignment = UITextAlignmentCenter;
-        }
-        self.occurrencesControlsTimesAtVenueLabel.frame = occurrencesControlsTimesAtVenueLabelFrame;
+        [self updateOccurrencesControlsInternalViewsFromData];
 
 //        NSLog(@"before the crash");
         self.swipeToPullInOccurrencesControls.enabled = self.occurrencesControlsHandleIsAvailable;
-        self.swipeToPushOutOccurrencesControls.enabled = self.swipeToPullInOccurrencesControls.enabled;
+        self.swipeToPushOutOccurrencesControls.enabled = NO; // DISABLING THIS GESTURE FOR NOW, BECAUSE IT SEEMS UNCLEAR TO THE USER THAT SWIPING THE OCCURRENCES CONTROLS AWAY WOULD RESULT IN A CANCEL, ESPECIALLY SINCE THEY COULD SWIPE AWAY AFTER HAVING SELECTED A VENUE (BUT NOT YET A TIME).
         self.tapToPullInOccurrencesControls.enabled = self.swipeToPullInOccurrencesControls.enabled && !self.occurrencesControlsPulledOut;
         self.dateOccurrenceInfoButton.enabled = [self.event occurrencesNotOnDate:self.eventOccurrenceCurrent.startDate].count > 0;
         self.locationOccurrenceInfoButton.enabled = [self.event occurrencesOnDate:self.eventOccurrenceCurrent.startDate notAtPlace:self.eventOccurrenceCurrent.place].count > 0;
@@ -820,7 +806,7 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
         self.locationOccurrenceInfoButton.enabled = NO;
         self.timeOccurrenceInfoButton.enabled = NO;
         self.swipeToPullInOccurrencesControls.enabled = NO;
-        self.swipeToPushOutOccurrencesControls.enabled = NO;
+        self.swipeToPushOutOccurrencesControls.enabled = NO; // DISABLING THIS GESTURE FOR NOW, BECAUSE IT SEEMS UNCLEAR TO THE USER THAT SWIPING THE OCCURRENCES CONTROLS AWAY WOULD RESULT IN A CANCEL, ESPECIALLY SINCE THEY COULD SWIPE AWAY AFTER HAVING SELECTED A VENUE (BUT NOT YET A TIME).
         self.tapToPullInOccurrencesControls.enabled = NO;
         
         
@@ -832,6 +818,27 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
     UIEdgeInsets scrollViewScrollIndicatorInsets = self.scrollView.scrollIndicatorInsets;
     scrollViewScrollIndicatorInsets.bottom = self.occurrencesControlsHandleIsAvailable ? 163 /* HARD CODED VALUE. HARD CODED VALUE. HARD CODED VALUE. HARD CODED VALUE. HARD CODED VALUE. HARD CODED VALUE. HARD CODED VALUE. HARD CODED VALUE. HARD CODED VALUE. HARD CODED VALUE. HARD CODED VALUE. HARD CODED VALUE. HARD CODED VALUE */ : 0;
     self.scrollView.scrollIndicatorInsets = scrollViewScrollIndicatorInsets;
+    
+}
+
+- (void) updateOccurrencesControlsInternalViewsFromData {
+    
+    // Adjust the labels in the occurrences controls
+    self.occurrencesControlsVenuesNearLocationLabel.text = self.userLocationString; // THIS IS NONFUNCTIONAL CURRENTLY. WE ARE CURRENTLY TAKING THE LOCATION FROM THE EVENTS LIST AND USING IT HERE. SOON, WE OBVIOUSLY NEED TO LET THE USER CHANGE (OR DEVICE UPDATE) THEIR LOCATION WITHIN THE EVENT CARD.
+    self.occurrencesControlsTimesOnDateLabel.text = [NSString stringWithFormat:@"Times on %@ at", [self.occurrencesControlsNavBarDateFormatter stringFromDate:self.eventOccurrenceCurrentDateSummaryObject.date]];
+    self.occurrencesControlsTimesAtVenueLabel.text = self.eventOccurrenceCurrentVenueSummaryObject.place.title;
+    CGFloat maximumWidth = self.occurrencesControlsNavBar.bounds.size.width - self.occurrencesControlsTimesAtVenueLabel.frame.origin.x - self.occurrencesControlsBackButton.frame.origin.x;
+    CGSize venueTextSize = [self.occurrencesControlsTimesAtVenueLabel.text sizeWithFont:self.occurrencesControlsTimesAtVenueLabel.font constrainedToSize:CGSizeMake(self.occurrencesControlsNavBar.bounds.size.width - self.occurrencesControlsTimesAtVenueLabel.frame.origin.x, self.occurrencesControlsTimesAtVenueLabel.bounds.size.height)];
+    CGFloat normalCenteredWidth = self.occurrencesControlsNavBar.bounds.size.width - 2 * self.occurrencesControlsTimesAtVenueLabel.frame.origin.x;
+    CGRect occurrencesControlsTimesAtVenueLabelFrame = self.occurrencesControlsTimesAtVenueLabel.frame;
+    if (venueTextSize.width > normalCenteredWidth) {
+        occurrencesControlsTimesAtVenueLabelFrame.size.width = maximumWidth;
+        self.occurrencesControlsTimesAtVenueLabel.textAlignment = UITextAlignmentLeft;
+    } else {
+        occurrencesControlsTimesAtVenueLabelFrame.size.width = normalCenteredWidth;
+        self.occurrencesControlsTimesAtVenueLabel.textAlignment = UITextAlignmentCenter;
+    }
+    self.occurrencesControlsTimesAtVenueLabel.frame = occurrencesControlsTimesAtVenueLabelFrame;
     
 }
 
@@ -1011,7 +1018,7 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
     return !self.occurrencesControlsContainer.hidden;
 }
 
-- (void) toggleOccurrencesControls {
+- (void) toggleOccurrencesControlsAndResetTableViewsWhenClosing:(BOOL)shouldResetTableViewsWhenClosing {
     NSLog(@"toggleOccurrencesControls from %d to %d", self.occurrencesControlsPulledOut, !self.occurrencesControlsPulledOut);
     self.occurrencesControlsPulledOut = !self.occurrencesControlsPulledOut;
     self.scrollView.scrollEnabled = !self.occurrencesControlsPulledOut;
@@ -1031,7 +1038,11 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
             [[UIApplication sharedApplication] setStatusBarStyle:UIStatusBarStyleDefault animated:YES];
         }
         self.occurrencesControlsContainer.frame = occurrencesControlsContainerFrame;
-    } completion:^(BOOL finished){}];
+    } completion:^(BOOL finished){
+        if (shouldResetTableViewsWhenClosing) {
+            [self resetOccurrencesControlsTableViewsToCurrentEventOccurrence];
+        }
+    }];
 }
 
 - (void) swipedToPullInOccurrencesControls:(UISwipeGestureRecognizer *)swipeGesture {
@@ -1052,14 +1063,14 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
     if (CGRectContainsPoint(acceptableOriginRegion, location) && 
         !self.occurrencesControlsPulledOut) {
         [self setOccurrencesControlsToShowGroup:OCGroupDatesVenues animated:NO];
-        [self toggleOccurrencesControls];
+        [self toggleOccurrencesControlsAndResetTableViewsWhenClosing:NO];
     }
 }
 
 - (void) swipedToPushOutOccurrencesControls:(UISwipeGestureRecognizer *)swipeGesture {
     NSLog(@"swipedToPushOutOccurrencesControls");
     if (self.occurrencesControlsPulledOut) {
-        [self toggleOccurrencesControls];
+        [self toggleOccurrencesControlsAndResetTableViewsWhenClosing:YES];
     }
 }
 
@@ -1410,7 +1421,7 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
     } else {
         NSLog(@"ERROR in EventViewController - unrecognized occurrenceInfoButton");
     }
-    [self toggleOccurrencesControls];
+    [self toggleOccurrencesControlsAndResetTableViewsWhenClosing:NO];
 }
 
 - (UIAlertView *)connectionErrorOnUserActionRequestAlertView {
@@ -1621,7 +1632,7 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
     
     BOOL updateSelectedVenue = NO;
     BOOL updateSelectedTime = NO;
-    
+        
     if (tableView == self.occurrencesControlsDatesTableView) {
         
         self.eventOccurrenceCurrentDateIndex = indexPath.row;
@@ -1644,7 +1655,7 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
         self.eventOccurrenceCurrentTimeIndex = indexPath.row;
         [self.occurrencesControlsTimesTableView scrollToRowAtIndexPath:indexPath atScrollPosition:UITableViewScrollPositionMiddle animated:YES];
         
-        [self toggleOccurrencesControls];
+        // Wait until later in method... Not even sure if this is necessary, but it's more clear.
         
     } else {
         NSLog(@"ERROR in EventViewController - unrecognized table view");
@@ -1672,9 +1683,14 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
         [self.occurrencesControlsTimesTableView scrollToRowAtIndexPath:indexPathOfTimeToSelect atScrollPosition:UITableViewScrollPositionMiddle animated:YES];
     }
     
-    self.eventOccurrenceCurrent = [self.eventOccurrenceCurrentVenueSummaryObject.occurrences objectAtIndex:self.eventOccurrenceCurrentTimeIndex];
-    [self updateOccurrenceInfoViewsFromDataAnimated:YES];
-    
+    if (tableView == self.occurrencesControlsTimesTableView) {
+        self.eventOccurrenceCurrent = [self.eventOccurrenceCurrentVenueSummaryObject.occurrences objectAtIndex:self.eventOccurrenceCurrentTimeIndex];
+        [self updateOccurrenceInfoViewsFromDataAnimated:YES];
+        [self toggleOccurrencesControlsAndResetTableViewsWhenClosing:NO];
+    } else {
+        [self updateOccurrencesControlsInternalViewsFromData];
+    }
+        
 }
 
 - (OccurrenceSummaryDate *) eventOccurrenceCurrentDateSummaryObject {
@@ -1776,8 +1792,25 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
     
 }
 
+- (void) resetOccurrencesControlsTableViewsToCurrentEventOccurrence {
+    
+    self.eventOccurrenceCurrentDateIndex = [self indexOfDate:self.eventOccurrenceCurrent.startDate inSummaryDates:self.eventOccurrencesSummaryArray];
+    self.eventOccurrenceCurrentVenueIndex = [self indexOfPlace:self.eventOccurrenceCurrent.place inSummaryVenues:self.eventOccurrenceCurrentDateSummaryObject.venues];
+    self.eventOccurrenceCurrentTimeIndex = [self indexOfTime:self.eventOccurrenceCurrent.startTime inOccurrences:self.eventOccurrenceCurrentVenueSummaryObject.occurrences settleForClosestFit:NO];
+    
+    [self.occurrencesControlsDatesTableView reloadData];
+    [self.occurrencesControlsDatesTableView selectRowAtIndexPath:[NSIndexPath indexPathForRow:self.eventOccurrenceCurrentDateIndex inSection:0] animated:NO scrollPosition:UITableViewScrollPositionMiddle];
+    
+    [self.occurrencesControlsVenuesTableView reloadData];
+    [self.occurrencesControlsVenuesTableView selectRowAtIndexPath:[NSIndexPath indexPathForRow:self.eventOccurrenceCurrentVenueIndex inSection:0] animated:NO scrollPosition:UITableViewScrollPositionMiddle];
+    
+    [self.occurrencesControlsTimesTableView reloadData];
+    [self.occurrencesControlsTimesTableView selectRowAtIndexPath:[NSIndexPath indexPathForRow:self.eventOccurrenceCurrentTimeIndex inSection:0] animated:NO scrollPosition:UITableViewScrollPositionMiddle];
+    
+}
+
 - (void)occurrencesControlsCancelButtonTouched:(id)sender {
-    [self toggleOccurrencesControls];
+    [self toggleOccurrencesControlsAndResetTableViewsWhenClosing:YES];
 }
 
 - (void)occurrencesControlsBackButtonTouched:(id)sender {

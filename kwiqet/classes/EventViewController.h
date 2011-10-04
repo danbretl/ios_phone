@@ -106,7 +106,7 @@ typedef enum {
     IBOutlet UILabel     * occurrencesControlsTimesAtVenueLabel;
     IBOutlet UIButton    * occurrencesControlsCancelButton;
     IBOutlet UIButton    * occurrencesControlsBackButton;
-    
+        
     WebActivityView * webActivityView;
     CLLocation * userLocation_; // Currently, this variable is just passed on from the events list. This will obviously need to change, so that the user's location can be changed / updated while the event card is showing.
     NSString * userLocationString_; // Currently, this variable is just passed on from the events list. This will obviously need to change, so that the user's location can be changed / updated while the event card is showing.
