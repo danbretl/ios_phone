@@ -71,6 +71,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 @property (retain) NSString * eventsSummaryStringBrowse;
 @property (retain) NSString * eventsSummaryStringSearch;
 @property (nonatomic, readonly) NSString * eventsSummaryStringForCurrentSource;
+@property BOOL pushedAwayForEventCard;
 
 /////////////////////
 // Views properties
@@ -232,7 +233,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 - (void) swipeUpToHideDrawer:(UISwipeGestureRecognizer *)swipeGesture;
 - (void) tapToHideDrawer:(UITapGestureRecognizer *)tapGesture;
 - (void) toggleDrawerAnimated:(BOOL)animated;
-- (void) toggleSearchModeAnimated:(BOOL)animated shouldMakeSearchTextFieldActiveWhenTogglingOn:(BOOL)shouldMakeSearchTextFieldActive shouldFlushQueryAndFiltersWhenTogglingOff:(BOOL)shouldFlushQueryAndFilters; // What an ugly method! Should be split up into two, one for on, one for off.
+- (void) toggleSearchModeAnimated:(BOOL)animated shouldMakeSearchTextFieldActiveWhenTogglingOn:(BOOL)shouldMakeSearchTextFieldActive shouldFlushQueryAndFilters:(BOOL)shouldFlushQueryAndFilters; // What an ugly method! Should be split up into two, one for on, one for off.
 - (void) updateActiveFilterHighlights;
 - (void) updateFilter:(EventsFilter *)filter buttonImageForFilterOption:(EventsFilterOption *)filterOption;
 - (void) updateFilterOptionButtonStatesOldSelected:(EventsFilterOption *)oldSelectedOption newSelected:(EventsFilterOption *)newSelectedOption;
@@ -256,6 +257,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 @synthesize filterButtonCategories, filterButtonPrice, filterButtonDate, filterButtonLocation, filterButtonTime;
 @synthesize filterSearchButtonDate, filterSearchButtonLocation, filterSearchButtonTime;
 @synthesize pushableContainerView, pushableContainerShadowCheatView, feedbackView, feedbackViewIsVisible, eventsSummaryStringBrowse, eventsSummaryStringSearch;
+@synthesize pushedAwayForEventCard;
 @synthesize drawerScrollView, activeFilterHighlightsContainerView;
 @synthesize drawerViewsBrowseContainer;
 @synthesize drawerViewsSearchContainer;
@@ -309,6 +311,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
     if (self) {
         // Custom initialization
+        self.pushedAwayForEventCard = NO;
     }
     return self;
 }
@@ -733,7 +736,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
         [DefaultsModel saveEventsListMostRecentMode:ModeBrowse];
     }
     BOOL mostRecentEventsListModeWasSearch = (mostRecentEventsListMode == ModeSearch);
-    BOOL shouldDisplaySearchMode = mostRecentEventsListModeWasSearch;/* && self.eventsFromSearch.count > 0;*/ // THIS COULD CAUSE PROBLEMS IF WE START LETTING PEOPLE DELETE EVENTS FROM THE EVENT CARD WHEN THEY GOT TO THAT EVENT CARD FROM SEARCH MODE. CURRENTLY, WE DO NOT DELETES IN THAT CASE. It could cause a problem because if this view gets unloaded while the event card view controller is showing, and then the event gets deleted from the event card, and if that event was the only result that had come up from a search, then when this view gets reloaded, instead of reconstructing it in search mode, the condition above (self.eventsFromSearch.count > 0) would fail, and the view would be reconstructed in browse mode instead. This could either just be annoying for the user, or it could cause some real technical glitches. // UPDATE: This condition is just confusing things. For now, we'll let users go straight back to search, no matter how many results you had previously.
+    BOOL shouldDisplaySearchMode = self.pushedAwayForEventCard && mostRecentEventsListModeWasSearch;/* && self.eventsFromSearch.count > 0;*/ // THIS COULD CAUSE PROBLEMS IF WE START LETTING PEOPLE DELETE EVENTS FROM THE EVENT CARD WHEN THEY GOT TO THAT EVENT CARD FROM SEARCH MODE. CURRENTLY, WE DO NOT DELETES IN THAT CASE. It could cause a problem because if this view gets unloaded while the event card view controller is showing, and then the event gets deleted from the event card, and if that event was the only result that had come up from a search, then when this view gets reloaded, instead of reconstructing it in search mode, the condition above (self.eventsFromSearch.count > 0) would fail, and the view would be reconstructed in browse mode instead. This could either just be annoying for the user, or it could cause some real technical glitches. // UPDATE: This condition is just confusing things. For now, we'll let users go straight back to search, no matter how many results you had previously.
         
     // Block with which to find the index of a given filter option in a filter's options array, given ann array of filters and the desired filter code
     NSUInteger(^indexOfEventsFilterOptionBlock)(NSString *, NSArray *, NSString *)=^(NSString * filterCode, NSArray * filtersArray, NSString * filterOptionCode){
@@ -873,7 +876,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
         [self updateFilter:[self filterForFilterCode:EVENTS_FILTER_LOCATION inFiltersArray:self.filtersSearch]buttonImageForFilterOption:self.selectedLocationSearchFilterOption];
         
         // Switch to search mode.
-        [self toggleSearchModeAnimated:NO shouldMakeSearchTextFieldActiveWhenTogglingOn:(self.eventsFromSearch.count == 0) shouldFlushQueryAndFiltersWhenTogglingOff:YES];
+        [self toggleSearchModeAnimated:NO shouldMakeSearchTextFieldActiveWhenTogglingOn:(self.eventsFromSearch.count == 0) shouldFlushQueryAndFilters:!self.pushedAwayForEventCard];
         
         // Set the search text field term
         self.searchTextField.text = searchTerm;
@@ -1141,12 +1144,13 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
         [self becomeFirstResponder];
     }
     
-    // Fixing some strange bug where if you are in search mode and not at the top of the events list, then push an event card, then come back to the events list, then the search text field (which we had been sticking at the top of the screen) would disappear until you scrolled the table view (at which point it would stick back at the top of the screen).
-    if (self.isSearchOn) {
-        CGRect scvf = self.searchContainerView.frame;
-        scvf.origin.y = self.tableView.bounds.origin.y;
-        self.searchContainerView.frame = scvf;
-    }
+    // I believe the following is old, and now unnecessary, and now causing bugs of its own.
+//    // Fixing some strange bug where if you are in search mode and not at the top of the events list, then push an event card, then come back to the events list, then the search text field (which we had been sticking at the top of the screen) would disappear until you scrolled the table view (at which point it would stick back at the top of the screen).
+//    if (self.isSearchOn) {
+//        CGRect scvf = self.searchContainerView.frame;
+//        scvf.origin.y = self.tableView.bounds.origin.y;
+//        self.searchContainerView.frame = scvf;
+//    }
     
     // Deselect selected row, if there is one
     [self.tableView deselectRowAtIndexPath:self.tableView.indexPathForSelectedRow animated:YES]; // There is something weird going on with the animation - it is going really slowly. Figure this out later. It doesn't look horrible right now though, so, I'm just going to leave it.
@@ -1758,6 +1762,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
                     [self webConnectGetEventsListWithCurrentOldFilterAndCategory];
                 } else {
                     // Search mode, should re-search...
+                    NSLog(@"About to searchExecutionRequestedByUser from toggleDrawerAnimated");
                     [self searchExecutionRequestedByUser];
                 }
                 [self setFeedbackViewIsVisible:self.feedbackViewIsVisible adjustMessages:YES withMessageType:LoadingEvents eventsSummaryString:self.eventsSummaryStringForCurrentSource searchString:(self.isSearchOn ? self.searchTextField.text : nil) animated:animated];
@@ -1781,7 +1786,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     
 }
 
-- (void) toggleSearchModeAnimated:(BOOL)animated shouldMakeSearchTextFieldActiveWhenTogglingOn:(BOOL)shouldMakeSearchTextFieldActive shouldFlushQueryAndFiltersWhenTogglingOff:(BOOL)shouldFlushQueryAndFilters {
+- (void) toggleSearchModeAnimated:(BOOL)animated shouldMakeSearchTextFieldActiveWhenTogglingOn:(BOOL)shouldMakeSearchTextFieldActive shouldFlushQueryAndFilters:(BOOL)shouldFlushQueryAndFilters {
     
     float duration = animated ? 0.25 : 0.0;
     
@@ -1796,6 +1801,27 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     NSLog(@"saveEventsListMostRecentMode %d", (self.isSearchOn ? ModeSearch : ModeBrowse));
     
     if (self.isSearchOn) {
+        if (shouldFlushQueryAndFilters) {
+            if (shouldFlushQueryAndFilters) {
+                [self resetSearchFilters];
+                if (self.eventsWebQueryFromSearch == nil ||
+                    self.eventsWebQueryFromSearch.queryDatetime != nil) {
+                    self.eventsWebQueryFromSearch = [NSEntityDescription insertNewObjectForEntityForName:@"EventsWebQuery" inManagedObjectContext:self.coreDataModel.managedObjectContext];
+                    NSLog(@"eventsWebQueryFromSearch was just made anew in toggleSearchMode");
+                }
+                NSString * searchTerm = self.searchTextField.text;
+                /* THE FOLLOWING CODE IS DUPLICATED IN ...viewDidLoad..., ...toggleSearchMode..., and ...searchExecutionRequestedByUser... */
+                self.eventsWebQueryFromSearch.searchTerm = searchTerm;
+                self.eventsWebQueryFromSearch.filterDateBucketString = self.selectedDateSearchFilterOption.code;
+                self.eventsWebQueryFromSearch.filterDistanceBucketString = self.selectedLocationSearchFilterOption.code;
+                self.eventsWebQueryFromSearch.filterLocationString = self.dvLocationSearchTextField.text.length > 0 ? self.dvLocationSearchTextField.text : @"Current Location"; // LOCATION HACK
+                self.eventsWebQueryFromSearch.filterTimeBucketString = self.selectedTimeSearchFilterOption.code;
+                [self.coreDataModel coreDataSave];
+                self.eventsFromSearch = [self.eventsWebQueryFromSearch.eventResultsEventsInOrder.mutableCopy autorelease];
+                /* THE PREVIOUS CODE IS DUPLICATED IN ...viewDidLoad..., ...toggleSearchMode..., and ...searchExecutionRequestedByUser... */
+                NSLog(@"eventsWebQueryFromSearch was just updated in toggleSearchMode and is now %@", self.eventsWebQueryFromSearch);
+            }
+        }
         self.tableViewCoverView.frame = CGRectMake(self.tableView.frame.origin.x, self.tableView.frame.origin.y + self.tableView.tableHeaderView.bounds.size.height, self.tableView.frame.size.width, self.pushableContainerView.frame.size.height - self.tableView.tableHeaderView.bounds.size.height);
         // Set table view content offset to top
         self.tableView.contentOffset = CGPointMake(0, 0);
@@ -1919,26 +1945,26 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
                                  NSLog(@"setTableViewScrollable from toggleSearch, could be sending NO");
                                  [self setTableViewScrollable:haveResult selectable:haveResult];
                              }];
-                             // Search filters clean-up
-                             if (shouldFlushQueryAndFilters) {
-                                 [self resetSearchFilters];
-                                 if (self.eventsWebQueryFromSearch == nil ||
-                                     self.eventsWebQueryFromSearch.queryDatetime != nil) {
-                                     self.eventsWebQueryFromSearch = [NSEntityDescription insertNewObjectForEntityForName:@"EventsWebQuery" inManagedObjectContext:self.coreDataModel.managedObjectContext];
-                                     NSLog(@"eventsWebQueryFromSearch was just made anew in toggleSearchMode");
-                                 }
-                                 NSString * searchTerm = self.searchTextField.text;
-                                 /* THE FOLLOWING CODE IS DUPLICATED IN ...viewDidLoad..., ...toggleSearchMode..., and ...searchExecutionRequestedByUser... */
-                                 self.eventsWebQueryFromSearch.searchTerm = searchTerm;
-                                 self.eventsWebQueryFromSearch.filterDateBucketString = self.selectedDateSearchFilterOption.code;
-                                 self.eventsWebQueryFromSearch.filterDistanceBucketString = self.selectedLocationSearchFilterOption.code;
-                                self.eventsWebQueryFromSearch.filterLocationString = self.dvLocationSearchTextField.text.length > 0 ? self.dvLocationSearchTextField.text : @"Current Location"; // LOCATION HACK
-                                 self.eventsWebQueryFromSearch.filterTimeBucketString = self.selectedTimeSearchFilterOption.code;
-                                 [self.coreDataModel coreDataSave];
-                                 self.eventsFromSearch = [self.eventsWebQueryFromSearch.eventResultsEventsInOrder.mutableCopy autorelease];
-                                 /* THE PREVIOUS CODE IS DUPLICATED IN ...viewDidLoad..., ...toggleSearchMode..., and ...searchExecutionRequestedByUser... */
-                                 NSLog(@"eventsWebQueryFromSearch was just updated in toggleSearchMode and is now %@", self.eventsWebQueryFromSearch);
-                             }
+//                             // Search filters clean-up
+//                             if (shouldFlushQueryAndFilters) {
+//                                 [self resetSearchFilters];
+//                                 if (self.eventsWebQueryFromSearch == nil ||
+//                                     self.eventsWebQueryFromSearch.queryDatetime != nil) {
+//                                     self.eventsWebQueryFromSearch = [NSEntityDescription insertNewObjectForEntityForName:@"EventsWebQuery" inManagedObjectContext:self.coreDataModel.managedObjectContext];
+//                                     NSLog(@"eventsWebQueryFromSearch was just made anew in toggleSearchMode");
+//                                 }
+//                                 NSString * searchTerm = self.searchTextField.text;
+//                                 /* THE FOLLOWING CODE IS DUPLICATED IN ...viewDidLoad..., ...toggleSearchMode..., and ...searchExecutionRequestedByUser... */
+//                                 self.eventsWebQueryFromSearch.searchTerm = searchTerm;
+//                                 self.eventsWebQueryFromSearch.filterDateBucketString = self.selectedDateSearchFilterOption.code;
+//                                 self.eventsWebQueryFromSearch.filterDistanceBucketString = self.selectedLocationSearchFilterOption.code;
+//                                self.eventsWebQueryFromSearch.filterLocationString = self.dvLocationSearchTextField.text.length > 0 ? self.dvLocationSearchTextField.text : @"Current Location"; // LOCATION HACK
+//                                 self.eventsWebQueryFromSearch.filterTimeBucketString = self.selectedTimeSearchFilterOption.code;
+//                                 [self.coreDataModel coreDataSave];
+//                                 self.eventsFromSearch = [self.eventsWebQueryFromSearch.eventResultsEventsInOrder.mutableCopy autorelease];
+//                                 /* THE PREVIOUS CODE IS DUPLICATED IN ...viewDidLoad..., ...toggleSearchMode..., and ...searchExecutionRequestedByUser... */
+//                                 NSLog(@"eventsWebQueryFromSearch was just updated in toggleSearchMode and is now %@", self.eventsWebQueryFromSearch);
+//                             }
                          }];
     }
 }
@@ -1979,12 +2005,14 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     if (self.isDrawerOpen) {
         [self toggleDrawerAnimated:YES];
     }
-    [self toggleSearchModeAnimated:YES shouldMakeSearchTextFieldActiveWhenTogglingOn:YES shouldFlushQueryAndFiltersWhenTogglingOff:YES];
+    [self toggleSearchModeAnimated:YES shouldMakeSearchTextFieldActiveWhenTogglingOn:YES shouldFlushQueryAndFilters:YES];
 }
 
 - (BOOL)textFieldShouldReturn:(UITextField *)textField {
+    NSLog(@"textFieldShouldReturn?");
     BOOL shouldReturn = YES;
     if (textField == self.searchTextField) {
+        NSLog(@"About to searchExecutionRequestedByUser from textFieldShouldReturn");
         [self searchExecutionRequestedByUser];
         shouldReturn = NO;
     } else if (textField == self.dvLocationTextField ||
@@ -2187,6 +2215,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     
     self.cardPageViewController.event = event;
     [self.navigationController pushViewController:self.cardPageViewController animated:YES];
+    self.pushedAwayForEventCard = YES;
     
     if (!self.webConnector.connectionInProgress) {
         [self hideWebLoadingViews];
@@ -2230,6 +2259,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
         
     }
     
+    self.pushedAwayForEventCard = NO;
     [self.navigationController popViewControllerAnimated:YES];
     
 }
@@ -2291,7 +2321,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     //NSString * action = [[notification userInfo] valueForKey:@"action"]; // We don't really care whether the user just logged in or logged out - we should get new events list no matter what.
     BOOL animated = self.view.window != nil;
     if (self.isSearchOn) {
-        [self toggleSearchModeAnimated:animated shouldMakeSearchTextFieldActiveWhenTogglingOn:YES shouldFlushQueryAndFiltersWhenTogglingOff:YES];
+        [self toggleSearchModeAnimated:animated shouldMakeSearchTextFieldActiveWhenTogglingOn:YES shouldFlushQueryAndFilters:YES];
     }
     if (self.isDrawerOpen) {
         [self toggleDrawerAnimated:animated];
@@ -2305,7 +2335,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 - (void) behaviorWasReset:(NSNotification *)notification {
     BOOL animated = self.view.window != nil;
     if (self.isSearchOn) {
-        [self toggleSearchModeAnimated:animated shouldMakeSearchTextFieldActiveWhenTogglingOn:YES shouldFlushQueryAndFiltersWhenTogglingOff:YES];
+        [self toggleSearchModeAnimated:animated shouldMakeSearchTextFieldActiveWhenTogglingOn:YES shouldFlushQueryAndFilters:YES];
     }
     if (self.isDrawerOpen) {
         [self toggleDrawerAnimated:animated];
@@ -2887,14 +2917,15 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
         if (self.eventsFromSearch.count > 0) {
             [self.searchTextField resignFirstResponder];
         } else {
-            [self toggleSearchModeAnimated:YES shouldMakeSearchTextFieldActiveWhenTogglingOn:YES shouldFlushQueryAndFiltersWhenTogglingOff:YES];
+            [self toggleSearchModeAnimated:YES shouldMakeSearchTextFieldActiveWhenTogglingOn:YES shouldFlushQueryAndFilters:YES];
         }
     } else {
-        [self toggleSearchModeAnimated:YES shouldMakeSearchTextFieldActiveWhenTogglingOn:YES shouldFlushQueryAndFiltersWhenTogglingOff:YES];
+        [self toggleSearchModeAnimated:YES shouldMakeSearchTextFieldActiveWhenTogglingOn:YES shouldFlushQueryAndFilters:YES];
     }
 }
 
 - (void)searchGoButtonTouched:(id)sender {
+    NSLog(@"About to searchExecutionRequestedByUser from searchGoButtonTouched");
     [self searchExecutionRequestedByUser];
 }
 
@@ -2906,6 +2937,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
         if (!self.isSearchOn) {
             [self webConnectGetEventsListWithCurrentOldFilterAndCategory];
         } else {
+            NSLog(@"About to searchExecutionRequestedByUser from feedbackViewRetryButtonTouched");
             [self searchExecutionRequestedByUser];
         }
     } else {

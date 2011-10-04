@@ -61,6 +61,7 @@
     BOOL feedbackViewIsVisible;
     NSString * eventsSummaryStringBrowse;
     NSString * eventsSummaryStringSearch;
+    BOOL pushedAwayForEventCard;
 
     //////////
     // Views
