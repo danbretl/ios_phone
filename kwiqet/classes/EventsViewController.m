@@ -1910,6 +1910,9 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
                                  [self setPushableContainerViewsOriginY:CGRectGetMaxY(self.filtersContainerView.frame) adjustHeightToFillMainView:YES];
                                  // Move summary string on screen
                                  [self setFeedbackViewIsVisible:YES adjustMessages:YES withMessageType:self.feedbackMessageTypeBrowseRemembered eventsSummaryString:self.eventsSummaryStringBrowse searchString:(self.isSearchOn ? self.searchTextField.text : nil) animated:animated];
+                                 UIEdgeInsets tableViewInset = self.tableView.contentInset;
+                                 tableViewInset.bottom = self.feedbackViewIsVisible ? self.feedbackView.bounds.size.height : 0.0;
+                                 self.tableView.contentInset = tableViewInset;
                                  // Fade table view in
                                  self.tableViewCoverView.alpha = 0.0;
                                  BOOL haveResult = self.eventsForCurrentSource.count > 0;
