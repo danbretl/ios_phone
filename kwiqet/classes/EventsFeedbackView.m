@@ -281,11 +281,14 @@
 - (NSString *) messageSoloForMessageType:(EventsFeedbackMessageType)messageType withEventsString:(NSString *)eventsString searchString:(NSString *)searchString {
     NSString * messageSolo = nil;
     if (![EventsFeedbackView doesMessageTypeRequireComplexMessage:messageType]) {
-        if (messageType == LoadingEvents ||
+        if (messageType == LoadingEventsTrue ||
+            messageType == LoadingEvents ||
             messageType == LookingAtEvents ||
             messageType == CloseDrawerToLoadPrompt) {
             NSString * leadIn = nil;
             switch (messageType) {
+                case LoadingEventsTrue:
+                    leadIn = @"Loading"; break; // In opposition to the following, we are going to maintain this 'true' Loading message for certain special cases. Generally though, we are still using the fake 'loading', as described below.
                 case LoadingEvents: /*leadIn = @"Loading"; break;*/ // The feedback view is getting a little busy with extremely frequent string updates. For now, I'm going to just make "Loading" messages the same as "Displaying" messages - effectively eliminating the former.
                 case LookingAtEvents: leadIn = @"Displaying"; break;
                 case CloseDrawerToLoadPrompt: leadIn = @"Swipe up to load"; break;                    
@@ -348,7 +351,8 @@
         NSString * messageFollowup = nil;
         NSString * messageSolo = nil;
         
-        if (messageType == LoadingEvents ||
+        if (messageType == LoadingEventsTrue ||
+            messageType == LoadingEvents ||
             messageType == LookingAtEvents ||
             messageType == SetFiltersPrompt ||
             messageType == CloseDrawerToLoadPrompt) {

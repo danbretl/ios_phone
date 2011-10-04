@@ -1133,6 +1133,21 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     }
 }
 
+- (void)viewWillAppear:(BOOL)animated {
+    [super viewWillAppear:animated];
+    if (self.eventsForCurrentSource.count == 0) {
+        if (self.isSearchOn) {
+            // Not going to do anything on this path for now... Just leave the list blank?
+        } else {
+            //            NSLog(@"No events for current source, going to web-get events. No events for current source, going to web-get events. No events for current source, going to web-get events. No events for current source, going to web-get events. No events for current source, going to web-get events. No events for current source, going to web-get events. No events for current source, going to web-get events. No events for current source, going to web-get events. No events for current source, going to web-get events. No events for current source, going to web-get events.");
+            [self setFeedbackViewIsVisible:self.feedbackViewIsVisible adjustMessages:YES withMessageType:LoadingEventsTrue eventsSummaryString:self.eventsSummaryStringBrowse searchString:nil animated:NO];
+            [self webConnectGetEventsListWithCurrentOldFilterAndCategory];
+        }
+    } else {
+        // Not worried about this path currently...
+    }
+}
+
 // On viewDidAppear, we should deselect the highlighted row (if there is one).
 - (void)viewDidAppear:(BOOL)animated
 {
@@ -1152,23 +1167,13 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 //        self.searchContainerView.frame = scvf;
 //    }
     
+    if (self.webConnector.connectionInProgress) {
+        [self setFeedbackViewIsVisible:YES adjustMessages:YES withMessageType:LoadingEventsTrue eventsSummaryString:self.eventsSummaryStringForCurrentSource searchString:(self.isSearchOn ? self.searchTextField.text : nil) animated:animated];
+        [self showWebLoadingViews];
+    }
+    
     // Deselect selected row, if there is one
     [self.tableView deselectRowAtIndexPath:self.tableView.indexPathForSelectedRow animated:YES]; // There is something weird going on with the animation - it is going really slowly. Figure this out later. It doesn't look horrible right now though, so, I'm just going to leave it.
-    
-    if (self.webConnector.connectionInProgress) {
-        [self setFeedbackViewIsVisible:YES adjustMessages:YES withMessageType:LoadingEvents eventsSummaryString:self.eventsSummaryStringForCurrentSource searchString:(self.isSearchOn ? self.searchTextField.text : nil) animated:animated];
-        [self showWebLoadingViews];
-    } else if (self.eventsForCurrentSource.count == 0) {
-        if (self.isSearchOn) {
-            // Not going to do anything on this path for now... Just leave the list blank?
-        } else {
-//            NSLog(@"No events for current source, going to web-get events. No events for current source, going to web-get events. No events for current source, going to web-get events. No events for current source, going to web-get events. No events for current source, going to web-get events. No events for current source, going to web-get events. No events for current source, going to web-get events. No events for current source, going to web-get events. No events for current source, going to web-get events. No events for current source, going to web-get events.");
-//            [self setFeedbackViewIsVisible:self.feedbackViewIsVisible adjustMessages:YES withMessageType:LoadingEvents eventsSummaryString:self.eventsSummaryStringBrowse searchString:nil animated:YES];
-//            [self webConnectGetEventsListWithCurrentOldFilterAndCategory];
-        }
-    } else {
-        // Not worried about this path currently...
-    }
     
 }
 
@@ -1336,14 +1341,14 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
         self.eventsWebQuery.queryDatetime = now;
         // Update events array
         self.events = [self.eventsWebQuery.eventResultsEventsInOrder.mutableCopy autorelease];
-        
-        // Save our core data changes
-        [self.coreDataModel coreDataSave];
-        
+                
     } else {
         self.eventsWebQuery.queryDatetime = [NSDate date];
         self.events = nil;
     }
+    
+    // Save our core data changes
+    [self.coreDataModel coreDataSave];
     
     if (!self.isSearchOn) {
         [self updateViewsFromCurrentSourceDataWhichShouldBePopulated:haveResults reasonIfNot:EVENTS_NO_RESULTS_REASON_NO_RESULTS animated:YES];
@@ -1360,6 +1365,9 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     
     self.eventsWebQuery.queryDatetime = [NSDate date];
     self.events = nil;
+    
+    // Save our core data changes
+    [self.coreDataModel coreDataSave];
     
     if (!self.isSearchOn) {
         [self updateViewsFromCurrentSourceDataWhichShouldBePopulated:NO reasonIfNot:EVENTS_NO_RESULTS_REASON_CONNECTION_ERROR animated:YES];
@@ -1439,14 +1447,14 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
         self.eventsWebQueryFromSearch.queryDatetime = [NSDate date];
         // Update events array
         self.eventsFromSearch = [self.eventsWebQueryFromSearch.eventResultsEventsInOrder.mutableCopy autorelease];
-        
-        // Save our core data changes
-        [self.coreDataModel coreDataSave];
-                
+                        
     } else {
         self.eventsWebQueryFromSearch.queryDatetime = [NSDate date];
         self.eventsFromSearch = nil;
     }
+    
+    // Save our core data changes
+    [self.coreDataModel coreDataSave];
         
     if (self.isSearchOn) {
         [self updateViewsFromCurrentSourceDataWhichShouldBePopulated:haveResults reasonIfNot:EVENTS_NO_RESULTS_REASON_NO_RESULTS animated:YES];
@@ -1463,6 +1471,9 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     
     self.eventsWebQueryFromSearch.queryDatetime = [NSDate date];
     self.eventsFromSearch = nil;
+    
+    // Save our core data changes
+    [self.coreDataModel coreDataSave];
     
     if (self.isSearchOn) {
         [self updateViewsFromCurrentSourceDataWhichShouldBePopulated:NO reasonIfNot:EVENTS_NO_RESULTS_REASON_CONNECTION_ERROR animated:YES];
@@ -2698,33 +2709,38 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
         NSLog(@"ERROR in EventsViewController filtersSummaryStringForSource:andUpdateSummaryLabel: - unrecognized source string.");
     }
     
+    // Location HACK
+    if (!(locationItself.length > 0)) {
+        locationItself = @"your current location";
+    }
+    
     NSMutableString * summaryString = [NSMutableString string];
 //    NSString * DUMMY_START_STRING = @"---DUMMY_START_STRING---";
 //    [summaryString appendString:DUMMY_START_STRING];
     NSString * eventsWord = @"events";
     if (categoryReadable) {
-        eventsWord = [NSString stringWithFormat:@"%@ %@", categoryReadable, eventsWord];
+        eventsWord = [NSString stringWithFormat:@"%@ %@", categoryReadable, eventsWord.lowercaseString];
     }
     if (priceReadable) {
         if ([priceReadable isEqualToString:@"Free"]) {
-            [summaryString appendFormat:@"%@ %@ ", [priceReadable lowercaseString], [eventsWord lowercaseString]];
+            [summaryString appendFormat:@"%@ %@ ", priceReadable.lowercaseString, eventsWord];
         } else {
-            [summaryString appendFormat:@"%@ that cost %@ ", [eventsWord lowercaseString], [priceReadable lowercaseString]];
+            [summaryString appendFormat:@"%@ that cost %@ ", eventsWord, priceReadable.lowercaseString];
         }
     } else {
-        [summaryString appendFormat:@"%@ ", [eventsWord lowercaseString]];
+        [summaryString appendFormat:@"%@ ", eventsWord];
     }
     if (timeReadable || dateReadable) {
         [summaryString appendString:@"happening "];
     }
     if (dateReadable) {
-        [summaryString appendFormat:@"%@ ", [dateReadable lowercaseString]];
+        [summaryString appendFormat:@"%@ ", dateReadable.lowercaseString];
     }
     if (timeReadable) {
-        [summaryString appendFormat:@"%@ ", [timeReadable lowercaseString]];
+        [summaryString appendFormat:@"%@ ", timeReadable.lowercaseString];
     }
     if (locationReadable) {
-        [summaryString appendFormat:@"%@ %@ ", [locationReadable lowercaseString], locationItself];
+        [summaryString appendFormat:@"%@ %@ ", locationReadable.lowercaseString, locationItself.lowercaseString];
     }
     [summaryString deleteCharactersInRange:NSMakeRange(summaryString.length-1, 1)];
     

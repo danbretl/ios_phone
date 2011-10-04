@@ -9,14 +9,15 @@
 #import <UIKit/UIKit.h>
 
 typedef enum {
-    CustomSolo = 1,
-    CustomComplex = 2,
-    LoadingEvents = 3,
-    LookingAtEvents = 4,
-    NoEventsFound = 5,
-    ConnectionError = 6,
-    SetFiltersPrompt = 7,
-    CloseDrawerToLoadPrompt = 8,
+    CustomSolo = 10,
+    CustomComplex = 15,
+    LoadingEvents = 20,
+    LoadingEventsTrue = 25,
+    LookingAtEvents = 30,
+    NoEventsFound = 40,
+    ConnectionError = 45,
+    SetFiltersPrompt = 50,
+    CloseDrawerToLoadPrompt = 55,
 } EventsFeedbackMessageType;
 
 @interface EventsFeedbackView : UIView {
