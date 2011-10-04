@@ -254,6 +254,7 @@ static NSString * const WEB_CONNECTOR_SEND_LEARNED_DATA_ABOUT_EVENT_USER_INFO_KE
         [request setDidFinishSelector:@selector(getRecommendedEventsSuccess:)];
         [request setDidFailSelector:@selector(getRecommendedEventsFailure:)];
         [request setTimeOutSeconds:self.timeoutLength];
+        /* THE FOLLOWING CODE IS DUPLICATED (IN PART) FOR SEARCH */
         NSMutableDictionary * userInfo = [NSMutableDictionary dictionary];
         if (categoryURI != nil) { 
             [userInfo setObject:categoryURI forKey:WEB_CONNECTOR_GET_EVENTS_LIST_USER_INFO_KEY_CATEGORY];
@@ -277,6 +278,7 @@ static NSString * const WEB_CONNECTOR_SEND_LEARNED_DATA_ABOUT_EVENT_USER_INFO_KE
             [userInfo setObject:startTimeLatestInclusive forKey:WEB_CONNECTOR_GET_EVENTS_LIST_USER_INFO_KEY_FILTER_TIME_LATEST];
         }
         request.userInfo = userInfo;
+        /* THE PREVIOUS CODE IS DUPLICATED (IN PART) FOR SEARCH */
         [request startAsynchronous];
     }
     
@@ -301,6 +303,7 @@ static NSString * const WEB_CONNECTOR_SEND_LEARNED_DATA_ABOUT_EVENT_USER_INFO_KE
 
     [self.connectionsInProgress removeObject:request];
 
+    /* THE FOLLOWING CODE IS DUPLICATED IN FAILURE CALLBACK METHOD, AND (IN PART) IN SEARCH SUCCESS & FAILURE METHODS */
     NSDictionary * userInfo = request.userInfo;
     NSString * categoryURI = [userInfo objectForKey:WEB_CONNECTOR_GET_EVENTS_LIST_USER_INFO_KEY_CATEGORY];
     NSNumber * minPriceInclusive = [userInfo objectForKey:WEB_CONNECTOR_GET_EVENTS_LIST_USER_INFO_KEY_FILTER_PRICE_MIN];
@@ -309,6 +312,7 @@ static NSString * const WEB_CONNECTOR_SEND_LEARNED_DATA_ABOUT_EVENT_USER_INFO_KE
     NSDate * startDateLatestInclusive = [userInfo objectForKey:WEB_CONNECTOR_GET_EVENTS_LIST_USER_INFO_KEY_FILTER_DATE_LATEST];
     NSDate * startTimeEarliestInclusive = [userInfo objectForKey:WEB_CONNECTOR_GET_EVENTS_LIST_USER_INFO_KEY_FILTER_TIME_EARLIEST];
     NSDate * startTimeLatestInclusive = [userInfo objectForKey:WEB_CONNECTOR_GET_EVENTS_LIST_USER_INFO_KEY_FILTER_TIME_LATEST];
+    /* THE PREVIOUS CODE IS DUPLICATED IN FAILURE CALLBACK METHOD, AND (IN PART) IN SEARCH SUCCESS & FAILURE METHODS */
     
     // There is still a possibility that we successfully got a response, but that that response is nil. We should check for this, and switch our assessment to "failure" if necessary.
     if (request) {
@@ -321,7 +325,8 @@ static NSString * const WEB_CONNECTOR_SEND_LEARNED_DATA_ABOUT_EVENT_USER_INFO_KE
 - (void) getRecommendedEventsFailure:(ASIHTTPRequest *)request {
     
     [self.connectionsInProgress removeObject:request];
-    
+
+    /* THE FOLLOWING CODE IS DUPLICATED IN FAILURE CALLBACK METHOD, AND (IN PART) IN SEARCH SUCCESS & FAILURE METHODS */
     NSDictionary * userInfo = request.userInfo;
     NSString * categoryURI = [userInfo objectForKey:WEB_CONNECTOR_GET_EVENTS_LIST_USER_INFO_KEY_CATEGORY];
     NSNumber * minPriceInclusive = [userInfo objectForKey:WEB_CONNECTOR_GET_EVENTS_LIST_USER_INFO_KEY_FILTER_PRICE_MIN];
@@ -330,14 +335,15 @@ static NSString * const WEB_CONNECTOR_SEND_LEARNED_DATA_ABOUT_EVENT_USER_INFO_KE
     NSDate * startDateLatestInclusive = [userInfo objectForKey:WEB_CONNECTOR_GET_EVENTS_LIST_USER_INFO_KEY_FILTER_DATE_LATEST];
     NSDate * startTimeEarliestInclusive = [userInfo objectForKey:WEB_CONNECTOR_GET_EVENTS_LIST_USER_INFO_KEY_FILTER_TIME_EARLIEST];
     NSDate * startTimeLatestInclusive = [userInfo objectForKey:WEB_CONNECTOR_GET_EVENTS_LIST_USER_INFO_KEY_FILTER_TIME_LATEST];
+    /* THE PREVIOUS CODE IS DUPLICATED IN FAILURE CALLBACK METHOD, AND (IN PART) IN SEARCH SUCCESS & FAILURE METHODS */
     
     [self.delegate webConnector:self getRecommendedEventsFailure:request withCategoryURI:categoryURI minPrice:minPriceInclusive maxPrice:maxPriceInclusive startDateEarliest:startDateEarliestInclusive startDateLatest:startDateLatestInclusive startTimeEarliest:startTimeEarliestInclusive startTimeLatest:startTimeLatestInclusive];
     
 }
 
-- (void)getEventsListForSearchString:(NSString *)searchString {
+- (void)getEventsListForSearchString:(NSString *)searchString startDateEarliest:(NSDate *)startDateEarliestInclusive startDateLatest:(NSDate *)startDateLatestInclusive startTimeEarliest:(NSDate *)startTimeEarliestInclusive startTimeLatest:(NSDate *)startTimeLatestInclusive {
     if (self.availableToMakeWebConnection) {
-        ASIHTTPRequest * request = [ASIHTTPRequest requestWithURL:[self.urlBuilder buildGetEventsListSearchURLWithSearchString:searchString]];
+        ASIHTTPRequest * request = [ASIHTTPRequest requestWithURL:[self.urlBuilder buildGetEventsListSearchURLWithSearchString:searchString startDateEarliest:startDateEarliestInclusive startDateLatest:startDateLatestInclusive startTimeEarliest:startTimeEarliestInclusive startTimeLatest:startTimeLatestInclusive]];
         [self.connectionsInProgress addObject:request];
         [request setRequestMethod:@"GET"];
         [request setDelegate:self];
@@ -346,8 +352,23 @@ static NSString * const WEB_CONNECTOR_SEND_LEARNED_DATA_ABOUT_EVENT_USER_INFO_KE
         [request setTimeOutSeconds:self.timeoutLength];
         [request setDidFinishSelector:@selector(getEventsListForSearchStringSuccess:)];
         [request setDidFailSelector:@selector(getEventsListForSearchStringFailure:)];
-        NSDictionary * userInfo = [NSDictionary dictionaryWithObjectsAndKeys:searchString, WEB_CONNECTOR_GET_EVENTS_LIST_USER_INFO_KEY_SEARCH_STRING, nil];
+        /* THE FOLLOWING CODE IS DUPLICATED (IN PART) FOR BROWSE (RECOMMENDED) */
+        NSMutableDictionary * userInfo = [NSMutableDictionary dictionary];
+        [userInfo setObject:searchString forKey:WEB_CONNECTOR_GET_EVENTS_LIST_USER_INFO_KEY_SEARCH_STRING];
+        if (startDateEarliestInclusive != nil) { 
+            [userInfo setObject:startDateEarliestInclusive forKey:WEB_CONNECTOR_GET_EVENTS_LIST_USER_INFO_KEY_FILTER_DATE_EARLIEST];
+        }
+        if (startDateLatestInclusive != nil) { 
+            [userInfo setObject:startDateLatestInclusive forKey:WEB_CONNECTOR_GET_EVENTS_LIST_USER_INFO_KEY_FILTER_DATE_LATEST];
+        }
+        if (startTimeEarliestInclusive != nil) { 
+            [userInfo setObject:startTimeEarliestInclusive forKey:WEB_CONNECTOR_GET_EVENTS_LIST_USER_INFO_KEY_FILTER_TIME_EARLIEST];
+        }
+        if (startTimeLatestInclusive != nil) { 
+            [userInfo setObject:startTimeLatestInclusive forKey:WEB_CONNECTOR_GET_EVENTS_LIST_USER_INFO_KEY_FILTER_TIME_LATEST];
+        }
         request.userInfo = userInfo;
+        /* THE PREVIOUS CODE IS DUPLICATED (IN PART) FOR BROWSE (RECOMMENDED) */
         [request startAsynchronous];
     }
 }
@@ -356,14 +377,20 @@ static NSString * const WEB_CONNECTOR_SEND_LEARNED_DATA_ABOUT_EVENT_USER_INFO_KE
     
     [self.connectionsInProgress removeObject:request];
     
+    /* THE FOLLOWING CODE IS DUPLICATED IN FAILURE CALLBACK METHOD, AND (IN PART) IN SEARCH SUCCESS & FAILURE METHODS */
     NSDictionary * userInfo = request.userInfo;
     NSString * searchString = [userInfo objectForKey:WEB_CONNECTOR_GET_EVENTS_LIST_USER_INFO_KEY_SEARCH_STRING];
+    NSDate * startDateEarliestInclusive = [userInfo objectForKey:WEB_CONNECTOR_GET_EVENTS_LIST_USER_INFO_KEY_FILTER_DATE_EARLIEST];
+    NSDate * startDateLatestInclusive = [userInfo objectForKey:WEB_CONNECTOR_GET_EVENTS_LIST_USER_INFO_KEY_FILTER_DATE_LATEST];
+    NSDate * startTimeEarliestInclusive = [userInfo objectForKey:WEB_CONNECTOR_GET_EVENTS_LIST_USER_INFO_KEY_FILTER_TIME_EARLIEST];
+    NSDate * startTimeLatestInclusive = [userInfo objectForKey:WEB_CONNECTOR_GET_EVENTS_LIST_USER_INFO_KEY_FILTER_TIME_LATEST];
+    /* THE PREVIOUS CODE IS DUPLICATED IN FAILURE CALLBACK METHOD, AND (IN PART) IN SEARCH SUCCESS & FAILURE METHODS */
     
     // There is still a possibility that we successfully got a response, but that that response is nil. We should check for this, and switch our assessment to "failure" if necessary.
     if (request) {
-        [self.delegate webConnector:self getEventsListSuccess:request forSearchString:searchString];
+        [self.delegate webConnector:self getEventsListSuccess:request forSearchString:searchString startDateEarliest:startDateEarliestInclusive startDateLatest:startDateLatestInclusive startTimeEarliest:startTimeEarliestInclusive startTimeLatest:startTimeLatestInclusive];
     } else {
-        [self.delegate webConnector:self getEventsListFailure:request forSearchString:searchString];
+        [self.delegate webConnector:self getEventsListFailure:request forSearchString:searchString startDateEarliest:startDateEarliestInclusive startDateLatest:startDateLatestInclusive startTimeEarliest:startTimeEarliestInclusive startTimeLatest:startTimeLatestInclusive];
     }
 }
 
@@ -371,10 +398,16 @@ static NSString * const WEB_CONNECTOR_SEND_LEARNED_DATA_ABOUT_EVENT_USER_INFO_KE
 
     [self.connectionsInProgress removeObject:request];
     
+    /* THE FOLLOWING CODE IS DUPLICATED IN FAILURE CALLBACK METHOD, AND (IN PART) IN SEARCH SUCCESS & FAILURE METHODS */
     NSDictionary * userInfo = request.userInfo;
     NSString * searchString = [userInfo objectForKey:WEB_CONNECTOR_GET_EVENTS_LIST_USER_INFO_KEY_SEARCH_STRING];
+    NSDate * startDateEarliestInclusive = [userInfo objectForKey:WEB_CONNECTOR_GET_EVENTS_LIST_USER_INFO_KEY_FILTER_DATE_EARLIEST];
+    NSDate * startDateLatestInclusive = [userInfo objectForKey:WEB_CONNECTOR_GET_EVENTS_LIST_USER_INFO_KEY_FILTER_DATE_LATEST];
+    NSDate * startTimeEarliestInclusive = [userInfo objectForKey:WEB_CONNECTOR_GET_EVENTS_LIST_USER_INFO_KEY_FILTER_TIME_EARLIEST];
+    NSDate * startTimeLatestInclusive = [userInfo objectForKey:WEB_CONNECTOR_GET_EVENTS_LIST_USER_INFO_KEY_FILTER_TIME_LATEST];
+    /* THE PREVIOUS CODE IS DUPLICATED IN FAILURE CALLBACK METHOD, AND (IN PART) IN SEARCH SUCCESS & FAILURE METHODS */
     
-    [self.delegate webConnector:self getEventsListFailure:request forSearchString:searchString];
+    [self.delegate webConnector:self getEventsListFailure:request forSearchString:searchString startDateEarliest:startDateEarliestInclusive startDateLatest:startDateLatestInclusive startTimeEarliest:startTimeEarliestInclusive startTimeLatest:startTimeLatestInclusive];
 }
 
 //////////////

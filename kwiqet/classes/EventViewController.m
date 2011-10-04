@@ -574,31 +574,48 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
     NSMutableArray * currentDevelopingOccurrencesArray = nil;
     // Loop through all occurrences (which are sorted by date, venue, time)
     for (Occurrence * occurrence in occurrencesByDateVenueTime) {
+        // Fix small bug...
+        BOOL madeNewVenuesArray = NO;
+        NSLog(@"--- Dealing with new occurrence (date %@ venue %@ time %@)", occurrence.startDate, occurrence.place.title, occurrence.startTime);
         // Check if we need to start a new OccurrenceSummaryDate object
         if (![occurrence.startDate isEqualToDate:currentOccurrenceSummaryDate.date]) {
-            if (currentOccurrenceSummaryDate) {
+            NSLog(@"Occurrence start date does not equal previous occurrence start date");
+            if (currentOccurrenceSummaryDate != nil) {
+                NSLog(@"Setting old current occurrence summary date's venues array to old current developing venues array");
                 currentOccurrenceSummaryDate.venues = currentDevelopingVenuesArray;
             }
+            NSLog(@"Creating new occurrence summary date");
             currentOccurrenceSummaryDate = [[[OccurrenceSummaryDate alloc] init] autorelease]; 
             [self.eventOccurrencesSummaryArray addObject:currentOccurrenceSummaryDate];
+            NSLog(@"Added occurrence summary date to one and only dates array, count now %d", self.eventOccurrencesSummaryArray.count);
             currentOccurrenceSummaryDate.date = occurrence.startDate;
+            NSLog(@"Creating new developing venues array");
             currentDevelopingVenuesArray = [NSMutableArray array];
+            madeNewVenuesArray = YES;
         }
         // Check if we need to start a new OccurrenceSummaryVenue object
-        if (occurrence.place != currentOccurrenceSummaryVenue.place) {
-            if (currentOccurrenceSummaryVenue) {
+        if (madeNewVenuesArray || occurrence.place != currentOccurrenceSummaryVenue.place) {
+            NSLog(@"Occurrence venue does not equal previous occurrence venue");
+            if (currentOccurrenceSummaryVenue != nil) {
+                NSLog(@"Setting old current occurrence summary venue's occurrences to old current developing occurrences array");
                 [currentOccurrenceSummaryVenue setOccurrences:currentDevelopingOccurrencesArray makeTimesSummaryUsingTimeFormatter:self.occurrenceTimeFormatter];
             }
+            NSLog(@"Creating new occurrence summary venue");
             currentOccurrenceSummaryVenue = [[[OccurrenceSummaryVenue alloc] init] autorelease];
             [currentDevelopingVenuesArray addObject:currentOccurrenceSummaryVenue];
+            NSLog(@"Added occurrence summary venue to current venues array, count now %d", currentDevelopingVenuesArray.count);
             currentOccurrenceSummaryVenue.place = occurrence.place;
+            NSLog(@"Creating new developing occurrences array");
             currentDevelopingOccurrencesArray = [NSMutableArray array];
         }
         // Add this occurrence to the current OccurrenceSummaryVenueObject
         [currentDevelopingOccurrencesArray addObject:occurrence];
+        NSLog(@"Added occurrence to current occurrences array, count now %d", currentDevelopingOccurrencesArray.count);
     }
     // Final cleanup
+    NSLog(@"Cleanup - setting last venues array");
     currentOccurrenceSummaryDate.venues = currentDevelopingVenuesArray;
+    NSLog(@"Cleanup - setting last occurrences array");
     [currentOccurrenceSummaryVenue setOccurrences:currentDevelopingOccurrencesArray makeTimesSummaryUsingTimeFormatter:self.occurrenceTimeFormatter];
     
     self.eventOccurrenceCurrent = [occurrencesByDateVenueTime objectAtIndex:0]; // THIS NEEDS TO CHANGE, ACCORDING TO WHAT THE USER'S FILTERS WERE IN EventsViewController, THEIR LOCATION, AND PROBABLY OTHER THINGS. THIS NEEDS TO CHANGE, ACCORDING TO WHAT THE USER'S FILTERS WERE IN EventsViewController, THEIR LOCATION, AND PROBABLY OTHER THINGS. THIS NEEDS TO CHANGE, ACCORDING TO WHAT THE USER'S FILTERS WERE IN EventsViewController, THEIR LOCATION, AND PROBABLY OTHER THINGS. THIS NEEDS TO CHANGE, ACCORDING TO WHAT THE USER'S FILTERS WERE IN EventsViewController, THEIR LOCATION, AND PROBABLY OTHER THINGS. THIS NEEDS TO CHANGE, ACCORDING TO WHAT THE USER'S FILTERS WERE IN EventsViewController, THEIR LOCATION, AND PROBABLY OTHER THINGS.

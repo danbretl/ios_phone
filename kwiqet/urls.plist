@@ -21,7 +21,7 @@
 	<key>event_summary_uri</key>
 	<string>/api/v1/eventsummary/?</string>
 	<key>event_summary_search_uri</key>
-	<string>/api/v1/eventsummary/search/?</string>
+	<string>/api/v1/eventsummary/?</string>
 	<key>featured_uri</key>
 	<string>/api/v1/event_featured/?</string>
 	<key>forgot_password_uri</key>

@@ -299,7 +299,7 @@ static NSString * const URL_BUILDER_GET_EVENTS_LIST_FILTER_POPULAR = @"popular";
     
     NSMutableString * urlString = [NSMutableString stringWithFormat:@"%@%@", baseURL, listURI];
     
-    // Credentials - defer adding this to the URL string
+    // Credentials
     NSString * credentials = [self buildCredentialString];
     [urlString appendString:credentials];
     
@@ -323,6 +323,7 @@ static NSString * const URL_BUILDER_GET_EVENTS_LIST_FILTER_POPULAR = @"popular";
     if (minPriceString != nil) { [urlString appendString:minPriceString]; }
     if (maxPriceString != nil) { [urlString appendString:maxPriceString]; }
     
+    /* THE FOLLOWING CODE IS DUPLICATED IN SEARCH URLS */
     // Date and time filters
     NSString * (^dateOrTimeStringBlock)(NSDate *, BOOL, BOOL) = ^(NSDate * datetime, BOOL isDate, BOOL isEarliest) {
         NSDateFormatter * dateFormatter = [[NSDateFormatter alloc] init];
@@ -347,6 +348,7 @@ static NSString * const URL_BUILDER_GET_EVENTS_LIST_FILTER_POPULAR = @"popular";
     NSString * latestTimeString = dateOrTimeStringBlock(startTimeLatestInclusive, NO, NO);
     if (earliestTimeString != nil) { [urlString appendString:earliestTimeString]; }
     if (latestTimeString != nil) { [urlString appendString:latestTimeString]; }
+    /* THE PREVIOUS CODE IS DUPLICATED IN SEARCH URLS */
     
     NSURL * url = [NSURL URLWithString:urlString];
     NSLog(@"%@", url);
@@ -363,24 +365,79 @@ static NSString * const URL_BUILDER_GET_EVENTS_LIST_FILTER_POPULAR = @"popular";
 //    return [self buildGetEventsListURLWithFilter:@"popular" categoryURI:nil];
 //}
 
-- (NSURL *) buildGetEventsListSearchURLWithSearchString:(NSString *)searchString {
+- (NSURL *)buildGetEventsListSearchURLWithSearchString:(NSString *)searchString startDateEarliest:(NSDate *)startDateEarliestInclusive startDateLatest:(NSDate *)startDateLatestInclusive startTimeEarliest:(NSDate *)startTimeEarliestInclusive startTimeLatest:(NSDate *)startTimeLatestInclusive {
     
     NSString * urlPList = [[NSBundle mainBundle] pathForResource:@"urls" ofType:@"plist"];
     NSDictionary * urlDictionary = [NSDictionary dictionaryWithContentsOfFile:urlPList];
     
+    NSString * baseURL = [urlDictionary valueForKey:self.baseURLKey];
+    NSString * searchURI = [urlDictionary valueForKey:@"event_summary_search_uri"];
+    
+    NSMutableString * urlString = [NSMutableString stringWithFormat:@"%@%@", baseURL, searchURI];
+    
+    // Credentials
+    NSString * credentials = [self buildCredentialString];
+    [urlString appendString:credentials];
+    
     // Remove spaces in search string
     NSString * searchParameterSafe = [searchString stringByReplacingOccurrencesOfString:@" " withString:@"%20"]; // NOTE - THIS DOES NOT SEEM EVEN REMOTELY ROBUST ENOUGH TO HANDLE STRANGE INPUT FROM USERS. THIS WILL ALMOST UNQUESTIONABLY NEED TO BE GREATLY IMPROVEN UPON IN THE FUTURE.
     NSString * searchVariableForURL = [NSString stringWithFormat:@"&q=%@", searchParameterSafe];
+    [urlString appendString:searchVariableForURL];
+        
+    /* THE FOLLOWING CODE IS DUPLICATED IN BROWSE (RECOMMENDED EVENTS) URLS */
+    // Date and time filters
+    NSString * (^dateOrTimeStringBlock)(NSDate *, BOOL, BOOL) = ^(NSDate * datetime, BOOL isDate, BOOL isEarliest) {
+        NSDateFormatter * dateFormatter = [[NSDateFormatter alloc] init];
+        NSString * dateFormat = isDate ? @"YYYY-MM-dd" : @"HHmm";
+        [dateFormatter setDateFormat:dateFormat];
+        NSString * dateString = nil;
+        if (datetime != nil) {
+            NSString * prefix = isDate ? @"dt" : @"t";
+            NSString * earliestLatest = isEarliest ? @"earliest" : @"latest";
+            dateString = [NSString stringWithFormat:@"&%@start_%@=%@", prefix, earliestLatest, [dateFormatter stringFromDate:datetime]];
+        }
+        [dateFormatter release];
+        return dateString;
+    };
+    // Date filters
+    NSString * earliestDateString = dateOrTimeStringBlock(startDateEarliestInclusive, YES, YES);
+    NSString * latestDateString = dateOrTimeStringBlock(startDateLatestInclusive, YES, NO);
+    if (earliestDateString != nil) { [urlString appendString:earliestDateString]; }
+    if (latestDateString != nil) { [urlString appendString:latestDateString]; }
+    // Time filters
+    NSString * earliestTimeString = dateOrTimeStringBlock(startTimeEarliestInclusive, NO, YES);
+    NSString * latestTimeString = dateOrTimeStringBlock(startTimeLatestInclusive, NO, NO);
+    if (earliestTimeString != nil) { [urlString appendString:earliestTimeString]; }
+    if (latestTimeString != nil) { [urlString appendString:latestTimeString]; }
+    /* THE PREVIOUS CODE IS DUPLICATED IN BROWSE (RECOMMENDED EVENTS) URLS */
     
-    NSString * baseURL = [urlDictionary valueForKey:self.baseURLKey];
-    NSString * searchURI = [urlDictionary valueForKey:@"event_summary_search_uri"];
-    NSString * credentials = [self buildCredentialString];
-    
-    NSURL * url = [NSURL URLWithString:[NSString stringWithFormat:@"%@%@%@%@", baseURL, searchURI, credentials, searchVariableForURL]];
+    NSURL * url = [NSURL URLWithString:urlString];
+    NSLog(@"%@", url);
     
     return url;
-    
+
 }
+
+//- (NSURL *) buildGetEventsListSearchURLWithSearchString:(NSString *)searchString {
+//    
+//    NSString * urlPList = [[NSBundle mainBundle] pathForResource:@"urls" ofType:@"plist"];
+//    NSDictionary * urlDictionary = [NSDictionary dictionaryWithContentsOfFile:urlPList];
+//    
+//    // Remove spaces in search string
+//    NSString * searchParameterSafe = [searchString stringByReplacingOccurrencesOfString:@" " withString:@"%20"]; // NOTE - THIS DOES NOT SEEM EVEN REMOTELY ROBUST ENOUGH TO HANDLE STRANGE INPUT FROM USERS. THIS WILL ALMOST UNQUESTIONABLY NEED TO BE GREATLY IMPROVEN UPON IN THE FUTURE.
+//    NSString * searchVariableForURL = [NSString stringWithFormat:@"&q=%@", searchParameterSafe];
+//    
+//    NSString * baseURL = [urlDictionary valueForKey:self.baseURLKey];
+//    NSString * searchURI = [urlDictionary valueForKey:@"event_summary_search_uri"];
+//    NSString * credentials = [self buildCredentialString];
+//    
+//    NSURL * url = [NSURL URLWithString:[NSString stringWithFormat:@"%@%@%@%@", baseURL, searchURI, credentials, searchVariableForURL]];
+//    
+//    NSLog(@"%@", url);
+//    
+//    return url;
+//    
+//}
 
 //////////
 // EVENT
