@@ -282,7 +282,7 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
     if (self) {
         self.deleteAllowed = YES;
         self.eventOccurrencesSummaryArray = [NSMutableArray array];
-        debuggingOccurrencesPicker = YES;
+        debuggingOccurrencesPicker = NO;
     }
     return self;
 }
