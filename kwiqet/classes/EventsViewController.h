@@ -58,10 +58,11 @@
     NSString * categoryURI;
     NSIndexPath * indexPathOfRowAttemptingToDelete;
     NSIndexPath * indexPathOfSelectedRow;
+    CGPoint tableViewContentOffsetPreserved;
     BOOL feedbackViewIsVisible;
     NSString * eventsSummaryStringBrowse;
     NSString * eventsSummaryStringSearch;
-    BOOL pushedAwayForEventCard;
+    BOOL deletedFromEventCard;
 
     //////////
     // Views

@@ -117,7 +117,7 @@ static NSString * const DM_TAB_BAR_SELECTED_INDEX_KEY = @"DM_TAB_BAR_SELECTED_IN
     if (standardUserDefaults) {
         [standardUserDefaults setInteger:eventsListMode forKey:@"EventsListMostRecentMode"];
     }
-    NSLog(@"DefaultsModel saveEventsListMostRecentMode:%d", eventsListMode);
+    NSLog(@"DefaultsModel saveEventsListMostRecentMode:%@", [DefaultsModel descriptionOfEventsListMode:eventsListMode]);
 }
 + (EventsListMode) loadEventsListMostRecentMode {
     NSUserDefaults * standardUserDefaults = [NSUserDefaults standardUserDefaults];
@@ -125,8 +125,19 @@ static NSString * const DM_TAB_BAR_SELECTED_INDEX_KEY = @"DM_TAB_BAR_SELECTED_IN
     if (standardUserDefaults) {
         eventsListMode = [standardUserDefaults integerForKey:@"EventsListMostRecentMode"];
     }
-    NSLog(@"DefaultsModel loadEventsListMostRecentMode %d", eventsListMode);
+    NSLog(@"DefaultsModel loadEventsListMostRecentMode %@", [DefaultsModel descriptionOfEventsListMode:eventsListMode]);
     return eventsListMode;
+}
+
++ (NSString *)descriptionOfEventsListMode:(EventsListMode)eventsListMode {
+    NSString * descriptionString = nil;
+    switch (eventsListMode) {
+        case ModeNotSet: descriptionString = @"ModeNotSet"; break;
+        case ModeBrowse: descriptionString = @"ModeBrowse"; break;
+        case ModeSearch: descriptionString = @"ModeSearch"; break;
+        default: break;
+    }
+    return descriptionString;
 }
 
 

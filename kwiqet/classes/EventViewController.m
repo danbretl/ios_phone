@@ -502,7 +502,7 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
 - (void) viewDidDisappear:(BOOL)animated {
     [super viewDidDisappear:animated];
     [self.titleBar scrollTextToOriginAnimated:animated];
-    NSLog(@"EventViewController image size was %@", NSStringFromCGSize(self.imageView.image.size));
+//    NSLog(@"EventViewController image size was %@", NSStringFromCGSize(self.imageView.image.size));
 }
 
 -(void) showWebLoadingViews  {

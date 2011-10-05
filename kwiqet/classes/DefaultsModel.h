@@ -60,4 +60,6 @@ typedef enum {
 + (void) saveTabBarSelectedIndex:(NSUInteger)index;
 + (NSUInteger) loadTabBarSelectedIndex;
 
++ (NSString *) descriptionOfEventsListMode:(EventsListMode)eventsListMode;
+
 @end
