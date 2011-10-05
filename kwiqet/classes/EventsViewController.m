@@ -1185,16 +1185,6 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     [self resignFirstResponder];
 }
 
-- (void)motionEnded:(UIEventSubtype)motion withEvent:(UIEvent *)event {
-    if (event.type == UIEventSubtypeMotionShake) {
-        if (!self.isSearchOn) {
-            NSLog(@"Shake to reload");
-            [self setFeedbackViewIsVisible:self.feedbackViewIsVisible adjustMessages:YES withMessageType:LoadingEvents eventsSummaryString:self.eventsSummaryStringBrowse searchString:nil animated:YES];
-            [self webConnectGetEventsListWithCurrentOldFilterAndCategory];
-        }
-    }
-}
-
 - (BOOL) canBecomeFirstResponder {
     return YES;
 }
@@ -2949,7 +2939,6 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 //    NSLog(@"EventsViewController feedbackViewRetryButtonTouched");
     if (button == self.feedbackView.button) {
 //        [self setFeedbackViewIsVisible:self.feedbackViewIsVisible adjustMessages:YES withMessageType:LoadingEvents eventsSummaryString:self.eventsSummaryStringForCurrentSource animated:YES];
-        [self showWebLoadingViews];
         if (!self.isSearchOn) {
             [self webConnectGetEventsListWithCurrentOldFilterAndCategory];
         } else {
@@ -2958,6 +2947,24 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
         }
     } else {
         NSLog(@"ERROR in EventsViewController - unrecognized button sending message feedbackViewRetryButtonTouched");
+    }
+}
+
+- (void)motionEnded:(UIEventSubtype)motion withEvent:(UIEvent *)event {
+    if (event.type == UIEventSubtypeMotionShake) {
+        if (!self.isSearchOn) {
+            if (self.isDrawerOpen) {
+                if (self.shouldReloadOnDrawerClose) {
+                    [self toggleDrawerAnimated:YES];
+                }
+            } else {
+                NSLog(@"Shake to reload");
+                if (!self.feedbackView.isCurrentMessageComplex) {
+                    [self setFeedbackViewIsVisible:self.feedbackViewIsVisible adjustMessages:YES withMessageType:LoadingEvents eventsSummaryString:self.eventsSummaryStringBrowse searchString:nil animated:YES];
+                }
+                [self webConnectGetEventsListWithCurrentOldFilterAndCategory];
+            }
+        }
     }
 }
 
