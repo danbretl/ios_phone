@@ -886,18 +886,10 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
         // Set the search text field term
         self.searchTextField.text = searchTerm;
 
-//        NSLog(@"OK FUCK IT I'M FIGURING THIS OUT - contentInset is %@ and feedbackView.height=%f IN THE MIDDLE OF viewDidLoad RIGHT BEFORE updateViewsFromCurrentSourceData...", NSStringFromUIEdgeInsets(self.tableView.contentInset), self.feedbackView.bounds.size.height);
         NSLog(@"About to updateViews from within shouldDisplaySearchMode, when self.eventsFromSearch.count=%d", self.eventsFromSearch.count);
         [self updateViewsFromCurrentSourceDataWhichShouldBePopulated:self.eventsFromSearch.count > 0 reasonIfNot:EVENTS_NO_RESULTS_REASON_NO_RESULTS animated:NO];
-//        NSLog(@"OK FUCK IT I'M FIGURING THIS OUT - contentInset is %@ and feedbackView.height=%f IN THE MIDDLE OF viewDidLoad RIGHT AFTER updateViewsFromCurrentSourceData...", NSStringFromUIEdgeInsets(self.tableView.contentInset), self.feedbackView.bounds.size.height);
         
     }
-    
-//    if (!priorEventsWebQueryExists || (!mostRecentEventsWebQueryWasFromSearch && eventsWebQueryToShow.eventResults.count == 0)) {
-//        // Connect to web and try to get a new set of results (IF we are in browse mode - if we're in search mode, just sit tight).
-//        [self setFeedbackViewIsVisible:YES adjustMessages:YES withMessageType:LoadingEvents eventsSummaryString:self.eventsSummaryStringBrowse searchString:nil animated:NO];
-//        [self webConnectGetEventsListWithCurrentOldFilterAndCategory]; // Don't need to reloadData until we get a response back from this web connection attempt.
-//    }
     
     // Register for keyboard events
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardWillShow:) name:UIKeyboardWillShowNotification object:nil];
@@ -1160,9 +1152,10 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
             [self.tableView selectRowAtIndexPath:self.indexPathOfSelectedRow animated:NO scrollPosition:UITableViewScrollPositionNone];
         }
         CGPoint preservedContentOffsetAdjusted = self.tableViewContentOffsetPreserved;
-        preservedContentOffsetAdjusted.y = MAX(preservedContentOffsetAdjusted.y, 0);
+        // Order matters in the following two lines of code.
         preservedContentOffsetAdjusted.y = MIN(preservedContentOffsetAdjusted.y, self.tableView.contentSize.height - self.tableView.bounds.size.height + self.tableView.contentInset.bottom);
-        // Fixing some weird very specific bug where if we were coming back from a reloaded view (after memory warning) in search mode and we had been scrolled all the way to the bottom of the list, that we would get popped up a bit. // HACK DIDN'T WORK.
+        preservedContentOffsetAdjusted.y = MAX(preservedContentOffsetAdjusted.y, 0); // This needs to come after the previous line of code. Otherwise, we get strange behavior when the table view content size is smaller (roughly) than the table view bounds height. We could handle this more intelligently, but I'm tired.
+        // The following is trying to fix some weird very specific bug where if we were coming back from a reloaded view (after memory warning) in search mode and we had been scrolled all the way to the bottom of the list, that we would get popped up a bit. // HACK DIDN'T WORK.
 //        if (self.isSearchOn &&
 //            self.tableViewContentOffsetPreserved.y > self.tableView.contentSize.height - self.tableView.bounds.size.height + self.tableView.contentInset.bottom - self.tableView.rowHeight) { // THIS HACK RELIES ON TABLE VIEW ROW HEIGHTS BEING EQUAL
 //            [self.tableView scrollToRowAtIndexPath:[NSIndexPath indexPathForRow:self.eventsFromSearch.count-1 inSection:0] atScrollPosition:UITableViewScrollPositionBottom animated:NO];
@@ -1566,7 +1559,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
                 [self.searchTextField becomeFirstResponder];
                 [self setFeedbackViewIsVisible:NO adjustMessages:NO withMessageType:0 eventsSummaryString:nil searchString:nil animated:animated];
             } else {
-                [self setFeedbackViewIsVisible:YES adjustMessages:YES withMessageType:NoEventsFound eventsSummaryString:self.eventsSummaryStringForCurrentSource searchString:(self.isSearchOn ? self.searchTextField.text : nil) animated:animated];
+                [self setFeedbackViewIsVisible:YES adjustMessages:YES withMessageType:NoEventsFound eventsSummaryString:self.eventsSummaryStringForCurrentSource searchString:nil animated:animated];
             }
         } else if ([reasonIfNotPopulated isEqualToString:EVENTS_NO_RESULTS_REASON_CONNECTION_ERROR]) {
             [self setFeedbackViewIsVisible:YES adjustMessages:YES withMessageType:ConnectionError eventsSummaryString:self.eventsSummaryStringForCurrentSource searchString:(self.isSearchOn ? self.searchTextField.text : nil) animated:animated];
@@ -1634,7 +1627,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 }
 
 - (void) scrollViewDidScroll:(UIScrollView *)scrollView {
-    NSLog(@"co=%@, ch=%f, bh=%f, fbvh=%f, fh=%f", NSStringFromCGPoint(scrollView.contentOffset), scrollView.contentSize.height, scrollView.bounds.size.height, self.feedbackView.bounds.size.height, self.tableView.tableFooterView != nil ? self.tableView.tableFooterView.bounds.size.height : 0);
+//    NSLog(@"co=%@, ch=%f, bh=%f, fbvh=%f, fh=%f", NSStringFromCGPoint(scrollView.contentOffset), scrollView.contentSize.height, scrollView.bounds.size.height, self.feedbackView.bounds.size.height, self.tableView.tableFooterView != nil ? self.tableView.tableFooterView.bounds.size.height : 0);
 //    if (scrollView == self.drawerScrollView) {
 //        [self updateActiveFilterHighlights]; // This is killing performance.
 //    }
@@ -2841,7 +2834,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     if (animated) {
         CGFloat durationTotal = 0.25;
         if (!makeVisible) {
-            [UIView animateWithDuration:durationTotal animations:feedbackViewVisibilityBlock completion:^(BOOL finished) {
+            [UIView animateWithDuration:durationTotal delay:0 options:UIViewAnimationOptionBeginFromCurrentState animations:feedbackViewVisibilityBlock completion:^(BOOL finished) {
                 if (shouldAdjustMessages) {
                     setMessagesTextBlock();
                     frameAdjustmentBlock(NO);
@@ -2853,26 +2846,26 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
                 BOOL forthcomingMessageComplex = [EventsFeedbackView doesMessageTypeRequireComplexMessage:messageType];
                 if (self.feedbackViewIsVisible &&
                     currentMessageComplex != forthcomingMessageComplex) {
-                    [UIView animateWithDuration:durationTotal/2.0 
+                    [UIView animateWithDuration:durationTotal/2.0 delay:0 options:UIViewAnimationOptionBeginFromCurrentState 
                                      animations:^{
                                          self.feedbackView.messagesContainer.alpha = 0.0;
                                      }
                                      completion:^(BOOL finished){
                                          setMessagesTextBlock();
-                                         [UIView animateWithDuration:durationTotal/2.0 animations:^{
+                                         [UIView animateWithDuration:durationTotal/2.0 delay:0 options:UIViewAnimationOptionBeginFromCurrentState animations:^{
                                              self.feedbackView.messagesContainer.alpha = 1.0;
-                                         }];
+                                         } completion:^(BOOL finished){}];
                                      }];
                 } else {
                     setMessagesTextBlock();
                 }
             }
-            [UIView animateWithDuration:durationTotal animations:^{
+            [UIView animateWithDuration:durationTotal delay:0 options:UIViewAnimationOptionBeginFromCurrentState animations:^{
                 if (shouldAdjustMessages) {
                     frameAdjustmentBlock(self.feedbackViewIsVisible);
                 }
                 feedbackViewVisibilityBlock();
-            }];
+            } completion:^(BOOL finished){}];
         }
     } else {
         if (shouldAdjustMessages) {
