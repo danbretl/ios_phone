@@ -19,8 +19,9 @@
 #import "UIButtonWithOverlayView.h"
 #import "EventsWebQuery.h"
 #import "EventsFeedbackView.h"
+#import <CoreLocation/CoreLocation.h>
 
-@interface EventsViewController : UIViewController <UITableViewDelegate, UITableViewDataSource, UIAlertViewDelegate, CardPageViewControllerDelegate, WebConnectorDelegate, UIScrollViewDelegate, UITextFieldDelegate> {
+@interface EventsViewController : UIViewController <UITableViewDelegate, UITableViewDataSource, UIAlertViewDelegate, CardPageViewControllerDelegate, WebConnectorDelegate, UIScrollViewDelegate, UITextFieldDelegate, CLLocationManagerDelegate> {
     
     ///////////
     // Models
@@ -32,6 +33,7 @@
     NSArray * concreteParentCategoriesArray;
     NSDictionary * concreteParentCategoriesDictionary; // Dictionary of Category objects, with their URI's as their keys.
     CoreDataModel * coreDataModel;
+    CLLocationManager * locationManager;
     
     //////////////////
     // "View models"
@@ -70,6 +72,7 @@
 	IBOutlet UITableView * tableView_;
     UIView * tableViewCoverView;
     IBOutlet UIView   * searchContainerView;
+    IBOutlet UIView   * searchContainerViewShadowCheatView;
     IBOutlet UIButton * searchButton;
     IBOutlet UIButton * searchCancelButton;
     IBOutlet UIButton * searchGoButton;
@@ -156,6 +159,7 @@
     WebActivityView * webActivityView;
     UIAlertView * connectionErrorStandardAlertView;
     UIAlertView * connectionErrorOnDeleteAlertView;
+    UIAlertView * resetAllFiltersAlertView;
     // Gesture Recognizers
     UITapGestureRecognizer * tapToHideDrawerGR;
     // Debugging
@@ -178,6 +182,7 @@
 // Public properties
 
 @property (nonatomic, retain) CoreDataModel *coreDataModel;
+@property (retain) CLLocationManager * locationManager;
 
 ///////////////////
 // Public methods

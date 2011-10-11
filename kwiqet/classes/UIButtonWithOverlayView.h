@@ -21,6 +21,8 @@
     BOOL isShadowVisibleWhenButtonNormal;
     BOOL isShadowVisibleWhenButtonHighlighted;
     
+    BOOL isEnabled_;
+    
 }
 
 @property (nonatomic, copy)   NSString * buttonText;
@@ -33,5 +35,7 @@
 @property (nonatomic) CGFloat cornerRadius;
 @property BOOL isShadowVisibleWhenButtonNormal;
 @property BOOL isShadowVisibleWhenButtonHighlighted;
+
+@property (nonatomic) BOOL enabled;
 
 @end

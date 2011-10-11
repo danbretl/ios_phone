@@ -16,7 +16,7 @@
 @interface MapViewController : UIViewController <MKMapViewDelegate/*,MKReverseGeocoderDelegate*/, CLLocationManagerDelegate> {
     
 //    MKReverseGeocoder * reverseGeocoder;
-//	MKPlacemark * placemark;
+//    MKPlacemark * placemark;
     
     IBOutlet UIView * navigationBarView;
     IBOutlet UIButton * backButton;

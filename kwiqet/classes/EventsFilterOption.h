@@ -57,4 +57,11 @@ static NSString * const EFO_CODE_CATEGORY_POSTFIX_ALL = @"all"; // Most general 
 + (EventsFilterOption *) eventsFilterOptionWithCode:(NSString *)code readableString:(NSString *)readable buttonText:(NSString *)buttonText buttonView:(UIButtonWithOverlayView *)buttonView;
 + (NSString *)eventsFilterOptionIconFilenameForCode:(NSString *)code grayscale:(BOOL)grayscale larger:(BOOL)larger;
 
++ (NSNumber *) priceMinimumForCode:(NSString *)priceCode;
++ (NSNumber *) priceMaximumForCode:(NSString *)priceCode;
++ (NSDate *) dateEarliestForCode:(NSString *)dateCode withUserDate:(NSDate *)userDate;
++ (NSDate *) dateLatestForCode:(NSString *)dateCode withUserDate:(NSDate *)userDate;
++ (NSDate *) timeEarliestForCode:(NSString *)timeCode withUserTime:(NSDate *)userTime;
++ (NSDate *) timeLatestForCode:(NSString *)timeCode withUserTime:(NSDate *)userTime;
+
 @end

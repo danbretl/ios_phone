@@ -9,6 +9,8 @@
 #import "UIButtonWithOverlayView.h"
 #import <QuartzCore/QuartzCore.h>
 
+float const UIBUTTON_WITH_OVERLAY_VIEW_DISABLED_ALPHA = 0.25;
+
 @interface UIButtonWithOverlayView()
 - (void) initWithFrameOrCoder;
 - (void) buttonTouchEvent;
@@ -25,6 +27,7 @@
 @synthesize buttonPrivate=button_, overlayPrivate=overlay_, shadowPrivate=shadow_;
 @synthesize cornerRadius=cornerRadius_;
 @synthesize isShadowVisibleWhenButtonNormal, isShadowVisibleWhenButtonHighlighted;
+@synthesize enabled=isEnabled_;
 
 - (id)initWithFrame:(CGRect)frame
 {
@@ -46,6 +49,7 @@
     
     self.isShadowVisibleWhenButtonNormal = YES;
     self.isShadowVisibleWhenButtonHighlighted = YES;
+    self.enabled = YES;
     
     self.backgroundColor = [UIColor clearColor];
     
@@ -141,6 +145,18 @@
 
 - (void) buttonTouchEnded {
     self.shadowPrivate.layer.shadowOpacity = self.isShadowVisibleWhenButtonNormal ? 0.5 : 0.0;
+}
+
+- (void)setEnabled:(BOOL)enabled {
+    isEnabled_ = enabled;
+    self.userInteractionEnabled = self.enabled;
+    if (self.enabled) {
+        self.button.titleLabel.alpha = 1.0;
+        self.button.imageView.alpha = 1.0;
+    } else {
+        self.button.titleLabel.alpha = UIBUTTON_WITH_OVERLAY_VIEW_DISABLED_ALPHA;
+        self.button.imageView.alpha = UIBUTTON_WITH_OVERLAY_VIEW_DISABLED_ALPHA;
+    }
 }
 
 - (void)dealloc {

@@ -80,6 +80,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 @property (retain) IBOutlet UITableView * tableView;
 @property (retain) UIView * tableViewCoverView;
 @property (retain) IBOutlet UIView   * searchContainerView;
+@property (retain) IBOutlet UIView   * searchContainerViewShadowCheatView;
 @property (retain) IBOutlet UIButton * searchButton;
 @property (retain) IBOutlet UIButton * searchCancelButton;
 @property (retain) IBOutlet UIButton * searchGoButton;
@@ -166,6 +167,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 @property (nonatomic, retain) WebActivityView * webActivityView;
 @property (nonatomic, readonly) UIAlertView * connectionErrorStandardAlertView;
 @property (nonatomic, readonly) UIAlertView * connectionErrorOnDeleteAlertView;
+@property (nonatomic, readonly) UIAlertView * resetAllFiltersAlertView;
 // Gesture recognizers
 @property (retain) UITapGestureRecognizer * tapToHideDrawerGR;
 // Debugging
@@ -238,6 +240,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 - (void) updateActiveFilterHighlights;
 - (void) updateFilter:(EventsFilter *)filter buttonImageForFilterOption:(EventsFilterOption *)filterOption;
 - (void) updateFilterOptionButtonStatesOldSelected:(EventsFilterOption *)oldSelectedOption newSelected:(EventsFilterOption *)newSelectedOption;
+- (void) updateTimeFilterOptions:(NSArray *)timeFilterOptions forSearch:(BOOL)forSearch givenSelectedDateFilterOption:(EventsFilterOption *)givenSelectedDateFilterOption userTime:(NSDate *)givenUserTime /*shouldBumpUnavailableTimes:(BOOL)shouldBumpUnavailableTimes*/;
 - (void) setFeedbackViewIsVisible:(BOOL)makeVisible adjustMessages:(BOOL)shouldAdjustMessages withMessageType:(EventsFeedbackMessageType)messageType eventsSummaryString:(NSString *)eventsSummaryString searchString:(NSString *)searchString animated:(BOOL)animated;
 //- (void) updateFiltersSummaryLabelWithString:(NSString *)summaryString;
 - (void) updateAdjustedSearchFiltersOrderedWithAdjustedFilter:(EventsFilter *)adjustedFilter selectedFilterOption:(EventsFilterOption *)selectedFilterOption;
@@ -272,11 +275,12 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 @synthesize drawerViewLocationSearch, dvLocationSearchTextField, dvLocationSearchCurrentLocationButton, dvLocationSearchButtonWalking, dvLocationSearchButtonNeighborhood, dvLocationSearchButtonBorough, dvLocationSearchButtonCity;
 @synthesize tableView=tableView_;
 @synthesize tableViewCoverView;
-@synthesize searchContainerView, searchButton, searchCancelButton, searchGoButton, searchTextField;
+@synthesize searchContainerView, searchButton, searchCancelButton, searchGoButton, searchTextField, searchContainerViewShadowCheatView;
 @synthesize tableReloadContainerView;
 @synthesize tapToHideDrawerGR;
 @synthesize debugTextView;
 @synthesize eventsWebQuery, eventsWebQueryFromSearch, events, eventsFromSearch;
+@synthesize locationManager;
 @synthesize coreDataModel, webActivityView, concreteParentCategoriesDictionary;
 @synthesize concreteParentCategoriesArray;
 @synthesize oldFilterString, categoryURI;
@@ -302,6 +306,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     [indexPathOfSelectedRow release];
     [webConnector release];
     [webDataTranslator release];
+    [locationManager release];
     [self releaseReconstructableViews];
     [self releaseReconstructableViewModels];
     [super dealloc];
@@ -313,6 +318,8 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     if (self) {
         // Custom initialization
         self.deletedFromEventCard = NO;
+//        locationManager = [[CLLocationManager alloc] init];
+//        self.locationManager.delegate = self;
     }
     return self;
 }
@@ -328,6 +335,12 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     self.drawerViewsSearchContainer.backgroundColor = self.drawerViewsBrowseContainer.backgroundColor;
     
     // Views settings - Shadows
+    // Search container
+    self.searchContainerViewShadowCheatView.layer.shadowColor = [UIColor blackColor].CGColor;
+    self.searchContainerViewShadowCheatView.layer.shadowOffset = CGSizeMake(0, 0);
+    self.searchContainerViewShadowCheatView.layer.shadowOpacity = 0.5;
+    self.searchContainerViewShadowCheatView.layer.shadowPath = [UIBezierPath bezierPathWithRect:self.searchContainerViewShadowCheatView.bounds].CGPath;
+    self.searchContainerViewShadowCheatView.layer.shouldRasterize = YES;
     // Filters container
     self.filtersContainerShadowCheatView.layer.shadowColor = [UIColor blackColor].CGColor;
     self.filtersContainerShadowCheatView.layer.shadowOffset = CGSizeMake(0, 0);
@@ -348,13 +361,15 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
         
     // Views settings - Table view
     self.tableView.backgroundColor = [UIColor colorWithWhite:EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT alpha:1.0];
+    // Views settings - Pushable container view
+//    self.pushableContainerView.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"cardbg.png"]];
     
     // Views settings - Table header & footer
     self.tableView.tableHeaderView = self.searchContainerView;
     self.tableView.tableFooterView = self.tableReloadContainerView;
     self.tableView.tableFooterView.alpha = 0.0;
     self.tableView.tableFooterView.userInteractionEnabled = NO;
-    self.tableView.tableFooterView.backgroundColor = [UIColor colorWithWhite:EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT alpha:1.0];
+//    self.tableView.tableFooterView.backgroundColor = [UIColor colorWithWhite:EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT alpha:1.0];
     
     // Views allocation and settings - Table view cover view
     tableViewCoverView = [[UIView alloc] initWithFrame:self.tableView.frame];
@@ -933,6 +948,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     self.tableView = nil;
     self.tableViewCoverView = nil;
     self.searchContainerView = nil;
+    self.searchContainerViewShadowCheatView = nil;
     self.searchButton = nil;
     self.searchCancelButton = nil;
     self.searchGoButton = nil;
@@ -1021,6 +1037,8 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     connectionErrorStandardAlertView = nil;
     [connectionErrorOnDeleteAlertView release];
     connectionErrorOnDeleteAlertView = nil;
+    [resetAllFiltersAlertView release];
+    resetAllFiltersAlertView = nil;
     self.tapToHideDrawerGR = nil;
     
     self.debugTextView = nil;
@@ -1070,8 +1088,12 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
         filter.button.adjustsImageWhenHighlighted = NO;
         if (![filter.code isEqualToString:EVENTS_FILTER_CATEGORIES]) {
             filter.button.contentVerticalAlignment = UIControlContentVerticalAlignmentBottom;
-            filter.button.titleEdgeInsets = UIEdgeInsetsMake(0, 0, 16, 0);
-            filter.button.imageEdgeInsets = UIEdgeInsetsMake(0, 0, 16, 0);
+            UIEdgeInsets filterButtonTitleEdgeInsets = filter.button.titleEdgeInsets;
+            UIEdgeInsets filterButtonImageEdgeInsets = filter.button.imageEdgeInsets;
+            filterButtonTitleEdgeInsets.bottom = 16;
+            filterButtonImageEdgeInsets.bottom = 16;
+            filter.button.titleEdgeInsets = filterButtonTitleEdgeInsets;
+            filter.button.imageEdgeInsets = filterButtonImageEdgeInsets;
         }
         [filter.button setTitleColor:[UIColor colorWithWhite:53.0/255.0 alpha:1.0] forState:UIControlStateNormal];
         [filter.button setTitleColor:[UIColor colorWithWhite:53.0/255.0 alpha:1.0] forState:UIControlStateHighlighted];
@@ -1172,6 +1194,8 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 //    NSLog(@"\n\nINDEX PATH FOR SELECTED ROW ACCORDING TO TABLEVIEW IS %@\n\n", self.indexPathOfSelectedRow);
 //    [self.tableView selectRowAtIndexPath:self.indexPathOfSelectedRow animated:NO scrollPosition:UITableViewScrollPositionNone];
 //    NSLog(@"\n\nINDEX PATH FOR SELECTED ROW ACCORDING TO TABLEVIEW IS %@\n\n", self.indexPathOfSelectedRow);
+    
+    [self updateTimeFilterOptions:[self filterForFilterCode:EVENTS_FILTER_TIME inFiltersArray:self.filtersForCurrentSource].options forSearch:self.isSearchOn givenSelectedDateFilterOption:self.isSearchOn ? self.selectedDateSearchFilterOption : self.selectedDateFilterOption userTime:[NSDate date]];
     
 }
 
@@ -1297,6 +1321,13 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
         connectionErrorOnDeleteAlertView = [[UIAlertView alloc] initWithTitle:@"Connection Error" message:@"Sorry, due to a connection error, we could not complete your request. Please check your settings and try again." delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil];
     }
     return connectionErrorOnDeleteAlertView;
+}
+
+- (UIAlertView *)resetAllFiltersAlertView {
+    if (resetAllFiltersAlertView == nil) {
+        resetAllFiltersAlertView = [[UIAlertView alloc] initWithTitle:@"Reset all filters?" message:@"Are you sure you'd like to reset all filters, and get a new list of general recommended events?" delegate:nil cancelButtonTitle:@"Cancel" otherButtonTitles:@"Reset", nil];
+    }
+    return resetAllFiltersAlertView;
 }
 
 - (void) webConnectGetEventsListWithCurrentOldFilterAndCategory {
@@ -1788,14 +1819,15 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
                 [self.tableView setContentOffset:CGPointMake(0, self.searchContainerView.bounds.size.height) animated:animated];
             }
             BOOL hadResults = self.eventsForCurrentSource.count > 0;
-            self.shouldReloadOnDrawerClose = !hadResults;
+            self.shouldReloadOnDrawerClose = !(self.isSearchOn || hadResults);
             [self setDrawerReloadIndicatorViewIsVisible:self.shouldReloadOnDrawerClose animated:NO];
             if (!self.isSearchOn) {
                 self.feedbackMessageTypeBrowseRemembered = self.feedbackView.messageType;
             } else {
                 self.feedbackMessageTypeSearchRemembered = self.feedbackView.messageType;
             }
-            [self setFeedbackViewIsVisible:self.feedbackViewIsVisible adjustMessages:YES withMessageType:(hadResults ? SetFiltersPrompt : CloseDrawerToLoadPrompt) eventsSummaryString:self.eventsSummaryStringForCurrentSource searchString:(self.isSearchOn ? self.searchTextField.text : nil) animated:animated];
+            [self setFeedbackViewIsVisible:self.feedbackViewIsVisible adjustMessages:YES withMessageType:(self.shouldReloadOnDrawerClose ? CloseDrawerToLoadPrompt : SetFiltersPrompt) eventsSummaryString:self.eventsSummaryStringForCurrentSource searchString:(self.isSearchOn ? self.searchTextField.text : nil) animated:animated];
+            [self updateTimeFilterOptions:[self filterForFilterCode:EVENTS_FILTER_TIME inFiltersArray:self.filtersForCurrentSource].options forSearch:self.isSearchOn givenSelectedDateFilterOption:self.isSearchOn ? self.selectedDateSearchFilterOption : self.selectedDateFilterOption userTime:[NSDate date]];
         } else {
             self.isDrawerOpen = NO;
             self.tapToHideDrawerGR.enabled = NO;
@@ -2297,6 +2329,10 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     } else if (alertView == self.connectionErrorOnDeleteAlertView) {
         // Do something...
         
+    } else if (alertView == self.resetAllFiltersAlertView) {
+        if (buttonIndex != alertView.cancelButtonIndex) {
+            NSLog(@"Not currently supported...");
+        }
     } else {
         NSLog(@"ERROR in EventsViewController - unrecognized alert view.");
     }
@@ -2531,9 +2567,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 }
 
 - (void) swipeAcrossFiltersStrip:(UISwipeGestureRecognizer *)swipeGesture {
-    UIAlertView * resetAllFiltersAlertView = [[UIAlertView alloc] initWithTitle:@"Reset all filters?" message:@"Are you sure you'd like to reset all filters?" delegate:nil cancelButtonTitle:@"Sure" otherButtonTitles:nil];
-    [resetAllFiltersAlertView show];
-    [resetAllFiltersAlertView release];
+//    [self.resetAllFiltersAlertView show]; // Disabling this gesture for now... Sort of weird.
 }
 
 - (void) setDrawerToShowFilter:(EventsFilter *)filter animated:(BOOL)animated {
@@ -2678,6 +2712,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
                       forFilterCode:EVENTS_FILTER_DATE 
                selectedOptionGetter:selectedOptionGetter
                selectedOptionSetter:selectedOptionSetter];
+    [self updateTimeFilterOptions:[self filterForFilterCode:EVENTS_FILTER_TIME inFiltersArray:self.filtersForCurrentSource].options forSearch:self.isSearchOn givenSelectedDateFilterOption:self.isSearchOn ? self.selectedDateSearchFilterOption : self.selectedDateFilterOption userTime:[NSDate date]];
 }
 - (IBAction) timeFilterOptionButtonTouched:(id)sender {
     SEL selectedOptionGetter, selectedOptionSetter;
@@ -2922,6 +2957,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 - (void) updateFilterOptionButtonStatesOldSelected:(EventsFilterOption *)oldSelectedOption newSelected:(EventsFilterOption *)newSelectedOption {
     oldSelectedOption.buttonView.button.selected = NO;
     newSelectedOption.buttonView.button.selected = YES;
+    oldSelectedOption.buttonView.enabled = oldSelectedOption.buttonView.enabled; // This is masking some weird bug where if a button view was selected (the button) and disabled (the view), and then was set to no longer be selected above, the button's image view alpha would be set to full, no matter the wishes of the button view's enabled/disabled state.
 }
 
 
@@ -3011,6 +3047,26 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
             }
         }
     }
+}
+
+// THE FOLLOWING METHOD STUPIDLY ASSUMES THAT THE USER IS IN THE SAME TIME ZONE AS THE EVENTS FOR WHICH THEY ARE QUERYING. REALLY, WE SHOULD BE FIGURING OUT WHAT TIME ZONE THE USER IS IN, AND MAKING AN ADJUSTMENT IN THE FOLLOWING METHOD'S CALCULATIONS. This issue has been filed on #github.
+- (void) updateTimeFilterOptions:(NSArray *)timeFilterOptions forSearch:(BOOL)forSearch givenSelectedDateFilterOption:(EventsFilterOption *)givenSelectedDateFilterOption userTime:(NSDate *)givenUserTime /*shouldBumpUnavailableTimes:(BOOL)shouldBumpUnavailableTimes*/ {
+    BOOL allEnabled = forSearch || ![givenSelectedDateFilterOption.code isEqualToString:EFO_CODE_DATE_TODAY];
+    for (EventsFilterOption * timeFilterOption in timeFilterOptions) {
+        NSDate * latestTimeForFilterOption = [EventsFilterOption timeLatestForCode:timeFilterOption.code withUserTime:givenUserTime];
+        unsigned int timeComponents = NSHourCalendarUnit | NSMinuteCalendarUnit | NSSecondCalendarUnit;
+        NSCalendar * calender = [NSCalendar currentCalendar];
+        NSDateComponents * latestTimeComponents = [calender components:timeComponents fromDate:latestTimeForFilterOption];
+        NSDateComponents * givenUserTimeComponents = [calender components:timeComponents fromDate:givenUserTime];
+        latestTimeForFilterOption = [calender dateFromComponents:latestTimeComponents];
+        givenUserTime = [calender dateFromComponents:givenUserTimeComponents];
+        NSComparisonResult timesComparisonResult = [latestTimeForFilterOption compare:givenUserTime];
+        timeFilterOption.buttonView.enabled = allEnabled || timeFilterOption.isMostGeneralOption || (timesComparisonResult == NSOrderedDescending);
+        NSLog(@"Compared bucket latest %@ with user's time %@, got %d (where descending is %d)", latestTimeForFilterOption, givenUserTime, timesComparisonResult, NSOrderedDescending);
+    }
+//    if (shouldBumpUnavailableTimes) {
+//        // ...
+//    }
 }
 
 @end

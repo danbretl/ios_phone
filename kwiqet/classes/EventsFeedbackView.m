@@ -296,7 +296,8 @@
             }
             messageSolo = [NSString stringWithFormat:@"%@ %@.", leadIn, eventsString];            
         } else if (messageType == SetFiltersPrompt) {
-            messageSolo = @"Use the filters above to narrow in on the type of events you're interested in.";
+            NSString * endingPhrase = (searchString == nil ? @"narrow in on the type of events you're interested in" : @"help find the events you're looking for");
+            messageSolo = [NSString stringWithFormat:@"Use the filters above to %@.", endingPhrase];
         } else {
             NSLog(@"ERROR in EventsFeedbackView - unrecognized simple message type in messageSoloForMessageType...");
         }
