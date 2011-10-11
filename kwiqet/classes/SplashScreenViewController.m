@@ -17,11 +17,12 @@ CGFloat const SPLASH_SCREEN_ERROR_CONNECTION_MESSAGE_SHOW_ANIMATION_DURATION = 0
 @interface SplashScreenViewController()
 @property (retain) UIImageView * imageView;
 @property (retain) UITextView * connectionErrorTextView;
+@property (retain) UIActivityIndicatorView * spinner;
 @end
 
 @implementation SplashScreenViewController
 
-@synthesize imageView, connectionErrorTextView;
+@synthesize imageView, connectionErrorTextView, spinner;
 @synthesize delegate;
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
@@ -36,6 +37,7 @@ CGFloat const SPLASH_SCREEN_ERROR_CONNECTION_MESSAGE_SHOW_ANIMATION_DURATION = 0
 - (void)dealloc
 {
     [imageView release];
+    [spinner release];
     [super dealloc];
 }
 
@@ -75,6 +77,7 @@ CGFloat const SPLASH_SCREEN_ERROR_CONNECTION_MESSAGE_SHOW_ANIMATION_DURATION = 0
 
 - (void)explodeAndFadeViewAnimated {
 //    NSLog(@"SplashScreenViewController explodeAndFadeViewAnimated");
+    [self.spinner stopAnimating]; // Should hide as well
     CGRect imageViewFrame = self.imageView.frame;
     CGFloat imageViewFrameExplodedWidth = floorf(imageViewFrame.size.width * SPLASH_SCREEN_EXPLOSION_SCALE);
     CGFloat imageViewFrameExplodedHeight = floorf(imageViewFrame.size.height * SPLASH_SCREEN_EXPLOSION_SCALE);

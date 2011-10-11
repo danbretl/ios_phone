@@ -19,6 +19,7 @@ extern CGFloat const SPLASH_SCREEN_ERROR_CONNECTION_MESSAGE_SHOW_ANIMATION_DURAT
     IBOutlet UIImageView * imageView;
     id<SplashScreenViewControllerDelegate> delegate;
     IBOutlet UITextView * connectionErrorTextView;
+    IBOutlet UIActivityIndicatorView * spinner;
 }
 
 @property (assign) id<SplashScreenViewControllerDelegate> delegate;
