@@ -1802,7 +1802,8 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     [viewToRemoveFromSuperview removeFromSuperview];
     [self.drawerScrollView addSubview:viewToAddAsSubview];
     
-    self.drawerScrollView.contentSize = viewToAddAsSubview.bounds.size;
+    CGRect viewToAddAsSubviewBounds = viewToAddAsSubview != nil ? viewToAddAsSubview.bounds : CGRectZero;
+    self.drawerScrollView.contentSize = viewToAddAsSubviewBounds.size;
     self.activeFilterHighlightsContainerView.numberOfSegments = self.filtersForCurrentSource.count;
     [self setDrawerToShowFilter:activeFilter animated:NO];
     
@@ -2749,7 +2750,8 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
                selectedOptionSetter:selectedOptionSetter];
 }
 - (void) categoryFilterOptionButtonTouched:(id)sender {
-    SEL selectedOptionGetter, selectedOptionSetter;
+    SEL selectedOptionGetter = NULL;
+    SEL selectedOptionSetter = NULL;
     if (self.isSearchOn) { } else {
         selectedOptionGetter = @selector(selectedCategoryFilterOption);
         selectedOptionSetter = @selector(setSelectedCategoryFilterOption:);
