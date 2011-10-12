@@ -67,7 +67,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 @property (copy) NSString * categoryURI;
 @property (retain) NSIndexPath * indexPathOfRowAttemptingToDelete;
 @property (retain) NSIndexPath * indexPathOfSelectedRow;
-@property (readonly) BOOL feedbackViewIsVisible;
+@property (nonatomic) BOOL feedbackViewIsVisible;
 @property (retain) NSString * eventsSummaryStringBrowse;
 @property (retain) NSString * eventsSummaryStringSearch;
 @property (nonatomic, readonly) NSString * eventsSummaryStringForCurrentSource;
@@ -86,6 +86,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 @property (retain) IBOutlet UIButton * searchGoButton;
 @property (retain) IBOutlet UITextField * searchTextField;
 @property (retain) IBOutlet UIView   * tableReloadContainerView;
+@property (retain) IBOutlet UIView   * tableReloadContainerShadowCheatView;
 @property (retain) IBOutlet UIView   * pushableContainerView;
 @property (retain) IBOutlet UIView   * pushableContainerShadowCheatView;
 //
@@ -213,6 +214,8 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 - (EventsFilterOption *) filterOptionForFilterOptionButton:(UIButton *)filterOptionButton inFilterOptionsArray:(NSArray *)filterOptions;
 - (NSString *) makeEventsSummaryStringForSource:(NSString *)sourceString;
 - (void) hideWebLoadingViews;
+- (BOOL) isTableViewFilledOut;
+- (BOOL) isTableViewScrolledToBottom;
 - (void) keyboardWillHide:(NSNotification *)notification;
 - (void) keyboardWillShow:(NSNotification *)notification;
 - (void) loginActivity:(NSNotification *)notification;
@@ -241,7 +244,8 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 - (void) updateFilter:(EventsFilter *)filter buttonImageForFilterOption:(EventsFilterOption *)filterOption;
 - (void) updateFilterOptionButtonStatesOldSelected:(EventsFilterOption *)oldSelectedOption newSelected:(EventsFilterOption *)newSelectedOption;
 - (void) updateTimeFilterOptions:(NSArray *)timeFilterOptions forSearch:(BOOL)forSearch givenSelectedDateFilterOption:(EventsFilterOption *)givenSelectedDateFilterOption userTime:(NSDate *)givenUserTime /*shouldBumpUnavailableTimes:(BOOL)shouldBumpUnavailableTimes*/;
-- (void) setFeedbackViewIsVisible:(BOOL)makeVisible adjustMessages:(BOOL)shouldAdjustMessages withMessageType:(EventsFeedbackMessageType)messageType eventsSummaryString:(NSString *)eventsSummaryString searchString:(NSString *)searchString animated:(BOOL)animated;
+- (void) setFeedbackViewIsVisible:(BOOL)feedbackViewIsVisible animated:(BOOL)animated;
+- (void) setFeedbackViewMessageType:(EventsFeedbackMessageType)messageType eventsSummaryString:(NSString *)eventsSummaryString searchString:(NSString *)searchString animated:(BOOL)animated;
 //- (void) updateFiltersSummaryLabelWithString:(NSString *)summaryString;
 - (void) updateAdjustedSearchFiltersOrderedWithAdjustedFilter:(EventsFilter *)adjustedFilter selectedFilterOption:(EventsFilterOption *)selectedFilterOption;
 - (void) updateViewsFromCurrentSourceDataWhichShouldBePopulated:(BOOL)dataShouldBePopulated reasonIfNot:(NSString *)reasonIfNotPopulated animated:(BOOL)animated;
@@ -260,7 +264,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 @synthesize filtersBarBrowse, filtersBarSearch;
 @synthesize filterButtonCategories, filterButtonPrice, filterButtonDate, filterButtonLocation, filterButtonTime;
 @synthesize filterSearchButtonDate, filterSearchButtonLocation, filterSearchButtonTime;
-@synthesize pushableContainerView, pushableContainerShadowCheatView, feedbackView, feedbackViewIsVisible, eventsSummaryStringBrowse, eventsSummaryStringSearch;
+@synthesize pushableContainerView, pushableContainerShadowCheatView, feedbackView, feedbackViewIsVisible=feedbackViewIsVisible_, eventsSummaryStringBrowse, eventsSummaryStringSearch;
 @synthesize deletedFromEventCard, tableViewContentOffsetPreserved;
 @synthesize drawerScrollView, activeFilterHighlightsContainerView;
 @synthesize drawerViewsBrowseContainer;
@@ -276,7 +280,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 @synthesize tableView=tableView_;
 @synthesize tableViewCoverView;
 @synthesize searchContainerView, searchButton, searchCancelButton, searchGoButton, searchTextField, searchContainerViewShadowCheatView;
-@synthesize tableReloadContainerView;
+@synthesize tableReloadContainerView, tableReloadContainerShadowCheatView;
 @synthesize tapToHideDrawerGR;
 @synthesize debugTextView;
 @synthesize eventsWebQuery, eventsWebQueryFromSearch, events, eventsFromSearch;
@@ -341,6 +345,12 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     self.searchContainerViewShadowCheatView.layer.shadowOpacity = 0.5;
     self.searchContainerViewShadowCheatView.layer.shadowPath = [UIBezierPath bezierPathWithRect:self.searchContainerViewShadowCheatView.bounds].CGPath;
     self.searchContainerViewShadowCheatView.layer.shouldRasterize = YES;
+    // Reload container
+    self.tableReloadContainerShadowCheatView.layer.shadowColor = [UIColor blackColor].CGColor;
+    self.tableReloadContainerShadowCheatView.layer.shadowOffset = CGSizeMake(0, 0);
+    self.tableReloadContainerShadowCheatView.layer.shadowOpacity = 0.5;
+    self.tableReloadContainerShadowCheatView.layer.shadowPath = [UIBezierPath bezierPathWithRect:self.tableReloadContainerShadowCheatView.bounds].CGPath;
+    self.tableReloadContainerShadowCheatView.layer.shouldRasterize = YES;    
     // Filters container
     self.filtersContainerShadowCheatView.layer.shadowColor = [UIColor blackColor].CGColor;
     self.filtersContainerShadowCheatView.layer.shadowOffset = CGSizeMake(0, 0);
@@ -361,7 +371,8 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
         
     // Views settings - Table view
     self.tableView.backgroundColor = [UIColor colorWithWhite:EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT alpha:1.0];
-    // Views settings - Pushable container view
+    // Alternate - transparent table view, brushed metal pushable container
+//    self.tableView.backgroundColor = [UIColor clearColor];
 //    self.pushableContainerView.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"cardbg.png"]];
     
     // Views settings - Table header & footer
@@ -828,7 +839,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     [self setDrawerToShowFilter:self.activeFilterInUI animated:NO];
     
     // Seed the feedback view as being visible
-    feedbackViewIsVisible = YES; // THIS IS A TOTAL HACK, TO GET THE BALL ROLLING ON THE FEEDBACK VIEW BEING VISIBLE. REALLY, THIS VALUE SHOULD BE COMING FROM SOMEWHERE ELSE, PERHAPS A PREFERENCE, OR IT SHOULD JUST BE SET TO YES ALWAYS IN A MORE INTELLIGENT WAY.
+    self.feedbackViewIsVisible = YES; // THIS IS A TOTAL HACK, TO GET THE BALL ROLLING ON THE FEEDBACK VIEW BEING VISIBLE. REALLY, THIS VALUE SHOULD BE COMING FROM SOMEWHERE ELSE, PERHAPS A PREFERENCE, OR IT SHOULD JUST BE SET TO YES ALWAYS IN A MORE INTELLIGENT WAY.
     
     NSLog(@"About to updateViews for first time in viewDidLoad");
     [self updateViewsFromCurrentSourceDataWhichShouldBePopulated:self.events.count > 0 reasonIfNot:EVENTS_NO_RESULTS_REASON_NO_RESULTS animated:NO];
@@ -954,6 +965,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     self.searchGoButton = nil;
     self.searchTextField = nil;
     self.tableReloadContainerView = nil;
+    self.tableReloadContainerShadowCheatView = nil;
     self.pushableContainerView = nil;
     self.pushableContainerShadowCheatView = nil;
     
@@ -1164,7 +1176,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
             // Not going to do anything on this path for now... Just leave the list blank?
         } else {
             //            NSLog(@"No events for current source, going to web-get events. No events for current source, going to web-get events. No events for current source, going to web-get events. No events for current source, going to web-get events. No events for current source, going to web-get events. No events for current source, going to web-get events. No events for current source, going to web-get events. No events for current source, going to web-get events. No events for current source, going to web-get events. No events for current source, going to web-get events.");
-            [self setFeedbackViewIsVisible:self.feedbackViewIsVisible adjustMessages:YES withMessageType:LoadingEventsTrue eventsSummaryString:self.eventsSummaryStringBrowse searchString:nil animated:NO];
+            [self setFeedbackViewMessageType:LoadingEventsTrue eventsSummaryString:self.eventsSummaryStringBrowse searchString:nil animated:NO];
             [self webConnectGetEventsListWithCurrentOldFilterAndCategory];
         }
     } else {
@@ -1221,7 +1233,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 //    }
     
     if (self.webConnector.connectionInProgress) {
-        [self setFeedbackViewIsVisible:YES adjustMessages:YES withMessageType:LoadingEventsTrue eventsSummaryString:self.eventsSummaryStringForCurrentSource searchString:(self.isSearchOn ? self.searchTextField.text : nil) animated:animated];
+        [self setFeedbackViewMessageType:LoadingEventsTrue eventsSummaryString:self.eventsSummaryStringForCurrentSource searchString:self.eventsWebQueryForCurrentSource.searchTerm animated:animated];
         [self showWebLoadingViews];
     }
     
@@ -1474,7 +1486,8 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
         /* THE PREVIOUS CODE IS DUPLICATED IN ...viewDidLoad..., ...toggleSearchMode..., and ...searchExecutionRequestedByUser... */
         NSLog(@"eventsWebQueryFromSearch was just updated in searchExecutionRequestedByUser and is now %@", self.eventsWebQueryFromSearch);
         self.eventsSummaryStringSearch = [self makeEventsSummaryStringForSource:EVENTS_SOURCE_SEARCH];
-        [self setFeedbackViewIsVisible:YES adjustMessages:YES withMessageType:LoadingEvents eventsSummaryString:self.eventsSummaryStringSearch searchString:self.eventsWebQueryFromSearch.searchTerm animated:YES];
+        [self setFeedbackViewIsVisible:YES animated:YES];
+        [self setFeedbackViewMessageType:LoadingEvents eventsSummaryString:self.eventsSummaryStringSearch searchString:self.eventsWebQueryFromSearch.searchTerm animated:YES];
         [self showWebLoadingViews];
         [self.webConnector getEventsListForSearchString:searchTerm startDateEarliest:self.eventsWebQueryFromSearch.filterDateEarliest startDateLatest:self.eventsWebQueryFromSearch.filterDateLatest startTimeEarliest:self.eventsWebQueryFromSearch.filterTimeEarliest startTimeLatest:self.eventsWebQueryFromSearch.filterTimeLatest];
 //        [self.webConnector getEventsListForSearchString:searchTerm];
@@ -1579,7 +1592,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     [self setTableViewScrollable:eventsRetrieved selectable:eventsRetrieved];
     if (eventsRetrieved) {
         // Events were retrieved... They will be displayed.
-        [self setFeedbackViewIsVisible:self.feedbackViewIsVisible adjustMessages:YES withMessageType:LookingAtEvents eventsSummaryString:self.eventsSummaryStringForCurrentSource searchString:(self.isSearchOn ? self.searchTextField.text : nil) animated:animated];
+        [self setFeedbackViewMessageType:LookingAtEvents eventsSummaryString:self.eventsSummaryStringForCurrentSource searchString:self.eventsWebQueryForCurrentSource.searchTerm animated:animated];
     } else {
         // No events were retrieved. Respond accordingly, depending on the reason.
         if ([reasonIfNotPopulated isEqualToString:EVENTS_NO_RESULTS_REASON_NO_RESULTS]) {
@@ -1588,12 +1601,12 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
                 [alertView show];
                 [alertView release];
                 [self.searchTextField becomeFirstResponder];
-                [self setFeedbackViewIsVisible:NO adjustMessages:NO withMessageType:0 eventsSummaryString:nil searchString:nil animated:animated];
+                [self setFeedbackViewIsVisible:NO animated:animated];
             } else {
-                [self setFeedbackViewIsVisible:YES adjustMessages:YES withMessageType:NoEventsFound eventsSummaryString:self.eventsSummaryStringForCurrentSource searchString:nil animated:animated];
+                [self setFeedbackViewMessageType:NoEventsFound eventsSummaryString:self.eventsSummaryStringBrowse searchString:nil animated:animated];
             }
         } else if ([reasonIfNotPopulated isEqualToString:EVENTS_NO_RESULTS_REASON_CONNECTION_ERROR]) {
-            [self setFeedbackViewIsVisible:YES adjustMessages:YES withMessageType:ConnectionError eventsSummaryString:self.eventsSummaryStringForCurrentSource searchString:(self.isSearchOn ? self.searchTextField.text : nil) animated:animated];
+            [self setFeedbackViewMessageType:ConnectionError eventsSummaryString:self.eventsSummaryStringForCurrentSource searchString:self.eventsWebQueryForCurrentSource.searchTerm animated:animated];
             if (self.isSearchOn) {
                 UIAlertView * alertView = [[UIAlertView alloc] initWithTitle:@"Connection Error" message:WEB_CONNECTION_ERROR_MESSAGE_STANDARD delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
                 [alertView show];
@@ -1606,9 +1619,9 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
         }
     }
     
-    UIEdgeInsets tableViewInset = self.tableView.contentInset;
-    tableViewInset.bottom = self.feedbackViewIsVisible ? self.feedbackView.bounds.size.height : 0.0;
-    self.tableView.contentInset = tableViewInset;
+//    UIEdgeInsets tableViewInset = self.tableView.contentInset;
+//    tableViewInset.bottom = self.feedbackViewIsVisible ? self.feedbackView.bounds.size.height : 0.0;
+//    self.tableView.contentInset = tableViewInset;
     
     [self hideWebLoadingViews];
     
@@ -1657,13 +1670,6 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 //    [self webConnectGetEventsListWithCurrentOldFilterAndCategory];
 }
 
-- (void) scrollViewDidScroll:(UIScrollView *)scrollView {
-//    NSLog(@"co=%@, ch=%f, bh=%f, fbvh=%f, fh=%f", NSStringFromCGPoint(scrollView.contentOffset), scrollView.contentSize.height, scrollView.bounds.size.height, self.feedbackView.bounds.size.height, self.tableView.tableFooterView != nil ? self.tableView.tableFooterView.bounds.size.height : 0);
-//    if (scrollView == self.drawerScrollView) {
-//        [self updateActiveFilterHighlights]; // This is killing performance.
-//    }
-}
-
 - (IBAction) filterButtonTouched:(id)sender {
     
     EventsFilter * oldActiveFilterInUI = nil;
@@ -1686,7 +1692,8 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 }
 
 - (IBAction) reloadEventsListButtonTouched:(id)sender {
-    [self setFeedbackViewIsVisible:self.feedbackViewIsVisible adjustMessages:YES withMessageType:LoadingEvents eventsSummaryString:self.eventsSummaryStringForCurrentSource searchString:(self.isSearchOn ? self.searchTextField.text : nil) animated:YES];
+    [self setFeedbackViewMessageType:LoadingEvents eventsSummaryString:self.eventsSummaryStringBrowse searchString:nil animated:YES]; // This button only gets used/touched in browse mode
+    [self setFeedbackViewIsVisible:YES animated:YES]; // In case the feedback view was hidden due to the table view being scrolled to the very bottom. (I think we want the feedback view to pop up immediately, rather than wait for the web response.)
     [self webConnectGetEventsListWithCurrentOldFilterAndCategory];
 }
 
@@ -1826,7 +1833,8 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
             } else {
                 self.feedbackMessageTypeSearchRemembered = self.feedbackView.messageType;
             }
-            [self setFeedbackViewIsVisible:self.feedbackViewIsVisible adjustMessages:YES withMessageType:(self.shouldReloadOnDrawerClose ? CloseDrawerToLoadPrompt : SetFiltersPrompt) eventsSummaryString:self.eventsSummaryStringForCurrentSource searchString:(self.isSearchOn ? self.searchTextField.text : nil) animated:animated];
+            [self setFeedbackViewMessageType:(self.shouldReloadOnDrawerClose ? CloseDrawerToLoadPrompt : SetFiltersPrompt) eventsSummaryString:self.eventsSummaryStringForCurrentSource searchString:(self.isSearchOn ? self.searchTextField.text : nil) animated:animated];
+            [self setFeedbackViewIsVisible:YES animated:animated];
             [self updateTimeFilterOptions:[self filterForFilterCode:EVENTS_FILTER_TIME inFiltersArray:self.filtersForCurrentSource].options forSearch:self.isSearchOn givenSelectedDateFilterOption:self.isSearchOn ? self.selectedDateSearchFilterOption : self.selectedDateFilterOption userTime:[NSDate date]];
         } else {
             self.isDrawerOpen = NO;
@@ -1845,21 +1853,22 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
             if (self.shouldReloadOnDrawerClose) {
                 if (!self.isSearchOn) {
                     // Browse mode, should reload...
+                    [self setFeedbackViewMessageType:LoadingEvents eventsSummaryString:self.eventsSummaryStringBrowse searchString:nil animated:animated];
                     [self webConnectGetEventsListWithCurrentOldFilterAndCategory];
                 } else {
                     // Search mode, should re-search...
                     NSLog(@"About to searchExecutionRequestedByUser from toggleDrawerAnimated");
                     [self searchExecutionRequestedByUser];
                 }
-                [self setFeedbackViewIsVisible:self.feedbackViewIsVisible adjustMessages:YES withMessageType:LoadingEvents eventsSummaryString:self.eventsSummaryStringForCurrentSource searchString:(self.isSearchOn ? self.searchTextField.text : nil) animated:animated];
             } else {
                 EventsFeedbackMessageType rememberedMessageType = !self.isSearchOn ? self.feedbackMessageTypeBrowseRemembered : self.feedbackMessageTypeSearchRemembered;
-                [self setFeedbackViewIsVisible:self.feedbackViewIsVisible adjustMessages:YES withMessageType:rememberedMessageType eventsSummaryString:self.eventsSummaryStringForCurrentSource searchString:(self.isSearchOn ? self.searchTextField.text : nil) animated:animated];
+                [self setFeedbackViewMessageType:rememberedMessageType eventsSummaryString:self.eventsSummaryStringForCurrentSource searchString:(self.isSearchOn ? self.searchTextField.text : nil) animated:animated];
+                [self setFeedbackViewIsVisible:![self isTableViewScrolledToBottom] animated:animated];
             }
             // The following code moved here from filterOptionButtonTouched... This spot seems more appropriate, considering that the table view will not move while the drawer is open.
-            UIEdgeInsets tableViewInset = self.tableView.contentInset;
-            tableViewInset.bottom = self.feedbackViewIsVisible ? self.feedbackView.bounds.size.height : 0.0;
-            self.tableView.contentInset = tableViewInset;
+//            UIEdgeInsets tableViewInset = self.tableView.contentInset;
+//            tableViewInset.bottom = self.feedbackViewIsVisible ? self.feedbackView.bounds.size.height : 0.0;
+//            self.tableView.contentInset = tableViewInset;
         }
         self.drawerScrollView.userInteractionEnabled = self.isDrawerOpen;
     };
@@ -1917,7 +1926,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
                              // Move pushable container view up to top of screen
                              [self setPushableContainerViewsOriginY:0 adjustHeightToFillMainView:YES];
                              // Move summary string off screen
-                             [self setFeedbackViewIsVisible:NO adjustMessages:NO withMessageType:0 eventsSummaryString:nil searchString:nil animated:animated];
+                             [self setFeedbackViewIsVisible:NO animated:animated];
                              // Fade table view out
                              self.tableViewCoverView.alpha = 1.0;
                              // Fade out table footer view
@@ -1962,10 +1971,11 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
                                  // Move summary string on screen
                                  if (!shouldMakeSearchTextFieldActive && 
                                      self.eventsFromSearch.count > 0) {
-                                     [self setFeedbackViewIsVisible:YES adjustMessages:YES withMessageType:LookingAtEvents eventsSummaryString:self.eventsSummaryStringSearch searchString:self.searchTextField.text animated:animated];
-                                     UIEdgeInsets tableViewInset = self.tableView.contentInset;
-                                     tableViewInset.bottom = self.feedbackViewIsVisible ? self.feedbackView.bounds.size.height : 0.0;
-                                     self.tableView.contentInset = tableViewInset;
+                                     [self setFeedbackViewMessageType:LookingAtEvents eventsSummaryString:self.eventsSummaryStringSearch searchString:self.eventsWebQueryFromSearch.searchTerm animated:animated];
+                                     [self setFeedbackViewIsVisible:YES animated:animated];
+//                                     UIEdgeInsets tableViewInset = self.tableView.contentInset;
+//                                     tableViewInset.bottom = self.feedbackViewIsVisible ? self.feedbackView.bounds.size.height : 0.0;
+//                                     self.tableView.contentInset = tableViewInset;
                                  }
                                  // Fade table view in
                                  self.tableViewCoverView.alpha = 0.0;
@@ -1986,7 +1996,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
                              // Move pushable container up
                              [self setPushableContainerViewsOriginY:CGRectGetMaxY(self.searchContainerView.frame) adjustHeightToFillMainView:YES];
                              // Move summary string off screen
-                             [self setFeedbackViewIsVisible:NO adjustMessages:NO withMessageType:0 eventsSummaryString:nil searchString:nil animated:animated];
+                             [self setFeedbackViewIsVisible:NO animated:animated];
                              // Fade table view out
                              self.tableViewCoverView.alpha = 1.0;
                          }
@@ -2024,10 +2034,11 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
                                  // Move pushable container down
                                  [self setPushableContainerViewsOriginY:CGRectGetMaxY(self.filtersContainerView.frame) adjustHeightToFillMainView:YES];
                                  // Move summary string on screen
-                                 [self setFeedbackViewIsVisible:YES adjustMessages:YES withMessageType:self.feedbackMessageTypeBrowseRemembered eventsSummaryString:self.eventsSummaryStringBrowse searchString:(self.isSearchOn ? self.searchTextField.text : nil) animated:animated];
-                                 UIEdgeInsets tableViewInset = self.tableView.contentInset;
-                                 tableViewInset.bottom = self.feedbackViewIsVisible ? self.feedbackView.bounds.size.height : 0.0;
-                                 self.tableView.contentInset = tableViewInset;
+                                 [self setFeedbackViewMessageType:self.feedbackMessageTypeBrowseRemembered eventsSummaryString:self.eventsSummaryStringBrowse searchString:nil animated:animated];
+                                 [self setFeedbackViewIsVisible:YES animated:animated];
+//                                 UIEdgeInsets tableViewInset = self.tableView.contentInset;
+//                                 tableViewInset.bottom = self.feedbackViewIsVisible ? self.feedbackView.bounds.size.height : 0.0;
+//                                 self.tableView.contentInset = tableViewInset;
                                  // Fade table view in
                                  self.tableViewCoverView.alpha = 0.0;
                                  BOOL haveResult = self.eventsForCurrentSource.count > 0;
@@ -2115,10 +2126,10 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
         
         if (!self.isSearchOn) {
             self.eventsSummaryStringBrowse = [self makeEventsSummaryStringForSource:EVENTS_SOURCE_BROWSE];
-            [self setFeedbackViewIsVisible:self.feedbackViewIsVisible adjustMessages:YES withMessageType:CloseDrawerToLoadPrompt eventsSummaryString:self.eventsSummaryStringBrowse searchString:nil animated:YES];
+            [self setFeedbackViewMessageType:CloseDrawerToLoadPrompt eventsSummaryString:self.eventsSummaryStringBrowse searchString:nil animated:YES];
         } else {
             self.eventsSummaryStringSearch = [self makeEventsSummaryStringForSource:EVENTS_SOURCE_SEARCH];
-            [self setFeedbackViewIsVisible:self.feedbackViewIsVisible adjustMessages:YES withMessageType:CloseDrawerToLoadPrompt eventsSummaryString:self.eventsSummaryStringSearch searchString:self.searchTextField.text animated:YES];
+            [self setFeedbackViewMessageType:CloseDrawerToLoadPrompt eventsSummaryString:self.eventsSummaryStringSearch searchString:self.searchTextField.text animated:YES];
         }
         /* WARNING: THE CODE ABOVE IS COPIED FROM THE METHOD ...filterOptionButtonTouched...*/
         
@@ -2390,7 +2401,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     double keyboardAnimationDuration = [[info objectForKey:UIKeyboardAnimationDurationUserInfoKey] doubleValue];
     [UIView animateWithDuration:keyboardAnimationDuration animations:^{
         UIEdgeInsets insets = self.tableView.contentInset;
-        insets.bottom = self.feedbackViewIsVisible ? self.feedbackView.bounds.size.height : 0.0;
+        insets.bottom = /*self.feedbackViewIsVisible ? self.feedbackView.bounds.size.height : */0.0;
         self.tableView.contentInset = insets;
         UIEdgeInsets scrollInsets = self.tableView.scrollIndicatorInsets;
         scrollInsets.bottom = 0;
@@ -2408,9 +2419,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     if (self.isDrawerOpen) {
         [self toggleDrawerAnimated:animated];
     }
-    if (self.view.window) {
-        [self setFeedbackViewIsVisible:self.feedbackViewIsVisible adjustMessages:YES withMessageType:LoadingEvents eventsSummaryString:self.eventsSummaryStringForCurrentSource searchString:(self.isSearchOn ? self.searchTextField.text : nil) animated:animated];
-    }
+    [self setFeedbackViewMessageType:LoadingEvents eventsSummaryString:self.eventsSummaryStringBrowse searchString:nil animated:animated];
     [self webConnectGetEventsListWithOldFilter:EVENTS_OLDFILTER_RECOMMENDED categoryURI:nil];
 }
 
@@ -2422,9 +2431,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     if (self.isDrawerOpen) {
         [self toggleDrawerAnimated:animated];
     }
-    if (self.view.window) {
-        [self setFeedbackViewIsVisible:self.feedbackViewIsVisible adjustMessages:YES withMessageType:LoadingEvents eventsSummaryString:self.eventsSummaryStringForCurrentSource searchString:(self.isSearchOn ? self.searchTextField.text : nil) animated:YES];
-    }
+    [self setFeedbackViewMessageType:LoadingEvents eventsSummaryString:self.eventsSummaryStringBrowse searchString:nil animated:animated];
     [self webConnectGetEventsListWithOldFilter:EVENTS_OLDFILTER_RECOMMENDED categoryURI:nil];
 }
 
@@ -2670,17 +2677,16 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
             [self updateAdjustedSearchFiltersOrderedWithAdjustedFilter:filter selectedFilterOption:newSelectedOption];
         }
         
-        
         /* WARNING: THE FOLLOWING CODE HAS BEEN COPIED TO THE METHOD ...textFieldShouldReturn... */
         self.shouldReloadOnDrawerClose = YES;
         [self setDrawerReloadIndicatorViewIsVisible:self.shouldReloadOnDrawerClose animated:self.isDrawerOpen];
         
         if (!self.isSearchOn) {
             self.eventsSummaryStringBrowse = [self makeEventsSummaryStringForSource:EVENTS_SOURCE_BROWSE];
-            [self setFeedbackViewIsVisible:self.feedbackViewIsVisible adjustMessages:YES withMessageType:CloseDrawerToLoadPrompt eventsSummaryString:self.eventsSummaryStringBrowse searchString:nil animated:YES];
+            [self setFeedbackViewMessageType:CloseDrawerToLoadPrompt eventsSummaryString:self.eventsSummaryStringBrowse searchString:nil animated:YES];
         } else {
             self.eventsSummaryStringSearch = [self makeEventsSummaryStringForSource:EVENTS_SOURCE_SEARCH];
-            [self setFeedbackViewIsVisible:self.feedbackViewIsVisible adjustMessages:YES withMessageType:CloseDrawerToLoadPrompt eventsSummaryString:self.eventsSummaryStringSearch searchString:self.searchTextField.text animated:YES];
+            [self setFeedbackViewMessageType:CloseDrawerToLoadPrompt eventsSummaryString:self.eventsSummaryStringSearch searchString:self.searchTextField.text animated:YES];
         }
         /* WARNING: THE CODE ABOVE HAS BEEN COPIED TO THE METHOD ...textFieldShouldReturn... */
 
@@ -2826,24 +2832,76 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     
 }
 
-- (void) setFeedbackViewIsVisible:(BOOL)makeVisible adjustMessages:(BOOL)shouldAdjustMessages withMessageType:(EventsFeedbackMessageType)messageType eventsSummaryString:(NSString *)eventsSummaryString searchString:(NSString *)searchString animated:(BOOL)animated {
-//    NSLog(@"EventsViewController setFeedbackViewIsVisible:(BOOL)%d adjustMessages:(BOOL)%d withMessageType:(EventsFeedbackMessageType)%d eventsSummaryString:(NSString *)%@ animated:(BOOL)%d", makeVisible, shouldAdjustMessages, messageType, eventsSummaryString, animated);
+- (BOOL) isTableViewFilledOut {
+    return self.tableView.contentSize.height >= self.tableView.bounds.size.height;
+}
 
+- (BOOL) isTableViewScrolledToBottom {
+    return [self isTableViewFilledOut] && self.tableView.contentOffset.y >= self.tableView.contentSize.height - self.tableView.bounds.size.height;
+}
+
+- (void) scrollViewDidScroll:(UIScrollView *)scrollView {
+    //    NSLog(@"co=%@, ch=%f, bh=%f, fbvh=%f, fh=%f", NSStringFromCGPoint(scrollView.contentOffset), scrollView.contentSize.height, scrollView.bounds.size.height, self.feedbackView.bounds.size.height, self.tableView.tableFooterView != nil ? self.tableView.tableFooterView.bounds.size.height : 0);
+    //    if (scrollView == self.drawerScrollView) {
+    //        [self updateActiveFilterHighlights]; // This is killing performance.
+    //    }
+    if (scrollView == self.tableView) {
+        if (!self.isDrawerOpen && [self isTableViewFilledOut]) {
+            BOOL scrolledPastEnd = [self isTableViewScrolledToBottom];
+            BOOL feedbackViewWasVisible = self.feedbackViewIsVisible;
+//            NSString * gtltSymbol = nil;
+//            NSString * verb = @"do nothing";
+//            gtltSymbol = scrolledPastEnd ? @">=" : @"<";
+            if (feedbackViewWasVisible && scrolledPastEnd) {
+                [self setFeedbackViewIsVisible:NO animated:YES];
+//                verb = @"hide";
+            } else if (!feedbackViewWasVisible && !scrolledPastEnd) {
+                [self setFeedbackViewIsVisible:YES animated:YES];
+//                verb = @"show";
+            }
+//            NSLog(@"%f %@ %f && isVis?%d : should %@", scrollView.contentOffset.y, gtltSymbol, scrollView.contentSize.height - scrollView.bounds.size.height, feedbackViewWasVisible, verb);
+        }
+    }
+}
+
+- (void) setFeedbackViewIsVisible:(BOOL)feedbackViewIsVisible {
+    [self setFeedbackViewIsVisible:feedbackViewIsVisible animated:NO];
+}
+
+- (void) setFeedbackViewIsVisible:(BOOL)feedbackViewIsVisible animated:(BOOL)animated {
+    
+    feedbackViewIsVisible_ = feedbackViewIsVisible;
+    
+    void(^feedbackViewVisibilityBlock)(BOOL) = ^(BOOL makeVisible){
+        CGFloat feedbackViewOriginY = self.view.frame.size.height;
+        if (makeVisible) {
+            feedbackViewOriginY -= self.feedbackView.frame.size.height;
+        }
+        CGRect feedbackViewFrame = self.feedbackView.frame;
+        feedbackViewFrame.origin.y = feedbackViewOriginY;
+        self.feedbackView.frame = feedbackViewFrame;
+    };
+    
+    if (animated) {
+        CGFloat durationTotal = 0.25;
+        [UIView animateWithDuration:durationTotal delay:0 
+                            options:UIViewAnimationOptionBeginFromCurrentState|UIViewAnimationOptionAllowUserInteraction
+                         animations:^{
+                             feedbackViewVisibilityBlock(self.feedbackViewIsVisible);
+                         } 
+                         completion:^(BOOL finished){}];
+    } else {
+        feedbackViewVisibilityBlock(self.feedbackViewIsVisible);
+    }
+    
+}
+
+- (void) setFeedbackViewMessageType:(EventsFeedbackMessageType)messageType eventsSummaryString:(NSString *)eventsSummaryString searchString:(NSString *)searchString animated:(BOOL)animated {
+    
     void(^setMessagesTextBlock)(void) = ^{
         [self.feedbackView setMessagesToShowMessageType:messageType withEventsString:eventsSummaryString searchString:searchString];
     };
-    void(^tableViewBlock)(void) = ^{
-//        CGPoint tableViewContentOffset = self.tableView.contentOffset;
-//        NSLog(@"tableViewContentOffset was %@", NSStringFromCGPoint(tableViewContentOffset));
-//        UIEdgeInsets tableViewInset = self.tableView.contentInset;
-//        tableViewInset.bottom = self.feedbackViewIsVisible ? self.feedbackView.bounds.size.height : 0.0;
-//        self.tableView.contentInset = tableViewInset;
-//        NSLog(@"self.tableView.contentOffset is %@", NSStringFromCGPoint(self.tableView.contentOffset));
-//        if (!(self.eventsForCurrentSource.count > 0) && self.isDrawerOpen) {
-//            self.tableView.contentOffset = tableViewContentOffset; // Fixing a very slight bug, which would result in the search bar being scrolled into view when there were no results in the table.
-//            NSLog(@"self.tableView.contentOffset is %@ (special case adjustment)", NSStringFromCGPoint(self.tableView.contentOffset));
-//        }
-    };
+    
     void(^frameAdjustmentBlock)(BOOL) = ^(BOOL maintainBottomY){
         CGSize feedbackViewAdjustedSize = [self.feedbackView sizeForMessagesWithMessageType:messageType withEventsString:eventsSummaryString searchString:searchString];
         CGRect feedbackViewFrame = self.feedbackView.frame;
@@ -2852,65 +2910,37 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
         }
         feedbackViewFrame.size = feedbackViewAdjustedSize;
         self.feedbackView.frame = feedbackViewFrame;
-        tableViewBlock();
-    };
-    void(^feedbackViewVisibilityBlock)(void) = ^{
-        CGFloat feedbackViewOriginY = self.view.frame.size.height;
-        if (makeVisible) {
-            feedbackViewOriginY -= self.feedbackView.frame.size.height;
-        }
-        CGRect feedbackViewFrame = self.feedbackView.frame;
-        feedbackViewFrame.origin.y = feedbackViewOriginY;
-        self.feedbackView.frame = feedbackViewFrame;
-        feedbackViewIsVisible = makeVisible;
-        tableViewBlock();
     };
     
-    if (animated) {
-        CGFloat durationTotal = 0.25;
-        if (!makeVisible) {
-            [UIView animateWithDuration:durationTotal delay:0 options:UIViewAnimationOptionBeginFromCurrentState animations:feedbackViewVisibilityBlock completion:^(BOOL finished) {
-                if (shouldAdjustMessages) {
-                    setMessagesTextBlock();
-                    frameAdjustmentBlock(NO);
-                }
-            }];
-        } else {
-            if (shouldAdjustMessages) {
-                BOOL currentMessageComplex = self.feedbackView.isCurrentMessageComplex;
-                BOOL forthcomingMessageComplex = [EventsFeedbackView doesMessageTypeRequireComplexMessage:messageType];
-                if (self.feedbackViewIsVisible &&
-                    currentMessageComplex != forthcomingMessageComplex) {
-                    [UIView animateWithDuration:durationTotal/2.0 delay:0 options:UIViewAnimationOptionBeginFromCurrentState 
-                                     animations:^{
-                                         self.feedbackView.messagesContainer.alpha = 0.0;
-                                     }
-                                     completion:^(BOOL finished){
-                                         setMessagesTextBlock();
-                                         [UIView animateWithDuration:durationTotal/2.0 delay:0 options:UIViewAnimationOptionBeginFromCurrentState animations:^{
-                                             self.feedbackView.messagesContainer.alpha = 1.0;
-                                         } completion:^(BOOL finished){}];
-                                     }];
-                } else {
-                    setMessagesTextBlock();
-                }
-            }
-            [UIView animateWithDuration:durationTotal delay:0 options:UIViewAnimationOptionBeginFromCurrentState animations:^{
-                if (shouldAdjustMessages) {
-                    frameAdjustmentBlock(self.feedbackViewIsVisible);
-                }
-                feedbackViewVisibilityBlock();
-            } completion:^(BOOL finished){}];
-        }
+    if (!animated || !self.feedbackViewIsVisible) {
+        
+        setMessagesTextBlock();
+        frameAdjustmentBlock(self.feedbackViewIsVisible);
+        
     } else {
-        if (shouldAdjustMessages) {
+        
+        CGFloat durationTotal = 0.25;
+        
+        BOOL currentMessageComplex = self.feedbackView.isCurrentMessageComplex;
+        BOOL forthcomingMessageComplex = [EventsFeedbackView doesMessageTypeRequireComplexMessage:messageType];
+        if (currentMessageComplex != forthcomingMessageComplex) {
+            [UIView animateWithDuration:durationTotal/2.0 delay:0 options:UIViewAnimationOptionBeginFromCurrentState|UIViewAnimationOptionAllowUserInteraction 
+                             animations:^{
+                                 self.feedbackView.messagesContainer.alpha = 0.0;
+                             }
+                             completion:^(BOOL finished){
+                                 setMessagesTextBlock();
+                                 [UIView animateWithDuration:durationTotal/2.0 delay:0 options:UIViewAnimationOptionBeginFromCurrentState|UIViewAnimationOptionAllowUserInteraction animations:^{
+                                     self.feedbackView.messagesContainer.alpha = 1.0;
+                                 } completion:^(BOOL finished){}];
+                             }];
+        } else {
             setMessagesTextBlock();
-            frameAdjustmentBlock(YES);
         }
-        feedbackViewVisibilityBlock();
+        
+        [UIView animateWithDuration:durationTotal delay:0 options:UIViewAnimationOptionBeginFromCurrentState|UIViewAnimationOptionAllowUserInteraction animations:^{ frameAdjustmentBlock(self.feedbackViewIsVisible); } completion:^(BOOL finished){}];
+        
     }
-    
-//    NSLog(@"feedbackView.frame = %@ (so that bottom edge of feedbackView is %f points away from the bottom edge of the main view itself)", NSStringFromCGRect(self.feedbackView.frame), self.view.bounds.size.height - CGRectGetMaxY(self.feedbackView.frame));
     
 }
 
@@ -3041,7 +3071,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
             } else {
                 NSLog(@"Shake to reload");
                 if (!self.feedbackView.isCurrentMessageComplex) {
-                    [self setFeedbackViewIsVisible:self.feedbackViewIsVisible adjustMessages:YES withMessageType:LoadingEvents eventsSummaryString:self.eventsSummaryStringBrowse searchString:nil animated:YES];
+                    [self setFeedbackViewMessageType:LoadingEvents eventsSummaryString:self.eventsSummaryStringBrowse searchString:nil animated:YES];
                 }
                 [self webConnectGetEventsListWithCurrentOldFilterAndCategory];
             }

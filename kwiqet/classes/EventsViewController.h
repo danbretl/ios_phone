@@ -61,7 +61,7 @@
     NSIndexPath * indexPathOfRowAttemptingToDelete;
     NSIndexPath * indexPathOfSelectedRow;
     CGPoint tableViewContentOffsetPreserved;
-    BOOL feedbackViewIsVisible;
+    BOOL feedbackViewIsVisible_;
     NSString * eventsSummaryStringBrowse;
     NSString * eventsSummaryStringSearch;
     BOOL deletedFromEventCard;
@@ -78,6 +78,7 @@
     IBOutlet UIButton * searchGoButton;
     IBOutlet UITextField * searchTextField;
     IBOutlet UIView   * tableReloadContainerView;
+    IBOutlet UIView   * tableReloadContainerShadowCheatView;
     IBOutlet UIView   * pushableContainerView;
     IBOutlet UIView   * pushableContainerShadowCheatView;
     //

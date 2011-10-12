@@ -259,6 +259,7 @@
 }
 
 - (void)splashScreenViewControllerExplodeAndFadeViewAnimationCompleted:(SplashScreenViewController *)_splashScreenViewController {
+    NSLog(@"splashScreenViewControllerExplodeAndFadeViewAnimationCompleted");
     if (_splashScreenViewController == self.splashScreenViewController) {
         [self.splashScreenViewController.view removeFromSuperview];
         self.splashScreenViewController = nil;
