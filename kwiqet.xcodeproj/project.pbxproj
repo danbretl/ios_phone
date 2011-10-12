@@ -2721,8 +2721,8 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				CODE_SIGN_IDENTITY = "iPhone Developer: Daniel Bretl (Z7RN8TSHSW)";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Daniel Bretl (Z7RN8TSHSW)";
+				CODE_SIGN_IDENTITY = "iPhone Developer: Daniel Bretl (L6HD8TCFWX)";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Daniel Bretl (L6HD8TCFWX)";
 				COPY_PHASE_STRIP = NO;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -2739,8 +2739,8 @@
 					"-all_load",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "2621C461-6B44-4805-88CF-E570DC2060CA";
-				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "2621C461-6B44-4805-88CF-E570DC2060CA";
+				PROVISIONING_PROFILE = "7373BE30-F2C3-4830-828F-EC0D0A86B6DE";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "7373BE30-F2C3-4830-828F-EC0D0A86B6DE";
 				WRAPPER_EXTENSION = app;
 			};
 			name = Debug;
@@ -2749,8 +2749,8 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				CODE_SIGN_IDENTITY = "iPhone Developer: Daniel Bretl (Z7RN8TSHSW)";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Daniel Bretl (Z7RN8TSHSW)";
+				CODE_SIGN_IDENTITY = "iPhone Developer: Daniel Bretl (L6HD8TCFWX)";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Daniel Bretl (L6HD8TCFWX)";
 				COPY_PHASE_STRIP = NO;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -2766,8 +2766,8 @@
 					"-all_load",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "2621C461-6B44-4805-88CF-E570DC2060CA";
-				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "2621C461-6B44-4805-88CF-E570DC2060CA";
+				PROVISIONING_PROFILE = "7373BE30-F2C3-4830-828F-EC0D0A86B6DE";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "7373BE30-F2C3-4830-828F-EC0D0A86B6DE";
 				VALIDATE_PRODUCT = YES;
 				WRAPPER_EXTENSION = app;
 			};

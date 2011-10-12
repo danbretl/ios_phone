@@ -1271,6 +1271,13 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     [self resignFirstResponder];
 }
 
+- (void) viewDidDisappear:(BOOL)animated {
+    [super viewDidDisappear:animated];
+    if (self.isDrawerOpen) {
+        [self toggleDrawerAnimated:NO];
+    }
+}
+
 - (BOOL) canBecomeFirstResponder {
     return YES;
 }
