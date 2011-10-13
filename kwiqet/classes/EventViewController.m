@@ -292,7 +292,8 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
     [super viewDidLoad];
     
     // Background
-    self.view.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"cardbg.png"]];
+    //self.view.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"cardbg.png"]];
+    self.view.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"bg_dark_gray.jpg"]];
     
     // Navigation bar
     self.navigationBar.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"navbar.png"]];
@@ -884,7 +885,7 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
     
     // Background
 //    self.view.backgroundColor = [concreteParentCategoryColor colorWithAlphaComponent:0.15];
-    self.backgroundColorView.backgroundColor = [concreteParentCategoryColor colorWithAlphaComponent:0.05];
+//    self.backgroundColorView.backgroundColor = [concreteParentCategoryColor colorWithAlphaComponent:0.05];
 //    self.detailsBackgroundColorView.backgroundColor = [concreteParentCategoryColor colorWithAlphaComponent:0.10];
     self.descriptionBackgroundColorView.backgroundColor = [concreteParentCategoryColor colorWithAlphaComponent:0.15];
 //    self.detailsLabel.backgroundColor = concreteParentCategoryColor;
@@ -908,7 +909,7 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
     detailsLabelFrame.size.width = detailsLabelWidth;
     self.descriptionLabel.frame = detailsLabelFrame;
     CGRect detailsContainerFrame = self.descriptionContainer.frame;
-    detailsContainerFrame.size.height = CGRectGetMaxY(self.descriptionLabel.frame) + self.descriptionLabel.frame.origin.y;
+    detailsContainerFrame.size.height = /*MAX(*/CGRectGetMaxY(self.descriptionLabel.frame) + self.descriptionLabel.frame.origin.y/*, self.scrollView.bounds.size.height - detailsContainerFrame.origin.y)*/;
     self.descriptionContainer.frame = detailsContainerFrame;
     self.shadowDescriptionContainer.frame = CGRectMake(self.descriptionContainer.frame.origin.x, self.descriptionContainer.frame.origin.y, self.descriptionContainer.frame.size.width, self.descriptionContainer.frame.size.height-1);
 
