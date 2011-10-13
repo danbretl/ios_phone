@@ -79,6 +79,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 
 @property (retain) IBOutlet UITableView * tableView;
 @property (retain) UIView * tableViewCoverView;
+@property (retain) IBOutlet UIImageView * tableViewBackgroundView;
 @property (retain) IBOutlet UIView   * searchContainerView;
 @property (retain) IBOutlet UIView   * searchContainerViewShadowCheatView;
 @property (retain) IBOutlet UIButton * searchButton;
@@ -278,7 +279,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 @synthesize drawerViewLocation, dvLocationTextField, dvLocationCurrentLocationButton, dvLocationButtonWalking, dvLocationButtonNeighborhood, dvLocationButtonBorough, dvLocationButtonCity;
 @synthesize drawerViewLocationSearch, dvLocationSearchTextField, dvLocationSearchCurrentLocationButton, dvLocationSearchButtonWalking, dvLocationSearchButtonNeighborhood, dvLocationSearchButtonBorough, dvLocationSearchButtonCity;
 @synthesize tableView=tableView_;
-@synthesize tableViewCoverView;
+@synthesize tableViewCoverView, tableViewBackgroundView;
 @synthesize searchContainerView, searchButton, searchCancelButton, searchGoButton, searchTextField, searchContainerViewShadowCheatView;
 @synthesize tableReloadContainerView, tableReloadContainerShadowCheatView;
 @synthesize tapToHideDrawerGR;
@@ -345,6 +346,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     self.searchContainerViewShadowCheatView.layer.shadowOpacity = 0.5;
     self.searchContainerViewShadowCheatView.layer.shadowPath = [UIBezierPath bezierPathWithRect:self.searchContainerViewShadowCheatView.bounds].CGPath;
     self.searchContainerViewShadowCheatView.layer.shouldRasterize = YES;
+//    self.searchContainerViewShadowCheatView.hidden = YES;
     // Reload container
     self.tableReloadContainerShadowCheatView.layer.shadowColor = [UIColor blackColor].CGColor;
     self.tableReloadContainerShadowCheatView.layer.shadowOffset = CGSizeMake(0, 0);
@@ -368,15 +370,19 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     self.pushableContainerShadowCheatView.layer.shadowOpacity = 0.5;
     self.pushableContainerShadowCheatView.layer.shadowPath = [UIBezierPath bezierPathWithRect:self.pushableContainerShadowCheatView.bounds].CGPath;
     self.pushableContainerShadowCheatView.layer.shouldRasterize = YES;
-        
+    self.pushableContainerShadowCheatView.hidden = YES;
+    
     // Views settings - Table view
     self.tableView.backgroundColor = [UIColor colorWithWhite:EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT alpha:1.0];
     // Alternate - transparent table view, brushed metal pushable container
 //    self.tableView.backgroundColor = [UIColor clearColor];
-//    self.pushableContainerView.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"cardbg.png"]];
+//    self.pushableContainerView.backgroundColor = [UIColor clearColor];
+//    self.pushableContainerShadowCheatView.backgroundColor = [UIColor clearColor];
+//    self.pushableContainerView.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"bg_dark_gray.jpg"]];
     
     // Views settings - Table header & footer
     self.tableView.tableHeaderView = self.searchContainerView;
+    self.tableView.tableHeaderView.backgroundColor = [UIColor redColor];
     self.tableView.tableFooterView = self.tableReloadContainerView;
     self.tableView.tableFooterView.alpha = 0.0;
     self.tableView.tableFooterView.userInteractionEnabled = NO;
@@ -384,9 +390,10 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     
     // Views allocation and settings - Table view cover view
     tableViewCoverView = [[UIView alloc] initWithFrame:self.tableView.frame];
-    self.tableViewCoverView.backgroundColor = [UIColor whiteColor];
+    self.tableViewCoverView.backgroundColor = [UIColor colorWithWhite:EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT alpha:1.0];
+//    self.tableViewCoverView.backgroundColor = /*[UIColor colorWithWhite:.20 alpha:1.0];*/ self.pushableContainerView.backgroundColor;//[UIColor whiteColor];
     self.tableViewCoverView.autoresizingMask = self.tableView.autoresizingMask;
-    self.tableViewCoverView.alpha = 0.0;
+    self.tableViewCoverView.alpha = 0.0;//1.0;
     [self.pushableContainerView insertSubview:self.tableViewCoverView aboveSubview:self.tableView];
 
     // Views settings - Feedback view
@@ -958,6 +965,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 - (void) releaseReconstructableViews {
     self.tableView = nil;
     self.tableViewCoverView = nil;
+    self.tableViewBackgroundView = nil;
     self.searchContainerView = nil;
     self.searchContainerViewShadowCheatView = nil;
     self.searchButton = nil;
@@ -1582,6 +1590,8 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     }
     
     [self.tableView reloadData];
+    BOOL haveEvents = self.eventsForCurrentSource.count > 0;
+//    self.tableViewCoverView.alpha = haveEvents ? 0.0 : 1.0;
     if (!self.isSearchOn) {
         if (self.eventsForCurrentSource.count > 0) {
             [self.tableView setContentOffset:CGPointMake(0, self.searchContainerView.bounds.size.height) animated:animated];
@@ -1590,14 +1600,13 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
         [self.tableView scrollRectToVisible:CGRectMake(0, 0, 1, 1) animated:animated];
     }
     
-    BOOL eventsRetrieved = self.eventsForCurrentSource.count > 0;
-    NSLog(@"eventsRetrieved in updateViews is %d", eventsRetrieved);
-    BOOL showTableFooterView = eventsRetrieved && !self.isSearchOn;
+    NSLog(@"haveEvents in updateViews is %d", haveEvents);
+    BOOL showTableFooterView = !self.isSearchOn && haveEvents;
     self.tableView.tableFooterView.alpha = showTableFooterView ? 1.0 : 0.0;
     self.tableView.tableFooterView.userInteractionEnabled = showTableFooterView;
     NSLog(@"setTableViewScrollable from updateViews, could be sending NO");
-    [self setTableViewScrollable:eventsRetrieved selectable:eventsRetrieved];
-    if (eventsRetrieved) {
+    [self setTableViewScrollable:haveEvents selectable:haveEvents];
+    if (haveEvents) {
         // Events were retrieved... They will be displayed.
         [self setFeedbackViewMessageType:LookingAtEvents eventsSummaryString:self.eventsSummaryStringForCurrentSource searchString:self.eventsWebQueryForCurrentSource.searchTerm animated:animated];
     } else {
@@ -1817,11 +1826,12 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 }
 
 -(void) toggleDrawerAnimated:(BOOL)animated {
-        
-    void(^allChangesBlock)(void) = ^{
-        if (self.isDrawerOpen == NO) {
-            self.isDrawerOpen = YES;
-            self.tapToHideDrawerGR.enabled = YES;
+    
+    void(^allChangesBlock)(BOOL) = ^(BOOL wasDrawerOpen){
+        self.isDrawerOpen = !wasDrawerOpen;
+        self.tapToHideDrawerGR.enabled = self.isDrawerOpen;
+        self.drawerScrollView.userInteractionEnabled = self.isDrawerOpen;
+        if (self.isDrawerOpen == YES) {
             CGRect pushableContainerViewFrame = self.pushableContainerView.frame;
             pushableContainerViewFrame.origin.y += self.drawerScrollView.contentSize.height;
             self.pushableContainerView.frame = pushableContainerViewFrame;
@@ -1845,8 +1855,6 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
             [self setFeedbackViewIsVisible:YES animated:animated];
             [self updateTimeFilterOptions:[self filterForFilterCode:EVENTS_FILTER_TIME inFiltersArray:self.filtersForCurrentSource].options forSearch:self.isSearchOn givenSelectedDateFilterOption:self.isSearchOn ? self.selectedDateSearchFilterOption : self.selectedDateFilterOption userTime:[NSDate date]];
         } else {
-            self.isDrawerOpen = NO;
-            self.tapToHideDrawerGR.enabled = NO;
             CGRect pushableContainerViewFrame = self.pushableContainerView.frame;
             pushableContainerViewFrame.origin.y -= self.drawerScrollView.contentSize.height;
             self.pushableContainerView.frame = pushableContainerViewFrame;
@@ -1878,13 +1886,27 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 //            tableViewInset.bottom = self.feedbackViewIsVisible ? self.feedbackView.bounds.size.height : 0.0;
 //            self.tableView.contentInset = tableViewInset;
         }
-        self.drawerScrollView.userInteractionEnabled = self.isDrawerOpen;
     };
     
     if (animated) {
-        [UIView animateWithDuration:(self.isSearchOn ? 0.3 : 0.4) delay:0.0 options:UIViewAnimationOptionBeginFromCurrentState animations:allChangesBlock completion:^(BOOL finished){}];
+        if (!self.isDrawerOpen) {
+            self.tableViewBackgroundView.hidden = YES;
+            self.pushableContainerShadowCheatView.hidden = NO;
+            [UIView animateWithDuration:(self.isSearchOn ? 0.3 : 0.4) delay:0.0 options:UIViewAnimationOptionBeginFromCurrentState animations:^{
+                allChangesBlock(self.isDrawerOpen);
+            } completion:^(BOOL finished){}];
+        } else {
+            [UIView animateWithDuration:(self.isSearchOn ? 0.3 : 0.4) delay:0.0 options:UIViewAnimationOptionBeginFromCurrentState animations:^{
+                allChangesBlock(self.isDrawerOpen);
+            } completion:^(BOOL finished){
+                self.tableViewBackgroundView.hidden = NO;
+                self.pushableContainerShadowCheatView.hidden = YES;
+            }];
+        }
+        
     } else {
-        allChangesBlock();
+        allChangesBlock(self.isDrawerOpen);
+        self.tableViewBackgroundView.hidden = self.isDrawerOpen;
     }
     
 }
@@ -2031,7 +2053,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
                              [self setDrawerScrollViewToDisplayViewsForSource:EVENTS_SOURCE_BROWSE];
                              // Add the table footer view back in
                              self.tableView.tableFooterView = self.tableReloadContainerView;
-                             BOOL showTableFooterView = self.eventsForCurrentSource.count > 0;
+                             BOOL showTableFooterView = !self.isSearchOn && self.eventsForCurrentSource.count > 0;
                              self.tableView.tableFooterView.alpha = showTableFooterView ? 1.0 : 0.0;
                              // Switch the filters summary label to browse
                              [UIView animateWithDuration:duration animations:^{
