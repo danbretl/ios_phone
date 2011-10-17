@@ -9,8 +9,11 @@
 
 #import <UIKit/UIKit.h>
 
+// Set this to true to enable localytics traces (useful for debugging)
+#define DO_LOCALYTICS_LOGGING false
+
 /*!
- @class LocalyticsSession (no location functions)
+ @class LocalyticsSession 
  @discussion The class which manages creating, collecting, & uploading a Localytics session.
  Please see the following guides for information on how to best use this
  library, sample code, and other useful information:
@@ -34,29 +37,29 @@
  </ul>
  
  @author Localytics
- @version 1.0
+ @version 2.0
  */
 @interface LocalyticsSession : NSObject {
 
-	BOOL _hasInitialized; // Whether or not the session object has been initialized.
-	BOOL _isSessionOpen;  // Whether or not this session has been opened.
-  float _backgroundSessionTimeout; // If an App stays in the background for more
-                                   // than this many seconds, start a new session
-                                   // when it returns to foreground.
+	BOOL _hasInitialized;               // Whether or not the session object has been initialized.
+	BOOL _isSessionOpen;                // Whether or not this session has been opened.
+    float _backgroundSessionTimeout;    // If an App stays in the background for more
+                                        // than this many seconds, start a new session
+                                        // when it returns to foreground.
 	@private
 	#pragma mark Member Variables
-	NSString *_localyticsFilePath; // Path for this app's Localytics Files
-	NSString *_optOutFilePath;     // Path to the opt out file
-	NSString *_sessionFilename;	   // Filename for this session
-	NSString *_closeSessionFilename; // Filename for close events for this session
-                                   // Close events are stored in a different file so that they
-                                   // can be deleted when a session is reopened.
-	NSString *_fullPathToSession;  // The path to this session file
-	NSString *_fullPathToCloseSession;  // The path to the file for this session for close events
-	NSString *_sessionUUID;        // Unique identifier for this session.
-	NSString *_applicationKey;     // Unique identifier for the instrumented application
-  NSDate *_sessionCloseTime;     // Time session was closed.
-	BOOL _sessionHasBeenOpen;  // Whether or not this session has ever been open.
+	NSString *_sessionUUID;                 // Unique identifier for this session.
+	NSString *_applicationKey;              // Unique identifier for the instrumented application
+    NSTimeInterval _lastSessionStartTimestamp;  // The start time of the most recent session.
+    NSDate *_sessionResumeTime;                 // Time session was started or resumed.
+    NSDate *_sessionCloseTime;              // Time session was closed.
+    NSMutableString *_unstagedFlowEvents;        // Comma-delimited list of app screens and events tagged during this
+                                            // session that have NOT been staged for upload.
+    NSMutableString *_stagedFlowEvents;        // App screens and events tagged during this session that HAVE been staged
+                                            // for upload.
+    NSMutableString *_screens;              // Comma-delimited list of screens tagged during this session.
+    NSTimeInterval _sessionActiveDuration;  // Duration that session open.
+	BOOL _sessionHasBeenOpen;               // Whether or not this session has ever been open.
 }
 
 @property BOOL isSessionOpen;
@@ -79,8 +82,7 @@
 /*!
  @method LocalyticsSession
  @abstract Initializes the Localytics Object.  Not necessary if you choose to use startSession.
- @param applicationKey The key unique for each application generated
- at www.localytics.com
+ @param applicationKey The key unique for each application generated at www.localytics.com
  */
 - (void)LocalyticsSession:(NSString *)appKey;
 
@@ -177,12 +179,21 @@
 
 - (void)tagEvent:(NSString *)event attributes:(NSDictionary *)attributes;
 
+- (void)tagEvent:(NSString *)event attributes:(NSDictionary *)attributes reportAttributes:(NSDictionary *)reportAttributes;
+
+/*!
+ @method tagScreen
+ @abstract Allows tagging the flow of screens encountered during the session.
+ @param screen The name of the screen 
+ */
+- (void)tagScreen:(NSString *)screen;
+
 /*!
  @method upload
  @abstract Creates a low priority thread which uploads any Localytics data already stored 
  on the device.  This should be done early in the process life in order to 
  guarantee as much time as possible for slow connections to complete.  It is also reasonable
- to uplod again when the application is exiting because if the upload is cancelled the data
+ to upload again when the application is exiting because if the upload is cancelled the data
  will just get uploaded the next time the app comes up.
  */
 - (void)upload;

@@ -70,7 +70,8 @@
     // Views
     
 	IBOutlet UITableView * tableView_;
-    UIView * tableViewCoverView;
+    UIView * tableViewCoverViewContainer;
+    UIImageView * tableViewCoverView;
     IBOutlet UIImageView * tableViewBackgroundView;
     IBOutlet UIView   * searchContainerView;
     IBOutlet UIView   * searchContainerViewShadowCheatView;
