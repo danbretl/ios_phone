@@ -284,6 +284,8 @@
 		3278EFE513D88C1700948EE6 /* kwiqetText_120width@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 3278EFE313D88C1700948EE6 /* kwiqetText_120width@2x.png */; };
 		327C4DB113DA270B00DAAD51 /* BugSense-iOS.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 327C4DB013DA270B00DAAD51 /* BugSense-iOS.framework */; };
 		327C4DB613DA301D00DAAD51 /* Analytics.m in Sources */ = {isa = PBXBuildFile; fileRef = 327C4DB513DA301D00DAAD51 /* Analytics.m */; };
+		327CB7C8144DC2D000CEF0D7 /* LocationSetterView.m in Sources */ = {isa = PBXBuildFile; fileRef = 327CB7C7144DC2D000CEF0D7 /* LocationSetterView.m */; };
+		327CB7CC144DC37500CEF0D7 /* LocationView.m in Sources */ = {isa = PBXBuildFile; fileRef = 327CB7CB144DC37500CEF0D7 /* LocationView.m */; };
 		3288360E13DDE7320090AFE0 /* EventsViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 3288360D13DDE7320090AFE0 /* EventsViewController.xib */; };
 		3288427E13F07DC900C06DDE /* EventViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 3288427D13F07DC900C06DDE /* EventViewController.xib */; };
 		32929C4213E9C02E001D0FE7 /* UIButtonWithOverlayView.m in Sources */ = {isa = PBXBuildFile; fileRef = 32929C4113E9C02E001D0FE7 /* UIButtonWithOverlayView.m */; };
@@ -845,6 +847,10 @@
 		327C4DB013DA270B00DAAD51 /* BugSense-iOS.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = "BugSense-iOS.framework"; sourceTree = "<group>"; };
 		327C4DB413DA301D00DAAD51 /* Analytics.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Analytics.h; sourceTree = "<group>"; };
 		327C4DB513DA301D00DAAD51 /* Analytics.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Analytics.m; sourceTree = "<group>"; };
+		327CB7C6144DC2D000CEF0D7 /* LocationSetterView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LocationSetterView.h; sourceTree = "<group>"; };
+		327CB7C7144DC2D000CEF0D7 /* LocationSetterView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LocationSetterView.m; sourceTree = "<group>"; };
+		327CB7CA144DC37500CEF0D7 /* LocationView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LocationView.h; sourceTree = "<group>"; };
+		327CB7CB144DC37500CEF0D7 /* LocationView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LocationView.m; sourceTree = "<group>"; };
 		3288360D13DDE7320090AFE0 /* EventsViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = EventsViewController.xib; sourceTree = "<group>"; };
 		3288427D13F07DC900C06DDE /* EventViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = EventViewController.xib; sourceTree = "<group>"; };
 		32929C4013E9C02E001D0FE7 /* UIButtonWithOverlayView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UIButtonWithOverlayView.h; sourceTree = "<group>"; };
@@ -1350,6 +1356,17 @@
 				322E51E513FACD1400E69576 /* btn_filter_option_sq_unselected@2x.png */,
 			);
 			name = Square;
+			sourceTree = "<group>";
+		};
+		32484EF9144CD392006A4366 /* location */ = {
+			isa = PBXGroup;
+			children = (
+				327CB7C6144DC2D000CEF0D7 /* LocationSetterView.h */,
+				327CB7C7144DC2D000CEF0D7 /* LocationSetterView.m */,
+				327CB7CA144DC37500CEF0D7 /* LocationView.h */,
+				327CB7CB144DC37500CEF0D7 /* LocationView.m */,
+			);
+			name = location;
 			sourceTree = "<group>";
 		};
 		3249FCAB141149D4000A0575 /* Occurrence Controls */ = {
@@ -2122,6 +2139,7 @@
 			isa = PBXGroup;
 			children = (
 				32D7FEE213B0BD40005E8406 /* view controllers */,
+				32484EF9144CD392006A4366 /* location */,
 				32D7FEE413B0BD8D005E8406 /* views */,
 				32D7FEE613B0C1E0005E8406 /* models etc */,
 				32D7FEE513B0C1B0005E8406 /* web */,
@@ -2688,6 +2706,8 @@
 				32C85F271420011F00D3F475 /* EventsWebQuery.m in Sources */,
 				321A87AE1423AB7C0012EA4A /* EventsFeedbackView.m in Sources */,
 				325FBB6D14482570007255FA /* LocalyticsDatabase.m in Sources */,
+				327CB7C8144DC2D000CEF0D7 /* LocationSetterView.m in Sources */,
+				327CB7CC144DC37500CEF0D7 /* LocationView.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

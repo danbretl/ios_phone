@@ -3,7 +3,7 @@
 //  Abextra
 //
 //  Created by Dan Bretl on 6/7/11.
-//  Copyright (c) 2011 __MyCompanyName__. All rights reserved.
+//  Copyright (c) 2011 Abextra Technologies. All rights reserved.
 //
 
 #import "Category.h"

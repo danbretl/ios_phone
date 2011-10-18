@@ -3,7 +3,7 @@
 //  kwiqet
 //
 //  Created by Dan Bretl on 6/20/11.
-//  Copyright 2011 __MyCompanyName__. All rights reserved.
+//  Copyright 2011 Abextra Technologies. All rights reserved.
 //
 
 #import <UIKit/UIKit.h>

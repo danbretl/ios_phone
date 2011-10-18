@@ -3,7 +3,7 @@
 //  kwiqet
 //
 //  Created by Dan Bretl on 8/1/11.
-//  Copyright (c) 2011 __MyCompanyName__. All rights reserved.
+//  Copyright (c) 2011 Abextra Technologies. All rights reserved.
 //
 
 #import "Event.h"

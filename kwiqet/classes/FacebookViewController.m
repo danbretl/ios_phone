@@ -3,7 +3,7 @@
 //  kwiqet
 //
 //  Created by Dan Bretl on 7/5/11.
-//  Copyright 2011 __MyCompanyName__. All rights reserved.
+//  Copyright 2011 Abextra Technologies. All rights reserved.
 //
 
 #import "FacebookViewController.h"
