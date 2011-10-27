@@ -73,6 +73,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 @property (nonatomic, readonly) NSString * eventsSummaryStringForCurrentSource;
 @property BOOL deletedFromEventCard;
 @property CGPoint tableViewContentOffsetPreserved;
+@property BOOL userRequestedToShowLocationSetter;
 
 /////////////////////
 // Views properties
@@ -83,6 +84,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 @property (retain) IBOutlet UIImageView * tableViewBackgroundView;
 @property (retain) IBOutlet UIView   * searchContainerView;
 @property (retain) IBOutlet UIView   * searchContainerViewShadowCheatView;
+@property (retain) IBOutlet UIView * searchContainerTopEdgeView;
 @property (retain) IBOutlet UIButton * searchButton;
 @property (retain) IBOutlet UIButton * searchCancelButton;
 @property (retain) IBOutlet UIButton * searchGoButton;
@@ -152,16 +154,16 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 @property (retain) IBOutlet UIButtonWithOverlayView * dvTimeSearchButtonAny;
 // Drawer view location
 @property (retain) IBOutlet UIView * drawerViewLocation;
-@property (retain) IBOutlet UITextField * dvLocationTextField;
-@property (retain) UIButton * dvLocationCurrentLocationButton;
+@property (retain) IBOutlet UIButton * dvLocationSetLocationButton;
+@property (retain) IBOutlet UIButton * dvLocationCurrentLocationButton;
 @property (retain) IBOutlet UIButtonWithOverlayView * dvLocationButtonWalking;
 @property (retain) IBOutlet UIButtonWithOverlayView * dvLocationButtonNeighborhood;
 @property (retain) IBOutlet UIButtonWithOverlayView * dvLocationButtonBorough;
 @property (retain) IBOutlet UIButtonWithOverlayView * dvLocationButtonCity;
 // Drawer view location search
 @property (retain) IBOutlet UIView * drawerViewLocationSearch;
-@property (retain) IBOutlet UITextField * dvLocationSearchTextField;
-@property (retain) UIButton * dvLocationSearchCurrentLocationButton;
+@property (retain) IBOutlet UIButton * dvLocationSearchSetLocationButton;
+@property (retain) IBOutlet UIButton * dvLocationSearchCurrentLocationButton;
 @property (retain) IBOutlet UIButtonWithOverlayView * dvLocationSearchButtonWalking;
 @property (retain) IBOutlet UIButtonWithOverlayView * dvLocationSearchButtonNeighborhood;
 @property (retain) IBOutlet UIButtonWithOverlayView * dvLocationSearchButtonBorough;
@@ -180,6 +182,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 // View Controllers
 
 @property (nonatomic, retain) EventViewController * cardPageViewController;
+@property (nonatomic, retain) SetLocationViewController * setLocationViewController;
 
 ///////////////////
 // Web properties
@@ -197,12 +200,12 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 - (IBAction) locationFilterOptionButtonTouched:(id)sender;
 - (void) categoryFilterOptionButtonTouched:(id)sender;
 - (void) filterOptionButtonTouched:(UIButton *)filterOptionButton forFilterCode:(NSString *)filterCode selectedOptionGetter:(SEL)selectedFilterOptionGetter selectedOptionSetter:(SEL)selectedFilterOptionSetter;
-- (IBAction) locationFilterCurrentLocationButtonTouched;
 - (IBAction) searchButtonTouched:(id)sender;
 - (IBAction) searchCancelButtonTouched:(id)sender;
 - (IBAction) searchGoButtonTouched:(id)sender;
 - (void) feedbackViewRetryButtonTouched:(UIButton *)button;
-
+- (IBAction) currentLocationButtonTouched:(UIButton *)currentLocationButton;
+- (IBAction) setLocationButtonTouched:(UIButton *)setLocationButton;
 - (IBAction) reloadEventsListButtonTouched:(id)sender;
 
 - (void) adjustSearchViewsToShowButtons:(BOOL)showButtons;
@@ -231,6 +234,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 - (void) setFiltersBarToDisplayViewsForSource:(NSString *)sourceString;
 - (void) setFiltersBarViewsOriginY:(CGFloat)originY adjustDrawerViewsAccordingly:(BOOL)shouldAdjustDrawerViews;
 - (void) setImagesForCategoryButton:(UIButton *)button forCategory:(Category *)category;
+- (void) setLocationSetterViewIsVisible:(BOOL)isVisible animated:(BOOL)animated animationBasedInKeyboardNotificationUserInfo:(NSDictionary *)keyboardNotificationUserInfo;
 - (void) setLogoButtonImageForCategoryURI:(NSString *)theCategoryURI;
 - (void) setLogoButtonImageWithImageNamed:(NSString *)imageName;
 - (void) setPushableContainerViewsOriginY:(CGFloat)originY adjustHeightToFillMainView:(BOOL)shouldAdjustHeight;
@@ -269,6 +273,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 @synthesize filterSearchButtonDate, filterSearchButtonLocation, filterSearchButtonTime;
 @synthesize pushableContainerView, pushableContainerShadowCheatView, feedbackView, feedbackViewIsVisible=feedbackViewIsVisible_, eventsSummaryStringBrowse, eventsSummaryStringSearch;
 @synthesize deletedFromEventCard, tableViewContentOffsetPreserved;
+@synthesize userRequestedToShowLocationSetter=userRequestedToShowLocationSetter_;
 @synthesize drawerScrollView, activeFilterHighlightsContainerView;
 @synthesize drawerViewsBrowseContainer;
 @synthesize drawerViewsSearchContainer;
@@ -278,11 +283,11 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 @synthesize drawerViewCategories;
 @synthesize drawerViewTime, dvTimeButtonAny, dvTimeButtonMorning, dvTimeButtonAfternoon, dvTimeButtonEvening, dvTimeButtonNight;
 @synthesize drawerViewTimeSearch, dvTimeSearchButtonMorning, dvTimeSearchButtonAfternoon, dvTimeSearchButtonEvening, dvTimeSearchButtonNight, dvTimeSearchButtonAny;
-@synthesize drawerViewLocation, dvLocationTextField, dvLocationCurrentLocationButton, dvLocationButtonWalking, dvLocationButtonNeighborhood, dvLocationButtonBorough, dvLocationButtonCity;
-@synthesize drawerViewLocationSearch, dvLocationSearchTextField, dvLocationSearchCurrentLocationButton, dvLocationSearchButtonWalking, dvLocationSearchButtonNeighborhood, dvLocationSearchButtonBorough, dvLocationSearchButtonCity;
+@synthesize drawerViewLocation, dvLocationSetLocationButton, dvLocationCurrentLocationButton, dvLocationButtonWalking, dvLocationButtonNeighborhood, dvLocationButtonBorough, dvLocationButtonCity;
+@synthesize drawerViewLocationSearch, dvLocationSearchSetLocationButton, dvLocationSearchCurrentLocationButton, dvLocationSearchButtonWalking, dvLocationSearchButtonNeighborhood, dvLocationSearchButtonBorough, dvLocationSearchButtonCity;
 @synthesize tableView=tableView_;
 @synthesize tableViewCoverViewContainer, tableViewCoverView, tableViewBackgroundView;
-@synthesize searchContainerView, searchButton, searchCancelButton, searchGoButton, searchTextField, searchContainerViewShadowCheatView;
+@synthesize searchContainerView, searchContainerTopEdgeView, searchButton, searchCancelButton, searchGoButton, searchTextField, searchContainerViewShadowCheatView;
 @synthesize tableReloadContainerView, tableReloadContainerShadowCheatView;
 @synthesize tapToHideDrawerGR;
 @synthesize debugTextView;
@@ -292,7 +297,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 @synthesize concreteParentCategoriesArray;
 @synthesize oldFilterString, categoryURI;
 @synthesize isSearchOn;
-@synthesize cardPageViewController;
+@synthesize cardPageViewController, setLocationViewController=setLocationViewController_;
 @synthesize indexPathOfRowAttemptingToDelete, indexPathOfSelectedRow;
 @synthesize isDrawerOpen, shouldReloadOnDrawerClose;
 @synthesize feedbackMessageTypeBrowseRemembered, feedbackMessageTypeSearchRemembered;
@@ -300,6 +305,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 - (void)dealloc {
     NSLog(@"--- --- --- --- --- EventsViewController dealloc --- --- --- --- ---");
     [cardPageViewController release];
+    [setLocationViewController_ release];
     [concreteParentCategoriesArray release];
     [concreteParentCategoriesDictionary release];
     [coreDataModel release];
@@ -359,7 +365,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     self.searchContainerViewShadowCheatView.layer.shadowOpacity = 0.5;
     self.searchContainerViewShadowCheatView.layer.shadowPath = [UIBezierPath bezierPathWithRect:self.searchContainerViewShadowCheatView.bounds].CGPath;
     self.searchContainerViewShadowCheatView.layer.shouldRasterize = YES;
-//    self.searchContainerViewShadowCheatView.hidden = YES;
+    self.searchContainerViewShadowCheatView.hidden = YES;
     // Reload container
     self.tableReloadContainerShadowCheatView.layer.shadowColor = [UIColor blackColor].CGColor;
     self.tableReloadContainerShadowCheatView.layer.shadowOffset = CGSizeMake(0, 0);
@@ -402,6 +408,9 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     self.tableView.tableFooterView.alpha = 0.0;
     self.tableView.tableFooterView.userInteractionEnabled = NO;
 //    self.tableView.tableFooterView.backgroundColor = [UIColor colorWithWhite:EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT alpha:1.0];
+    
+    // Views settings - Table header
+    self.searchContainerTopEdgeView.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"stretchable_table_top.png"]];
     
     // Views allocation and settings - Table view cover view
     // Container
@@ -459,18 +468,9 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     self.activeFilterHighlightsContainerView.highlightImage = [UIImage imageNamed:@"filter_select_glow.png"];
     self.activeFilterHighlightsContainerView.hidden = YES;
     
-    // Views allocations and settings - Location drawer view & its subviews
-    // Current location button
-    self.dvLocationCurrentLocationButton = [UIButton buttonWithType:UIButtonTypeCustom];
-    self.dvLocationCurrentLocationButton.frame = CGRectMake(0, 0, 23, 15);
-    self.dvLocationCurrentLocationButton.contentHorizontalAlignment = UIControlContentHorizontalAlignmentRight;
-    [self.dvLocationCurrentLocationButton setImage:[UIImage imageNamed:@"ico_locationsearch.png"] forState:UIControlStateNormal];
-    [self.dvLocationCurrentLocationButton addTarget:self action:@selector(locationFilterCurrentLocationButtonTouched) forControlEvents:UIControlEventTouchUpInside];
-    // Location text field
-    self.dvLocationTextField.leftView = self.dvLocationCurrentLocationButton;
-    self.dvLocationTextField.leftViewMode = UITextFieldViewModeAlways;
-    self.dvLocationSearchTextField.leftView = self.dvLocationCurrentLocationButton;
-    self.dvLocationSearchTextField.leftViewMode = UITextFieldViewModeAlways;
+    // Views settings - location drawers
+    self.dvLocationSetLocationButton.titleLabel.font = [UIFont kwiqetFontOfType:BoldCondensed size:15.0];
+    self.dvLocationSearchSetLocationButton.titleLabel.font = self.dvLocationSetLocationButton.titleLabel.font;
     
     // Views allocation and settings - categories drawer view & its subviews
     int categoryOptionsCount = 9;
@@ -907,7 +907,8 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
         self.eventsWebQueryFromSearch.searchTerm = searchTerm;
         self.eventsWebQueryFromSearch.filterDateBucketString = self.selectedDateSearchFilterOption.code;
         self.eventsWebQueryFromSearch.filterDistanceBucketString = self.selectedLocationSearchFilterOption.code;
-        self.eventsWebQueryFromSearch.filterLocationString = self.dvLocationSearchTextField.text.length > 0 ? self.dvLocationSearchTextField.text : @"Current Location"; // LOCATION HACK
+        self.eventsWebQueryFromSearch.filterLocationString = self.dvLocationSearchSetLocationButton.titleLabel.text; // LOCATION HACK
+//        self.eventsWebQueryFromSearch.filterLocationString = self.dvLocationSearchTextField.text.length > 0 ? self.dvLocationSearchTextField.text : @"Current Location"; // LOCATION HACK
         self.eventsWebQueryFromSearch.filterTimeBucketString = self.selectedTimeSearchFilterOption.code;
         [self.coreDataModel coreDataSave];
         self.eventsFromSearch = [self.eventsWebQueryFromSearch.eventResultsEventsInOrder.mutableCopy autorelease];
@@ -1004,6 +1005,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     self.tableViewBackgroundView = nil;
     self.searchContainerView = nil;
     self.searchContainerViewShadowCheatView = nil;
+    self.searchContainerTopEdgeView = nil;
     self.searchButton = nil;
     self.searchCancelButton = nil;
     self.searchGoButton = nil;
@@ -1073,7 +1075,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     self.dvTimeSearchButtonAny = nil;
     
     self.drawerViewLocation = nil;
-    self.dvLocationTextField = nil;
+    self.dvLocationSetLocationButton = nil;
     self.dvLocationCurrentLocationButton = nil;
     self.dvLocationButtonWalking = nil;
     self.dvLocationButtonNeighborhood = nil;
@@ -1081,7 +1083,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     self.dvLocationButtonCity = nil;
     
     self.drawerViewLocationSearch = nil;
-    self.dvLocationSearchTextField = nil;
+    self.dvLocationSearchSetLocationButton = nil;
     self.dvLocationSearchCurrentLocationButton = nil;
     self.dvLocationSearchButtonWalking = nil;
     self.dvLocationSearchButtonNeighborhood = nil;
@@ -1132,6 +1134,115 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     [self releaseReconstructableViewModels];
 	// Release any retained subviews of the main view.
 	// e.g. self.myOutlet = nil;
+}
+
+- (void)viewWillAppear:(BOOL)animated {
+    [super viewWillAppear:animated];
+    if (self.eventsForCurrentSource.count == 0) {
+        if (self.isSearchOn) {
+            // Not going to do anything on this path for now... Just leave the list blank?
+        } else {
+            //            NSLog(@"No events for current source, going to web-get events. No events for current source, going to web-get events. No events for current source, going to web-get events. No events for current source, going to web-get events. No events for current source, going to web-get events. No events for current source, going to web-get events. No events for current source, going to web-get events. No events for current source, going to web-get events. No events for current source, going to web-get events. No events for current source, going to web-get events.");
+            [self setFeedbackViewMessageType:LoadingEventsTrue eventsSummaryString:self.eventsSummaryStringBrowse searchString:nil animated:NO];
+            [self webConnectGetEventsListWithCurrentOldFilterAndCategory];
+        }
+    } else {
+        if (self.indexPathOfSelectedRow != nil) {
+            // - Make sure that the row that should be selected is selected.
+            // - Make sure that the table view content offset is set to what it once was (only an issue if there had been a memory warning).
+            [self.tableView selectRowAtIndexPath:self.indexPathOfSelectedRow animated:NO scrollPosition:UITableViewScrollPositionNone];
+        }
+        CGPoint preservedContentOffsetAdjusted = self.tableViewContentOffsetPreserved;
+        // Order matters in the following two lines of code.
+        preservedContentOffsetAdjusted.y = MIN(preservedContentOffsetAdjusted.y, self.tableView.contentSize.height - self.tableView.bounds.size.height + self.tableView.contentInset.bottom);
+        preservedContentOffsetAdjusted.y = MAX(preservedContentOffsetAdjusted.y, 0); // This needs to come after the previous line of code. Otherwise, we get strange behavior when the table view content size is smaller (roughly) than the table view bounds height. We could handle this more intelligently, but I'm tired.
+        // The following is trying to fix some weird very specific bug where if we were coming back from a reloaded view (after memory warning) in search mode and we had been scrolled all the way to the bottom of the list, that we would get popped up a bit. // HACK DIDN'T WORK.
+        //        if (self.isSearchOn &&
+        //            self.tableViewContentOffsetPreserved.y > self.tableView.contentSize.height - self.tableView.bounds.size.height + self.tableView.contentInset.bottom - self.tableView.rowHeight) { // THIS HACK RELIES ON TABLE VIEW ROW HEIGHTS BEING EQUAL
+        //            [self.tableView scrollToRowAtIndexPath:[NSIndexPath indexPathForRow:self.eventsFromSearch.count-1 inSection:0] atScrollPosition:UITableViewScrollPositionBottom animated:NO];
+        //        } else {
+        [self.tableView setContentOffset:preservedContentOffsetAdjusted animated:NO];
+        //        }
+        
+        NSLog(@"FIGURING THIS OUT, setContentOffset=%@", NSStringFromCGPoint(preservedContentOffsetAdjusted));
+        NSLog(@"FIGURING THIS OUT, self.tableView.contentOffset is %@", NSStringFromCGPoint(self.tableView.contentOffset));
+    }
+    
+    //    NSLog(@"OK FUCK IT I'M FIGURING THIS OUT - contentInset is %@ and feedbackView.height=%f AT END OF viewWillAppear", NSStringFromUIEdgeInsets(self.tableView.contentInset), self.feedbackView.bounds.size.height);
+    
+    //    NSLog(@"\n\nINDEX PATH FOR SELECTED ROW ACCORDING TO TABLEVIEW IS %@\n\n", self.indexPathOfSelectedRow);
+    //    [self.tableView selectRowAtIndexPath:self.indexPathOfSelectedRow animated:NO scrollPosition:UITableViewScrollPositionNone];
+    //    NSLog(@"\n\nINDEX PATH FOR SELECTED ROW ACCORDING TO TABLEVIEW IS %@\n\n", self.indexPathOfSelectedRow);
+    
+    [self updateTimeFilterOptions:[self filterForFilterCode:EVENTS_FILTER_TIME inFiltersArray:self.filtersForCurrentSource].options forSearch:self.isSearchOn givenSelectedDateFilterOption:self.isSearchOn ? self.selectedDateSearchFilterOption : self.selectedDateFilterOption userTime:[NSDate date]];
+    
+}
+
+// On viewDidAppear, we should deselect the highlighted row (if there is one).
+- (void)viewDidAppear:(BOOL)animated
+{
+    // Call super
+	[super viewDidAppear:animated];
+    [self suggestToRedrawEventsList];
+    // Following if statement should never return true, but that's OK.
+    if (![self.searchTextField isFirstResponder]) {
+        [self becomeFirstResponder];
+    }
+    
+    NSLog(@"\n\nINDEX PATH FOR SELECTED ROW IS %@\n\n", self.indexPathOfSelectedRow);
+    
+    // I believe the following is old, and now unnecessary, and now causing bugs of its own.
+    //    // Fixing some strange bug where if you are in search mode and not at the top of the events list, then push an event card, then come back to the events list, then the search text field (which we had been sticking at the top of the screen) would disappear until you scrolled the table view (at which point it would stick back at the top of the screen).
+    //    if (self.isSearchOn) {
+    //        CGRect scvf = self.searchContainerView.frame;
+    //        scvf.origin.y = self.tableView.bounds.origin.y;
+    //        self.searchContainerView.frame = scvf;
+    //    }
+    
+    if (self.webConnector.connectionInProgress) {
+        [self setFeedbackViewMessageType:LoadingEventsTrue eventsSummaryString:self.eventsSummaryStringForCurrentSource searchString:self.eventsWebQueryForCurrentSource.searchTerm animated:animated];
+        [self showWebLoadingViews];
+    }
+    
+    if (self.deletedFromEventCard) {
+        Event * eventToDelete = [self.eventsForCurrentSource objectAtIndex:self.indexPathOfSelectedRow.row];
+        
+        [self.coreDataModel deleteRegularEventForURI:eventToDelete.uri];
+        
+        // Delete event from our table display array
+        [self.eventsForCurrentSource removeObjectAtIndex:self.indexPathOfSelectedRow.row];
+        
+        // Animate event deletion from the table
+        [self.tableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:self.indexPathOfSelectedRow] withRowAnimation:UITableViewRowAnimationFade];
+    }
+    
+    // Deselect selected row, if there is one
+    [self.tableView deselectRowAtIndexPath:self.tableView.indexPathForSelectedRow animated:animated]; // There is something weird going on with the animation - it is going really slowly. Figure this out later. It doesn't look horrible right now though, so, I'm just going to leave it.
+    
+    //    NSLog(@"OK FUCK IT I'M FIGURING THIS OUT - contentInset is %@ and feedbackView.height=%f AT END OF viewDidAppear", NSStringFromUIEdgeInsets(self.tableView.contentInset), self.feedbackView.bounds.size.height);
+    
+    self.deletedFromEventCard = NO;
+    self.indexPathOfSelectedRow = nil;
+    
+    NSLog(@"FIGURING THIS OUT, self.tableView.contentOffset is %@", NSStringFromCGPoint(self.tableView.contentOffset));
+    
+}
+
+- (void)viewWillDisappear:(BOOL)animated {
+    [super viewWillDisappear:animated];
+    self.tableViewContentOffsetPreserved = self.tableView.contentOffset;
+    NSLog(@"FIGURING THIS OUT, self.tableViewContentOffsetPreserved=%@", NSStringFromCGPoint(self.tableViewContentOffsetPreserved));
+    //    if (self.isDrawerOpen) {
+    //        [self toggleDrawerAnimated];
+    //    } // I like this behavior less and less, especially when closing the drawer is what a user does to initiate an events reload (with newly adjusted filters).
+    [self resignFirstResponder];
+}
+
+- (void) viewDidDisappear:(BOOL)animated {
+    [super viewDidDisappear:animated];
+//    if (self.isDrawerOpen) {
+//        [self toggleDrawerAnimated:NO];
+//    }
 }
 
 - (void) setUpFiltersUI:(NSArray *)arrayOfEventsFilters withOptionButtonSelectors:(NSDictionary *)dictionaryOfEventFilterOptionSelectors compressedOptionButtons:(BOOL)compressed {
@@ -1210,115 +1321,6 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
             }
 
         }
-    }
-}
-
-- (void)viewWillAppear:(BOOL)animated {
-    [super viewWillAppear:animated];
-    if (self.eventsForCurrentSource.count == 0) {
-        if (self.isSearchOn) {
-            // Not going to do anything on this path for now... Just leave the list blank?
-        } else {
-            //            NSLog(@"No events for current source, going to web-get events. No events for current source, going to web-get events. No events for current source, going to web-get events. No events for current source, going to web-get events. No events for current source, going to web-get events. No events for current source, going to web-get events. No events for current source, going to web-get events. No events for current source, going to web-get events. No events for current source, going to web-get events. No events for current source, going to web-get events.");
-            [self setFeedbackViewMessageType:LoadingEventsTrue eventsSummaryString:self.eventsSummaryStringBrowse searchString:nil animated:NO];
-            [self webConnectGetEventsListWithCurrentOldFilterAndCategory];
-        }
-    } else {
-        if (self.indexPathOfSelectedRow != nil) {
-            // - Make sure that the row that should be selected is selected.
-            // - Make sure that the table view content offset is set to what it once was (only an issue if there had been a memory warning).
-            [self.tableView selectRowAtIndexPath:self.indexPathOfSelectedRow animated:NO scrollPosition:UITableViewScrollPositionNone];
-        }
-        CGPoint preservedContentOffsetAdjusted = self.tableViewContentOffsetPreserved;
-        // Order matters in the following two lines of code.
-        preservedContentOffsetAdjusted.y = MIN(preservedContentOffsetAdjusted.y, self.tableView.contentSize.height - self.tableView.bounds.size.height + self.tableView.contentInset.bottom);
-        preservedContentOffsetAdjusted.y = MAX(preservedContentOffsetAdjusted.y, 0); // This needs to come after the previous line of code. Otherwise, we get strange behavior when the table view content size is smaller (roughly) than the table view bounds height. We could handle this more intelligently, but I'm tired.
-        // The following is trying to fix some weird very specific bug where if we were coming back from a reloaded view (after memory warning) in search mode and we had been scrolled all the way to the bottom of the list, that we would get popped up a bit. // HACK DIDN'T WORK.
-//        if (self.isSearchOn &&
-//            self.tableViewContentOffsetPreserved.y > self.tableView.contentSize.height - self.tableView.bounds.size.height + self.tableView.contentInset.bottom - self.tableView.rowHeight) { // THIS HACK RELIES ON TABLE VIEW ROW HEIGHTS BEING EQUAL
-//            [self.tableView scrollToRowAtIndexPath:[NSIndexPath indexPathForRow:self.eventsFromSearch.count-1 inSection:0] atScrollPosition:UITableViewScrollPositionBottom animated:NO];
-//        } else {
-            [self.tableView setContentOffset:preservedContentOffsetAdjusted animated:NO];
-//        }
-        
-        NSLog(@"FIGURING THIS OUT, setContentOffset=%@", NSStringFromCGPoint(preservedContentOffsetAdjusted));
-        NSLog(@"FIGURING THIS OUT, self.tableView.contentOffset is %@", NSStringFromCGPoint(self.tableView.contentOffset));
-    }
-    
-//    NSLog(@"OK FUCK IT I'M FIGURING THIS OUT - contentInset is %@ and feedbackView.height=%f AT END OF viewWillAppear", NSStringFromUIEdgeInsets(self.tableView.contentInset), self.feedbackView.bounds.size.height);
-    
-//    NSLog(@"\n\nINDEX PATH FOR SELECTED ROW ACCORDING TO TABLEVIEW IS %@\n\n", self.indexPathOfSelectedRow);
-//    [self.tableView selectRowAtIndexPath:self.indexPathOfSelectedRow animated:NO scrollPosition:UITableViewScrollPositionNone];
-//    NSLog(@"\n\nINDEX PATH FOR SELECTED ROW ACCORDING TO TABLEVIEW IS %@\n\n", self.indexPathOfSelectedRow);
-    
-    [self updateTimeFilterOptions:[self filterForFilterCode:EVENTS_FILTER_TIME inFiltersArray:self.filtersForCurrentSource].options forSearch:self.isSearchOn givenSelectedDateFilterOption:self.isSearchOn ? self.selectedDateSearchFilterOption : self.selectedDateFilterOption userTime:[NSDate date]];
-    
-}
-
-// On viewDidAppear, we should deselect the highlighted row (if there is one).
-- (void)viewDidAppear:(BOOL)animated
-{
-    // Call super
-	[super viewDidAppear:animated];
-    [self suggestToRedrawEventsList];
-    // Following if statement should never return true, but that's OK.
-    if (![self.searchTextField isFirstResponder]) {
-        [self becomeFirstResponder];
-    }
-    
-    NSLog(@"\n\nINDEX PATH FOR SELECTED ROW IS %@\n\n", self.indexPathOfSelectedRow);
-    
-    // I believe the following is old, and now unnecessary, and now causing bugs of its own.
-//    // Fixing some strange bug where if you are in search mode and not at the top of the events list, then push an event card, then come back to the events list, then the search text field (which we had been sticking at the top of the screen) would disappear until you scrolled the table view (at which point it would stick back at the top of the screen).
-//    if (self.isSearchOn) {
-//        CGRect scvf = self.searchContainerView.frame;
-//        scvf.origin.y = self.tableView.bounds.origin.y;
-//        self.searchContainerView.frame = scvf;
-//    }
-    
-    if (self.webConnector.connectionInProgress) {
-        [self setFeedbackViewMessageType:LoadingEventsTrue eventsSummaryString:self.eventsSummaryStringForCurrentSource searchString:self.eventsWebQueryForCurrentSource.searchTerm animated:animated];
-        [self showWebLoadingViews];
-    }
-    
-    if (self.deletedFromEventCard) {
-        Event * eventToDelete = [self.eventsForCurrentSource objectAtIndex:self.indexPathOfSelectedRow.row];
-        
-        [self.coreDataModel deleteRegularEventForURI:eventToDelete.uri];
-        
-        // Delete event from our table display array
-        [self.eventsForCurrentSource removeObjectAtIndex:self.indexPathOfSelectedRow.row];
-        
-        // Animate event deletion from the table
-        [self.tableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:self.indexPathOfSelectedRow] withRowAnimation:UITableViewRowAnimationFade];
-    }
-    
-    // Deselect selected row, if there is one
-    [self.tableView deselectRowAtIndexPath:self.tableView.indexPathForSelectedRow animated:animated]; // There is something weird going on with the animation - it is going really slowly. Figure this out later. It doesn't look horrible right now though, so, I'm just going to leave it.
-    
-//    NSLog(@"OK FUCK IT I'M FIGURING THIS OUT - contentInset is %@ and feedbackView.height=%f AT END OF viewDidAppear", NSStringFromUIEdgeInsets(self.tableView.contentInset), self.feedbackView.bounds.size.height);
-    
-    self.deletedFromEventCard = NO;
-    self.indexPathOfSelectedRow = nil;
-    
-    NSLog(@"FIGURING THIS OUT, self.tableView.contentOffset is %@", NSStringFromCGPoint(self.tableView.contentOffset));
-    
-}
-
-- (void)viewWillDisappear:(BOOL)animated {
-    [super viewWillDisappear:animated];
-    self.tableViewContentOffsetPreserved = self.tableView.contentOffset;
-    NSLog(@"FIGURING THIS OUT, self.tableViewContentOffsetPreserved=%@", NSStringFromCGPoint(self.tableViewContentOffsetPreserved));
-//    if (self.isDrawerOpen) {
-//        [self toggleDrawerAnimated];
-//    } // I like this behavior less and less, especially when closing the drawer is what a user does to initiate an events reload (with newly adjusted filters).
-    [self resignFirstResponder];
-}
-
-- (void) viewDidDisappear:(BOOL)animated {
-    [super viewDidDisappear:animated];
-    if (self.isDrawerOpen) {
-        [self toggleDrawerAnimated:NO];
     }
 }
 
@@ -1408,7 +1410,8 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     }
     self.eventsWebQuery.filterDateBucketString = self.selectedDateFilterOption.code;
     self.eventsWebQuery.filterDistanceBucketString = self.selectedLocationFilterOption.code;
-    self.eventsWebQuery.filterLocationString = self.dvLocationTextField.text.length > 0 ? self.dvLocationTextField.text : @"Current Location"; // LOCATION HACK
+    self.eventsWebQuery.filterLocationString = self.dvLocationSetLocationButton.titleLabel.text; // LOCATION HACK
+//    self.eventsWebQuery.filterLocationString = self.dvLocationTextField.text.length > 0 ? self.dvLocationTextField.text : @"Current Location"; // LOCATION HACK
     self.eventsWebQuery.filterPriceBucketString = self.selectedPriceFilterOption.code;
     self.eventsWebQuery.filterTimeBucketString = self.selectedTimeFilterOption.code;
     Category * filterCategory = [self.coreDataModel getCategoryWithURI:theProposedCategoryURI];
@@ -1530,7 +1533,8 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
         self.eventsWebQueryFromSearch.searchTerm = searchTerm;
         self.eventsWebQueryFromSearch.filterDateBucketString = self.selectedDateSearchFilterOption.code;
         self.eventsWebQueryFromSearch.filterDistanceBucketString = self.selectedLocationSearchFilterOption.code;
-        self.eventsWebQueryFromSearch.filterLocationString = self.dvLocationSearchTextField.text.length > 0 ? self.dvLocationSearchTextField.text : @"Current Location"; // LOCATION HACK
+        self.eventsWebQueryFromSearch.filterLocationString = self.dvLocationSetLocationButton.titleLabel.text; // LOCATION HACK
+//        self.eventsWebQueryFromSearch.filterLocationString = self.dvLocationSearchTextField.text.length > 0 ? self.dvLocationSearchTextField.text : @"Current Location"; // LOCATION HACK
         self.eventsWebQueryFromSearch.filterTimeBucketString = self.selectedTimeSearchFilterOption.code;
         [self.coreDataModel coreDataSave];
         self.eventsFromSearch = [self.eventsWebQueryFromSearch.eventResultsEventsInOrder.mutableCopy autorelease];
@@ -1630,7 +1634,11 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 //    self.tableViewCoverView.alpha = haveEvents ? 0.0 : 1.0;
     if (!self.isSearchOn) {
         if (haveEvents) {
-            [self.tableView setContentOffset:CGPointMake(0, self.searchContainerView.bounds.size.height) animated:animated];
+            CGFloat y = 0;
+            if (self.tableView.contentSize.height - self.searchContainerView.bounds.size.height >= self.tableView.bounds.size.height) {
+                y = self.searchContainerView.bounds.size.height;
+            }
+            [self.tableView setContentOffset:CGPointMake(0, y) animated:animated];
         }
     } else {
         [self.tableView scrollRectToVisible:CGRectMake(0, 0, 1, 1) animated:animated];
@@ -1762,8 +1770,9 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     int reverser = showButtons ? 1 : -1;
     
     // Set search UI shifts up
-    CGFloat searchCancelButtonShift = reverser * (10 + self.searchCancelButton.frame.size.width);
-    CGFloat searchGoButtonShift = reverser * -(10 + self.searchGoButton.frame.size.width);
+    CGFloat searchCancelButtonShift = reverser * (7 + self.searchCancelButton.frame.size.width);
+    CGFloat searchGoButtonShift = reverser * -(7 + self.searchGoButton.frame.size.width);
+    CGFloat textFieldSpacing = showButtons ? 7 : 10;
     // Shift search cancel button
     CGRect scbf = self.searchCancelButton.frame;
     scbf.origin.x += searchCancelButtonShift;
@@ -1774,8 +1783,8 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     self.searchGoButton.frame = sgbf;
     // Shift search text field
     CGRect stff = self.searchTextField.frame;
-    stff.origin.x += searchCancelButtonShift;
-    stff.size.width += -searchCancelButtonShift + searchGoButtonShift;
+    stff.origin.x = CGRectGetMaxX(scbf) + textFieldSpacing;
+    stff.size.width = CGRectGetMinX(sgbf) - textFieldSpacing - stff.origin.x;
     self.searchTextField.frame = stff;
     
 }
@@ -1970,8 +1979,8 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
             [self setTableViewScrollable:haveEvents selectable:haveEvents];
             self.filtersContainerShadowCheatView.alpha = 1.0;
             self.filtersContainerShadowCheatWayBelowView.alpha = 0.0;
-            [self.dvLocationTextField resignFirstResponder];
-            [self.dvLocationSearchTextField resignFirstResponder];
+//            [self.dvLocationTextField resignFirstResponder];
+//            [self.dvLocationSearchTextField resignFirstResponder];
             if (self.shouldReloadOnDrawerClose) {
                 if (!self.isSearchOn) {
                     // Browse mode, should reload...
@@ -1987,7 +1996,9 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
                 [self setFeedbackViewMessageType:rememberedMessageType eventsSummaryString:self.eventsSummaryStringForCurrentSource searchString:(self.isSearchOn ? self.searchTextField.text : nil) animated:animated];
                 [self setFeedbackViewIsVisible:![self isTableViewScrolledToBottom] animated:animated];
             }
-            if (!self.isSearchOn && self.eventsForCurrentSource.count == 0) {
+            
+            if (!self.isSearchOn && /*self.eventsForCurrentSource.count == 0*/
+                self.tableView.contentSize.height - self.searchContainerView.bounds.size.height < self.tableView.bounds.size.height) {
                 [self.tableView setContentOffset:CGPointMake(0, 0) animated:NO];
             }
             // The following code moved here from filterOptionButtonTouched... This spot seems more appropriate, considering that the table view will not move while the drawer is open.
@@ -2059,7 +2070,8 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
             self.eventsWebQueryFromSearch.searchTerm = searchTerm;
             self.eventsWebQueryFromSearch.filterDateBucketString = self.selectedDateSearchFilterOption.code;
             self.eventsWebQueryFromSearch.filterDistanceBucketString = self.selectedLocationSearchFilterOption.code;
-            self.eventsWebQueryFromSearch.filterLocationString = self.dvLocationSearchTextField.text.length > 0 ? self.dvLocationSearchTextField.text : @"Current Location"; // LOCATION HACK
+            self.eventsWebQueryFromSearch.filterLocationString = self.dvLocationSearchSetLocationButton.titleLabel.text; // LOCATION HACK
+//            self.eventsWebQueryFromSearch.filterLocationString = self.dvLocationSearchTextField.text.length > 0 ? self.dvLocationSearchTextField.text : @"Current Location"; // LOCATION HACK
             self.eventsWebQueryFromSearch.filterTimeBucketString = self.selectedTimeSearchFilterOption.code;
             [self.coreDataModel coreDataSave];
             self.eventsFromSearch = [self.eventsWebQueryFromSearch.eventResultsEventsInOrder.mutableCopy autorelease];
@@ -2271,27 +2283,13 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
         NSLog(@"About to searchExecutionRequestedByUser from textFieldShouldReturn");
         [self searchExecutionRequestedByUser];
         shouldReturn = NO;
-    } else if (textField == self.dvLocationTextField ||
-               textField == self.dvLocationSearchTextField) {
-        [self.dvLocationTextField resignFirstResponder];
-        [self.dvLocationSearchTextField resignFirstResponder];
-        
-        /* WARNING: THE FOLLOWING CODE IS COPIED FROM THE METHOD ...filterOptionButtonTouched...*/
-        self.shouldReloadOnDrawerClose = YES;
-        [self setDrawerReloadIndicatorViewIsVisible:self.shouldReloadOnDrawerClose animated:self.isDrawerOpen];
-        
-        if (!self.isSearchOn) {
-            self.eventsSummaryStringBrowse = [self makeEventsSummaryStringForSource:EVENTS_SOURCE_BROWSE];
-            [self setFeedbackViewMessageType:CloseDrawerToLoadPrompt eventsSummaryString:self.eventsSummaryStringBrowse searchString:nil animated:YES];
-        } else {
-            self.eventsSummaryStringSearch = [self makeEventsSummaryStringForSource:EVENTS_SOURCE_SEARCH];
-            [self setFeedbackViewMessageType:CloseDrawerToLoadPrompt eventsSummaryString:self.eventsSummaryStringSearch searchString:self.searchTextField.text animated:YES];
-        }
-        /* WARNING: THE CODE ABOVE IS COPIED FROM THE METHOD ...filterOptionButtonTouched...*/
-        
-        shouldReturn = NO;
     }
     return shouldReturn;
+}
+
+- (BOOL)textFieldShouldBeginEditing:(UITextField *)textField {
+    BOOL should = YES;
+    return should;
 }
 
 - (void)textFieldDidBeginEditing:(UITextField *)textField {
@@ -2537,32 +2535,70 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     
 }
 
+- (void) setLocationSetterViewIsVisible:(BOOL)isVisible animated:(BOOL)animated animationBasedInKeyboardNotificationUserInfo:(NSDictionary *)keyboardNotificationUserInfo {
+    
+//	CGSize keyboardSize = [[keyboardNotificationUserInfo objectForKey:UIKeyboardFrameBeginUserInfoKey] CGRectValue].size;
+//    double keyboardAnimationDuration = [[keyboardNotificationUserInfo objectForKey:UIKeyboardAnimationDurationUserInfoKey] doubleValue];
+//    UIViewAnimationCurve keyboardAnimationCurve = [[keyboardNotificationUserInfo objectForKey:UIKeyboardAnimationCurveUserInfoKey] integerValue];
+//    
+//    CGFloat endingLocationSetterViewOriginX = 0.0;
+//    if (isVisible) {
+//        
+//        [self.view bringSubviewToFront:self.locationSetterView];
+//        CGRect locationSetterViewFrame = self.locationSetterView.frame;
+//        locationSetterViewFrame.size.height = self.view.bounds.size.height + self.tabBarController.tabBar.bounds.size.height - keyboardSize.height;
+//        self.locationSetterView.frame = locationSetterViewFrame;
+//        endingLocationSetterViewOriginX = 0.0;
+//        
+//    } else {
+//        
+//        endingLocationSetterViewOriginX = self.view.bounds.size.width;
+//        
+//    }
+//    
+//    [UIView animateWithDuration:keyboardAnimationDuration delay:0.0 options:keyboardAnimationCurve animations:^{
+//        CGRect locationSetterViewFrame = self.locationSetterView.frame;
+//        locationSetterViewFrame.origin.x = endingLocationSetterViewOriginX;
+//        self.locationSetterView.frame = locationSetterViewFrame;
+//    } completion:^(BOOL finished){ self.userRequestedToShowLocationSetter = isVisible; }];
+    
+}
+
 - (void)keyboardWillShow:(NSNotification *)notification {
     NSDictionary * info = [notification userInfo];
 	CGSize keyboardSize = [[info objectForKey:UIKeyboardFrameBeginUserInfoKey] CGRectValue].size;
     double keyboardAnimationDuration = [[info objectForKey:UIKeyboardAnimationDurationUserInfoKey] doubleValue];
-    [UIView animateWithDuration:keyboardAnimationDuration animations:^{
-        UIEdgeInsets insets = self.tableView.contentInset;
-        insets.bottom = keyboardSize.height - self.tabBarController.tabBar.bounds.size.height;
-        self.tableView.contentInset = insets;
-        UIEdgeInsets scrollInsets = self.tableView.scrollIndicatorInsets;
-        scrollInsets.bottom = keyboardSize.height - self.tabBarController.tabBar.bounds.size.height;
-        self.tableView.scrollIndicatorInsets = scrollInsets;
-    }];
+    UIViewAnimationCurve keyboardAnimationCurve = [[info objectForKey:UIKeyboardAnimationCurveUserInfoKey] integerValue];
+    if (self.userRequestedToShowLocationSetter) {
+        [self setLocationSetterViewIsVisible:YES animated:YES animationBasedInKeyboardNotificationUserInfo:info];
+    } else {
+        [UIView animateWithDuration:keyboardAnimationDuration delay:0.0 options:keyboardAnimationCurve animations:^{
+            UIEdgeInsets insets = self.tableView.contentInset;
+            insets.bottom = keyboardSize.height - self.tabBarController.tabBar.bounds.size.height;
+            self.tableView.contentInset = insets;
+            UIEdgeInsets scrollInsets = self.tableView.scrollIndicatorInsets;
+            scrollInsets.bottom = keyboardSize.height - self.tabBarController.tabBar.bounds.size.height;
+            self.tableView.scrollIndicatorInsets = scrollInsets;
+        } completion:^(BOOL finished){}];
+    }
 }
 
 - (void)keyboardWillHide:(NSNotification *)notification {
     NSDictionary * info = [notification userInfo];
-//	CGSize keyboardSize = [[info objectForKey:UIKeyboardFrameBeginUserInfoKey] CGRectValue].size;
     double keyboardAnimationDuration = [[info objectForKey:UIKeyboardAnimationDurationUserInfoKey] doubleValue];
-    [UIView animateWithDuration:keyboardAnimationDuration animations:^{
-        UIEdgeInsets insets = self.tableView.contentInset;
-        insets.bottom = /*self.feedbackViewIsVisible ? self.feedbackView.bounds.size.height : */0.0;
-        self.tableView.contentInset = insets;
-        UIEdgeInsets scrollInsets = self.tableView.scrollIndicatorInsets;
-        scrollInsets.bottom = 0;
-        self.tableView.scrollIndicatorInsets = scrollInsets;
-    }];
+    UIViewAnimationCurve keyboardAnimationCurve = [[info objectForKey:UIKeyboardAnimationCurveUserInfoKey] integerValue];
+    if (self.userRequestedToShowLocationSetter) {
+        [self setLocationSetterViewIsVisible:NO animated:YES animationBasedInKeyboardNotificationUserInfo:info];
+    } else {
+        [UIView animateWithDuration:keyboardAnimationDuration delay:0.0 options:keyboardAnimationCurve animations:^{
+            UIEdgeInsets insets = self.tableView.contentInset;
+            insets.bottom = /*self.feedbackViewIsVisible ? self.feedbackView.bounds.size.height : */0.0;
+            self.tableView.contentInset = insets;
+            UIEdgeInsets scrollInsets = self.tableView.scrollIndicatorInsets;
+            scrollInsets.bottom = 0;
+            self.tableView.scrollIndicatorInsets = scrollInsets;
+        } completion:^(BOOL finished){ }];
+    }
 }
 
 - (void)loginActivity:(NSNotification *)notification {
@@ -2575,7 +2611,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     if (self.isDrawerOpen) {
         [self toggleDrawerAnimated:animated];
     }
-    [self setFeedbackViewMessageType:LoadingEvents eventsSummaryString:self.eventsSummaryStringBrowse searchString:nil animated:animated];
+    [self setFeedbackViewMessageType:LoadingEventsTrue eventsSummaryString:self.eventsSummaryStringBrowse searchString:nil animated:animated];
     [self webConnectGetEventsListWithOldFilter:EVENTS_OLDFILTER_RECOMMENDED categoryURI:nil];
 }
 
@@ -2587,7 +2623,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     if (self.isDrawerOpen) {
         [self toggleDrawerAnimated:animated];
     }
-    [self setFeedbackViewMessageType:LoadingEvents eventsSummaryString:self.eventsSummaryStringBrowse searchString:nil animated:animated];
+    [self setFeedbackViewMessageType:LoadingEventsTrue eventsSummaryString:self.eventsSummaryStringBrowse searchString:nil animated:animated];
     [self webConnectGetEventsListWithOldFilter:EVENTS_OLDFILTER_RECOMMENDED categoryURI:nil];
 }
 
@@ -2744,10 +2780,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     } else {
         shiftDrawerScrollViewContentOffsetBlock();
     }
-    
-    [self.dvLocationTextField resignFirstResponder];
-    [self.dvLocationSearchTextField resignFirstResponder];
-    
+        
     [self updateActiveFilterHighlights];
     
 }
@@ -2833,7 +2866,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
             [self updateAdjustedSearchFiltersOrderedWithAdjustedFilter:filter selectedFilterOption:newSelectedOption];
         }
         
-        /* WARNING: THE FOLLOWING CODE HAS BEEN COPIED TO THE METHOD ...textFieldShouldReturn... */
+        /* WARNING: THE FOLLOWING CODE HAS BEEN COPIED TO SETLOCATIONVIEWCONTROLLER DELEGATE PROTOCOL METHODS */
         self.shouldReloadOnDrawerClose = YES;
         [self setDrawerReloadIndicatorViewIsVisible:self.shouldReloadOnDrawerClose animated:self.isDrawerOpen];
         
@@ -2844,7 +2877,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
             self.eventsSummaryStringSearch = [self makeEventsSummaryStringForSource:EVENTS_SOURCE_SEARCH];
             [self setFeedbackViewMessageType:CloseDrawerToLoadPrompt eventsSummaryString:self.eventsSummaryStringSearch searchString:self.searchTextField.text animated:YES];
         }
-        /* WARNING: THE CODE ABOVE HAS BEEN COPIED TO THE METHOD ...textFieldShouldReturn... */
+        /* WARNING: THE CODE ABOVE HAS BEEN COPIED TO SETLOCATIONVIEWCONTROLLER DELEGATE PROTOCOL METHODS */
 
     }
 }
@@ -2932,18 +2965,20 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
         categoryReadable = self.categoryURI ? [self.coreDataModel getCategoryWithURI:self.categoryURI].title : nil;
         timeReadable     = self.selectedTimeFilterOption.readable;
         locationReadable = self.selectedLocationFilterOption.readable;
-        locationItself   = self.dvLocationTextField.text;
+        locationItself   = self.dvLocationSetLocationButton.titleLabel.text;
+//        locationItself   = self.dvLocationTextField.text;
     } else if ([sourceString isEqualToString:EVENTS_SOURCE_SEARCH]) {
         dateReadable     = self.selectedDateSearchFilterOption.readable;
         locationReadable = self.selectedLocationSearchFilterOption.readable;
-        locationItself   = self.dvLocationSearchTextField.text;
+        locationItself   = self.dvLocationSearchSetLocationButton.titleLabel.text;
+//        locationItself   = self.dvLocationSearchTextField.text;
         timeReadable     = self.selectedTimeSearchFilterOption.readable;
     } else {
         NSLog(@"ERROR in EventsViewController filtersSummaryStringForSource:andUpdateSummaryLabel: - unrecognized source string.");
     }
     
     // Location HACK
-    if (!(locationItself.length > 0)) {
+    if (!(locationItself.length > 0) || [locationItself.lowercaseString isEqualToString:@"current location"]) {
         locationItself = @"your current location";
     }
     
@@ -2973,7 +3008,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
         [summaryString appendFormat:@"%@ ", timeReadable.lowercaseString];
     }
     if (locationReadable) {
-        [summaryString appendFormat:@"%@ %@ ", locationReadable.lowercaseString, locationItself.lowercaseString];
+        [summaryString appendFormat:@"%@ %@ ", locationReadable.lowercaseString, locationItself];
     }
     [summaryString deleteCharactersInRange:NSMakeRange(summaryString.length-1, 1)];
     
@@ -3174,18 +3209,6 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     [self setLogoButtonImageWithImageNamed:logoCategoryThumbnail];
 }
 
-- (void)locationFilterCurrentLocationButtonTouched {
-    if (self.isSearchOn) {
-        [self.dvLocationSearchTextField resignFirstResponder];        
-        self.dvLocationSearchTextField.text = @"";
-        self.dvLocationSearchTextField.placeholder = @"Current Location";        
-    } else {
-        [self.dvLocationTextField resignFirstResponder];        
-        self.dvLocationTextField.text = @"";
-        self.dvLocationTextField.placeholder = @"Current Location";
-    }
-}
-
 - (void)searchCancelButtonTouched:(id)sender {
     if ([self.searchTextField isFirstResponder]) {
         if (self.eventsFromSearch.count > 0) {
@@ -3254,6 +3277,104 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 //    if (shouldBumpUnavailableTimes) {
 //        // ...
 //    }
+}
+
+- (void) setLocationViewControllerDidCancel:(SetLocationViewController *)setLocationViewController {
+    [self dismissModalViewControllerAnimated:YES];
+    self.setLocationViewController = nil;
+}
+
+- (void) setLocationViewController:(SetLocationViewController *)setLocationViewController didSelectLocation:(BSKmlResult *)location {
+    [self.dvLocationSetLocationButton setTitle:location.address forState:UIControlStateNormal];
+    [self.dvLocationSearchSetLocationButton setTitle:location.address forState:UIControlStateNormal];
+    [self dismissModalViewControllerAnimated:YES];
+    self.setLocationViewController = nil;
+    /* THE FOLLOWING CODE IS DUPLICATED SEVERAL PLACES IN EVENTSVIEWCONTROLLER */
+    self.shouldReloadOnDrawerClose = YES;
+    [self setDrawerReloadIndicatorViewIsVisible:self.shouldReloadOnDrawerClose animated:self.isDrawerOpen];
+    
+    if (!self.isSearchOn) {
+        self.eventsSummaryStringBrowse = [self makeEventsSummaryStringForSource:EVENTS_SOURCE_BROWSE];
+        [self setFeedbackViewMessageType:CloseDrawerToLoadPrompt eventsSummaryString:self.eventsSummaryStringBrowse searchString:nil animated:YES];
+    } else {
+        self.eventsSummaryStringSearch = [self makeEventsSummaryStringForSource:EVENTS_SOURCE_SEARCH];
+        [self setFeedbackViewMessageType:CloseDrawerToLoadPrompt eventsSummaryString:self.eventsSummaryStringSearch searchString:self.searchTextField.text animated:YES];
+    }
+    /* THE PREVIOUS CODE IS DUPLICATED SEVERAL PLACES IN EVENTSVIEWCONTROLLER */
+}
+
+- (void) setLocationViewController:(SetLocationViewController *)setLocationViewController didSelectCurrentLocation:(CLLocation *)location {
+    [self.dvLocationSetLocationButton setTitle:@"Current Location" forState:UIControlStateNormal];
+    [self.dvLocationSearchSetLocationButton setTitle:@"Current Location" forState:UIControlStateNormal];
+    [self dismissModalViewControllerAnimated:YES];
+    self.setLocationViewController = nil;
+    /* THE FOLLOWING CODE IS DUPLICATED SEVERAL PLACES IN EVENTSVIEWCONTROLLER */
+    self.shouldReloadOnDrawerClose = YES;
+    [self setDrawerReloadIndicatorViewIsVisible:self.shouldReloadOnDrawerClose animated:self.isDrawerOpen];
+    
+    if (!self.isSearchOn) {
+        self.eventsSummaryStringBrowse = [self makeEventsSummaryStringForSource:EVENTS_SOURCE_BROWSE];
+        [self setFeedbackViewMessageType:CloseDrawerToLoadPrompt eventsSummaryString:self.eventsSummaryStringBrowse searchString:nil animated:YES];
+    } else {
+        self.eventsSummaryStringSearch = [self makeEventsSummaryStringForSource:EVENTS_SOURCE_SEARCH];
+        [self setFeedbackViewMessageType:CloseDrawerToLoadPrompt eventsSummaryString:self.eventsSummaryStringSearch searchString:self.searchTextField.text animated:YES];
+    }
+    /* THE PREVIOUS CODE IS DUPLICATED SEVERAL PLACES IN EVENTSVIEWCONTROLLER */
+}
+
+- (IBAction) currentLocationButtonTouched:(UIButton *)currentLocationButton {
+    if (currentLocationButton == self.dvLocationCurrentLocationButton) {
+        [self.dvLocationSetLocationButton setTitle:@"Current Location" forState:UIControlStateNormal];
+    } else if (currentLocationButton == self.dvLocationSearchCurrentLocationButton) {
+        [self.dvLocationSearchSetLocationButton setTitle:@"Current Location" forState:UIControlStateNormal];
+    } else {
+        NSLog(@"ERROR in EventsViewController - unrecognized currentLocationButton %@", currentLocationButton);
+    }
+    /* THE FOLLOWING CODE IS DUPLICATED SEVERAL PLACES IN EVENTSVIEWCONTROLLER */
+    self.shouldReloadOnDrawerClose = YES;
+    [self setDrawerReloadIndicatorViewIsVisible:self.shouldReloadOnDrawerClose animated:self.isDrawerOpen];
+    
+    if (!self.isSearchOn) {
+        self.eventsSummaryStringBrowse = [self makeEventsSummaryStringForSource:EVENTS_SOURCE_BROWSE];
+        [self setFeedbackViewMessageType:CloseDrawerToLoadPrompt eventsSummaryString:self.eventsSummaryStringBrowse searchString:nil animated:YES];
+    } else {
+        self.eventsSummaryStringSearch = [self makeEventsSummaryStringForSource:EVENTS_SOURCE_SEARCH];
+        [self setFeedbackViewMessageType:CloseDrawerToLoadPrompt eventsSummaryString:self.eventsSummaryStringSearch searchString:self.searchTextField.text animated:YES];
+    }
+    /* THE PREVIOUS CODE IS DUPLICATED SEVERAL PLACES IN EVENTSVIEWCONTROLLER */
+}
+
+- (IBAction) setLocationButtonTouched:(UIButton *)setLocationButton {
+    
+    self.userRequestedToShowLocationSetter = YES;
+    if (self.setLocationViewController == nil) {
+        setLocationViewController_ = [[SetLocationViewController alloc] initWithNibName:@"SetLocationViewController" bundle:[NSBundle mainBundle]];
+    }
+    self.setLocationViewController.delegate = self;
+    self.setLocationViewController.hidesBottomBarWhenPushed = YES;
+    [self presentModalViewController:self.setLocationViewController animated:YES];
+    
+//    if (textField == self.dvLocationTextField ||
+//        textField == self.dvLocationSearchTextField) {
+//        [self.dvLocationTextField resignFirstResponder];
+//        [self.dvLocationSearchTextField resignFirstResponder];
+//        
+//        /* WARNING: THE FOLLOWING CODE IS COPIED FROM THE METHOD ...filterOptionButtonTouched...*/
+//        self.shouldReloadOnDrawerClose = YES;
+//        [self setDrawerReloadIndicatorViewIsVisible:self.shouldReloadOnDrawerClose animated:self.isDrawerOpen];
+//        
+//        if (!self.isSearchOn) {
+//            self.eventsSummaryStringBrowse = [self makeEventsSummaryStringForSource:EVENTS_SOURCE_BROWSE];
+//            [self setFeedbackViewMessageType:CloseDrawerToLoadPrompt eventsSummaryString:self.eventsSummaryStringBrowse searchString:nil animated:YES];
+//        } else {
+//            self.eventsSummaryStringSearch = [self makeEventsSummaryStringForSource:EVENTS_SOURCE_SEARCH];
+//            [self setFeedbackViewMessageType:CloseDrawerToLoadPrompt eventsSummaryString:self.eventsSummaryStringSearch searchString:self.searchTextField.text animated:YES];
+//        }
+//        /* WARNING: THE CODE ABOVE IS COPIED FROM THE METHOD ...filterOptionButtonTouched...*/
+//        
+//        shouldReturn = NO;
+//    }
+
 }
 
 @end

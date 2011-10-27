@@ -20,8 +20,9 @@
 #import "EventsWebQuery.h"
 #import "EventsFeedbackView.h"
 #import <CoreLocation/CoreLocation.h>
+#import "SetLocationViewController.h"
 
-@interface EventsViewController : UIViewController <UITableViewDelegate, UITableViewDataSource, UIAlertViewDelegate, CardPageViewControllerDelegate, WebConnectorDelegate, UIScrollViewDelegate, UITextFieldDelegate, CLLocationManagerDelegate> {
+@interface EventsViewController : UIViewController <UITableViewDelegate, UITableViewDataSource, UIAlertViewDelegate, CardPageViewControllerDelegate, WebConnectorDelegate, UIScrollViewDelegate, UITextFieldDelegate, CLLocationManagerDelegate, SetLocationViewControllerDelegate> {
     
     ///////////
     // Models
@@ -65,6 +66,7 @@
     NSString * eventsSummaryStringBrowse;
     NSString * eventsSummaryStringSearch;
     BOOL deletedFromEventCard;
+    BOOL userRequestedToShowLocationSetter_;
 
     //////////
     // Views
@@ -75,6 +77,7 @@
     IBOutlet UIImageView * tableViewBackgroundView;
     IBOutlet UIView   * searchContainerView;
     IBOutlet UIView   * searchContainerViewShadowCheatView;
+    IBOutlet UIView * searchContainerTopEdgeView;
     IBOutlet UIButton * searchButton;
     IBOutlet UIButton * searchCancelButton;
     IBOutlet UIButton * searchGoButton;
@@ -144,20 +147,22 @@
     IBOutlet UIButtonWithOverlayView * dvTimeSearchButtonAny;
     // Drawer view location
     IBOutlet UIView * drawerViewLocation;
-    IBOutlet UITextField * dvLocationTextField;
-    UIButton * dvLocationCurrentLocationButton;
+    IBOutlet UIButton * dvLocationSetLocationButton;
+    IBOutlet UIButton * dvLocationCurrentLocationButton;
     IBOutlet UIButtonWithOverlayView * dvLocationButtonWalking;
     IBOutlet UIButtonWithOverlayView * dvLocationButtonNeighborhood;
     IBOutlet UIButtonWithOverlayView * dvLocationButtonBorough;
     IBOutlet UIButtonWithOverlayView * dvLocationButtonCity;
     // Drawer view location search
     IBOutlet UIView * drawerViewLocationSearch;
-    IBOutlet UITextField * dvLocationSearchTextField;
-    UIButton * dvLocationSearchCurrentLocationButton;
+    IBOutlet UIButton * dvLocationSearchSetLocationButton;
+    IBOutlet UIButton * dvLocationSearchCurrentLocationButton;
     IBOutlet UIButtonWithOverlayView * dvLocationSearchButtonWalking;
     IBOutlet UIButtonWithOverlayView * dvLocationSearchButtonNeighborhood;
     IBOutlet UIButtonWithOverlayView * dvLocationSearchButtonBorough;
     IBOutlet UIButtonWithOverlayView * dvLocationSearchButtonCity;
+    // Location setter views
+    SetLocationViewController * setLocationViewController_;
     // Assorted views
     WebActivityView * webActivityView;
     UIAlertView * connectionErrorStandardAlertView;

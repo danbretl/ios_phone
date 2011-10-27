@@ -10,15 +10,13 @@
 
 @interface LocationSetterView : UIView {
     
-    UITextField * locationTextField;
-    UIButton * currentLocationButton;
+    UIView * headerBar_;
+    UIButton * cancelButton_;
+    UILabel * headerLabel_;
+    UIButton * doneButton_;
     
-    UIButton * cancelButton;
-    UIButton * doneButton;
-    
-    UILabel * headerLabel;
-    
-    
+    UITextField * locationTextField_;
+    UIButton * currentLocationButton_;
     
 }
 

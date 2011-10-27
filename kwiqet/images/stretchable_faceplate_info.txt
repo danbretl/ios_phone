@@ -1,0 +1,17 @@
+Locations faceplate dimensions
+ Total area to stretch to: 320 x 200
+
+Do not stretch:
+ Top Right/Top Left Corner: 25x26px
+ Bottom Right/Bottom Left Corner: 25x26px
+ Top/Bottom Tile: 1x26px
+ Left/Right Tile: 25x1px
+
+--- --- --- --- ---
+
+Translations to XCode:
+- Fixed (unstretchable) insets:
+	- Top: 26px
+	- Bottom: 26px
+	- Left: 25px
+	- Right: 25px
