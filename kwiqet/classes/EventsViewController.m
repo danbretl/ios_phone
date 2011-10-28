@@ -341,12 +341,12 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 - (void)viewDidLoad {
     [super viewDidLoad];
     
-    NSLog(@"\n\n\n\n\n\n\n\n");
-    NSLog(@"testing");
-    NSLog(@"self.view.frame=%@", NSStringFromCGRect(self.view.frame));
-    CGRect windowFrame = [self.view convertRect:CGRectMake(0, -[UIApplication sharedApplication].statusBarFrame.size.height, 320, 480) toView:self.tableView];
-    NSLog(@"windowFrame (re:searchContainerView) = %@", NSStringFromCGRect(windowFrame));
-    NSLog(@"\n\n\n\n\n\n\n\n");
+//    NSLog(@"\n\n\n\n\n\n\n\n");
+//    NSLog(@"testing");
+//    NSLog(@"self.view.frame=%@", NSStringFromCGRect(self.view.frame));
+//    CGRect windowFrame = [self.view convertRect:CGRectMake(0, -[UIApplication sharedApplication].statusBarFrame.size.height, 320, 480) toView:self.tableView];
+//    NSLog(@"windowFrame (re:searchContainerView) = %@", NSStringFromCGRect(windowFrame));
+//    NSLog(@"\n\n\n\n\n\n\n\n");
     
     // Views settings - Drawer scroll view
     self.drawerScrollView.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"cat_overlay.png"]];
@@ -985,16 +985,12 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     
 //    NSLog(@"OK FUCK IT I'M FIGURING THIS OUT - contentInset is %@ and feedbackView.height=%f AT END OF viewDidLoad", NSStringFromUIEdgeInsets(self.tableView.contentInset), self.feedbackView.bounds.size.height);
     
-    
-    
-    
-    NSLog(@"\n\n\n\n\n\n\n\n");
-    NSLog(@"testing");
-    windowFrame = [self.view convertRect:CGRectMake(0, 0, 320, 480) toView:self.tableView];
-    NSLog(@"self.view.frame=%@", NSStringFromCGRect(self.view.frame));
-    NSLog(@"windowFrame (re:searchContainerView) = %@", NSStringFromCGRect(windowFrame));
-    NSLog(@"\n\n\n\n\n\n\n\n");
-
+//    NSLog(@"\n\n\n\n\n\n\n\n");
+//    NSLog(@"testing");
+//    windowFrame = [self.view convertRect:CGRectMake(0, 0, 320, 480) toView:self.tableView];
+//    NSLog(@"self.view.frame=%@", NSStringFromCGRect(self.view.frame));
+//    NSLog(@"windowFrame (re:searchContainerView) = %@", NSStringFromCGRect(windowFrame));
+//    NSLog(@"\n\n\n\n\n\n\n\n");
     
 }
 
@@ -1861,8 +1857,8 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 
 - (void) matchTableViewCoverViewToTableView {
     
-    CGRect tvcvf_o = self.tableViewCoverView.frame;
-    CGRect tvcvb_o = self.tableViewCoverView.bounds;
+//    CGRect tvcvf_o = self.tableViewCoverView.frame;
+//    CGRect tvcvb_o = self.tableViewCoverView.bounds;
     
     CGFloat spaceForHeader = self.tableView.tableHeaderView != nil ? self.tableView.tableHeaderView.bounds.size.height : 0;
     
@@ -1879,18 +1875,18 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 //    tableViewCoverViewFrame.origin.y = originalCoverViewOriginY - coverViewContainerOriginYAdjustment;
 //    self.tableViewCoverView.frame = tableViewCoverViewFrame;
     
-    NSLog(@"\n\n\n\n\n\n\n\n");
-    NSLog(@"testing");
-    CGRect testingFrame = [self.view convertRect:CGRectMake(0, -[UIApplication sharedApplication].statusBarFrame.size.height, 320, 480) toView:self.tableViewCoverView.superview];
-    NSLog(@"testing ::: %@", NSStringFromCGRect(testingFrame));
-    NSLog(@"\n\n\n\n\n\n\n\n");
-    CGRect tableViewCoverViewFrame = self.tableViewCoverView.frame;
-    tableViewCoverViewFrame.origin.y = testingFrame.origin.y;
-    self.tableViewCoverView.frame = tableViewCoverViewFrame;
-    
-    NSLog(@"\n*\n*\n*\nmatchTableViewCoverViewToTableView");
-    NSLog(@"tableViewCoverView.frame ::: %@ to %@", NSStringFromCGRect(tvcvf_o), NSStringFromCGRect(self.tableViewCoverView.frame));
-    NSLog(@"tableViewCoverView.bounds (re:self.view) ::: %@ to %@", NSStringFromCGRect([self.view convertRect:tvcvb_o fromView:self.tableViewCoverView]), NSStringFromCGRect([self.view convertRect:self.tableViewCoverView.bounds fromView:self.tableViewCoverView]));
+//    NSLog(@"\n\n\n\n\n\n\n\n");
+//    NSLog(@"testing");
+//    CGRect testingFrame = [self.view convertRect:CGRectMake(0, -[UIApplication sharedApplication].statusBarFrame.size.height, 320, 480) toView:self.tableViewCoverView.superview];
+//    NSLog(@"testing ::: %@", NSStringFromCGRect(testingFrame));
+//    NSLog(@"\n\n\n\n\n\n\n\n");
+//    CGRect tableViewCoverViewFrame = self.tableViewCoverView.frame;
+//    tableViewCoverViewFrame.origin.y = testingFrame.origin.y;
+//    self.tableViewCoverView.frame = tableViewCoverViewFrame;
+//    
+//    NSLog(@"\n*\n*\n*\nmatchTableViewCoverViewToTableView");
+//    NSLog(@"tableViewCoverView.frame ::: %@ to %@", NSStringFromCGRect(tvcvf_o), NSStringFromCGRect(self.tableViewCoverView.frame));
+//    NSLog(@"tableViewCoverView.bounds (re:self.view) ::: %@ to %@", NSStringFromCGRect([self.view convertRect:tvcvb_o fromView:self.tableViewCoverView]), NSStringFromCGRect([self.view convertRect:self.tableViewCoverView.bounds fromView:self.tableViewCoverView]));
         
 }
 

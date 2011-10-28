@@ -8,7 +8,7 @@
 
 #import <UIKit/UIKit.h>
 #import "FacebookManager.h"
-#import "FBLoginButton.h"
+//#import "FBLoginButton.h"
 #import "CoreDataModel.h"
 #import "LoginViewController.h"
 

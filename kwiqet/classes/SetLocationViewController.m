@@ -232,7 +232,7 @@
     NSLog(@"SetLocationViewController locationManager didUpdateToLocation");
     NSTimeInterval howRecent = [newLocation.timestamp timeIntervalSinceNow];
     BOOL isRecent = (abs(howRecent) < 15.0); // Locations from the last 15 seconds are considered to be "recent enough" to be accurate.
-    BOOL isAccurate = newLocation.horizontalAccuracy < 100; // Locations with an accuracy less than 100 meters are considered to be accurate.
+    BOOL isAccurate = newLocation.horizontalAccuracy <= 400; // Locations with an accuracy less than or equal to 400 meters are considered to be accurate.
     if (isRecent && isAccurate) {
         // Accept this event
         [self.locationManager stopUpdatingLocation];

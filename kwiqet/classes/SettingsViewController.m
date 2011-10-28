@@ -371,6 +371,8 @@
 }
 
 - (void) configureCell:(UITableViewCell *)cell forRowAtIndexPath:(NSIndexPath *)indexPath {
+    
+    NSLog(@"SettingsViewController configureCell forRowAtIndexPath:%@", indexPath);
 
     cell.userInteractionEnabled = YES;
     cell.imageView.contentMode = UIViewContentModeCenter;
@@ -402,8 +404,9 @@
         textLabelText = [[self.settingsModel objectAtIndex:indexPath.row] valueForKey:@"textLabel"];
         imageName = [[self.settingsModel objectAtIndex:indexPath.row] valueForKey:@"imageName"];
         accessoryType = [[[self.settingsModel objectAtIndex:indexPath.row] valueForKey:@"showAccessoryArrow"] boolValue] ? UITableViewCellAccessoryDisclosureIndicator : UITableViewCellAccessoryNone;
-        if (indexPath == self.facebookIndexPath) {
+        if ([indexPath isEqual:self.facebookIndexPath]) {
             [self.facebookManager pullAuthenticationInfoFromDefaults];
+            NSLog(@"indexPath=self.facebookIndexPath ::: self.facebookManager.fb isSessionValid=%d", [self.facebookManager.fb isSessionValid]);
             if ([self.facebookManager.fb isSessionValid]) {
                 detailTextLabelText = [[self.settingsModel objectAtIndex:indexPath.row] valueForKey:@"detailTextLabelWhenBooleanYes"];
                 accessoryType = [[self.settingsModel objectAtIndex:indexPath.row] valueForKey:@"showAccessoryArrowWhenBooleanYes"] ? UITableViewCellAccessoryDisclosureIndicator : accessoryType;

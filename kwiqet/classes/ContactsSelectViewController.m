@@ -308,6 +308,17 @@ float const CSVC_TAB_BUTTON_ANIMATION_DURATION = .25;
 //    return titleForHeader;
 //}
 
+// Prior to iOS 5.0, table views would automatically resize the heights of headers to 0 for sections where tableView:viewForHeaderInSection: returned a nil view. In iOS 5.0 and later, you must return the actual height for each section header in this method.
+- (CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section {
+    CGFloat headerHeight = 0.0;
+    if ([self tableView:tableView numberOfRowsInSection:section] > 0 ||
+        self.isSearchOn || 
+        tableView == self.selectedTableView) {
+        headerHeight = tableView.sectionHeaderHeight;
+    }
+    return headerHeight;
+}
+
 - (UIView *)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section {
     UIView * sectionHeaderView = nil;
     if ([self tableView:tableView numberOfRowsInSection:section] > 0 ||
@@ -619,6 +630,7 @@ float const CSVC_TAB_BUTTON_ANIMATION_DURATION = .25;
     UITableView * activeTableView = self.friendsTableView.hidden ? self.selectedTableView : self.friendsTableView;
     [self killScrollForScrollView:activeTableView];
     activeTableView.scrollsToTop = NO;
+    [self setSelectedTabButton:tabButton]; // This needs to come before setShowSelectedTabButtonVisible for some reason... Look into it later, just for your own understanding!
     if (tabButton == self.showAllFriendsTabButton) {
         NSLog(@"Friends tab button touched");
         self.friendsTableView.hidden = NO;
@@ -633,7 +645,6 @@ float const CSVC_TAB_BUTTON_ANIMATION_DURATION = .25;
     } else {
         NSLog(@"ERROR in ContactsSelectViewController - unrecognized tabButton");
     }
-    [self setSelectedTabButton:tabButton];
 }
 
 - (void) setSelectedTabButton:(UIButton *)tabButton {

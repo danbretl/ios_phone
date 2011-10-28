@@ -291,7 +291,6 @@
 		3272750013EC89CD00E085B4 /* ico_locationsearch.png in Resources */ = {isa = PBXBuildFile; fileRef = 327274FE13EC89CD00E085B4 /* ico_locationsearch.png */; };
 		3272750113EC89CD00E085B4 /* ico_locationsearch@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 327274FF13EC89CD00E085B4 /* ico_locationsearch@2x.png */; };
 		32733E1013B0FBBA0053C44A /* Facebook.m in Sources */ = {isa = PBXBuildFile; fileRef = 32733DF613B0FBBA0053C44A /* Facebook.m */; };
-		32733E1113B0FBBA0053C44A /* FBConnect.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 32733DF713B0FBBA0053C44A /* FBConnect.bundle */; };
 		32733E1213B0FBBA0053C44A /* FBDialog.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 32733DF913B0FBBA0053C44A /* FBDialog.bundle */; };
 		32733E1313B0FBBA0053C44A /* FBDialog.m in Sources */ = {isa = PBXBuildFile; fileRef = 32733DFB13B0FBBA0053C44A /* FBDialog.m */; };
 		32733E1413B0FBBA0053C44A /* FBLoginButton.m in Sources */ = {isa = PBXBuildFile; fileRef = 32733DFD13B0FBBA0053C44A /* FBLoginButton.m */; };
@@ -868,10 +867,8 @@
 		327274D913EC764600E085B4 /* btn_cat_yellow_touch@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "btn_cat_yellow_touch@2x.png"; sourceTree = "<group>"; };
 		327274FE13EC89CD00E085B4 /* ico_locationsearch.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = ico_locationsearch.png; sourceTree = "<group>"; };
 		327274FF13EC89CD00E085B4 /* ico_locationsearch@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "ico_locationsearch@2x.png"; sourceTree = "<group>"; };
-		32733DF413B0FBBA0053C44A /* facebook_ios_sdk_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = facebook_ios_sdk_Prefix.pch; path = kwiqet/classes/facebook_ios_sdk_Prefix.pch; sourceTree = SOURCE_ROOT; };
 		32733DF513B0FBBA0053C44A /* Facebook.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Facebook.h; path = kwiqet/classes/Facebook.h; sourceTree = SOURCE_ROOT; };
 		32733DF613B0FBBA0053C44A /* Facebook.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Facebook.m; path = kwiqet/classes/Facebook.m; sourceTree = SOURCE_ROOT; };
-		32733DF713B0FBBA0053C44A /* FBConnect.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; name = FBConnect.bundle; path = kwiqet/classes/FBConnect.bundle; sourceTree = SOURCE_ROOT; };
 		32733DF813B0FBBA0053C44A /* FBConnect.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = FBConnect.h; path = kwiqet/classes/FBConnect.h; sourceTree = SOURCE_ROOT; };
 		32733DF913B0FBBA0053C44A /* FBDialog.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; name = FBDialog.bundle; path = kwiqet/classes/FBDialog.bundle; sourceTree = SOURCE_ROOT; };
 		32733DFA13B0FBBA0053C44A /* FBDialog.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = FBDialog.h; path = kwiqet/classes/FBDialog.h; sourceTree = SOURCE_ROOT; };
@@ -1274,10 +1271,8 @@
 		3215A9A013B0FB6400E0DCE6 /* facebook */ = {
 			isa = PBXGroup;
 			children = (
-				32733DF413B0FBBA0053C44A /* facebook_ios_sdk_Prefix.pch */,
 				32733DF513B0FBBA0053C44A /* Facebook.h */,
 				32733DF613B0FBBA0053C44A /* Facebook.m */,
-				32733DF713B0FBBA0053C44A /* FBConnect.bundle */,
 				32733DF813B0FBBA0053C44A /* FBConnect.h */,
 				32733DF913B0FBBA0053C44A /* FBDialog.bundle */,
 				32733DFA13B0FBBA0053C44A /* FBDialog.h */,
@@ -2390,7 +2385,6 @@
 				32041B6D13AFFE7B0072F95C /* Entitlements.plist in Resources */,
 				32D7FEDD13B0BC43005E8406 /* InfoPlist.strings in Resources */,
 				32D7FEE013B0BC5A005E8406 /* MainWindow.xib in Resources */,
-				32733E1113B0FBBA0053C44A /* FBConnect.bundle in Resources */,
 				32733E1213B0FBBA0053C44A /* FBDialog.bundle in Resources */,
 				32BEE72F13BA4720009D583E /* cardbg.png in Resources */,
 				32BEE73013BA4720009D583E /* cardbg@2x.png in Resources */,
