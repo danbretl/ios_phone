@@ -92,6 +92,10 @@ static NSString * const WDT_DATA_UNAVAILABLE_EVENT_LIST_TIME  = @"";
     
     if (timeString && timeString.length > 0) {
         
+        if (timeString.length > 8) { // If the time contains microsecond information, just lop it off for now. Really, we should come up with a smarter datetime format to use when formatting, but this is fine for now. Bit of a HACK!
+            timeString = [timeString substringToIndex:8];
+        }
+        
         [self.dateFormatter setDateFormat:@"HH:mm:ss"];
         timeDatetime = [self.dateFormatter dateFromString:timeString];
         
