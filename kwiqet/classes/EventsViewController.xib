@@ -2211,7 +2211,7 @@
 					</object>
 					<object class="IBUIView" id="1062525164">
 						<reference key="NSNextResponder" ref="249820771"/>
-						<int key="NSvFlags">274</int>
+						<int key="NSvFlags">290</int>
 						<string key="NSFrame">{{0, 1}, {320, 21}}</string>
 						<reference key="NSSuperview" ref="249820771"/>
 						<reference key="NSWindow"/>
@@ -2380,18 +2380,37 @@
 				<int key="NSvFlags">298</int>
 				<object class="NSMutableArray" key="NSSubviews">
 					<bool key="EncodedWithXMLCoder">YES</bool>
-					<object class="IBUIView" id="84753878">
+					<object class="IBUIView" id="1050583565">
 						<reference key="NSNextResponder" ref="157363908"/>
 						<int key="NSvFlags">266</int>
-						<string key="NSFrame">{{0, 20}, {320, 20}}</string>
+						<object class="NSMutableArray" key="NSSubviews">
+							<bool key="EncodedWithXMLCoder">YES</bool>
+							<object class="IBUIView" id="84753878">
+								<reference key="NSNextResponder" ref="1050583565"/>
+								<int key="NSvFlags">290</int>
+								<string key="NSFrame">{{0, -20}, {320, 20}}</string>
+								<reference key="NSSuperview" ref="1050583565"/>
+								<reference key="NSWindow"/>
+								<reference key="NSNextKeyView"/>
+								<string key="NSReuseIdentifierKey">_NS:180</string>
+								<object class="NSColor" key="IBUIBackgroundColor">
+									<int key="NSColorSpace">3</int>
+									<bytes key="NSWhite">MC40NTYyMDQzNzk2AA</bytes>
+								</object>
+								<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
+							</object>
+						</object>
+						<string key="NSFrame">{{0, 40}, {320, 100}}</string>
 						<reference key="NSSuperview" ref="157363908"/>
 						<reference key="NSWindow"/>
-						<reference key="NSNextKeyView"/>
-						<string key="NSReuseIdentifierKey">_NS:180</string>
+						<reference key="NSNextKeyView" ref="84753878"/>
+						<string key="NSReuseIdentifierKey">_NS:196</string>
 						<object class="NSColor" key="IBUIBackgroundColor">
 							<int key="NSColorSpace">3</int>
-							<bytes key="NSWhite">MC40NTYyMDQzNzk2AA</bytes>
+							<bytes key="NSWhite">MSAwAA</bytes>
 						</object>
+						<bool key="IBUIOpaque">NO</bool>
+						<bool key="IBUIClipsSubviews">YES</bool>
 						<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
 					</object>
 					<object class="IBUIButton" id="507711442">
@@ -2400,7 +2419,7 @@
 						<string key="NSFrameSize">{320, 40}</string>
 						<reference key="NSSuperview" ref="157363908"/>
 						<reference key="NSWindow"/>
-						<reference key="NSNextKeyView" ref="84753878"/>
+						<reference key="NSNextKeyView" ref="1050583565"/>
 						<string key="NSReuseIdentifierKey">_NS:222</string>
 						<object class="NSColor" key="IBUIBackgroundColor">
 							<int key="NSColorSpace">3</int>
@@ -2997,14 +3016,6 @@
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBCocoaTouchOutletConnection" key="connection">
-						<string key="label">tableReloadContainerShadowCheatView</string>
-						<reference key="source" ref="372490531"/>
-						<reference key="destination" ref="84753878"/>
-					</object>
-					<int key="connectionID">364</int>
-				</object>
-				<object class="IBConnectionRecord">
-					<object class="IBCocoaTouchOutletConnection" key="connection">
 						<string key="label">tableViewBackgroundView</string>
 						<reference key="source" ref="372490531"/>
 						<reference key="destination" ref="311440557"/>
@@ -3050,6 +3061,22 @@
 						<reference key="destination" ref="289942772"/>
 					</object>
 					<int key="connectionID">392</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBCocoaTouchOutletConnection" key="connection">
+						<string key="label">searchContainerTopAboveView</string>
+						<reference key="source" ref="372490531"/>
+						<reference key="destination" ref="417515054"/>
+					</object>
+					<int key="connectionID">393</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBCocoaTouchOutletConnection" key="connection">
+						<string key="label">tableReloadContainerShadowCheatView</string>
+						<reference key="source" ref="372490531"/>
+						<reference key="destination" ref="84753878"/>
+					</object>
+					<int key="connectionID">364</int>
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBCocoaTouchOutletConnection" key="connection">
@@ -3666,7 +3693,7 @@
 						<object class="NSMutableArray" key="children">
 							<bool key="EncodedWithXMLCoder">YES</bool>
 							<reference ref="507711442"/>
-							<reference ref="84753878"/>
+							<reference ref="1050583565"/>
 						</object>
 						<reference key="parent" ref="0"/>
 						<string key="objectName">Load More Events Container</string>
@@ -4048,11 +4075,6 @@
 						<reference key="parent" ref="249820771"/>
 					</object>
 					<object class="IBObjectRecord">
-						<int key="objectID">363</int>
-						<reference key="object" ref="84753878"/>
-						<reference key="parent" ref="157363908"/>
-					</object>
-					<object class="IBObjectRecord">
 						<int key="objectID">367</int>
 						<reference key="object" ref="417515054"/>
 						<reference key="parent" ref="249820771"/>
@@ -4086,6 +4108,20 @@
 						<int key="objectID">391</int>
 						<reference key="object" ref="289942772"/>
 						<reference key="parent" ref="249820771"/>
+					</object>
+					<object class="IBObjectRecord">
+						<int key="objectID">394</int>
+						<reference key="object" ref="1050583565"/>
+						<object class="NSMutableArray" key="children">
+							<bool key="EncodedWithXMLCoder">YES</bool>
+							<reference ref="84753878"/>
+						</object>
+						<reference key="parent" ref="157363908"/>
+					</object>
+					<object class="IBObjectRecord">
+						<int key="objectID">363</int>
+						<reference key="object" ref="84753878"/>
+						<reference key="parent" ref="1050583565"/>
 					</object>
 				</object>
 			</object>
@@ -4261,6 +4297,7 @@
 					<string>38.IBPluginDependency</string>
 					<string>39.IBPluginDependency</string>
 					<string>391.IBPluginDependency</string>
+					<string>394.IBPluginDependency</string>
 					<string>4.CustomClassName</string>
 					<string>4.IBPluginDependency</string>
 					<string>40.IBPluginDependency</string>
@@ -4437,6 +4474,7 @@
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
+					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<string>EventsFeedbackView</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
@@ -4456,7 +4494,7 @@
 				<reference key="dict.values" ref="0"/>
 			</object>
 			<nil key="sourceID"/>
-			<int key="maxID">392</int>
+			<int key="maxID">394</int>
 		</object>
 		<object class="IBClassDescriber" key="IBDocument.Classes">
 			<object class="NSMutableArray" key="referencedPartialClassDescriptions">
@@ -4637,6 +4675,7 @@
 							<string>pushableContainerView</string>
 							<string>searchButton</string>
 							<string>searchCancelButton</string>
+							<string>searchContainerTopAboveView</string>
 							<string>searchContainerTopEdgeView</string>
 							<string>searchContainerView</string>
 							<string>searchContainerViewShadowCheatView</string>
@@ -4719,6 +4758,7 @@
 							<string>UIView</string>
 							<string>UIView</string>
 							<string>UIView</string>
+							<string>UIView</string>
 							<string>UIButton</string>
 							<string>UITextField</string>
 							<string>UIView</string>
@@ -4798,6 +4838,7 @@
 							<string>pushableContainerView</string>
 							<string>searchButton</string>
 							<string>searchCancelButton</string>
+							<string>searchContainerTopAboveView</string>
 							<string>searchContainerTopEdgeView</string>
 							<string>searchContainerView</string>
 							<string>searchContainerViewShadowCheatView</string>
@@ -5074,6 +5115,10 @@
 							<object class="IBToOneOutletInfo">
 								<string key="name">searchCancelButton</string>
 								<string key="candidateClassName">UIButton</string>
+							</object>
+							<object class="IBToOneOutletInfo">
+								<string key="name">searchContainerTopAboveView</string>
+								<string key="candidateClassName">UIView</string>
 							</object>
 							<object class="IBToOneOutletInfo">
 								<string key="name">searchContainerTopEdgeView</string>

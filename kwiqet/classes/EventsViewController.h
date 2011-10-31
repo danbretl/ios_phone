@@ -73,11 +73,16 @@
     
 	IBOutlet UITableView * tableView_;
     UIView * tableViewCoverViewContainer;
-    UIImageView * tableViewCoverView;
+    UIView * tableViewCoverView;
+    UIView * tableViewBackgroundViewContainer;
+    UIView * tableViewStaticHeightBackgroundView;
+    UIView * tableViewHeaderForSearch;
+    UIView * tableViewFooterForSearch;
     IBOutlet UIImageView * tableViewBackgroundView;
     IBOutlet UIView   * searchContainerView;
     IBOutlet UIView   * searchContainerViewShadowCheatView;
     IBOutlet UIView * searchContainerTopEdgeView;
+    IBOutlet UIView * searchContainerTopAboveView;
     IBOutlet UIButton * searchButton;
     IBOutlet UIButton * searchCancelButton;
     IBOutlet UIButton * searchGoButton;
