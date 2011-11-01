@@ -949,9 +949,6 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     [self updateAdjustedSearchFiltersOrderedWithAdjustedFilter:[self filterForFilterCode:EVENTS_FILTER_TIME inFiltersArray:self.filtersSearch] selectedFilterOption:self.selectedTimeFilterOption];
     [self updateAdjustedSearchFiltersOrderedWithAdjustedFilter:[self filterForFilterCode:EVENTS_FILTER_DATE inFiltersArray:self.filtersSearch] selectedFilterOption:self.selectedDateFilterOption];
     
-    // Set the feedback strings
-    self.eventsSummaryStringSearch = [self makeEventsSummaryStringForSource:EVENTS_SOURCE_SEARCH];
-    
     if (shouldDisplaySearchMode) {
         
         [DefaultsModel saveEventsListMostRecentMode:ModeSearch];
@@ -970,6 +967,9 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
         
         // Set the search text field term
         self.searchTextField.text = searchTerm;
+        
+        // Set the feedback strings
+        self.eventsSummaryStringSearch = [self makeEventsSummaryStringForSource:EVENTS_SOURCE_SEARCH];
         
         // Use the location string that was pulled/updated from search
         [self.dvLocationSetLocationButton setTitle:locationString forState:UIControlStateNormal];
@@ -2230,7 +2230,8 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
                                  }
                                  // Fade table view in
                                  self.tableViewCoverViewContainer.alpha = 0.0;
-                                 [self setTableViewScrollable:NO selectable:NO];
+                                 BOOL haveEvents = self.eventsFromSearch.count > 0;
+                                 [self setTableViewScrollable:haveEvents selectable:haveEvents];
                              } completion:^(BOOL finished){ 
                                  // Swap the table view background (color to view)
                                  tableViewBackgroundColorViewSwap(NO);
