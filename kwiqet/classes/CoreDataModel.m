@@ -26,6 +26,8 @@
     [persistentStoreCoordinator release];
     [tempSolutionCategoriesOrderDictionary release];
     [tempSolutionCategoriesIconThumbsDictionary release];
+    [tempSolutionCategoriesIconThumbsBigDictionary release];
+    [tempSolutionCategoriesIconThumbsBigHorizontalOffsetDictionary release];
     [coreDataYes release];
     [coreDataNo release];
     [super dealloc];
@@ -140,6 +142,39 @@
     }
     return tempSolutionCategoriesIconThumbsDictionary;
 }
+- (NSDictionary *)tempSolutionCategoriesIconThumbsBigDictionary {
+    if (tempSolutionCategoriesIconThumbsBigDictionary == nil) {
+        tempSolutionCategoriesIconThumbsBigDictionary = 
+        [[NSDictionary alloc] initWithObjectsAndKeys:
+         @"icon_movies&media_big.png",      @"/api/v1/category/136/",
+         @"icon_music_big.png",             @"/api/v1/category/137/",
+         @"icon_sports&recreation_big.png", @"/api/v1/category/1/"  ,
+         @"icon_food&drink_big.png",        @"/api/v1/category/38/" ,
+         @"icon_arts&theater_big.png",      @"/api/v1/category/139/",
+         @"icon_hobbies&interest_big.png",  @"/api/v1/category/138/",
+         @"icon_gatherings_big.png",        @"/api/v1/category/9/"  ,
+         @"icon_nightlife_big.png",         @"/api/v1/category/16/" ,
+         nil];
+    }
+    return tempSolutionCategoriesIconThumbsBigDictionary;
+}
+
+- (NSDictionary *)tempSolutionCategoriesIconThumbsBigHorizontalOffsetDictionary {
+    if (tempSolutionCategoriesIconThumbsBigHorizontalOffsetDictionary == nil) {
+        tempSolutionCategoriesIconThumbsBigHorizontalOffsetDictionary = 
+        [[NSDictionary alloc] initWithObjectsAndKeys:
+         [NSNumber numberWithFloat:-18 + -9.0], @"/api/v1/category/136/", // Movies & Media
+         [NSNumber numberWithFloat:-18 + -1.0], @"/api/v1/category/137/", // Music
+         [NSNumber numberWithFloat:-18 +  0.0], @"/api/v1/category/1/"  , // Sports & Recreation
+         [NSNumber numberWithFloat:-18 + -2.0], @"/api/v1/category/38/" , // Food & Drink
+         [NSNumber numberWithFloat:-18 +  1.0], @"/api/v1/category/139/", // Arts & Theater
+         [NSNumber numberWithFloat:-18 +  0.0], @"/api/v1/category/138/", // Hobbies & Interest
+         [NSNumber numberWithFloat:-18 + -8.0], @"/api/v1/category/9/"  , // Gatherings
+         [NSNumber numberWithFloat:-18 +  0.0], @"/api/v1/category/16/" , // Nightlife
+         nil];
+    }
+    return tempSolutionCategoriesIconThumbsBigHorizontalOffsetDictionary;
+}
 
 - (void) addOrUpdateConcreteCategories:(NSArray *)concreteCategories deleteOthers:(BOOL)shouldDeleteOthers {
     
@@ -241,6 +276,8 @@
     category.buttonThumb = buttonThumb;
     category.displayOrder = [self.tempSolutionCategoriesOrderDictionary valueForKey:category.uri];
     category.iconThumb = [self.tempSolutionCategoriesIconThumbsDictionary valueForKey:category.uri];
+    category.iconBigThumb = [self.tempSolutionCategoriesIconThumbsBigDictionary valueForKey:category.uri];
+    category.iconBigHorizontalOffset = [self.tempSolutionCategoriesIconThumbsBigHorizontalOffsetDictionary valueForKey:category.uri];
 }
 
 - (Category *)getCategoryWithURI:(NSString *)uri {

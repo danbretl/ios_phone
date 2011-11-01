@@ -26,6 +26,8 @@
     
     NSDictionary * tempSolutionCategoriesOrderDictionary;
     NSDictionary * tempSolutionCategoriesIconThumbsDictionary;
+    NSDictionary * tempSolutionCategoriesIconThumbsBigDictionary;
+    NSDictionary * tempSolutionCategoriesIconThumbsBigHorizontalOffsetDictionary;
     
     WebDataTranslator * webDataTranslator;
     NSNumber * coreDataYes;
@@ -39,6 +41,8 @@
 
 @property (nonatomic, readonly) NSDictionary * tempSolutionCategoriesOrderDictionary;
 @property (nonatomic, readonly) NSDictionary * tempSolutionCategoriesIconThumbsDictionary;
+@property (nonatomic, readonly) NSDictionary * tempSolutionCategoriesIconThumbsBigDictionary;
+@property (nonatomic, readonly) NSDictionary * tempSolutionCategoriesIconThumbsBigHorizontalOffsetDictionary;
 
 // Util
 @property (nonatomic, readonly) WebDataTranslator * webDataTranslator;

@@ -844,7 +844,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     int indexOfSelectedDateFilterOption = dateOptions.count - 1;
     int indexOfSelectedTimeFilterOption = timeOptions.count - 1;
     int indexOfSelectedLocationFilterOption = locationOptions.count - 1;
-    NSString * locationStringBrowse = nil;
+    NSString * locationString = nil;
     
     // Set a bunch of indexes from above
     if (self.eventsWebQuery != nil) {
@@ -857,7 +857,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
         NSLog(@"indexOfSelectedDateFilterOption=%d", indexOfSelectedDateFilterOption);
         indexOfSelectedTimeFilterOption = indexOfEventsFilterOptionBlock(EVENTS_FILTER_TIME, self.filters, self.eventsWebQuery.filterTimeBucketString);
         indexOfSelectedLocationFilterOption = indexOfEventsFilterOptionBlock(EVENTS_FILTER_LOCATION, self.filters, self.eventsWebQuery.filterDistanceBucketString);
-        locationStringBrowse = self.eventsWebQuery.filterLocationString;
+        locationString = self.eventsWebQuery.filterLocationString;
     }
     
     // Set the browse filter settings
@@ -875,6 +875,8 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 
     // Update views
     // Update filter option button states for browse
+    [self.dvLocationSetLocationButton setTitle:locationString forState:UIControlStateNormal];
+    [self.dvLocationSearchSetLocationButton setTitle:locationString forState:UIControlStateNormal];
     [self updateFilterOptionButtonStatesOldSelected:nil newSelected:self.selectedPriceFilterOption];
     [self updateFilterOptionButtonStatesOldSelected:nil newSelected:self.selectedDateFilterOption];
     [self updateFilterOptionButtonStatesOldSelected:nil newSelected:self.selectedTimeFilterOption];
@@ -906,7 +908,6 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     int indexOfSelectedDateSearchFilterOption = dateSearchOptions.count - 1;
     int indexOfSelectedLocationSearchFilterOption = locationSearchOptions.count - 1;
     int indexOfSelectedTimeSearchFilterOption = timeSearchOptions.count - 1;
-    NSString * locationStringSearch = nil;
     NSString * searchTerm = nil;
     
     // indexOfActiveSearchFilter... // Skipping for now. Not that important.
@@ -917,7 +918,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
         indexOfSelectedDateSearchFilterOption = indexOfEventsFilterOptionBlock(EVENTS_FILTER_DATE, self.filtersSearch, self.eventsWebQueryFromSearch.filterDateBucketString);
         indexOfSelectedTimeSearchFilterOption = indexOfEventsFilterOptionBlock(EVENTS_FILTER_TIME, self.filtersSearch, self.eventsWebQueryFromSearch.filterTimeBucketString);
         indexOfSelectedLocationSearchFilterOption = indexOfEventsFilterOptionBlock(EVENTS_FILTER_LOCATION, self.filtersSearch, self.eventsWebQueryFromSearch.filterDistanceBucketString);
-        locationStringSearch = self.eventsWebQueryFromSearch.filterLocationString;
+        locationString = self.eventsWebQueryFromSearch.filterLocationString;
         searchTerm = self.eventsWebQueryFromSearch.searchTerm;
     }
     
@@ -969,6 +970,10 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
         
         // Set the search text field term
         self.searchTextField.text = searchTerm;
+        
+        // Use the location string that was pulled/updated from search
+        [self.dvLocationSetLocationButton setTitle:locationString forState:UIControlStateNormal];
+        [self.dvLocationSearchSetLocationButton setTitle:locationString forState:UIControlStateNormal];
 
         NSLog(@"About to updateViews from within shouldDisplaySearchMode, when self.eventsFromSearch.count=%d", self.eventsFromSearch.count);
         [self updateViewsFromCurrentSourceDataWhichShouldBePopulated:self.eventsFromSearch.count > 0 reasonIfNot:EVENTS_NO_RESULTS_REASON_NO_RESULTS animated:NO];
@@ -1238,7 +1243,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
         [self.eventsForCurrentSource removeObjectAtIndex:self.indexPathOfSelectedRow.row];
         
         // Animate event deletion from the table
-        [self.tableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:self.indexPathOfSelectedRow] withRowAnimation:UITableViewRowAnimationFade];
+        [self.tableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:self.indexPathOfSelectedRow] withRowAnimation:UITableViewRowAnimationTop];
     }
     
     // Deselect selected row, if there is one
@@ -1276,6 +1281,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
         filter.drawerView.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"cat_overlay.png"]];
         filter.drawerView.backgroundColor = [UIColor clearColor]; // TESTING PERFORMANCE HIT TESTING PERFORMANCE HIT TESTING PERFORMANCE HIT TESTING PERFORMANCE HIT TESTING PERFORMANCE HIT TESTING PERFORMANCE HIT TESTING PERFORMANCE HIT TESTING PERFORMANCE HIT TESTING PERFORMANCE HIT TESTING PERFORMANCE HIT TESTING PERFORMANCE HIT TESTING PERFORMANCE HIT TESTING PERFORMANCE HIT TESTING PERFORMANCE HIT TESTING PERFORMANCE HIT
         [filter.button setTitle:[filter.buttonText uppercaseString] forState:UIControlStateNormal];
+        filter.button.exclusiveTouch = YES;
         filter.button.titleLabel.font = [UIFont kwiqetFontOfType:RegularCondensed size:12.0];
         filter.button.adjustsImageWhenHighlighted = NO;
         if (![filter.code isEqualToString:EVENTS_FILTER_CATEGORIES]) {
@@ -1292,6 +1298,9 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
         
         SEL filterOptionButtonSelector = [[dictionaryOfEventFilterOptionSelectors objectForKey:filter.code] pointerValue];
         for (EventsFilterOption * filterOption in filter.options) {
+            
+            // Disable multitouch
+            filterOption.buttonView.button.exclusiveTouch = YES;
             
             // Set button option target
             [filterOption.buttonView.button addTarget:self action:filterOptionButtonSelector forControlEvents:UIControlEventTouchUpInside];
@@ -1839,15 +1848,15 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 
 - (void) setPushableContainerViewsOriginY:(CGFloat)originY adjustHeightToFillMainView:(BOOL)shouldAdjustHeight {
     
-    CGRect pcvf_o = self.pushableContainerView.frame;
-    CGRect pcscv_o = self.pushableContainerShadowCheatView.frame;
-    CGRect tvcvf_o = self.tableViewCoverView.frame;
-    CGRect tvcvb_o = self.tableViewCoverView.bounds;
+//    CGRect pcvf_o = self.pushableContainerView.frame;
+//    CGRect pcscv_o = self.pushableContainerShadowCheatView.frame;
+//    CGRect tvcvf_o = self.tableViewCoverView.frame;
+//    CGRect tvcvb_o = self.tableViewCoverView.bounds;
     
     CGRect pushableContainerViewFrame = self.pushableContainerView.frame;
-//    CGFloat originalOriginY = pushableContainerViewFrame.origin.y;
+    //    CGFloat originalOriginY = pushableContainerViewFrame.origin.y;
     pushableContainerViewFrame.origin.y = originY;
-//    CGFloat originYAdjustment = pushableContainerViewFrame.origin.y - originalOriginY;
+    //    CGFloat originYAdjustment = pushableContainerViewFrame.origin.y - originalOriginY;
     if (shouldAdjustHeight) {
         pushableContainerViewFrame.size.height = self.view.bounds.size.height - pushableContainerViewFrame.origin.y;        
     }
@@ -1858,11 +1867,11 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     
     [self matchTableViewCoverViewToTableView];
     
-    NSLog(@"\n*\n*\n*\nsetPushableContainerViewsOriginY");
-    NSLog(@"pushableContainerView.frame ::: %@ to %@", NSStringFromCGRect(pcvf_o), NSStringFromCGRect(self.pushableContainerView.frame));
-    NSLog(@"pushableContainerShadowCheatView.frame ::: %@ to %@", NSStringFromCGRect(pcscv_o), NSStringFromCGRect(self.pushableContainerShadowCheatView.frame));
-    NSLog(@"tableViewCoverView.frame ::: %@ to %@", NSStringFromCGRect(tvcvf_o), NSStringFromCGRect(self.tableViewCoverView.frame));
-    NSLog(@"tableViewCoverView.bounds (re:self.view) ::: %@ to %@", NSStringFromCGRect([self.view convertRect:tvcvb_o fromView:self.tableViewCoverView]), NSStringFromCGRect([self.view convertRect:self.tableViewCoverView.bounds fromView:self.tableViewCoverView]));
+//    NSLog(@"\n*\n*\n*\nsetPushableContainerViewsOriginY");
+//    NSLog(@"pushableContainerView.frame ::: %@ to %@", NSStringFromCGRect(pcvf_o), NSStringFromCGRect(self.pushableContainerView.frame));
+//    NSLog(@"pushableContainerShadowCheatView.frame ::: %@ to %@", NSStringFromCGRect(pcscv_o), NSStringFromCGRect(self.pushableContainerShadowCheatView.frame));
+//    NSLog(@"tableViewCoverView.frame ::: %@ to %@", NSStringFromCGRect(tvcvf_o), NSStringFromCGRect(self.tableViewCoverView.frame));
+//    NSLog(@"tableViewCoverView.bounds (re:self.view) ::: %@ to %@", NSStringFromCGRect([self.view convertRect:tvcvb_o fromView:self.tableViewCoverView]), NSStringFromCGRect([self.view convertRect:self.tableViewCoverView.bounds fromView:self.tableViewCoverView]));
     
 }
 
@@ -2093,6 +2102,9 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 
 - (void) toggleSearchModeAnimated:(BOOL)animated shouldMakeSearchTextFieldActiveWhenTogglingOn:(BOOL)shouldMakeSearchTextFieldActive shouldFlushQueryAndFilters:(BOOL)shouldFlushQueryAndFilters {
     
+    BOOL wasSearchOn = self.isSearchOn;
+    BOOL willSearchBeOn = !wasSearchOn;
+    
     // The following block and its use is to fix a bug caused by the fact that when a view has its background color set to a pattern image, and then that view's dimensions change during an animation, the pattern background color is merely stretched. Gross.
     void(^tableViewBackgroundColorViewSwap)(BOOL)=^(BOOL swapToView){
         UIColor * backgroundColor = swapToView ? self.tableView.backgroundColor : self.tableViewStaticHeightBackgroundView.backgroundColor;
@@ -2108,15 +2120,17 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     float duration = animated ? 0.25 : 0.0;
     
     if (self.isDrawerOpen) {
+        self.shouldReloadOnDrawerClose = NO; // This only comes into play when going from search mode to browse mode. This seems like a good idea... Testing. Seems to work well! Avoids the possible scenario of a wasted search web call (and ugly confusing resulting UI) right as we switch from search to browse modes.
         [self toggleDrawerAnimated:animated];
     }
-    self.isSearchOn = !self.isSearchOn;
-    // Is new mode search on, or search off
-    self.searchButton.enabled = !self.isSearchOn;
-    self.searchTextField.text = @"";
-    [DefaultsModel saveEventsListMostRecentMode:(self.isSearchOn ? ModeSearch : ModeBrowse)];
     
-    if (self.isSearchOn) {
+//    self.isSearchOn = !self.isSearchOn; // Changing this value up front is problematic. Toggling search mode causes the table view to move up and grow in height, which could reveal a new row. The data for this row comes an indexPath and an array of events. The indexPath is coming from the tableView, which essentially is still in "old source" mode. The array of events however is the "current source" array. At best, this would result in the wrongful display of an event from the wrong source, and at worst, this causes the app to crash (if the "old source" indexPath is out of bounds for the "current source" array).
+    // Is new mode search on, or search off
+    self.searchButton.enabled = !willSearchBeOn;
+    self.searchTextField.text = @"";
+//    [DefaultsModel saveEventsListMostRecentMode:(willSearchBeOn ? ModeSearch : ModeBrowse)]; // Saving this value up front just seems like it's looking for trouble.
+    
+    if (willSearchBeOn) {
         if (shouldFlushQueryAndFilters) {
             [self resetSearchFilters];
             if (self.eventsWebQueryFromSearch == nil ||
@@ -2159,6 +2173,9 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 //                             self.tableView.tableFooterView.alpha = 0.0; // Don't need to explicitly fade out the table footer view. It gets covered by the table view cover view, along with the rest of the table view, and it will actually be removed while the cover view is in place.
                          }
                          completion:^(BOOL finished){
+                             // Search mode is officially on now
+                             self.isSearchOn = willSearchBeOn;
+                             [DefaultsModel saveEventsListMostRecentMode:(self.isSearchOn ? ModeSearch : ModeBrowse)];
                              // Reload table data
                              [self.tableView reloadData];
                              NSLog(@"EventsViewController tableView reloadData");
@@ -2184,7 +2201,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
                              self.tableView.tableFooterView = self.tableView.tableFooterView;
                              self.tableView.tableFooterView.alpha = 0.0;
                              // Show (maybe) the table footer view
-                             BOOL showTableFooterView = /*!self.isSearchOn && */self.eventsForCurrentSource.count > 0;
+                             BOOL showTableFooterView = self.eventsForCurrentSource.count > 0;
                              self.tableView.tableFooterView.alpha = showTableFooterView ? 1.0 : 0.0;
                              // Remember the feedback message type that was showing
                              self.feedbackMessageTypeBrowseRemembered = self.feedbackView.messageType;
@@ -2242,6 +2259,9 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
                              self.tableViewCoverViewContainer.alpha = 1.0;
                          }
                          completion:^(BOOL finished){
+                             // Search mode is officially off now
+                             self.isSearchOn = willSearchBeOn;
+                             [DefaultsModel saveEventsListMostRecentMode:(self.isSearchOn ? ModeSearch : ModeBrowse)];
                              // Reload table data
                              [self.tableView reloadData];
                              NSLog(@"EventsViewController tableView reloadData");
@@ -2268,7 +2288,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
                              self.tableView.tableFooterView.frame = tableFooterViewFrame;
                              self.tableView.tableFooterView = self.tableView.tableFooterView;
                              // Show (maybe) the table footer view
-                             BOOL showTableFooterView = /*!self.isSearchOn && */self.eventsForCurrentSource.count > 0;
+                             BOOL showTableFooterView = self.eventsForCurrentSource.count > 0;
                              self.tableView.tableFooterView.alpha = showTableFooterView ? 1.0 : 0.0;
                              // Switch the filters summary label to browse
                              [UIView animateWithDuration:duration animations:^{
@@ -2417,6 +2437,8 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 - (void) configureCell:(EventTableViewCell *)cell forRowAtIndexPath:(NSIndexPath *)indexPath {
 //    NSLog(@"configureCell for %d-%d", indexPath.section, indexPath.row);
     
+    BOOL debuggingFramesAndFonts = NO;
+    
     Event * event = (Event *)[self.eventsForCurrentSource objectAtIndex:indexPath.row];
     
     NSString * title = event.summary.title;
@@ -2433,31 +2455,47 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     NSNumber * priceMin = event.summary.priceMinimum;
     NSNumber * priceMax = event.summary.priceMaximum;
     
+    if (debuggingFramesAndFonts) {
+        title = @"Hal Willner's Freedom Rides";        
+    }
+    
     if (!title) { title = @"Title not available"; }
     cell.titleLabel.text = title;
+//    cell.eventContentView.titleString = title;
     
     NSString * colorHex = concreteParentCategory.colorHex;
     if (colorHex) {
-        cell.categoryColorView.backgroundColor = [WebUtil colorFromHexString:colorHex];
+        cell.categoryColor = [WebUtil colorFromHexString:colorHex];
+//        cell.eventContentView.categoryColor = [WebUtil colorFromHexString:colorHex];
     }
     NSString * iconThumb = concreteParentCategory.iconThumb;
     if (iconThumb) {
-        cell.iconImageView.image = [UIImage imageNamed:iconThumb];
+        iconThumb = [iconThumb stringByReplacingOccurrencesOfString:@".png" withString:@"_big.png"];
+        cell.categoryIcon = [UIImage imageNamed:iconThumb];
+        NSNumber * iconHorizontalOffset = concreteParentCategory.iconBigHorizontalOffset;
+        if (iconHorizontalOffset != nil) {
+            cell.categoryIconHorizontalOffset = iconHorizontalOffset.floatValue;
+        }
+//        cell.eventContentView.categoryIcon = [UIImage imageNamed:iconThumb];
     }
     
     if (location || address) {
         if (location) {
             cell.locationLabel.text = location;
+//            cell.eventContentView.locationString = location;
             if ([placeCount intValue] > 1) {
                 int moreCount = placeCount.intValue - 1;
                 NSString * locationWord = moreCount > 1 ? @"locations" : @"location";
                 cell.locationLabel.text = [cell.locationLabel.text stringByAppendingFormat:@" & %d more %@", moreCount, locationWord];
+//                cell.eventContentView.locationString = [cell.eventContentView.locationString stringByAppendingFormat:@" & %d more %@", moreCount, locationWord];
             }
         } else {
             cell.locationLabel.text = address;
+//            cell.eventContentView.locationString = address;
         }
     } else {
         cell.locationLabel.text = @"Location not available";
+//        cell.eventContentView.locationString = @"Location not available";
     }
 
     NSString * dateToDisplay = [self.webDataTranslator eventsListDateRangeStringFromEventDateEarliest:startDateEarliest eventDateLatest:startDateLatest eventDateCount:startDateCount relativeDates:YES dataUnavailableString:nil];
@@ -2466,9 +2504,24 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     NSString * divider = startDateEarliest && startTimeEarliest ? @" | " : @"";
     NSString * finalDatetimeString = [NSString stringWithFormat:@"%@%@%@", dateToDisplay, divider, timeToDisplay];
     cell.dateAndTimeLabel.text = finalDatetimeString;
+//    cell.eventContentView.dateAndTimeString = finalDatetimeString;
     
     NSString * priceRange = [self.webDataTranslator priceRangeStringFromMinPrice:priceMin maxPrice:priceMax separatorString:nil dataUnavailableString:nil];
-    cell.priceLabel.text = priceRange;
+    cell.priceOriginalLabel.text = priceRange;
+//    cell.eventContentView.priceOriginalString = priceRange;
+    
+    if (debuggingFramesAndFonts) {
+        NSLog(@"Debugging cell frames from EventsViewController");
+        [cell.dateAndTimeLabel sizeToFit];
+        NSLog(@"%@", NSStringFromCGRect(cell.dateAndTimeLabel.frame));
+        [cell.titleLabel sizeToFit];
+        NSLog(@"%@", NSStringFromCGRect(cell.titleLabel.frame));
+        [cell.locationLabel sizeToFit];
+        NSLog(@"%@", NSStringFromCGRect(cell.locationLabel.frame));
+        [cell.priceOriginalLabel sizeToFit];
+        NSLog(@"%@", NSStringFromCGRect(cell.priceOriginalLabel.frame));
+        NSLog(@"Debugging cell frames from EventsViewController");
+    }
     
 }
 
@@ -2511,7 +2564,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
         // Delete event from our table display array
         [self.eventsForCurrentSource removeObjectAtIndex:indexPath.row];
         // Animate event deletion from the table
-        [self.tableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:indexPath] withRowAnimation:UITableViewRowAnimationFade];
+        [self.tableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:indexPath] withRowAnimation:UITableViewRowAnimationTop];
         
     }
     
@@ -3404,13 +3457,8 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 }
 
 - (IBAction) currentLocationButtonTouched:(UIButton *)currentLocationButton {
-    if (currentLocationButton == self.dvLocationCurrentLocationButton) {
-        [self.dvLocationSetLocationButton setTitle:@"Current Location" forState:UIControlStateNormal];
-    } else if (currentLocationButton == self.dvLocationSearchCurrentLocationButton) {
-        [self.dvLocationSearchSetLocationButton setTitle:@"Current Location" forState:UIControlStateNormal];
-    } else {
-        NSLog(@"ERROR in EventsViewController - unrecognized currentLocationButton %@", currentLocationButton);
-    }
+    [self.dvLocationSetLocationButton setTitle:@"Current Location" forState:UIControlStateNormal];
+    [self.dvLocationSearchSetLocationButton setTitle:@"Current Location" forState:UIControlStateNormal];
     /* THE FOLLOWING CODE IS DUPLICATED SEVERAL PLACES IN EVENTSVIEWCONTROLLER */
     self.shouldReloadOnDrawerClose = YES;
     [self setDrawerReloadIndicatorViewIsVisible:self.shouldReloadOnDrawerClose animated:self.isDrawerOpen];

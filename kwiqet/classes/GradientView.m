@@ -10,7 +10,7 @@
 
 @implementation GradientView
 
-@synthesize color;
+@synthesize colorEnd;
 
 - (id)initWithFrame:(CGRect)frame
 {
@@ -24,15 +24,15 @@
 
 - (void)dealloc
 {
-    [color release];
+    [colorEnd release];
     [super dealloc];
 }
 
-- (void)setColor:(UIColor *)theColor {
-    if (color != theColor) {
+- (void)setColorEnd:(UIColor *)theColor {
+    if (colorEnd != theColor) {
 //        NSLog(@"GradientView setColor:%@", theColor);
-        [color release];
-        color = [theColor retain];
+        [colorEnd release];
+        colorEnd = [theColor retain];
         [self setNeedsDisplay];
     }
 }
@@ -47,8 +47,8 @@
     CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
     CGFloat locations[] = { 0.0, 1.0 };
     
-    CGColorRef startColor = [[self.color colorWithAlphaComponent:0.0] CGColor];
-    CGColorRef endColor = [self.color CGColor];
+    CGColorRef startColor = [self.colorEnd colorWithAlphaComponent:0.0].CGColor;
+    CGColorRef endColor = self.colorEnd.CGColor;
     
     NSArray * colors = [NSArray arrayWithObjects:(id)startColor, (id)endColor, nil];
     

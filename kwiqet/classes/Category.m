@@ -19,6 +19,8 @@
 @dynamic breadcrumbs;
 @dynamic events;
 @dynamic queryLinks;
+@dynamic iconBigHorizontalOffset;
+@dynamic iconBigThumb;
 
 - (void)addBreadcrumbsObject:(CategoryBreadcrumb *)value {    
     NSSet *changedObjects = [[NSSet alloc] initWithObjects:&value count:1];

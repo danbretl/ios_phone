@@ -127,7 +127,7 @@ CGFloat const ELASTICUILABEL_GRADIENT_VIEW_WIDTH = 45.0;
         [color release];
         color = [theColor retain];
         self.backgroundColor = self.color;
-        self.gradientView.color = self.color;
+        self.gradientView.colorEnd = self.color;
     }
 }
 

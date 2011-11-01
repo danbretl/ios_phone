@@ -10,9 +10,9 @@
 
 
 @interface GradientView : UIView {
-    UIColor * color;
+    UIColor * colorEnd;
 }
 
-@property (nonatomic, retain) UIColor * color;
+@property (nonatomic, retain) UIColor * colorEnd;
 
 @end

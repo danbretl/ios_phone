@@ -8,31 +8,40 @@
 
 #import <UIKit/UIKit.h>
 #import "UINeverClearView.h"
+//#import "EventCellContentView.h"
 
-@interface EventTableViewCell : UITableViewCell {
+@interface EventTableViewCell : UITableViewCell /*<EventCellContentViewDelegate>*/ {
     
-    UIView * backgroundViewNormal;
-    UIView * backgroundViewSelected;
-    UINeverClearView * categoryColorView;
-    UIImageView * iconImageView;
+//    EventCellContentView * eventContentView;
+    
+    UINeverClearView * backgroundColorView;
+    UIView * categoryBarContainer;
+    UINeverClearView * categoryBarColorView;
+    UIImageView * categoryBarIconImageView;
     UILabel * titleLabel;
     UILabel * locationLabel;
     UILabel * dateAndTimeLabel;
-    UILabel * priceLabel;
+    UILabel * priceOriginalLabel;
+//    UILabel * priceChangedLabel; // NOT YET IMPLEMENTED
+//    UILabel * priceSavingsLabel; // NOT YET IMPLEMENTED
     
-    UIColor * categoryColor;
+    UIColor * categoryColor_;
+    UIImage * categoryIcon_;
+    CGFloat categoryIconHorizontalOffset_;
     
 }
 
-@property (readonly) UIView * categoryColorView;
-@property (readonly) UIImageView * iconImageView;
+//@property (readonly) EventCellContentView * eventContentView;
+
 @property (readonly) UILabel * titleLabel;
 @property (readonly) UILabel * locationLabel;
 @property (readonly) UILabel * dateAndTimeLabel;
-@property (readonly) UILabel * priceLabel;
-@property (readonly) UIView * backgroundViewNormal;
-@property (readonly) UIView * backgroundViewSelected;
+@property (readonly) UILabel * priceOriginalLabel;
+//@property (readonly) UILabel * priceChangedLabel; // NOT YET IMPLEMENTED
+//@property (readonly) UILabel * priceSavingsLabel; // NOT YET IMPLEMENTED
 
 @property (nonatomic, retain) UIColor * categoryColor;
+@property (nonatomic, retain) UIImage * categoryIcon;
+@property (nonatomic) CGFloat categoryIconHorizontalOffset;
 
 @end

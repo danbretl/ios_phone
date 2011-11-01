@@ -24,6 +24,8 @@
 @property (nonatomic, retain) NSSet* events;
 @property (nonatomic, retain) NSString * iconThumb;
 @property (nonatomic, retain) NSSet *queryLinks;
+@property (nonatomic, retain) NSNumber * iconBigHorizontalOffset;
+@property (nonatomic, retain) NSString * iconBigThumb;
 @end
 
 @interface Category (CoreDataGeneratedAccessors)
