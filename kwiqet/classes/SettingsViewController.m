@@ -407,14 +407,15 @@
         if ([indexPath isEqual:self.facebookIndexPath]) {
             [self.facebookManager pullAuthenticationInfoFromDefaults];
             NSLog(@"indexPath=self.facebookIndexPath ::: self.facebookManager.fb isSessionValid=%d", [self.facebookManager.fb isSessionValid]);
+            NSLog(@"SettingsViewController set self.facebookCellEnabled=%d", self.facebookCellEnabled);
             if ([self.facebookManager.fb isSessionValid]) {
+                self.facebookCellEnabled = YES;
                 detailTextLabelText = [[self.settingsModel objectAtIndex:indexPath.row] valueForKey:@"detailTextLabelWhenBooleanYes"];
                 accessoryType = [[self.settingsModel objectAtIndex:indexPath.row] valueForKey:@"showAccessoryArrowWhenBooleanYes"] ? UITableViewCellAccessoryDisclosureIndicator : accessoryType;
-                self.facebookCellEnabled = YES;
                 [self setTableViewCell:cell atIndexPath:indexPath appearanceEnabled:self.facebookCellEnabled];
             } else {
-                detailTextLabelText = @"Touch to connect";
                 self.facebookCellEnabled = ([DefaultsModel retrieveAPIFromUserDefaults] != nil);
+                detailTextLabelText = @"Touch to connect";
                 [self setTableViewCell:cell atIndexPath:indexPath appearanceEnabled:self.facebookCellEnabled];
             }
         }
@@ -449,8 +450,9 @@
 
 - (NSIndexPath *)tableView:(UITableView *)tableView willSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     NSIndexPath * returnPath = indexPath;
-    if (indexPath == self.facebookIndexPath &&
+    if ([indexPath isEqual:self.facebookIndexPath] &&
         !self.facebookCellEnabled) {
+        NSLog(@"SettingsViewController willSelectRowAtIndexPath=self.facebookIndexPath when self.facebookCellEnabled=%d", self.facebookCellEnabled);
         UIAlertView * alertView = [[UIAlertView alloc] initWithTitle:@"Enable Facebook Connect" message:@"You must log in with a Kwiqet account before you can enable Facebook Connect." delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
         [alertView show];
         [alertView release];
