@@ -343,6 +343,15 @@
 // EVENTS - GENERAL //
 //////////////////////
 
+- (Event *)getEventWithURI:(NSString *)eventURI {
+    NSArray * matchingEvents = [self getEventsForPredicate:[NSPredicate predicateWithFormat:@"uri == %@", eventURI]];
+    Event * matchedEvent = nil;
+    if (matchingEvents && matchingEvents.count > 0) {
+        matchedEvent = [matchingEvents objectAtIndex:0];
+    }
+    return matchedEvent;
+}
+
 - (NSArray *) getEventsForPredicate:(NSPredicate *)predicate {
     return [self getAllObjectsForEntityName:@"Event" predicate:predicate sortDescriptors:nil];
 }
@@ -435,6 +444,8 @@
 }
 
 - (void)updateEvent:(Event *)event usingEventDictionary:(NSDictionary *)eventDictionary featuredOverride:(NSNumber *)featuredOverride fromSearchOverride:(NSNumber *)fromSearchOverride {
+    
+//    NSLog(@"findme2 %@", eventDictionary);
     
     // Basic
     NSString * uri = [WebUtil stringOrNil:[eventDictionary objectForKey:@"resource_uri"]];

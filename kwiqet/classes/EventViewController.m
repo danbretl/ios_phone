@@ -187,7 +187,6 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
 @synthesize mapViewController;
 @synthesize facebookManager;
 @synthesize letsGoChoiceActionSheet, letsGoChoiceActionSheetSelectors, shareChoiceActionSheet, shareChoiceActionSheetSelectors;
-@synthesize deleteAllowed=deleteAllowed_;
 
 - (void)dealloc {
     [backgroundColorView release];
@@ -280,7 +279,6 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
 {
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
     if (self) {
-        self.deleteAllowed = YES;
         self.eventOccurrencesSummaryArray = [NSMutableArray array];
         debuggingOccurrencesPicker = NO;
     }
@@ -315,7 +313,7 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
     [self.view insertSubview:shadowActionBar aboveSubview:self.backgroundColorView];
     [shadowActionBar release];
     // Delete button
-    self.deleteButton.enabled = self.deleteAllowed;
+//    self.deleteAllowed = NO; asldfjkasdlf;j
     
     // Title bar shadow
     shadowTitleBar = [[UIView alloc] initWithFrame:
@@ -557,11 +555,6 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
 - (void)setUserLocation:(CLLocation *)userLocation withUserLocationString:(NSString *)userLocationString {
     self.userLocation = userLocation;
     self.userLocationString = userLocationString;
-}
-
-- (void)setDeleteAllowed:(BOOL)deleteAllowed {
-    deleteAllowed_ = deleteAllowed;
-    self.deleteButton.enabled = self.deleteAllowed;
 }
 
 - (void)processOccurrencesFromEvent:(Event *)theEvent {

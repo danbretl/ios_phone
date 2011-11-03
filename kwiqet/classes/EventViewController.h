@@ -124,7 +124,6 @@ typedef enum {
     NSDateFormatter * occurrencesControlsNavBarDateFormatter;
     WebConnector * webConnector;
     UIAlertView * connectionErrorOnUserActionRequestAlertView;
-    BOOL deleteAllowed_;
     BOOL deletedEventDueToGoingToEvent;
     FacebookManager * facebookManager;
     
@@ -142,7 +141,6 @@ typedef enum {
 @property (assign) id<CardPageViewControllerDelegate> delegate;
 @property (nonatomic, retain) CoreDataModel * coreDataModel;
 @property (nonatomic, readonly) FacebookManager * facebookManager;
-@property (nonatomic) BOOL deleteAllowed;
 
 - (void) viewControllerIsFinished;
 - (void) updateViewsFromDataAnimated:(BOOL)animated;

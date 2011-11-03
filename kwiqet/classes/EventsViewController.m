@@ -1494,14 +1494,19 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
         int order = 0;
         // Loop through and process all event dictionaries
         for (NSDictionary * eventSummaryDictionary in eventsDictionaries) {
+//            NSLog(@"findme %@", eventSummaryDictionary);
             
-            Event * newEvent = (Event *)[NSEntityDescription insertNewObjectForEntityForName:@"Event" inManagedObjectContext:self.coreDataModel.managedObjectContext];
-            [self.coreDataModel updateEvent:newEvent usingEventSummaryDictionary:eventSummaryDictionary featuredOverride:nil fromSearchOverride:nil];
+            Event * eventToUpdate = [self.coreDataModel getEventWithURI:[eventSummaryDictionary valueForKey:@"event"]];
+            if (eventToUpdate == nil) {
+                eventToUpdate = (Event *)[NSEntityDescription insertNewObjectForEntityForName:@"Event" inManagedObjectContext:self.coreDataModel.managedObjectContext];
+            }
+
+            [self.coreDataModel updateEvent:eventToUpdate usingEventSummaryDictionary:eventSummaryDictionary featuredOverride:nil fromSearchOverride:nil];
             
             EventResult * newEventResult = [NSEntityDescription insertNewObjectForEntityForName:@"EventResult" inManagedObjectContext:self.coreDataModel.managedObjectContext];
             newEventResult.order = [NSNumber numberWithInt:order];
             order++;
-            newEventResult.event = newEvent;
+            newEventResult.event = eventToUpdate;
             newEventResult.query = self.eventsWebQuery;
             
         }
@@ -1607,13 +1612,17 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
         // Loop through and process all event dictionaries
         for (NSDictionary * eventSummaryDictionary in eventsDictionaries) {
             
-            Event * newEvent = (Event *)[NSEntityDescription insertNewObjectForEntityForName:@"Event" inManagedObjectContext:self.coreDataModel.managedObjectContext];
-            [self.coreDataModel updateEvent:newEvent usingEventSummaryDictionary:eventSummaryDictionary featuredOverride:nil fromSearchOverride:[NSNumber numberWithBool:YES]];
+            Event * eventToUpdate = [self.coreDataModel getEventWithURI:[eventSummaryDictionary valueForKey:@"event"]];
+            if (eventToUpdate == nil) {
+                eventToUpdate = (Event *)[NSEntityDescription insertNewObjectForEntityForName:@"Event" inManagedObjectContext:self.coreDataModel.managedObjectContext];
+            }
+            
+            [self.coreDataModel updateEvent:eventToUpdate usingEventSummaryDictionary:eventSummaryDictionary featuredOverride:nil fromSearchOverride:[NSNumber numberWithBool:YES]];
             
             EventResult * newEventResult = [NSEntityDescription insertNewObjectForEntityForName:@"EventResult" inManagedObjectContext:self.coreDataModel.managedObjectContext];
             newEventResult.order = [NSNumber numberWithInt:order];
             order++;
-            newEventResult.event = newEvent;
+            newEventResult.event = eventToUpdate;
             newEventResult.query = self.eventsWebQueryFromSearch;
             
         }
@@ -2539,7 +2548,6 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     self.cardPageViewController.coreDataModel = self.coreDataModel;
     self.cardPageViewController.delegate = self;
     self.cardPageViewController.hidesBottomBarWhenPushed = YES;
-    self.cardPageViewController.deleteAllowed = !self.isSearchOn;
     NSLog(@"self.eventsWebQueryForCurrentSource.filterLocationString = %@", self.eventsWebQueryForCurrentSource.filterLocationString);
     [self.cardPageViewController setUserLocation:nil withUserLocationString:self.eventsWebQueryForCurrentSource.filterLocationString]; // THIS NEEDS TO BE UPDATED SO THAT WE ACTUALLY PASS ON THE USER'S LOCATION. THAT COULD JUST BE A STARTING POINT THOUGH - REALLY, THE EVENT VIEW CONTROLLER SHOULD CONTINUE DOING ITS OWN LOCATION UPDATING ETC.
     
