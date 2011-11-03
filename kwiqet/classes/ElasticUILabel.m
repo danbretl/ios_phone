@@ -9,12 +9,16 @@
 #import "ElasticUILabel.h"
 
 CGFloat const ELASTICUILABEL_GRADIENT_VIEW_WIDTH = 45.0;
+double const ELASTICUILABEL_ELASTIC_DELAY_LENGTH = 1.0;
 
 @interface ElasticUILabel()
 @property (nonatomic, retain) GradientView * gradientView;
 @property (nonatomic, retain) UIScrollView * scrollView;
 @property (nonatomic, retain) UILabel * label;
 - (void) initWithFrameOrCoder;
+@property (retain) NSTimer * elasticDelayTimer;
+- (void) restartElasticDelayTimer;
+- (void) elasticDelayTimerDidFire:(NSTimer *)theTimer;
 @end
 
 @implementation ElasticUILabel
@@ -22,6 +26,7 @@ CGFloat const ELASTICUILABEL_GRADIENT_VIEW_WIDTH = 45.0;
 @synthesize gradientView, scrollView, label;
 @synthesize text, color;
 @synthesize overlayView = overlayView_;
+@synthesize elasticDelayTimer=elasticDelayTimer_;
 
 - (void)dealloc {
     [gradientView release];
@@ -30,6 +35,7 @@ CGFloat const ELASTICUILABEL_GRADIENT_VIEW_WIDTH = 45.0;
     [text release];
     [color release];
     [overlayView_ release];
+    [elasticDelayTimer_ release];
     [super dealloc];
 }
 
@@ -85,11 +91,33 @@ CGFloat const ELASTICUILABEL_GRADIENT_VIEW_WIDTH = 45.0;
     }
 }
 
+- (void) restartElasticDelayTimer {
+    if (self.elasticDelayTimer != nil) {
+        [self.elasticDelayTimer invalidate];
+        self.elasticDelayTimer = nil;
+    }
+    self.elasticDelayTimer = [NSTimer scheduledTimerWithTimeInterval:ELASTICUILABEL_ELASTIC_DELAY_LENGTH target:self selector:@selector(elasticDelayTimerDidFire:) userInfo:nil repeats:NO];
+}
+
+- (void) elasticDelayTimerDidFire:(NSTimer *)theTimer {
+    if (theTimer == self.elasticDelayTimer) {
+        [self scrollTextToOriginAnimated:YES];
+    }
+}
+
+- (void)scrollViewWillBeginDragging:(UIScrollView *)scrollView {
+    if (self.elasticDelayTimer != nil) {
+        [self.elasticDelayTimer invalidate];
+        self.elasticDelayTimer = nil;
+    }
+}
+
 - (void)scrollViewDidEndDragging:(UIScrollView *)theScrollView willDecelerate:(BOOL)decelerate {
     if (theScrollView == self.scrollView) {
         if (self.scrollView.contentOffset.x > 0) {
             if (!decelerate) {
-                [self.scrollView setContentOffset:CGPointMake(0, 0) animated:YES];
+                [self restartElasticDelayTimer];
+//                [self scrollTextToOriginAnimated:YES];
             }
         }
     }
@@ -98,7 +126,8 @@ CGFloat const ELASTICUILABEL_GRADIENT_VIEW_WIDTH = 45.0;
 - (void) scrollViewDidEndDecelerating:(UIScrollView *)theScrollView {
     if (theScrollView == self.scrollView) {
         if (self.scrollView.contentOffset.x > 0) {
-            [self scrollTextToOriginAnimated:YES];
+            [self restartElasticDelayTimer];
+//            [self scrollTextToOriginAnimated:YES];
         }
     }
 }

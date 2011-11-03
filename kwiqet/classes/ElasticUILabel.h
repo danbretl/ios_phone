@@ -23,6 +23,8 @@ extern CGFloat const ELASTICUILABEL_GRADIENT_VIEW_WIDTH;
     
     UIView * overlayView_;
     
+    NSTimer * elasticDelayTimer_;
+    
 }
 
 @property (nonatomic, copy) NSString * text;
