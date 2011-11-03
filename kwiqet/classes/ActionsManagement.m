@@ -169,7 +169,9 @@
     if (addressLineFirst || addressLineSecond) {
         [iCalEventNotes appendString:@"\n"];
     }
-    [iCalEventNotes appendString:event.eventDescription];
+    if (event.eventDescription) {
+        [iCalEventNotes appendString:event.eventDescription];
+    }
     newEvent.notes = iCalEventNotes;
     
     [newEvent setCalendar:[eventStore defaultCalendarForNewEvents]];
