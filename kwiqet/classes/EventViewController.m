@@ -888,6 +888,12 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
     self.titleBar.text = self.event.title;
     self.titleBar.color = concreteParentCategoryColor;
     
+    // Action buttons
+    BOOL actionButtonsEnabled = self.eventOccurrenceCurrent != nil;
+    self.letsGoButton.enabled = actionButtonsEnabled;
+    self.shareButton.enabled = actionButtonsEnabled;
+    self.deleteButton.enabled = actionButtonsEnabled;
+    
     // Occurrence Info
     [self updateOccurrenceInfoViewsFromDataAnimated:animated]; // This should come before setting the description string and sizes, because those things are dependent on whether or not the occurrence controls pull tab is visible.
     
