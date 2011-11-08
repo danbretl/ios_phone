@@ -59,6 +59,6 @@
 @property (readonly) MKCoordinateSpan coordinateSpan;
 @property (readonly) MKCoordinateRegion coordinateRegion;
 
--(NSArray*)findAddressComponent:(NSString*)typeName;
+- (NSArray*) findAddressComponent:(NSString*)typeName;
 
 @end

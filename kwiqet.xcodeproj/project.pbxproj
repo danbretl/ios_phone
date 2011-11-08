@@ -175,6 +175,14 @@
 		322E521D13FAD55400E69576 /* btn_searchfilterbar_right_touch@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 322E521113FAD55400E69576 /* btn_searchfilterbar_right_touch@2x.png */; };
 		322E521E13FAD55400E69576 /* btn_searchfilterbar_right.png in Resources */ = {isa = PBXBuildFile; fileRef = 322E521213FAD55400E69576 /* btn_searchfilterbar_right.png */; };
 		322E521F13FAD55400E69576 /* btn_searchfilterbar_right@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 322E521313FAD55400E69576 /* btn_searchfilterbar_right@2x.png */; };
+		3232ED8814697C0C0086D545 /* btn_findlocation_gray_touch.png in Resources */ = {isa = PBXBuildFile; fileRef = 3232ED8414697C0C0086D545 /* btn_findlocation_gray_touch.png */; };
+		3232ED8914697C0C0086D545 /* btn_findlocation_gray_touch@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 3232ED8514697C0C0086D545 /* btn_findlocation_gray_touch@2x.png */; };
+		3232ED8A14697C0C0086D545 /* btn_findlocation_gray.png in Resources */ = {isa = PBXBuildFile; fileRef = 3232ED8614697C0C0086D545 /* btn_findlocation_gray.png */; };
+		3232ED8B14697C0C0086D545 /* btn_findlocation_gray@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 3232ED8714697C0C0086D545 /* btn_findlocation_gray@2x.png */; };
+		3232ED8D14698B6D0086D545 /* AddressBook.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3232ED8C14698B6D0086D545 /* AddressBook.framework */; };
+		3232ED8F14698EB30086D545 /* AddressBookUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3232ED8E14698EB30086D545 /* AddressBookUI.framework */; };
+		3232ED91146996B00086D545 /* USStateAbbreviations.plist in Resources */ = {isa = PBXBuildFile; fileRef = 3232ED90146996B00086D545 /* USStateAbbreviations.plist */; };
+		3232ED94146997400086D545 /* LocationUtil.m in Sources */ = {isa = PBXBuildFile; fileRef = 3232ED931469973E0086D545 /* LocationUtil.m */; };
 		3239BF521419861900783BED /* LTe50050.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 3239BF501419861900783BED /* LTe50050.ttf */; };
 		3239BF531419861900783BED /* LTe50052.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 3239BF511419861900783BED /* LTe50052.ttf */; };
 		3239BF55141986DD00783BED /* LTe50054.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 3239BF54141986DD00783BED /* LTe50054.ttf */; };
@@ -238,6 +246,7 @@
 		326A2C8D141ABD8D00F44E22 /* LTe51250.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 326A2C8B141ABD8D00F44E22 /* LTe51250.ttf */; };
 		326A2C8E141ABD8D00F44E22 /* LTe51252.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 326A2C8C141ABD8D00F44E22 /* LTe51252.ttf */; };
 		326A2C91141ACCC200F44E22 /* OccurrenceInfoOverlayView.m in Sources */ = {isa = PBXBuildFile; fileRef = 326A2C90141ACCC200F44E22 /* OccurrenceInfoOverlayView.m */; };
+		326E201914687E780056623C /* UserLocation.m in Sources */ = {isa = PBXBuildFile; fileRef = 326E201814687E780056623C /* UserLocation.m */; };
 		326F6C7A13D0E2B80032CA5F /* UIImageView+WebCache.m in Sources */ = {isa = PBXBuildFile; fileRef = 326F6C6E13D0E2B80032CA5F /* UIImageView+WebCache.m */; };
 		326F6C7B13D0E2B80032CA5F /* SDWebImageManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 326F6C7113D0E2B80032CA5F /* SDWebImageManager.m */; };
 		326F6C7C13D0E2B80032CA5F /* SDWebImageDownloader.m in Sources */ = {isa = PBXBuildFile; fileRef = 326F6C7413D0E2B80032CA5F /* SDWebImageDownloader.m */; };
@@ -746,6 +755,15 @@
 		322E521113FAD55400E69576 /* btn_searchfilterbar_right_touch@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "btn_searchfilterbar_right_touch@2x.png"; sourceTree = "<group>"; };
 		322E521213FAD55400E69576 /* btn_searchfilterbar_right.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = btn_searchfilterbar_right.png; sourceTree = "<group>"; };
 		322E521313FAD55400E69576 /* btn_searchfilterbar_right@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "btn_searchfilterbar_right@2x.png"; sourceTree = "<group>"; };
+		3232ED8414697C0C0086D545 /* btn_findlocation_gray_touch.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = btn_findlocation_gray_touch.png; sourceTree = "<group>"; };
+		3232ED8514697C0C0086D545 /* btn_findlocation_gray_touch@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "btn_findlocation_gray_touch@2x.png"; sourceTree = "<group>"; };
+		3232ED8614697C0C0086D545 /* btn_findlocation_gray.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = btn_findlocation_gray.png; sourceTree = "<group>"; };
+		3232ED8714697C0C0086D545 /* btn_findlocation_gray@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "btn_findlocation_gray@2x.png"; sourceTree = "<group>"; };
+		3232ED8C14698B6D0086D545 /* AddressBook.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AddressBook.framework; path = System/Library/Frameworks/AddressBook.framework; sourceTree = SDKROOT; };
+		3232ED8E14698EB30086D545 /* AddressBookUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AddressBookUI.framework; path = System/Library/Frameworks/AddressBookUI.framework; sourceTree = SDKROOT; };
+		3232ED90146996B00086D545 /* USStateAbbreviations.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = USStateAbbreviations.plist; sourceTree = "<group>"; };
+		3232ED921469973D0086D545 /* LocationUtil.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LocationUtil.h; sourceTree = "<group>"; };
+		3232ED931469973E0086D545 /* LocationUtil.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LocationUtil.m; sourceTree = "<group>"; };
 		3239BF501419861900783BED /* LTe50050.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = LTe50050.ttf; sourceTree = "<group>"; };
 		3239BF511419861900783BED /* LTe50052.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = LTe50052.ttf; sourceTree = "<group>"; };
 		3239BF54141986DD00783BED /* LTe50054.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = LTe50054.ttf; sourceTree = "<group>"; };
@@ -820,6 +838,9 @@
 		326A2C8C141ABD8D00F44E22 /* LTe51252.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = LTe51252.ttf; sourceTree = "<group>"; };
 		326A2C8F141ACCC200F44E22 /* OccurrenceInfoOverlayView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OccurrenceInfoOverlayView.h; sourceTree = "<group>"; };
 		326A2C90141ACCC200F44E22 /* OccurrenceInfoOverlayView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OccurrenceInfoOverlayView.m; sourceTree = "<group>"; };
+		326E20151468798C0056623C /* kwiqet 011.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "kwiqet 011.xcdatamodel"; sourceTree = "<group>"; };
+		326E201714687E780056623C /* UserLocation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = UserLocation.h; path = classes/UserLocation.h; sourceTree = "<group>"; };
+		326E201814687E780056623C /* UserLocation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = UserLocation.m; path = classes/UserLocation.m; sourceTree = "<group>"; };
 		326F6C6E13D0E2B80032CA5F /* UIImageView+WebCache.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIImageView+WebCache.m"; sourceTree = "<group>"; };
 		326F6C6F13D0E2B80032CA5F /* UIImageView+WebCache.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIImageView+WebCache.h"; sourceTree = "<group>"; };
 		326F6C7013D0E2B80032CA5F /* SDWebImageManagerDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDWebImageManagerDelegate.h; sourceTree = "<group>"; };
@@ -1235,6 +1256,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3232ED8F14698EB30086D545 /* AddressBookUI.framework in Frameworks */,
+				3232ED8D14698B6D0086D545 /* AddressBook.framework in Frameworks */,
 				325FBB72144825EB007255FA /* libsqlite3.dylib in Frameworks */,
 				325FBB70144825D8007255FA /* libz.dylib in Frameworks */,
 				32C4D28D144812040089D883 /* libz.1.2.5.dylib in Frameworks */,
@@ -1309,6 +1332,10 @@
 				320557051457509500847D77 /* btn_findlocation_touch@2x.png */,
 				320557061457509500847D77 /* btn_findlocation.png */,
 				320557071457509500847D77 /* btn_findlocation@2x.png */,
+				3232ED8414697C0C0086D545 /* btn_findlocation_gray_touch.png */,
+				3232ED8514697C0C0086D545 /* btn_findlocation_gray_touch@2x.png */,
+				3232ED8614697C0C0086D545 /* btn_findlocation_gray.png */,
+				3232ED8714697C0C0086D545 /* btn_findlocation_gray@2x.png */,
 				320557081457509500847D77 /* btn_setlocation_touch.png */,
 				320557091457509500847D77 /* btn_setlocation_touch@2x.png */,
 				3205570A1457509500847D77 /* btn_setlocation.png */,
@@ -1481,6 +1508,8 @@
 			isa = PBXGroup;
 			children = (
 				32719BD71458A3070047B81C /* geocoding */,
+				3232ED921469973D0086D545 /* LocationUtil.h */,
+				3232ED931469973E0086D545 /* LocationUtil.m */,
 			);
 			name = location;
 			sourceTree = "<group>";
@@ -2030,6 +2059,8 @@
 				32C85F261420011F00D3F475 /* EventsWebQuery.m */,
 				32C85F221420011F00D3F475 /* EventResult.h */,
 				32C85F231420011F00D3F475 /* EventResult.m */,
+				326E201714687E780056623C /* UserLocation.h */,
+				326E201814687E780056623C /* UserLocation.m */,
 			);
 			name = "core data";
 			sourceTree = "<group>";
@@ -2274,6 +2305,8 @@
 				32C4D28C144812040089D883 /* libz.1.2.5.dylib */,
 				325FBB71144825EB007255FA /* libsqlite3.dylib */,
 				325FBB6F144825D8007255FA /* libz.dylib */,
+				3232ED8E14698EB30086D545 /* AddressBookUI.framework */,
+				3232ED8C14698B6D0086D545 /* AddressBook.framework */,
 				327C4DB013DA270B00DAAD51 /* BugSense-iOS.framework */,
 				32041B6A13AFFE330072F95C /* YAJL.framework */,
 				32FD38B313AFF5DB007549B6 /* QuartzCore.framework */,
@@ -2313,6 +2346,7 @@
 				32D7FEDB13B0BC43005E8406 /* InfoPlist.strings */,
 				32041B6C13AFFE7B0072F95C /* Entitlements.plist */,
 				32FD381513AFF451007549B6 /* urls.plist */,
+				3232ED90146996B00086D545 /* USStateAbbreviations.plist */,
 				32D7FEDE13B0BC5A005E8406 /* MainWindow.xib */,
 				32FD31FE13AFD82C007549B6 /* kwiqet-Prefix.pch */,
 				32FD365513AFF3F7007549B6 /* main.m */,
@@ -2836,6 +2870,11 @@
 				3298994A145F416B00583D21 /* event_cell_border_bottom@2x.png in Resources */,
 				3298994D145F419000583D21 /* event_cell_category_bar_border_right.png in Resources */,
 				3298994E145F419000583D21 /* event_cell_category_bar_border_right@2x.png in Resources */,
+				3232ED8814697C0C0086D545 /* btn_findlocation_gray_touch.png in Resources */,
+				3232ED8914697C0C0086D545 /* btn_findlocation_gray_touch@2x.png in Resources */,
+				3232ED8A14697C0C0086D545 /* btn_findlocation_gray.png in Resources */,
+				3232ED8B14697C0C0086D545 /* btn_findlocation_gray@2x.png in Resources */,
+				3232ED91146996B00086D545 /* USStateAbbreviations.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2937,6 +2976,8 @@
 				32719BD61458A05F0047B81C /* NSString+URLEncode.m in Sources */,
 				32719BDD1458A3670047B81C /* KwiqetGeocoder.m in Sources */,
 				32719BE41458A5470047B81C /* CustomPlacemark.m in Sources */,
+				326E201914687E780056623C /* UserLocation.m in Sources */,
+				3232ED94146997400086D545 /* LocationUtil.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3141,9 +3182,10 @@
 				32A0C8A913E353C300F5DDDC /* kwiqet 008.xcdatamodel */,
 				32ABA3BD141FC33B003523DA /* kwiqet 009.xcdatamodel */,
 				32C7810514605C3900AAAAF2 /* kwiqet 010.xcdatamodel */,
+				326E20151468798C0056623C /* kwiqet 011.xcdatamodel */,
 				32FD364E13AFF3B6007549B6 /* kwiqet 001.xcdatamodel */,
 			);
-			currentVersion = 32C7810514605C3900AAAAF2 /* kwiqet 010.xcdatamodel */;
+			currentVersion = 326E20151468798C0056623C /* kwiqet 011.xcdatamodel */;
 			path = kwiqet.xcdatamodeld;
 			sourceTree = "<group>";
 			versionGroupType = wrapper.xcdatamodel;

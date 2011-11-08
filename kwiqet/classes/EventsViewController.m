@@ -16,6 +16,7 @@
 #import "Analytics.h"
 #import "EventResult.h"
 #import "UIFont+Kwiqet.h"
+#import "LocationUtil.h"
 
 static NSString * const EVENTS_OLDFILTER_RECOMMENDED = @"recommended";
 static NSString * const EVENTS_CATEGORY_BUTTON_TOUCH_POSTFIX = @"_touch";
@@ -3427,28 +3428,9 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     self.setLocationViewController = nil;
 }
 
-- (void) setLocationViewController:(SetLocationViewController *)setLocationViewController didSelectLocation:(BSKmlResult *)location {
-    [self.dvLocationSetLocationButton setTitle:location.address forState:UIControlStateNormal];
-    [self.dvLocationSearchSetLocationButton setTitle:location.address forState:UIControlStateNormal];
-    [self dismissModalViewControllerAnimated:YES];
-    self.setLocationViewController = nil;
-    /* THE FOLLOWING CODE IS DUPLICATED SEVERAL PLACES IN EVENTSVIEWCONTROLLER */
-    self.shouldReloadOnDrawerClose = YES;
-    [self setDrawerReloadIndicatorViewIsVisible:self.shouldReloadOnDrawerClose animated:self.isDrawerOpen];
-    
-    if (!self.isSearchOn) {
-        self.eventsSummaryStringBrowse = [self makeEventsSummaryStringForSource:EVENTS_SOURCE_BROWSE];
-        [self setFeedbackViewMessageType:CloseDrawerToLoadPrompt eventsSummaryString:self.eventsSummaryStringBrowse searchString:nil animated:YES];
-    } else {
-        self.eventsSummaryStringSearch = [self makeEventsSummaryStringForSource:EVENTS_SOURCE_SEARCH];
-        [self setFeedbackViewMessageType:CloseDrawerToLoadPrompt eventsSummaryString:self.eventsSummaryStringSearch searchString:self.searchTextField.text animated:YES];
-    }
-    /* THE PREVIOUS CODE IS DUPLICATED SEVERAL PLACES IN EVENTSVIEWCONTROLLER */
-}
-
-- (void) setLocationViewController:(SetLocationViewController *)setLocationViewController didSelectCurrentLocation:(CLLocation *)location {
-    [self.dvLocationSetLocationButton setTitle:@"Current Location" forState:UIControlStateNormal];
-    [self.dvLocationSearchSetLocationButton setTitle:@"Current Location" forState:UIControlStateNormal];
+- (void)setLocationViewController:(SetLocationViewController *)setLocationViewController didSelectUserLocation:(UserLocation *)location {
+    [self.dvLocationSetLocationButton setTitle:location.addressFormatted forState:UIControlStateNormal];
+    [self.dvLocationSearchSetLocationButton setTitle:location.addressFormatted forState:UIControlStateNormal];
     [self dismissModalViewControllerAnimated:YES];
     self.setLocationViewController = nil;
     /* THE FOLLOWING CODE IS DUPLICATED SEVERAL PLACES IN EVENTSVIEWCONTROLLER */
@@ -3488,6 +3470,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     if (self.setLocationViewController == nil) {
         setLocationViewController_ = [[SetLocationViewController alloc] initWithNibName:@"SetLocationViewController" bundle:[NSBundle mainBundle]];
     }
+    self.setLocationViewController.coreDataModel = self.coreDataModel;
     self.setLocationViewController.delegate = self;
     self.setLocationViewController.hidesBottomBarWhenPushed = YES;
     [self presentModalViewController:self.setLocationViewController animated:YES];

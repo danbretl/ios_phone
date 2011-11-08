@@ -14,6 +14,8 @@
 - (NSArray *) getEventsForPredicate:(NSPredicate *)predicate;
 - (void) deleteEventsForPredicate:(NSPredicate *)predicate;
 - (EventsWebQuery *) getMostRecentEventsWebQueryWithPredicate:(NSPredicate *)predicate;
+- (NSArray *) getRecentUserLocationsWithPredicate:(NSPredicate *)predicate;
+- (UserLocation *) getMostRecentUserLocationFromRecentLocationsArray:(NSArray *)recentUserLocations;
 @end
 
 @implementation CoreDataModel
@@ -818,6 +820,77 @@
     NSArray * sortDescriptors = [NSArray arrayWithObject:
                                  [NSSortDescriptor sortDescriptorWithKey:@"fbName" ascending:YES]];
     return [self getAllObjectsForEntityName:@"Contact" predicate:predicate sortDescriptors:sortDescriptors];
+}
+
+////////////////////
+// USER LOCATIONS //
+////////////////////
+
+- (void) addSeedUserLocationNYC {
+    [self addUserLocationThatIsManual:YES withLatitude:40.7358633 longitude:-73.9910835 addressFormatted:@"Union Square, New York, NY, USA" typeGoogle:@"neighborhood"];
+}
+
+- (UserLocation *) addUserLocationThatIsManual:(BOOL)isManual withLatitude:(CLLocationDegrees)latitude longitude:(CLLocationDegrees)longitude addressFormatted:(NSString *)addressFormatted typeGoogle:(NSString *)typeGoogle {
+    UserLocation * userLocationObject = [NSEntityDescription insertNewObjectForEntityForName:@"UserLocation" inManagedObjectContext:self.managedObjectContext];
+    [self updateUserLocation:userLocationObject isManual:isManual latitude:latitude longitude:longitude addressFormatted:addressFormatted typeGoogle:typeGoogle updateDatetimeRecorded:YES updateDatetimeLastUsed:YES];
+    return userLocationObject;
+}
+
+- (void) updateUserLocation:(UserLocation *)location isManual:(BOOL)isManual latitude:(CLLocationDegrees)latitude longitude:(CLLocationDegrees)longitude addressFormatted:(NSString *)addressFormatted typeGoogle:(NSString *)typeGoogle updateDatetimeRecorded:(BOOL)shouldUpdateDatetimeRecorded updateDatetimeLastUsed:(BOOL)shouldUpdateDatetimeLastUsed {
+    
+    if (shouldUpdateDatetimeRecorded || shouldUpdateDatetimeLastUsed) {
+        NSDate * now = [NSDate date];
+        if (shouldUpdateDatetimeRecorded) { location.datetimeRecorded = now; }
+        if (shouldUpdateDatetimeLastUsed) { location.datetimeLastUsed = now; }
+    }
+    
+    location.isManual = [NSNumber numberWithBool:isManual];
+    location.latitude = [NSNumber numberWithDouble:latitude];
+    location.longitude = [NSNumber numberWithDouble:longitude];
+    location.addressFormatted = addressFormatted;
+    location.typeGoogle = typeGoogle;
+    location.typeKwiqet = @"Unknown_NotYetImplemented"; // Not yet implemented! Not yet implemented! Not yet implemented! Not yet implemented! Not yet implemented! Not yet implemented! Not yet implemented! Not yet implemented! Not yet implemented! Not yet implemented! Not yet implemented! Not yet implemented! Not yet implemented! Not yet implemented! Not yet implemented! Not yet implemented! Not yet implemented! Not yet implemented!
+}
+
+- (void)updateUserLocationLastUseDate:(UserLocation *)location {
+    location.datetimeLastUsed = [NSDate date];
+}
+
+- (NSArray *) getRecentUserLocationsWithPredicate:(NSPredicate *)predicate {
+    NSArray * recentUserLocations = [self getAllObjectsForEntityName:@"UserLocation" predicate:predicate sortDescriptors:[NSArray arrayWithObject:[NSSortDescriptor sortDescriptorWithKey:@"datetimeLastUsed" ascending:NO]]];
+    return recentUserLocations;
+}
+
+- (NSArray *) getRecentUserLocations {
+    return [self getRecentUserLocationsWithPredicate:nil];
+}
+
+- (NSArray *) getRecentAutoUserLocations {
+    return [self getRecentUserLocationsWithPredicate:[NSPredicate predicateWithFormat:@"isManual == NO"]];
+}
+
+- (NSArray *) getRecentManualUserLocations {
+    return [self getRecentUserLocationsWithPredicate:[NSPredicate predicateWithFormat:@"isManual == YES"]];
+}
+
+- (UserLocation *) getMostRecentUserLocationFromRecentLocationsArray:(NSArray *)recentUserLocations {
+    UserLocation * mostRecentUserLocation = nil;
+    if (recentUserLocations && recentUserLocations.count > 0) {
+        mostRecentUserLocation = [recentUserLocations objectAtIndex:0];
+    }
+    return mostRecentUserLocation;
+}
+
+- (UserLocation *) getMostRecentUserLocation {
+    return [self getMostRecentUserLocationFromRecentLocationsArray:[self getRecentUserLocations]];
+}
+
+- (UserLocation *) getMostRecentAutoUserLocation {
+    return [self getMostRecentUserLocationFromRecentLocationsArray:[self getRecentAutoUserLocations]];
+}
+
+- (UserLocation *) getMostRecentManualUserLocation {
+    return [self getMostRecentUserLocationFromRecentLocationsArray:[self getRecentManualUserLocations]];
 }
 
 @end

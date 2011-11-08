@@ -17,6 +17,8 @@
 #import "Place.h"
 #import "Price.h"
 #import "EventsWebQuery.h"
+#import "UserLocation.h"
+#import <CoreLocation/CoreLocation.h>
 
 @interface CoreDataModel : NSObject {
     
@@ -107,5 +109,17 @@
 - (void) addOrUpdateContactsFromFacebook:(NSArray *)fbContacts deleteOthers:(BOOL)shouldDeleteOthers;
 - (NSArray *) getAllContacts;
 - (NSArray *) getAllFacebookContacts;
+
+// User Locations
+- (void) addSeedUserLocationNYC;
+- (UserLocation *) addUserLocationThatIsManual:(BOOL)isManual withLatitude:(CLLocationDegrees)latitude longitude:(CLLocationDegrees)longitude addressFormatted:(NSString *)addressFormatted typeGoogle:(NSString *)typeGoogle;
+- (void) updateUserLocation:(UserLocation *)location isManual:(BOOL)isManual latitude:(CLLocationDegrees)latitude longitude:(CLLocationDegrees)longitude addressFormatted:(NSString *)addressFormatted typeGoogle:(NSString *)typeGoogle updateDatetimeRecorded:(BOOL)shouldUpdateDatetimeRecorded updateDatetimeLastUsed:(BOOL)shouldUpdateDatetimeLastUsed;
+- (void) updateUserLocationLastUseDate:(UserLocation *)location;
+- (NSArray *) getRecentUserLocations;
+- (NSArray *) getRecentAutoUserLocations;
+- (NSArray *) getRecentManualUserLocations;
+- (UserLocation *) getMostRecentUserLocation;
+- (UserLocation *) getMostRecentAutoUserLocation;
+- (UserLocation *) getMostRecentManualUserLocation;
 
 @end

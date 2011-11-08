@@ -21,6 +21,7 @@
 @dynamic searchTerm;
 @dynamic eventResults;
 @dynamic filterCategories;
+@dynamic filterLocation;
 
 - (NSArray *)eventResultsInOrder {
     return [self.eventResults sortedArrayUsingDescriptors:[NSArray arrayWithObject:[NSSortDescriptor sortDescriptorWithKey:@"order" ascending:YES]]];

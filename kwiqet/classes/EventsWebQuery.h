@@ -9,7 +9,7 @@
 #import <Foundation/Foundation.h>
 #import <CoreData/CoreData.h>
 
-@class Category, EventResult;
+@class Category, EventResult, UserLocation;
 
 @interface EventsWebQuery : NSManagedObject {
 @private
@@ -23,6 +23,7 @@
 @property (nonatomic, retain) NSString * searchTerm;
 @property (nonatomic, retain) NSSet * eventResults;
 @property (nonatomic, retain) NSSet * filterCategories;
+@property (nonatomic, retain) UserLocation * filterLocation;
 @end
 
 @interface EventsWebQuery (CoreDataGeneratedAccessors)

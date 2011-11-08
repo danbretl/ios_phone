@@ -35,6 +35,12 @@
     BugSenseCrashController * crash = [BugSenseCrashController sharedInstanceWithBugSenseAPIKey:@"9a6d3e3b"];
     NSLog(@"Created bugSenseCrashController %@", crash);
     
+    BOOL previousUserLocationExists = [self.coreDataModel getMostRecentUserLocation] != nil;
+    if (!previousUserLocationExists) {
+        [self.coreDataModel addSeedUserLocationNYC]; // This should obviously change / become more sophisticated once we operate in cities other than NYC.
+        [self.coreDataModel coreDataSave];
+    }
+    
     // Setup stuff
 //    // Caching...
 //    NSLog(@"%d", [[NSURLCache sharedURLCache] memoryCapacity]);

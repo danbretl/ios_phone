@@ -20,10 +20,20 @@
 @property (retain) UITableView * locationsTableView;
 @property (retain) UIImageView * locationsWindowImageView;
 
+@property (nonatomic, readonly) UIAlertView * locationManagerTimerAlertView;
 @property (retain) WebActivityView * webActivityView;
 
+@property (retain) NSTimer * locationManagerTimer;
+- (void) locationManagerTimerDidFire:(NSTimer *)theTimer;
 @property (nonatomic, readonly) BSForwardGeocoder * forwardGeocoder;
-@property (retain) NSArray * matchedLocations;
+@property (retain) MKReverseGeocoder * reverseGeocoder;
+@property (retain) NSArray * matchedLocations; // Array of BSKmlResult objects
+@property (retain) NSArray * recentLocations; // Array of UserLocation objects
+@property (retain) CLLocation * currentLocation;
+@property (copy) NSString * currentLocationAddress;
+
+@property (nonatomic, readonly) NSDateFormatter * recentLocationsDateFormatter;
+@property (nonatomic, readonly) NSDateFormatter * recentLocationsTimeFormatter;
 
 - (IBAction) cancelButtonTouched:(UIButton *)sender;
 - (void) keyboardWillHide:(NSNotification *)notification;
@@ -32,6 +42,10 @@
 - (void) setWebActivityViewIsVisible:(BOOL)isVisible;
 
 - (void) releaseReconstructableViews;
+
+- (void) didSelectCurrentLocation:(CLLocation *)location withReverseGeocodedInfo:(MKPlacemark *)reverseGeocodedPlacemark;
+- (void) didSelectNewMatchedLocation:(BSKmlResult *)location;
+- (void) didSelectOldRecentLocation:(UserLocation *)location;
 
 @end
 
@@ -46,13 +60,24 @@
 @synthesize locationsTableView=locationsTableView_;
 @synthesize locationsWindowImageView=locationsWindowImageView_;
 
+@synthesize locationManagerTimerAlertView=locationManagerTimerAlertView_;
 @synthesize webActivityView=webActivityView_;
 
 @synthesize delegate=delegate_;
 
 @synthesize locationManager=locationManager_;
+@synthesize locationManagerTimer=locationManagerTimer_;
 @synthesize forwardGeocoder=forwardGeocoder_;
+@synthesize reverseGeocoder=reverseGeocoder_;
 @synthesize matchedLocations=matchedLocations_;
+@synthesize recentLocations=recentLocations_;
+@synthesize currentLocation=currentLocation_;
+@synthesize currentLocationAddress=currentLocationAddress_;
+
+@synthesize recentLocationsDateFormatter=recentLocationsDateFormatter_;
+@synthesize recentLocationsTimeFormatter=recentLocationsTimeFormatter_;
+
+@synthesize coreDataModel=coreDataModel_;
 
 - (id) initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
@@ -66,8 +91,16 @@
 - (void) dealloc {
     [self releaseReconstructableViews];
     [locationManager_ release];
+    [locationManagerTimer_ release];
     [matchedLocations_ release];
+    [recentLocations_ release];
     [forwardGeocoder_ release];
+    [reverseGeocoder_ release];
+    [currentLocation_ release];
+    [currentLocationAddress_ release];
+    [coreDataModel_ release];
+    [recentLocationsDateFormatter_ release];
+    [recentLocationsTimeFormatter_ release];
     [super dealloc];
 }
 
@@ -81,6 +114,7 @@
     self.locationsTableView = nil;
     self.locationsWindowImageView = nil;
     
+    [locationManagerTimerAlertView_ release];
     self.webActivityView = nil;
 }
 
@@ -97,7 +131,10 @@
 - (void) viewDidLoad
 {
     [super viewDidLoad];
-    // Do any additional setup after loading the view from its nib.
+    
+    self.recentLocations = [self.coreDataModel getRecentManualUserLocations];
+    [self.locationsTableView reloadData];
+    
     UIImage * windowImageToStretch = [UIImage imageNamed:@"stretchable_faceplate.png"];
     if ([windowImageToStretch respondsToSelector:@selector(resizableImageWithCapInsets:)]) {
         windowImageToStretch = [windowImageToStretch resizableImageWithCapInsets:UIEdgeInsetsMake(26, 25, 26, 25)];
@@ -140,6 +177,22 @@
 {
     // Return YES for supported orientations
     return (interfaceOrientation == UIInterfaceOrientationPortrait);
+}
+
+- (NSDateFormatter *)recentLocationsDateFormatter {
+    if (recentLocationsDateFormatter_ == nil) {
+        recentLocationsDateFormatter_ = [[NSDateFormatter alloc] init];
+        [self.recentLocationsDateFormatter setDateFormat:@"MMM d, YYYY"];
+    }
+    return recentLocationsDateFormatter_;
+}
+
+- (NSDateFormatter *)recentLocationsTimeFormatter {
+    if (recentLocationsTimeFormatter_ == nil) {
+        recentLocationsTimeFormatter_ = [[NSDateFormatter alloc] init];
+        [self.recentLocationsTimeFormatter setDateFormat:@"h:mm a"];
+    }
+    return recentLocationsTimeFormatter_;
 }
 
 - (void) cancelButtonTouched:(UIButton *)sender {
@@ -209,6 +262,7 @@
     }
     self.matchedLocations = filteredArrayTempOnlyUSA;
     [self.locationsTableView reloadData];
+    [self.locationsTableView scrollToRowAtIndexPath:[NSIndexPath indexPathForRow:0 inSection:0] atScrollPosition:UITableViewScrollPositionTop animated:YES];
     [self setWebActivityViewIsVisible:NO];
 }
 
@@ -217,6 +271,16 @@
     [alertView show];
     [alertView release];
     [self setWebActivityViewIsVisible:NO];
+}
+
+- (void)reverseGeocoder:(MKReverseGeocoder *)geocoder didFindPlacemark:(MKPlacemark *)placemark {
+    NSLog(@"Reverse geocoder success");
+    [self didSelectCurrentLocation:self.currentLocation withReverseGeocodedInfo:placemark];
+}
+
+- (void)reverseGeocoder:(MKReverseGeocoder *)geocoder didFailWithError:(NSError *)error {
+    NSLog(@"Reverse geocoder error");
+    [self didSelectCurrentLocation:self.currentLocation withReverseGeocodedInfo:nil];
 }
 
 - (CLLocationManager *)locationManager {
@@ -228,17 +292,86 @@
     return locationManager_;
 }
 
+- (UIAlertView *)locationManagerTimerAlertView {
+    if (locationManagerTimerAlertView_ == nil) {
+        locationManagerTimerAlertView_ = [[UIAlertView alloc] initWithTitle:@"Error finding location" message:@"We are having trouble finding your current location. Would you like to keep trying, or else enter your location manually?" delegate:self cancelButtonTitle:@"Manual" otherButtonTitles:@"Keep Trying", nil];
+    }
+    return locationManagerTimerAlertView_;
+}
+
+- (void)locationManagerTimerDidFire:(NSTimer *)theTimer {
+    [self.locationManager stopUpdatingLocation];
+    self.currentLocation = self.locationManager.location;
+    self.currentLocationAddress = nil;
+    BOOL showAlertView = self.currentLocation == nil;
+    if (self.currentLocation != nil) {
+        NSTimeInterval howRecent = [self.currentLocation.timestamp timeIntervalSinceNow];
+        BOOL isRecent = (abs(howRecent) < 15.0); // Locations from the last 15 seconds are considered to be "recent enough" to be accurate.
+        BOOL isModeratelyAccurate = self.currentLocation.horizontalAccuracy <= 250; // Locations with an accuracy less than or equal to 250 meters are considered to be accurate. (We have lowered our standards since the timer has fired.)
+        BOOL isAcceptable = (isRecent && isModeratelyAccurate);
+        showAlertView = !isAcceptable;
+        if (isAcceptable) {
+            NSLog(@"SetLocationViewController locationManager took too long to determine current location. Timer fired, current location with lat/lon (%+.6f, %+.6f) accepted (howRecent=%f, howAccurate=%f) is good enough.", self.currentLocation.coordinate.latitude, self.currentLocation.coordinate.longitude, howRecent, self.currentLocation.horizontalAccuracy);
+            self.reverseGeocoder = [[MKReverseGeocoder alloc] initWithCoordinate:self.currentLocation.coordinate];
+            self.reverseGeocoder.delegate = self;
+            [self.reverseGeocoder start];        
+        } else {
+            NSLog(@"SetLocationViewController locationManager took too long to determine current location. Timer fired, current location with lat/lon (%+.6f, %+.6f) not accepted (howRecent=%f, howAccurate=%f) - still not good enough. Providing user with some options on how to proceed.", self.currentLocation.coordinate.latitude, self.currentLocation.coordinate.longitude, howRecent, self.currentLocation.horizontalAccuracy);
+        }
+    }
+    if (showAlertView) {
+        if (self.currentLocation == nil) {
+            NSLog(@"SetLocationViewController locationManager took too long to determine current location, and we don't have a fallback location to use. Providing the user with some options on how to proceed.");
+        }
+        [self.locationManagerTimerAlertView show];
+    }
+}
+
+- (void)alertView:(UIAlertView *)alertView didDismissWithButtonIndex:(NSInteger)buttonIndex {
+    if (alertView == self.locationManagerTimerAlertView) {
+        if (buttonIndex == alertView.cancelButtonIndex) {
+            // Enter manual location
+            [self setWebActivityViewIsVisible:NO];
+            [self.locationsTableView deselectRowAtIndexPath:self.locationsTableView.indexPathForSelectedRow animated:NO];
+        } else {
+            // Keep trying to determine current location
+            [self setWebActivityViewIsVisible:YES];
+            self.locationManagerTimer = [NSTimer scheduledTimerWithTimeInterval:5.0 target:self selector:@selector(locationManagerTimerDidFire:) userInfo:nil repeats:NO];
+            [self.locationManager startUpdatingLocation];
+        }
+    }
+}
+
+- (void)locationManager:(CLLocationManager *)manager didChangeAuthorizationStatus:(CLAuthorizationStatus)status {
+    NSLog(@"SetLocationViewController locationManager didChangeAuthorizationStatus=%d whichIsAuthorized?=%d", status, status == kCLAuthorizationStatusAuthorized);
+    if (manager == self.locationManager &&
+        status == kCLAuthorizationStatusAuthorized) {
+        if (!(self.locationManagerTimer && [self.locationManagerTimer isValid])) {
+            self.locationManagerTimer = [NSTimer scheduledTimerWithTimeInterval:5.0 target:self selector:@selector(locationManagerTimerDidFire:) userInfo:nil repeats:NO];
+        }
+    }
+}
+
 - (void)locationManager:(CLLocationManager *)manager didUpdateToLocation:(CLLocation *)newLocation fromLocation:(CLLocation *)oldLocation {
     NSLog(@"SetLocationViewController locationManager didUpdateToLocation");
     NSTimeInterval howRecent = [newLocation.timestamp timeIntervalSinceNow];
     BOOL isRecent = (abs(howRecent) < 15.0); // Locations from the last 15 seconds are considered to be "recent enough" to be accurate.
-    BOOL isAccurate = newLocation.horizontalAccuracy <= 400; // Locations with an accuracy less than or equal to 400 meters are considered to be accurate.
+    BOOL isAccurate = newLocation.horizontalAccuracy <= 50; // Locations with an accuracy less than or equal to 50 meters are considered to be accurate.
+    self.currentLocation = newLocation;
     if (isRecent && isAccurate) {
+        NSLog(@"Location with lat/lon (%+.6f, %+.6f) accepted ::: howRecent=%f, howAccurate=%f", newLocation.coordinate.latitude, newLocation.coordinate.longitude, howRecent, newLocation.horizontalAccuracy);
         // Accept this event
         [self.locationManager stopUpdatingLocation];
-        [self.delegate setLocationViewController:self didSelectCurrentLocation:newLocation];
+        // Turn off the timer
+        [self.locationManagerTimer invalidate];
+        self.locationManagerTimer = nil;
+        // Reverse geocode the location
+        self.currentLocationAddress = nil;
+        self.reverseGeocoder = [[MKReverseGeocoder alloc] initWithCoordinate:self.currentLocation.coordinate];
+        self.reverseGeocoder.delegate = self;
+        [self.reverseGeocoder start];
     } else {
-        // Skip this event and wait for the next (hopefully more accurate) one...
+        // Skip this event (though we're holding onto the location anyway) and wait for the next (hopefully more accurate) one...
         NSLog(@"Location with lat/lon (%+.6f, %+.6f) not accepted ::: howRecent=%f, howAccurate=%f", newLocation.coordinate.latitude, newLocation.coordinate.longitude, howRecent, newLocation.horizontalAccuracy);
     }
 }
@@ -280,44 +413,9 @@
     if (section == 0) {
         numberOfRows = MAX(1, self.matchedLocations.count);
     } else {
-        numberOfRows = 1 /* + ... */;
-        // ...
-        // ...
-        // ...
+        numberOfRows = 1 + self.recentLocations.count;
     }
     return numberOfRows;
-}
-
-- (UITableViewCell *) tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
-    static NSString * LocationCellIdentifier = @"LocationCell";
-    UITableViewCell * cell = [tableView dequeueReusableCellWithIdentifier:LocationCellIdentifier];
-    if (cell == nil) {
-        cell = [[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:LocationCellIdentifier] autorelease];
-    }
-    cell.textLabel.font = [UIFont kwiqetFontOfType:LightNormal size:14.0];
-    cell.textLabel.textColor = [UIColor blackColor];
-    cell.detailTextLabel.font = [UIFont kwiqetFontOfType:LightNormal size:10.0];
-    if (indexPath.section == 0) {
-        if (self.matchedLocations.count == 0) {
-            cell.textLabel.text = @"No locations matched";
-            cell.detailTextLabel.text = @"Adjust your search term above";
-        } else {
-            BSKmlResult * location = [self.matchedLocations objectAtIndex:indexPath.row];
-            cell.textLabel.text = location.address;
-            cell.detailTextLabel.text = [NSString stringWithFormat:@"%f, %f", location.latitude, location.longitude];
-        }
-    } else {
-        if (indexPath.row == 0) {
-            cell.textLabel.textColor = [UIColor blueColor];
-            cell.textLabel.text = @"Current Location";
-            cell.detailTextLabel.text = nil;
-        } else {
-            // ...
-            // ...
-            // ...
-        }
-    }
-    return cell;
 }
 
 - (NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section {
@@ -328,6 +426,41 @@
         sectionTitle = @"Recent locations";
     }
     return sectionTitle;
+}
+
+- (UITableViewCell *) tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
+    static NSString * LocationCellIdentifier = @"LocationCell";
+    UITableViewCell * cell = [tableView dequeueReusableCellWithIdentifier:LocationCellIdentifier];
+    if (cell == nil) {
+        cell = [[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:LocationCellIdentifier] autorelease];
+        cell.textLabel.font = [UIFont kwiqetFontOfType:LightNormal size:14.0];
+        cell.detailTextLabel.font = [UIFont kwiqetFontOfType:LightNormal size:10.0];
+    }
+    cell.textLabel.textColor = [UIColor blackColor];
+    cell.selectionStyle = (indexPath.section == 0 && self.matchedLocations.count == 0) ? UITableViewCellSelectionStyleNone : UITableViewCellSelectionStyleBlue;
+    if (indexPath.section == 0) {
+        if (self.matchedLocations.count == 0) {
+            cell.textLabel.text = @"No locations matched";
+            cell.detailTextLabel.text = @"Adjust your search term above or select a recent location below";
+        } else {
+            BSKmlResult * location = [self.matchedLocations objectAtIndex:indexPath.row];
+            cell.textLabel.text = location.address;
+            cell.detailTextLabel.text = nil;
+//            cell.detailTextLabel.text = [NSString stringWithFormat:@"%f, %f", location.latitude, location.longitude]; // Debugging
+        }
+    } else {
+        if (indexPath.row == 0) {
+            cell.textLabel.textColor = [UIColor blueColor];
+            cell.textLabel.text = @"Current Location";
+            cell.detailTextLabel.text = nil;
+        } else {
+            UserLocation * recentLocation = [self.recentLocations objectAtIndex:indexPath.row - 1];
+            cell.textLabel.text = recentLocation.addressFormatted;
+            cell.detailTextLabel.text = [NSString stringWithFormat:@"%@ at %@", [self.recentLocationsDateFormatter stringFromDate:recentLocation.datetimeLastUsed], [self.recentLocationsTimeFormatter stringFromDate:recentLocation.datetimeLastUsed]];
+//            cell.detailTextLabel.text = [NSString stringWithFormat:@"%f, %f", recentLocation.latitude.doubleValue, recentLocation.longitude.doubleValue]; // Debugging
+        }
+    }
+    return cell;
 }
 
 - (NSIndexPath *)tableView:(UITableView *)tableView willSelectRowAtIndexPath:(NSIndexPath *)indexPath {
@@ -341,7 +474,7 @@
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     if (indexPath.section == 0) {
-        [self.delegate setLocationViewController:self didSelectLocation:[self.matchedLocations objectAtIndex:indexPath.row]];
+        [self didSelectNewMatchedLocation:[self.matchedLocations objectAtIndex:indexPath.row]];
     } else {
         if (indexPath.row == 0) {
             if ([CLLocationManager authorizationStatus] == kCLAuthorizationStatusRestricted ||
@@ -358,14 +491,46 @@
                 [self.locationsTableView deselectRowAtIndexPath:self.locationsTableView.indexPathForSelectedRow animated:NO];
             } else {
                 [self setWebActivityViewIsVisible:YES];
+                if ([CLLocationManager authorizationStatus] == kCLAuthorizationStatusAuthorized) {
+                    self.locationManagerTimer = [NSTimer scheduledTimerWithTimeInterval:5.0 target:self selector:@selector(locationManagerTimerDidFire:) userInfo:nil repeats:NO];
+                }
                 [self.locationManager startUpdatingLocation];
             }
         } else {
-            // ...
-            // ...
-            // ...
+            [self didSelectOldRecentLocation:[self.recentLocations objectAtIndex:indexPath.row - 1]];
         }
     }
+}
+
+- (void) didSelectCurrentLocation:(CLLocation *)location withReverseGeocodedInfo:(MKPlacemark *)reverseGeocodedPlacemark {
+    
+    NSMutableString * addressFormatted = [NSMutableString string];
+    BOOL first = YES;
+    for (NSString * addressLine in [reverseGeocodedPlacemark.addressDictionary valueForKey:@"FormattedAddressLines"]) {
+        [addressFormatted appendFormat:@"%@%@", first ? @"" : @", ", addressLine];
+        first = NO;
+    }
+    
+    UserLocation * userLocationObject = [self.coreDataModel addUserLocationThatIsManual:NO withLatitude:location.coordinate.latitude longitude:location.coordinate.longitude addressFormatted:addressFormatted typeGoogle:@"unknown-unknown-unknown"];
+    [self.coreDataModel coreDataSave];
+    [self.delegate setLocationViewController:self didSelectUserLocation:userLocationObject];
+    
+}
+
+- (void) didSelectNewMatchedLocation:(BSKmlResult *)location {
+    
+    UserLocation * userLocationObject = [self.coreDataModel addUserLocationThatIsManual:YES withLatitude:location.latitude longitude:location.longitude addressFormatted:location.address typeGoogle:@"unknown-unknown-unknown"];
+    [self.coreDataModel coreDataSave];
+    [self.delegate setLocationViewController:self didSelectUserLocation:userLocationObject];
+    
+}
+
+- (void) didSelectOldRecentLocation:(UserLocation *)location {
+    
+    [self.coreDataModel updateUserLocationLastUseDate:location];
+    [self.coreDataModel coreDataSave];
+    [self.delegate setLocationViewController:self didSelectUserLocation:location];
+    
 }
                  
 @end
