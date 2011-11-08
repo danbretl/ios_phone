@@ -456,7 +456,7 @@
         } else {
             UserLocation * recentLocation = [self.recentLocations objectAtIndex:indexPath.row - 1];
             cell.textLabel.text = recentLocation.addressFormatted;
-            cell.detailTextLabel.text = [NSString stringWithFormat:@"%@ at %@", [self.recentLocationsDateFormatter stringFromDate:recentLocation.datetimeLastUsed], [self.recentLocationsTimeFormatter stringFromDate:recentLocation.datetimeLastUsed]];
+            cell.detailTextLabel.text = [NSString stringWithFormat:@"Last used %@ at %@", [self.recentLocationsDateFormatter stringFromDate:recentLocation.datetimeLastUsed], [self.recentLocationsTimeFormatter stringFromDate:recentLocation.datetimeLastUsed]];
 //            cell.detailTextLabel.text = [NSString stringWithFormat:@"%f, %f", recentLocation.latitude.doubleValue, recentLocation.longitude.doubleValue]; // Debugging
         }
     }
