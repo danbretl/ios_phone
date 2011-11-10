@@ -8,6 +8,7 @@
 
 #import "LocationUpdatedFeedbackView.h"
 #import "UIFont+Kwiqet.h"
+#import <QuartzCore/QuartzCore.h>
 
 double const LUFV_ANIMATION_DURATION = 0.25;
 CGFloat const LUFV_LABEL_PADDING_LEFT = 6.0; // Not sure why this looks better, but it does. There is just more space after a lowercase "o" than before a lowercase "u", I guess.
@@ -18,12 +19,14 @@ CGFloat const LUFV_LABEL_PADDING_RIGHT = 5.0;
 @property (retain) UILabel * label;
 @property (retain) UIImageView * backgroundImageView;
 @property (retain) UIImageView * foregroundImageView;
+@property (retain) UIView * shadow;
 @property LocationUpdatedFeedbackMessageType messageType;
 @end
 
 @implementation LocationUpdatedFeedbackView
 
 @synthesize label=label_, backgroundImageView=backgroundImageView_, foregroundImageView=foregroundImageView_;
+@synthesize shadow=shadow_;
 @synthesize messageType=messageType_;
 
 - (id)initWithFrame:(CGRect)frame
@@ -79,12 +82,23 @@ CGFloat const LUFV_LABEL_PADDING_RIGHT = 5.0;
     self.foregroundImageView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleBottomMargin;
     [self insertSubview:self.foregroundImageView aboveSubview:self.label];
     
+    shadow_ = [[UIView alloc] initWithFrame:self.bounds];
+    self.shadow.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+    self.shadow.layer.shadowColor = [UIColor blackColor].CGColor;
+    self.shadow.layer.shadowOffset = CGSizeMake(0, 1.0);
+    self.shadow.layer.shadowOpacity = 0.15;
+    self.shadow.layer.shadowRadius = 1.0;
+    self.shadow.layer.shouldRasterize = YES;
+    self.shadow.layer.shadowPath = [UIBezierPath bezierPathWithRoundedRect:self.bounds cornerRadius:5.0].CGPath;
+    [self insertSubview:self.shadow belowSubview:self.backgroundImageView];
+    
 }
 
 - (void)dealloc {
     [label_ release];
     [backgroundImageView_ release];
     [foregroundImageView_ release];
+    [shadow_ release];
     [super dealloc];
 }
 

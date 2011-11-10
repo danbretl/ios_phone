@@ -19,6 +19,7 @@ typedef enum {
     UILabel * label_;
     UIImageView * backgroundImageView_;
     UIImageView * foregroundImageView_;
+    UIView * shadow_;
     
     LocationUpdatedFeedbackMessageType messageType_;
     
