@@ -162,6 +162,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 @property (retain) IBOutlet UIView * drawerViewLocation;
 @property (retain) IBOutlet UIButton * dvLocationSetLocationButton;
 @property (retain) IBOutlet UIButton * dvLocationCurrentLocationButton;
+@property (retain) IBOutlet LocationUpdatedFeedbackView * dvLocationUpdatedView;
 @property (retain) IBOutlet UIButtonWithOverlayView * dvLocationButtonWalking;
 @property (retain) IBOutlet UIButtonWithOverlayView * dvLocationButtonNeighborhood;
 @property (retain) IBOutlet UIButtonWithOverlayView * dvLocationButtonBorough;
@@ -170,6 +171,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 @property (retain) IBOutlet UIView * drawerViewLocationSearch;
 @property (retain) IBOutlet UIButton * dvLocationSearchSetLocationButton;
 @property (retain) IBOutlet UIButton * dvLocationSearchCurrentLocationButton;
+@property (retain) IBOutlet LocationUpdatedFeedbackView * dvLocationSearchUpdatedView;
 @property (retain) IBOutlet UIButtonWithOverlayView * dvLocationSearchButtonWalking;
 @property (retain) IBOutlet UIButtonWithOverlayView * dvLocationSearchButtonNeighborhood;
 @property (retain) IBOutlet UIButtonWithOverlayView * dvLocationSearchButtonBorough;
@@ -289,8 +291,8 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 @synthesize drawerViewCategories;
 @synthesize drawerViewTime, dvTimeButtonAny, dvTimeButtonMorning, dvTimeButtonAfternoon, dvTimeButtonEvening, dvTimeButtonNight;
 @synthesize drawerViewTimeSearch, dvTimeSearchButtonMorning, dvTimeSearchButtonAfternoon, dvTimeSearchButtonEvening, dvTimeSearchButtonNight, dvTimeSearchButtonAny;
-@synthesize drawerViewLocation, dvLocationSetLocationButton, dvLocationCurrentLocationButton, dvLocationButtonWalking, dvLocationButtonNeighborhood, dvLocationButtonBorough, dvLocationButtonCity;
-@synthesize drawerViewLocationSearch, dvLocationSearchSetLocationButton, dvLocationSearchCurrentLocationButton, dvLocationSearchButtonWalking, dvLocationSearchButtonNeighborhood, dvLocationSearchButtonBorough, dvLocationSearchButtonCity;
+@synthesize drawerViewLocation, dvLocationSetLocationButton, dvLocationCurrentLocationButton, dvLocationUpdatedView, dvLocationButtonWalking, dvLocationButtonNeighborhood, dvLocationButtonBorough, dvLocationButtonCity;
+@synthesize drawerViewLocationSearch, dvLocationSearchSetLocationButton, dvLocationSearchCurrentLocationButton, dvLocationSearchUpdatedView, dvLocationSearchButtonWalking, dvLocationSearchButtonNeighborhood, dvLocationSearchButtonBorough, dvLocationSearchButtonCity;
 @synthesize tableView=tableView_;
 @synthesize tableViewCoverViewContainer, tableViewCoverView, tableViewBackgroundView;
 @synthesize tableViewBackgroundViewContainer, tableViewStaticHeightBackgroundView;
@@ -498,6 +500,21 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     // Views settings - location drawers
     self.dvLocationSetLocationButton.titleLabel.font = [UIFont kwiqetFontOfType:BoldCondensed size:15.0];
     self.dvLocationSearchSetLocationButton.titleLabel.font = self.dvLocationSetLocationButton.titleLabel.font;
+    
+    // Views settings - location updated feedback views
+    // testing testing testing testing testing testing testing testing testing testing testing testing testing testing testing testing testing testing testing testing testing testing testing testing testing testing testing testing 
+    int testValue = 3;
+    NSTimeInterval timeInterval = -1;
+    switch (testValue) {
+        case 0: timeInterval = -45; break;
+        case 1: timeInterval = -783; break;
+        case 2: timeInterval = -8600; break;
+        case 3: timeInterval = -180000; break;
+        default: break;
+    }
+    [self.dvLocationUpdatedView setLabelTextToUpdatedDate:[NSDate dateWithTimeIntervalSinceNow:timeInterval] animated:NO];
+    [self.dvLocationSearchUpdatedView setLabelTextToUpdatedDate:[NSDate dateWithTimeIntervalSinceNow:timeInterval] animated:NO];
+    // testing testing testing testing testing testing testing testing testing testing testing testing testing testing testing testing testing testing testing testing testing testing testing testing testing testing testing testing 
     
     // Views allocation and settings - categories drawer view & its subviews
     int categoryOptionsCount = 9;
@@ -1108,6 +1125,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     self.drawerViewLocation = nil;
     self.dvLocationSetLocationButton = nil;
     self.dvLocationCurrentLocationButton = nil;
+    self.dvLocationUpdatedView = nil;
     self.dvLocationButtonWalking = nil;
     self.dvLocationButtonNeighborhood = nil;
     self.dvLocationButtonBorough = nil;
@@ -1116,6 +1134,7 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
     self.drawerViewLocationSearch = nil;
     self.dvLocationSearchSetLocationButton = nil;
     self.dvLocationSearchCurrentLocationButton = nil;
+    self.dvLocationSearchUpdatedView = nil;
     self.dvLocationSearchButtonWalking = nil;
     self.dvLocationSearchButtonNeighborhood = nil;
     self.dvLocationSearchButtonBorough = nil;
@@ -1173,9 +1192,11 @@ float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
         if (self.isSearchOn) {
             // Not going to do anything on this path for now... Just leave the list blank?
         } else {
-            //            NSLog(@"No events for current source, going to web-get events. No events for current source, going to web-get events. No events for current source, going to web-get events. No events for current source, going to web-get events. No events for current source, going to web-get events. No events for current source, going to web-get events. No events for current source, going to web-get events. No events for current source, going to web-get events. No events for current source, going to web-get events. No events for current source, going to web-get events.");
-            [self setFeedbackViewMessageType:LoadingEventsTrue eventsSummaryString:self.eventsSummaryStringBrowse searchString:nil animated:NO];
-            [self webConnectGetEventsListWithCurrentOldFilterAndCategory];
+            if (!self.isDrawerOpen) {
+                //            NSLog(@"No events for current source, going to web-get events. No events for current source, going to web-get events. No events for current source, going to web-get events. No events for current source, going to web-get events. No events for current source, going to web-get events. No events for current source, going to web-get events. No events for current source, going to web-get events. No events for current source, going to web-get events. No events for current source, going to web-get events. No events for current source, going to web-get events.");
+                [self setFeedbackViewMessageType:LoadingEventsTrue eventsSummaryString:self.eventsSummaryStringBrowse searchString:nil animated:NO];
+                [self webConnectGetEventsListWithCurrentOldFilterAndCategory];
+            }
         }
     } else {
         if (self.indexPathOfSelectedRow != nil) {

@@ -28,6 +28,7 @@
 @property (nonatomic, readonly) BSForwardGeocoder * forwardGeocoder;
 @property (retain) MKReverseGeocoder * reverseGeocoder;
 @property (retain) NSArray * matchedLocations; // Array of BSKmlResult objects
+@property BOOL matchLocationsRequestMade;
 @property (retain) NSArray * recentLocations; // Array of UserLocation objects
 @property (retain) CLLocation * currentLocation;
 @property (copy) NSString * currentLocationAddress;
@@ -70,6 +71,7 @@
 @synthesize forwardGeocoder=forwardGeocoder_;
 @synthesize reverseGeocoder=reverseGeocoder_;
 @synthesize matchedLocations=matchedLocations_;
+@synthesize matchLocationsRequestMade=matchLocationsRequestMade_;
 @synthesize recentLocations=recentLocations_;
 @synthesize currentLocation=currentLocation_;
 @synthesize currentLocationAddress=currentLocationAddress_;
@@ -84,6 +86,7 @@
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
     if (self) {
         // Custom initialization
+        self.matchLocationsRequestMade = NO;
     }
     return self;
 }
@@ -261,6 +264,7 @@
         }
     }
     self.matchedLocations = filteredArrayTempOnlyUSA;
+    self.matchLocationsRequestMade = YES;
     [self.locationsTableView reloadData];
     [self.locationsTableView scrollToRowAtIndexPath:[NSIndexPath indexPathForRow:0 inSection:0] atScrollPosition:UITableViewScrollPositionTop animated:YES];
     [self setWebActivityViewIsVisible:NO];
@@ -418,6 +422,12 @@
     return numberOfRows;
 }
 
+- (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
+    BOOL doubleRow = (indexPath.section == 0 && self.matchedLocations.count == 0) || (indexPath.section == 1 && indexPath.row != 0);
+    CGFloat rowHeight = doubleRow ? 42.0 : 32.0;
+    return rowHeight;    
+}
+
 - (NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section {
     NSString * sectionTitle = nil;
     if (section == 0) {
@@ -426,6 +436,26 @@
         sectionTitle = @"Recent locations";
     }
     return sectionTitle;
+}
+
+- (CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section {
+    return self.locationsTableView.sectionHeaderHeight;
+}
+
+- (UIView *)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section {
+    UIView * sectionHeaderView = [[UIView alloc] init];
+    sectionHeaderView.backgroundColor = [UIColor colorWithWhite:53.0/255.0 alpha:0.8];
+    UILabel * sectionHeaderTitleLabel = [[UILabel alloc] initWithFrame:CGRectMake(-10, 0, sectionHeaderView.frame.size.width, sectionHeaderView.frame.size.height)]; // Something weird going on with positioning / autoresizing...
+    sectionHeaderTitleLabel.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+    sectionHeaderTitleLabel.textAlignment = UITextAlignmentRight;
+    sectionHeaderTitleLabel.font = [UIFont kwiqetFontOfType:BoldCondensed size:14.0];
+    sectionHeaderTitleLabel.textColor = [UIColor colorWithWhite:241.0/255.0 alpha:1.0];
+    sectionHeaderTitleLabel.text = [self tableView:tableView titleForHeaderInSection:section];
+    sectionHeaderTitleLabel.backgroundColor = [UIColor clearColor];
+    [sectionHeaderView addSubview:sectionHeaderTitleLabel];
+    NSLog(@"%@ and %@", NSStringFromCGRect(sectionHeaderView.frame), NSStringFromCGRect(sectionHeaderTitleLabel.frame));
+    [sectionHeaderTitleLabel release];
+    return [sectionHeaderView autorelease];
 }
 
 - (UITableViewCell *) tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
@@ -440,8 +470,13 @@
     cell.selectionStyle = (indexPath.section == 0 && self.matchedLocations.count == 0) ? UITableViewCellSelectionStyleNone : UITableViewCellSelectionStyleBlue;
     if (indexPath.section == 0) {
         if (self.matchedLocations.count == 0) {
-            cell.textLabel.text = @"No locations matched";
-            cell.detailTextLabel.text = @"Adjust your search term above or select a recent location below";
+            if (!self.matchLocationsRequestMade) {
+                cell.textLabel.text = @"Enter a location above";
+                cell.detailTextLabel.text = @"Enter a search term, or select a recent location below";
+            } else {
+                cell.textLabel.text = @"No locations matched";
+                cell.detailTextLabel.text = @"Adjust your search term, or select a recent location below";
+            }
         } else {
             BSKmlResult * location = [self.matchedLocations objectAtIndex:indexPath.row];
             cell.textLabel.text = location.address;

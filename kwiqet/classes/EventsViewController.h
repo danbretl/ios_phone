@@ -21,6 +21,7 @@
 #import "EventsFeedbackView.h"
 #import <CoreLocation/CoreLocation.h>
 #import "SetLocationViewController.h"
+#import "LocationUpdatedFeedbackView.h"
 
 @interface EventsViewController : UIViewController <UITableViewDelegate, UITableViewDataSource, UIAlertViewDelegate, CardPageViewControllerDelegate, WebConnectorDelegate, UIScrollViewDelegate, UITextFieldDelegate, CLLocationManagerDelegate, SetLocationViewControllerDelegate> {
     
@@ -34,7 +35,6 @@
     NSArray * concreteParentCategoriesArray;
     NSDictionary * concreteParentCategoriesDictionary; // Dictionary of Category objects, with their URI's as their keys.
     CoreDataModel * coreDataModel;
-    CLLocationManager * locationManager;
     
     //////////////////
     // "View models"
@@ -154,6 +154,7 @@
     IBOutlet UIView * drawerViewLocation;
     IBOutlet UIButton * dvLocationSetLocationButton;
     IBOutlet UIButton * dvLocationCurrentLocationButton;
+    IBOutlet LocationUpdatedFeedbackView * dvLocationUpdatedView;
     IBOutlet UIButtonWithOverlayView * dvLocationButtonWalking;
     IBOutlet UIButtonWithOverlayView * dvLocationButtonNeighborhood;
     IBOutlet UIButtonWithOverlayView * dvLocationButtonBorough;
@@ -162,6 +163,7 @@
     IBOutlet UIView * drawerViewLocationSearch;
     IBOutlet UIButton * dvLocationSearchSetLocationButton;
     IBOutlet UIButton * dvLocationSearchCurrentLocationButton;
+    IBOutlet LocationUpdatedFeedbackView * dvLocationSearchUpdatedView;
     IBOutlet UIButtonWithOverlayView * dvLocationSearchButtonWalking;
     IBOutlet UIButtonWithOverlayView * dvLocationSearchButtonNeighborhood;
     IBOutlet UIButtonWithOverlayView * dvLocationSearchButtonBorough;
@@ -188,6 +190,14 @@
     
     WebConnector * webConnector;
     WebDataTranslator * webDataTranslator;
+    
+    /////////////
+    // Location
+    
+    CLLocationManager * locationManager;
+    UserLocation * userLocationForCurrentList;
+    UserLocation * userLocationForNextWebCall;
+    MKReverseGeocoder * reverseGeocoder;
 
 }
 

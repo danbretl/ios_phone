@@ -89,6 +89,11 @@
 		320557131457509500847D77 /* btn_setlocation@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 3205570B1457509500847D77 /* btn_setlocation@2x.png */; };
 		32055716145777B200847D77 /* stretchable_table_top.png in Resources */ = {isa = PBXBuildFile; fileRef = 32055714145777B100847D77 /* stretchable_table_top.png */; };
 		32055717145777B200847D77 /* stretchable_table_top@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 32055715145777B100847D77 /* stretchable_table_top@2x.png */; };
+		320850C2146AE91000062F36 /* LocationUpdatedFeedbackView.m in Sources */ = {isa = PBXBuildFile; fileRef = 320850C1146AE91000062F36 /* LocationUpdatedFeedbackView.m */; };
+		320850C6146AFDC100062F36 /* location_updated_feedback_stretchbg.png in Resources */ = {isa = PBXBuildFile; fileRef = 320850C4146AFDC100062F36 /* location_updated_feedback_stretchbg.png */; };
+		320850C7146AFDC100062F36 /* location_updated_feedback_stretchbg@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 320850C5146AFDC100062F36 /* location_updated_feedback_stretchbg@2x.png */; };
+		320850CA146B0BFD00062F36 /* location_updated_feedback_stretchgloss.png in Resources */ = {isa = PBXBuildFile; fileRef = 320850C8146B0BFD00062F36 /* location_updated_feedback_stretchgloss.png */; };
+		320850CB146B0BFD00062F36 /* location_updated_feedback_stretchgloss@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 320850C9146B0BFD00062F36 /* location_updated_feedback_stretchgloss@2x.png */; };
 		3211538F13B4E56500DE5163 /* FacebookManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 3211538E13B4E56500DE5163 /* FacebookManager.m */; };
 		3211539213B5252700DE5163 /* Contact.m in Sources */ = {isa = PBXBuildFile; fileRef = 3211539113B5252600DE5163 /* Contact.m */; };
 		32164D6E140D924800CAD71F /* btn_occurrence_date_disabled.png in Resources */ = {isa = PBXBuildFile; fileRef = 32164D5A140D924800CAD71F /* btn_occurrence_date_disabled.png */; };
@@ -656,6 +661,12 @@
 		3205570B1457509500847D77 /* btn_setlocation@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "btn_setlocation@2x.png"; sourceTree = "<group>"; };
 		32055714145777B100847D77 /* stretchable_table_top.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = stretchable_table_top.png; sourceTree = "<group>"; };
 		32055715145777B100847D77 /* stretchable_table_top@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "stretchable_table_top@2x.png"; sourceTree = "<group>"; };
+		320850C0146AE91000062F36 /* LocationUpdatedFeedbackView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LocationUpdatedFeedbackView.h; sourceTree = "<group>"; };
+		320850C1146AE91000062F36 /* LocationUpdatedFeedbackView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LocationUpdatedFeedbackView.m; sourceTree = "<group>"; };
+		320850C4146AFDC100062F36 /* location_updated_feedback_stretchbg.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = location_updated_feedback_stretchbg.png; sourceTree = "<group>"; };
+		320850C5146AFDC100062F36 /* location_updated_feedback_stretchbg@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "location_updated_feedback_stretchbg@2x.png"; sourceTree = "<group>"; };
+		320850C8146B0BFD00062F36 /* location_updated_feedback_stretchgloss.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = location_updated_feedback_stretchgloss.png; sourceTree = "<group>"; };
+		320850C9146B0BFD00062F36 /* location_updated_feedback_stretchgloss@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "location_updated_feedback_stretchgloss@2x.png"; sourceTree = "<group>"; };
 		3211538D13B4E56500DE5163 /* FacebookManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FacebookManager.h; sourceTree = "<group>"; };
 		3211538E13B4E56500DE5163 /* FacebookManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FacebookManager.m; sourceTree = "<group>"; };
 		3211539013B5252600DE5163 /* Contact.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Contact.h; path = classes/Contact.h; sourceTree = "<group>"; };
@@ -1536,6 +1547,10 @@
 		325033DE13D5C405006E872B /* EventsViewController */ = {
 			isa = PBXGroup;
 			children = (
+				320850C8146B0BFD00062F36 /* location_updated_feedback_stretchgloss.png */,
+				320850C9146B0BFD00062F36 /* location_updated_feedback_stretchgloss@2x.png */,
+				320850C4146AFDC100062F36 /* location_updated_feedback_stretchbg.png */,
+				320850C5146AFDC100062F36 /* location_updated_feedback_stretchbg@2x.png */,
 				3298994B145F418800583D21 /* event_cell_category_bar_border_right.png */,
 				3298994C145F418B00583D21 /* event_cell_category_bar_border_right@2x.png */,
 				32989947145F416400583D21 /* event_cell_border_bottom.png */,
@@ -1982,6 +1997,8 @@
 				32FD383D13AFF52F007549B6 /* EventTableViewCell.m */,
 				321A87AC1423AB7C0012EA4A /* EventsFeedbackView.h */,
 				321A87AD1423AB7C0012EA4A /* EventsFeedbackView.m */,
+				320850C0146AE91000062F36 /* LocationUpdatedFeedbackView.h */,
+				320850C1146AE91000062F36 /* LocationUpdatedFeedbackView.m */,
 			);
 			name = EventsViewController;
 			sourceTree = "<group>";
@@ -2875,6 +2892,10 @@
 				3232ED8A14697C0C0086D545 /* btn_findlocation_gray.png in Resources */,
 				3232ED8B14697C0C0086D545 /* btn_findlocation_gray@2x.png in Resources */,
 				3232ED91146996B00086D545 /* USStateAbbreviations.plist in Resources */,
+				320850C6146AFDC100062F36 /* location_updated_feedback_stretchbg.png in Resources */,
+				320850C7146AFDC100062F36 /* location_updated_feedback_stretchbg@2x.png in Resources */,
+				320850CA146B0BFD00062F36 /* location_updated_feedback_stretchgloss.png in Resources */,
+				320850CB146B0BFD00062F36 /* location_updated_feedback_stretchgloss@2x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2978,6 +2999,7 @@
 				32719BE41458A5470047B81C /* CustomPlacemark.m in Sources */,
 				326E201914687E780056623C /* UserLocation.m in Sources */,
 				3232ED94146997400086D545 /* LocationUtil.m in Sources */,
+				320850C2146AE91000062F36 /* LocationUpdatedFeedbackView.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

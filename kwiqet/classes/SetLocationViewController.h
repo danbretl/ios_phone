@@ -36,6 +36,7 @@
     BSForwardGeocoder * forwardGeocoder_;
     MKReverseGeocoder * reverseGeocoder_;
     NSArray * matchedLocations_; // Array of BSKmlResult objects
+    BOOL matchLocationsRequestMade_;
     NSArray * recentLocations_; // Array of UserLocation objects
     CLLocation * currentLocation_;
     NSString * currentLocationAddress_;
