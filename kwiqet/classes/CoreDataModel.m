@@ -318,7 +318,7 @@
 
 - (EventsWebQuery *) getMostRecentEventsWebQueryWithPredicate:(NSPredicate *)predicate {
     EventsWebQuery * mostRecentEventWebQuery = nil;
-    NSArray * eventsWebQueries = [self getAllObjectsForEntityName:@"EventsWebQuery" predicate:predicate sortDescriptors:[NSArray arrayWithObject:[NSSortDescriptor sortDescriptorWithKey:@"queryDatetime" ascending:NO]]];
+    NSArray * eventsWebQueries = [self getAllObjectsForEntityName:@"EventsWebQuery" predicate:predicate sortDescriptors:[NSArray arrayWithObject:[NSSortDescriptor sortDescriptorWithKey:@"datetimeQueryCreated" ascending:NO]]];
     if (eventsWebQueries && eventsWebQueries.count > 0) {
         mostRecentEventWebQuery = [eventsWebQueries objectAtIndex:0];
     }
@@ -329,16 +329,16 @@
     return [self getMostRecentEventsWebQueryWithPredicate:nil];
 }
 
-- (EventsWebQuery *) getMostRecentEventsWebQueryWithoutSearchTerm {
-    return [self getMostRecentEventsWebQueryWithPredicate:[NSPredicate predicateWithFormat:@"searchTerm == nil"]];
+- (EventsWebQuery *) getMostRecentEventsRecommendedWebQuery {
+    return [self getMostRecentEventsWebQueryWithPredicate:[NSPredicate predicateWithFormat:@"isSearchQuery == NO"]]; // Trying to play nice with older EventsWebQuery objects that didn't set the isSearchQuery attribute. I have set the isSearchQuery attribute to be not optional, but I don't know if Core Data automatically updates all old objects to have the default value for the new non-optional attribute. // UPDATE: According to Apple Docs, I think Core Data does play nice, so long as you give a default value for a new non-optional attribute. // UPDATE: Problem is that we don't want all older EventsWebQuery objects to automatically have isSearchQuery defaulted/updated to NO. So, for now we are going to leave the attribute as optional. Makes this method ugly, but oh well. Fix this later. // UPDATE: Screw it, leave the new boolean attribute as optional, and just forget about old EventsWebQuery objects. The only downsides are that it will cause a user on upgrade to possibly be thrown from search back to browse (before loading), or else have a new browse list loaded despite previously having one.
 }
 
-- (EventsWebQuery *) getMostRecentEventsWebQueryWithSearchTerm {
-    return [self getMostRecentEventsWebQueryWithPredicate:[NSPredicate predicateWithFormat:@"searchTerm != nil"]];
+- (EventsWebQuery *) getMostRecentEventsSearchWebQuery {
+    return [self getMostRecentEventsWebQueryWithPredicate:[NSPredicate predicateWithFormat:@"isSearchQuery == YES"]]; // Trying to play nice with older EventsWebQuery objects that didn't set the isSearchQuery attribute. I have set the isSearchQuery attribute to be not optional, but I don't know if Core Data automatically updates all old objects to have the default value for the new non-optional attribute. // UPDATE: According to Apple Docs, I think Core Data does play nice, so long as you give a default value for a new non-optional attribute. // UPDATE: Problem is that we don't want all older EventsWebQuery objects to automatically have isSearchQuery defaulted/updated to NO. So, for now we are going to leave the attribute as optional. Makes this method ugly, but oh well. Fix this later. // UPDATE: Screw it, leave the new boolean attribute as optional, and just forget about old EventsWebQuery objects. The only downsides are that it will cause a user on upgrade to possibly be thrown from search back to browse (before loading), or else have a new browse list loaded despite previously having one.
 }
 
-- (EventsWebQuery *) getMostRecentEventsWebQueryForSearchTerm:(NSString *)searchTerm {
-    return [self getMostRecentEventsWebQueryWithPredicate:[NSPredicate predicateWithFormat:@"searchTerm == %@", searchTerm]];
+- (EventsWebQuery *) getMostRecentEventsSearchWebQueryWithSearchTerm:(NSString *)searchTerm {
+    return [self getMostRecentEventsWebQueryWithPredicate:[NSPredicate predicateWithFormat:@"isSearchQuery == YES && searchTerm == %@", searchTerm]]; // Trying to play nice with older EventsWebQuery objects that didn't set the isSearchQuery attribute. I have set the isSearchQuery attribute to be not optional, but I don't know if Core Data automatically updates all old objects to have the default value for the new non-optional attribute. // UPDATE: According to Apple Docs, I think Core Data does play nice, so long as you give a default value for a new non-optional attribute. // UPDATE: Problem is that we don't want all older EventsWebQuery objects to automatically have isSearchQuery defaulted/updated to NO. So, for now we are going to leave the attribute as optional. Makes this method ugly, but oh well. Fix this later. // UPDATE: Screw it, leave the new boolean attribute as optional, and just forget about old EventsWebQuery objects. The only downsides are that it will cause a user on upgrade to possibly be thrown from search back to browse (before loading), or else have a new browse list loaded despite previously having one.
 }
 
 //////////////////////

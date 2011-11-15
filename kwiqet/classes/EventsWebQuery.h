@@ -19,11 +19,13 @@
 @property (nonatomic, retain) NSString * filterDistanceBucketString;
 @property (nonatomic, retain) NSString * filterPriceBucketString;
 @property (nonatomic, retain) NSString * filterLocationString;
-@property (nonatomic, retain) NSDate * queryDatetime;
+@property (nonatomic, retain) NSDate * datetimeQueryExecuted;
+@property (nonatomic, retain) NSDate * datetimeQueryCreated;
 @property (nonatomic, retain) NSString * searchTerm;
 @property (nonatomic, retain) NSSet * eventResults;
 @property (nonatomic, retain) NSSet * filterCategories;
 @property (nonatomic, retain) UserLocation * filterLocation;
+@property (nonatomic, retain) NSNumber * isSearchQuery;
 @end
 
 @interface EventsWebQuery (CoreDataGeneratedAccessors)

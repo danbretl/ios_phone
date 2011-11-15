@@ -17,11 +17,13 @@
 @dynamic filterDistanceBucketString;
 @dynamic filterPriceBucketString;
 @dynamic filterLocationString;
-@dynamic queryDatetime;
+@dynamic datetimeQueryExecuted;
+@dynamic datetimeQueryCreated;
 @dynamic searchTerm;
 @dynamic eventResults;
 @dynamic filterCategories;
 @dynamic filterLocation;
+@dynamic isSearchQuery;
 
 - (NSArray *)eventResultsInOrder {
     return [self.eventResults sortedArrayUsingDescriptors:[NSArray arrayWithObject:[NSSortDescriptor sortDescriptorWithKey:@"order" ascending:YES]]];

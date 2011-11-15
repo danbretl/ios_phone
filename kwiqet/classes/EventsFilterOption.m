@@ -54,7 +54,7 @@ static NSString * const EFO_ICON_EXT = @".png";
     return categoryURI;
 }
 
-+ (EventsFilterOption *) eventsFilterOptionWithCode:(NSString *)code readableString:(NSString *)readable buttonText:(NSString *)buttonText buttonView:(UIButtonWithOverlayView *)buttonView {
++ (EventsFilterOption *) eventsFilterOptionWithCode:(NSString *)code readableString:(NSString *)readable buttonText:(NSString *)buttonText {// buttonView:(UIButtonWithOverlayView *)buttonView {
     
     EventsFilterOption * option = [[EventsFilterOption alloc] init];
     option.code = code;
@@ -62,7 +62,7 @@ static NSString * const EFO_ICON_EXT = @".png";
         option.readable = readable;
     }
     option.buttonText = buttonText;
-    option.buttonView = buttonView;
+//    option.buttonView = buttonView;
     option.isMostGeneralOption = ([code isEqualToString:EFO_CODE_PRICE_ANY] ||
                                   [code isEqualToString:EFO_CODE_DATE_ANY] ||
                                   [code isEqualToString:EFO_CODE_LOCATION_CITY] ||
@@ -212,7 +212,7 @@ static NSString * const EFO_ICON_EXT = @".png";
     [code_ release];
     [readable_ release];
     [buttonText_ release];
-    [buttonView_ release];
+//    [buttonView_ release];
     [super dealloc];
 }
 

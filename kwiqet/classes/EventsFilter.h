@@ -27,12 +27,12 @@ extern NSString * const EVENTS_FILTER_TIME;
     
 }
 
-+ (EventsFilter *) eventsFilterWithCode:(NSString *)filterCode buttonText:(NSString *)buttonText button:(UIButton *)button drawerView:(UIView *)drawerView options:(NSArray *)options mostGeneralOption:(EventsFilterOption *)mostGeneralOption;
++ (EventsFilter *) eventsFilterWithCode:(NSString *)filterCode buttonText:(NSString *)buttonText /*button:(UIButton *)button drawerView:(UIView *)drawerView*/ options:(NSArray *)options mostGeneralOption:(EventsFilterOption *)mostGeneralOption;
 
 @property (copy) NSString * code;
 @property (copy) NSString * buttonText;
-@property (retain) UIButton * button;
-@property (retain) UIView * drawerView;
+@property (assign) UIButton * button;
+@property (assign) UIView * drawerView;
 @property (readonly) NSMutableArray * options;
 @property (nonatomic, retain) EventsFilterOption * mostGeneralOption;
 

@@ -112,33 +112,33 @@ static NSString * const DM_TAB_BAR_SELECTED_INDEX_KEY = @"DM_TAB_BAR_SELECTED_IN
     return value;
 }
 
-+ (void) saveEventsListMostRecentMode:(EventsListMode)eventsListMode {
-    NSUserDefaults * standardUserDefaults = [NSUserDefaults standardUserDefaults];
-    if (standardUserDefaults) {
-        [standardUserDefaults setInteger:eventsListMode forKey:@"EventsListMostRecentMode"];
-    }
-    NSLog(@"DefaultsModel saveEventsListMostRecentMode:%@", [DefaultsModel descriptionOfEventsListMode:eventsListMode]);
-}
-+ (EventsListMode) loadEventsListMostRecentMode {
-    NSUserDefaults * standardUserDefaults = [NSUserDefaults standardUserDefaults];
-    EventsListMode eventsListMode = ModeNotSet;
-    if (standardUserDefaults) {
-        eventsListMode = [standardUserDefaults integerForKey:@"EventsListMostRecentMode"];
-    }
-    NSLog(@"DefaultsModel loadEventsListMostRecentMode %@", [DefaultsModel descriptionOfEventsListMode:eventsListMode]);
-    return eventsListMode;
-}
+//+ (void) saveEventsListMostRecentMode:(EventsListMode)eventsListMode {
+//    NSUserDefaults * standardUserDefaults = [NSUserDefaults standardUserDefaults];
+//    if (standardUserDefaults) {
+//        [standardUserDefaults setInteger:eventsListMode forKey:@"EventsListMostRecentMode"];
+//    }
+//    NSLog(@"DefaultsModel saveEventsListMostRecentMode:%@", [DefaultsModel descriptionOfEventsListMode:eventsListMode]);
+//}
+//+ (EventsListMode) loadEventsListMostRecentMode {
+//    NSUserDefaults * standardUserDefaults = [NSUserDefaults standardUserDefaults];
+//    EventsListMode eventsListMode = ModeNotSet;
+//    if (standardUserDefaults) {
+//        eventsListMode = [standardUserDefaults integerForKey:@"EventsListMostRecentMode"];
+//    }
+//    NSLog(@"DefaultsModel loadEventsListMostRecentMode %@", [DefaultsModel descriptionOfEventsListMode:eventsListMode]);
+//    return eventsListMode;
+//}
 
-+ (NSString *)descriptionOfEventsListMode:(EventsListMode)eventsListMode {
-    NSString * descriptionString = nil;
-    switch (eventsListMode) {
-        case ModeNotSet: descriptionString = @"ModeNotSet"; break;
-        case ModeBrowse: descriptionString = @"ModeBrowse"; break;
-        case ModeSearch: descriptionString = @"ModeSearch"; break;
-        default: break;
-    }
-    return descriptionString;
-}
+//+ (NSString *)descriptionOfEventsListMode:(EventsListMode)eventsListMode {
+//    NSString * descriptionString = nil;
+//    switch (eventsListMode) {
+//        case ModeNotSet: descriptionString = @"ModeNotSet"; break;
+//        case ModeBrowse: descriptionString = @"ModeBrowse"; break;
+//        case ModeSearch: descriptionString = @"ModeSearch"; break;
+//        default: break;
+//    }
+//    return descriptionString;
+//}
 
 
 + (void) saveCategoryTreeMostRecentRetrievalDate:(NSDate *)date {

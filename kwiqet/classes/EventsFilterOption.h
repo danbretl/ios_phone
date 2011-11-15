@@ -49,12 +49,12 @@ static NSString * const EFO_CODE_CATEGORY_POSTFIX_ALL = @"all"; // Most general 
 @property (copy) NSString * code;
 @property (copy) NSString * readable;
 @property (copy) NSString * buttonText;
-@property (retain) UIButtonWithOverlayView * buttonView;
+@property (assign) UIButtonWithOverlayView * buttonView;
 @property BOOL isMostGeneralOption;
 
 + (NSString *) eventsFilterOptionCategoryCodeForCategoryURI:(NSString *)categoryURI;
 + (NSString *) categoryURIForEventsFilterOptionCategoryCode:(NSString *)codeForCategoryEFO;
-+ (EventsFilterOption *) eventsFilterOptionWithCode:(NSString *)code readableString:(NSString *)readable buttonText:(NSString *)buttonText buttonView:(UIButtonWithOverlayView *)buttonView;
++ (EventsFilterOption *) eventsFilterOptionWithCode:(NSString *)code readableString:(NSString *)readable buttonText:(NSString *)buttonText;// buttonView:(UIButtonWithOverlayView *)buttonView;
 + (NSString *)eventsFilterOptionIconFilenameForCode:(NSString *)code grayscale:(BOOL)grayscale larger:(BOOL)larger;
 
 + (NSNumber *) priceMinimumForCode:(NSString *)priceCode;

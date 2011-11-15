@@ -23,22 +23,27 @@
 #import "SetLocationViewController.h"
 #import "LocationUpdatedFeedbackView.h"
 
+typedef enum {
+    Browse = 1,
+    Search = 2,
+} EventsListMode;
+
 @interface EventsViewController : UIViewController <UITableViewDelegate, UITableViewDataSource, UIAlertViewDelegate, CardPageViewControllerDelegate, WebConnectorDelegate, UIScrollViewDelegate, UITextFieldDelegate, CLLocationManagerDelegate, SetLocationViewControllerDelegate> {
     
     ///////////
     // Models
     
+    EventsListMode listMode;
     EventsWebQuery * eventsWebQuery;
     EventsWebQuery * eventsWebQueryFromSearch;
 	NSMutableArray * events;
 	NSMutableArray * eventsFromSearch;
     NSArray * concreteParentCategoriesArray;
     NSDictionary * concreteParentCategoriesDictionary; // Dictionary of Category objects, with their URI's as their keys.
-    CoreDataModel * coreDataModel;
+    CoreDataModel * coreDataModel_;
     
     //////////////////
     // "View models"
-    
     NSArray * filters;
     EventsFilter * activeFilterInUI;
     EventsFilterOption * selectedPriceFilterOption;
@@ -67,6 +72,10 @@
     NSString * eventsSummaryStringSearch;
     BOOL deletedFromEventCard;
     BOOL userRequestedToShowLocationSetter_;
+    NSString * searchTermSaved_;
+    BOOL searchTextFieldWasFirstResponder_;
+    BOOL drawerWasOpen_;
+    BOOL shouldHaveReloadedOnDrawerClose_;
 
     //////////
     // Views
@@ -204,7 +213,7 @@
 //////////////////////
 // Public properties
 
-@property (nonatomic, retain) CoreDataModel *coreDataModel;
+@property (nonatomic, retain) CoreDataModel * coreDataModel;
 @property (retain) CLLocationManager * locationManager;
 
 ///////////////////
