@@ -24,8 +24,6 @@ static NSString * const EVENTS_OLDFILTER_RECOMMENDED = @"recommended";
 static NSString * const EVENTS_CATEGORY_BUTTON_TOUCH_POSTFIX = @"_touch";
 static NSString * const EVENTS_NO_RESULTS_REASON_NO_RESULTS = @"EVENTS_NO_RESULTS_REASON_NO_RESULTS";
 static NSString * const EVENTS_NO_RESULTS_REASON_CONNECTION_ERROR = @"EVENTS_NO_RESULTS_REASON_CONNECTION_ERROR";
-static NSString * const EVENTS_SOURCE_BROWSE = @"EVENTS_SOURCE_BROWSE";
-static NSString * const EVENTS_SOURCE_SEARCH = @"EVENTS_SOURCE_SEARCH";
 
 float const EVENTS_TABLE_VIEW_BACKGROUND_COLOR_WHITE_AMOUNT = 247.0/255.0;
 double const EVENTS_LIST_MODE_ANIMATION_DURATION = 0.25;
@@ -234,8 +232,8 @@ double const EVENTS_LIST_MODE_ANIMATION_DURATION = 0.25;
 - (EventsFilter *) filterForDrawerScrollViewContentOffset:(CGPoint)contentOffset fromFilters:(NSArray *)arrayOfEventsFilters;
 - (EventsFilterOption *) filterOptionForFilterOptionButton:(UIButton *)filterOptionButton inFilterOptionsArray:(NSArray *)filterOptions;
 - (EventsFilterOption *) filterOptionForFilterOptionCode:(NSString *)filterOptionCode inFilterOptionsArray:(NSArray *)filterOptions;
-- (EventsFilterOption *) filterOptionForFilterOptionCode:(NSString *)filterOptionCode filterCode:(NSString *)filterCode source:(NSString *)source;
-- (NSString *) makeEventsSummaryStringForSource:(NSString *)sourceString;
+- (EventsFilterOption *) filterOptionForFilterOptionCode:(NSString *)filterOptionCode filterCode:(NSString *)filterCode source:(EventsListMode)sourceMode;
+- (NSString *) makeEventsSummaryStringForSource:(EventsListMode)source;
 - (void) hideWebLoadingViews;
 - (BOOL) isTableViewFilledOut;
 - (BOOL) isTableViewScrolledToBottom;
@@ -247,9 +245,9 @@ double const EVENTS_LIST_MODE_ANIMATION_DURATION = 0.25;
 - (void) resetSearchFilters;
 - (void) updateSearchFilterViewsFromCurrentSelectedSearchFilterOptions;
 - (void) searchExecutionRequestedByUser;
-- (void) setDrawerScrollViewToDisplayViewsForSource:(NSString *)sourceString;
+- (void) setDrawerScrollViewToDisplayViewsForSource:(EventsListMode)sourceMode;
 - (void) setDrawerToShowFilter:(EventsFilter *)filter animated:(BOOL)animated;
-- (void) setFiltersBarToDisplayViewsForSource:(NSString *)sourceString;
+- (void) setFiltersBarToDisplayViewsForSource:(EventsListMode)sourceMode;
 - (void) setFiltersBarViewsOriginY:(CGFloat)originY adjustDrawerViewsAccordingly:(BOOL)shouldAdjustDrawerViews;
 - (void) setImagesForCategoryButton:(UIButton *)button forCategory:(Category *)category;
 - (void) setLocationSetterViewIsVisible:(BOOL)isVisible animated:(BOOL)animated animationBasedInKeyboardNotificationUserInfo:(NSDictionary *)keyboardNotificationUserInfo;
@@ -857,7 +855,7 @@ double const EVENTS_LIST_MODE_ANIMATION_DURATION = 0.25;
         NSString * efoCategoryURI = (y == 0 && x == 0) ? nil : category.uri;
 //        [categoryFilterOptions addObject:[EventsFilterOption eventsFilterOptionWithCode:[EventsFilterOption eventsFilterOptionCategoryCodeForCategoryURI:efoCategoryURI] readableString:nil buttonText:nil buttonView:categoryButton]];
         NSLog(@"Here is the problem?");
-        [self filterOptionForFilterOptionCode:[EventsFilterOption eventsFilterOptionCategoryCodeForCategoryURI:efoCategoryURI] filterCode:EVENTS_FILTER_CATEGORIES source:EVENTS_SOURCE_BROWSE].buttonView = categoryButton;
+        [self filterOptionForFilterOptionCode:[EventsFilterOption eventsFilterOptionCategoryCodeForCategoryURI:efoCategoryURI] filterCode:EVENTS_FILTER_CATEGORIES source:Browse].buttonView = categoryButton;
     }
     
     // Associating Browse Filter Views with Filter Models
@@ -1022,7 +1020,7 @@ double const EVENTS_LIST_MODE_ANIMATION_DURATION = 0.25;
         self.categoryURI = categoryFilterURI;
     }
     // Events summary string
-    self.eventsSummaryStringBrowse = [self makeEventsSummaryStringForSource:EVENTS_SOURCE_BROWSE];
+    self.eventsSummaryStringBrowse = [self makeEventsSummaryStringForSource:Browse];
 
     // Update views
     // Update filter option button states for browse
@@ -1697,7 +1695,7 @@ double const EVENTS_LIST_MODE_ANIMATION_DURATION = 0.25;
         self.eventsFromSearch = [self.eventsWebQueryFromSearch.eventResultsEventsInOrder.mutableCopy autorelease];
         /* THE PREVIOUS CODE IS DUPLICATED IN ...viewDidLoad..., ...toggleSearchMode..., and ...searchExecutionRequestedByUser... */
         NSLog(@"eventsWebQueryFromSearch was just updated in searchExecutionRequestedByUser and is now %@", self.eventsWebQueryFromSearch);
-        self.eventsSummaryStringSearch = [self makeEventsSummaryStringForSource:EVENTS_SOURCE_SEARCH];
+        self.eventsSummaryStringSearch = [self makeEventsSummaryStringForSource:Search];
         [self setFeedbackViewIsVisible:YES animated:YES];
         [self setFeedbackViewMessageType:LoadingEvents eventsSummaryString:self.eventsSummaryStringSearch searchString:self.eventsWebQueryFromSearch.searchTerm animated:YES];
         [self showWebLoadingViews];
@@ -1784,9 +1782,9 @@ double const EVENTS_LIST_MODE_ANIMATION_DURATION = 0.25;
 - (void) updateViewsFromCurrentSourceDataWhichShouldBePopulated:(BOOL)dataShouldBePopulated reasonIfNot:(NSString *)reasonIfNotPopulated animated:(BOOL)animated {
     
     if (!self.isSearchOn) {
-        self.eventsSummaryStringBrowse = [self makeEventsSummaryStringForSource:EVENTS_SOURCE_BROWSE];
+        self.eventsSummaryStringBrowse = [self makeEventsSummaryStringForSource:Browse];
     } else {
-        self.eventsSummaryStringSearch = [self makeEventsSummaryStringForSource:EVENTS_SOURCE_SEARCH];
+        self.eventsSummaryStringSearch = [self makeEventsSummaryStringForSource:Search];
     }
     
     [self.tableView reloadData];
@@ -2036,41 +2034,41 @@ double const EVENTS_LIST_MODE_ANIMATION_DURATION = 0.25;
         
 }
 
-- (void) setFiltersBarToDisplayViewsForSource:(NSString *)sourceString {
+- (void) setFiltersBarToDisplayViewsForSource:(EventsListMode)sourceMode {
     
     UIView * viewToRemoveFromSuperview = nil;
     UIView * viewToAddAsSubview = nil;
         
-    if ([sourceString isEqualToString:EVENTS_SOURCE_BROWSE]) {
+    if (sourceMode == Browse) {
         viewToRemoveFromSuperview = self.filtersBarSearch;
         viewToAddAsSubview = self.filtersBarBrowse;
-    } else if ([sourceString isEqualToString:EVENTS_SOURCE_SEARCH]) {
+    } else if (sourceMode == Search) {
         viewToRemoveFromSuperview = self.filtersBarBrowse;
         viewToAddAsSubview = self.filtersBarSearch;
     } else {
-        NSLog(@"ERROR in EventsViewController setFiltersBarToDisplayViewsForSource - unrecognized source string.");
+        NSLog(@"ERROR in EventsViewController setFiltersBarToDisplayViewsForSource - unrecognized source mode.");
     }
     [viewToRemoveFromSuperview removeFromSuperview];
     [self.filtersContainerView addSubview:viewToAddAsSubview];
     
 }
 
-- (void) setDrawerScrollViewToDisplayViewsForSource:(NSString *)sourceString {
+- (void) setDrawerScrollViewToDisplayViewsForSource:(EventsListMode)sourceMode {
     
     UIView * viewToRemoveFromSuperview = nil;
     UIView * viewToAddAsSubview = nil;
     EventsFilter * activeFilter = nil;
     
-    if ([sourceString isEqualToString:EVENTS_SOURCE_BROWSE]) {
+    if (sourceMode == Browse) {
         viewToRemoveFromSuperview = self.drawerViewsSearchContainer;
         viewToAddAsSubview = self.drawerViewsBrowseContainer;
         activeFilter = self.activeFilterInUI;
-    } else if ([sourceString isEqualToString:EVENTS_SOURCE_SEARCH]) {
+    } else if (sourceMode == Search) {
         viewToRemoveFromSuperview = self.drawerViewsBrowseContainer;
         viewToAddAsSubview = self.drawerViewsSearchContainer;
         activeFilter = self.activeSearchFilterInUI;
     } else {
-        NSLog(@"ERROR in EventsViewController setDrawerScrollViewToDisplayViewsForSource - unrecognized source string.");
+        NSLog(@"ERROR in EventsViewController setDrawerScrollViewToDisplayViewsForSource - unrecognized source mode.");
     }
     [viewToRemoveFromSuperview removeFromSuperview];
     [self.drawerScrollView addSubview:viewToAddAsSubview];
@@ -2235,9 +2233,9 @@ double const EVENTS_LIST_MODE_ANIMATION_DURATION = 0.25;
             [self setPushableContainerViewsOriginY:CGRectGetMaxY(self.searchContainerView.frame) adjustHeightToFillMainView:YES];
             [self matchTableViewCoverViewToTableView];
             // Swap the browse & search filter bars
-            [self setFiltersBarToDisplayViewsForSource:EVENTS_SOURCE_SEARCH];
+            [self setFiltersBarToDisplayViewsForSource:Search];
             // Swap the browse & search filter drawer views
-            [self setDrawerScrollViewToDisplayViewsForSource:EVENTS_SOURCE_SEARCH];
+            [self setDrawerScrollViewToDisplayViewsForSource:Search];
             // Prepare filters bar to come back on screen
             [self setFiltersBarViewsOriginY:CGRectGetMaxY(self.searchContainerView.frame) - self.filtersContainerView.frame.size.height adjustDrawerViewsAccordingly:NO];
             // Shrink the table footer view
@@ -2371,9 +2369,9 @@ double const EVENTS_LIST_MODE_ANIMATION_DURATION = 0.25;
                              // Adjust the table view cover view
                              [self matchTableViewCoverViewToTableView];
                              // Swap the browse & search filter bars
-                             [self setFiltersBarToDisplayViewsForSource:EVENTS_SOURCE_BROWSE];
+                             [self setFiltersBarToDisplayViewsForSource:Browse];
                              // Swap the browse & search filter drawer views
-                             [self setDrawerScrollViewToDisplayViewsForSource:EVENTS_SOURCE_BROWSE];
+                             [self setDrawerScrollViewToDisplayViewsForSource:Browse];
                              // Expand the table footer view
                              CGRect tableFooterViewFrame = self.tableView.tableFooterView.frame;
                              tableFooterViewFrame.size.height = 40;
@@ -2439,7 +2437,7 @@ double const EVENTS_LIST_MODE_ANIMATION_DURATION = 0.25;
     [self updateFilter:[self filterForFilterCode:EVENTS_FILTER_TIME inFiltersArray:self.filtersSearch] buttonImageForFilterOption:self.selectedTimeSearchFilterOption];
     
     // Update the search filters summary string
-    self.eventsSummaryStringSearch = [self makeEventsSummaryStringForSource:EVENTS_SOURCE_SEARCH];
+    self.eventsSummaryStringSearch = [self makeEventsSummaryStringForSource:Search];
     
 }
 
@@ -2477,7 +2475,7 @@ double const EVENTS_LIST_MODE_ANIMATION_DURATION = 0.25;
     [self updateFilter:timeSearchFilter buttonImageForFilterOption:self.selectedTimeSearchFilterOption];
     
     // Update the search filters summary string
-    self.eventsSummaryStringSearch = [self makeEventsSummaryStringForSource:EVENTS_SOURCE_SEARCH];
+    self.eventsSummaryStringSearch = [self makeEventsSummaryStringForSource:Search];
     
     // Update the array of most recently adjusted search filters (in an arbitrary order)
     [self updateAdjustedSearchFiltersOrderedWithAdjustedFilter:dateSearchFilter selectedFilterOption:self.selectedDateSearchFilterOption];
@@ -2983,8 +2981,8 @@ double const EVENTS_LIST_MODE_ANIMATION_DURATION = 0.25;
     return filterOption;
 }
         
-- (EventsFilterOption *) filterOptionForFilterOptionCode:(NSString *)filterOptionCode filterCode:(NSString *)filterCode source:(NSString *)source {
-    return [self filterOptionForFilterOptionCode:filterOptionCode inFilterOptionsArray:[self filterForFilterCode:filterCode inFiltersArray:([source isEqualToString:EVENTS_SOURCE_BROWSE] ? self.filters : self.filtersSearch)].options];
+- (EventsFilterOption *) filterOptionForFilterOptionCode:(NSString *)filterOptionCode filterCode:(NSString *)filterCode source:(EventsListMode)sourceMode {
+    return [self filterOptionForFilterOptionCode:filterOptionCode inFilterOptionsArray:[self filterForFilterCode:filterCode inFiltersArray:(sourceMode == Browse ? self.filters : self.filtersSearch)].options];
 }
 
 - (EventsFilterOption *) filterOptionForFilterOptionCode:(NSString *)filterOptionCode inFilterOptionsArray:(NSArray *)filterOptions {
@@ -3134,10 +3132,10 @@ double const EVENTS_LIST_MODE_ANIMATION_DURATION = 0.25;
         [self setDrawerReloadIndicatorViewIsVisible:self.shouldReloadOnDrawerClose animated:self.isDrawerOpen];
         
         if (!self.isSearchOn) {
-            self.eventsSummaryStringBrowse = [self makeEventsSummaryStringForSource:EVENTS_SOURCE_BROWSE];
+            self.eventsSummaryStringBrowse = [self makeEventsSummaryStringForSource:Browse];
             [self setFeedbackViewMessageType:CloseDrawerToLoadPrompt eventsSummaryString:self.eventsSummaryStringBrowse searchString:nil animated:YES];
         } else {
-            self.eventsSummaryStringSearch = [self makeEventsSummaryStringForSource:EVENTS_SOURCE_SEARCH];
+            self.eventsSummaryStringSearch = [self makeEventsSummaryStringForSource:Search];
             [self setFeedbackViewMessageType:CloseDrawerToLoadPrompt eventsSummaryString:self.eventsSummaryStringSearch searchString:self.searchTextField.text animated:YES];
         }
         /* WARNING: THE CODE ABOVE HAS BEEN COPIED TO SETLOCATIONVIEWCONTROLLER DELEGATE PROTOCOL METHODS */
@@ -3213,7 +3211,7 @@ double const EVENTS_LIST_MODE_ANIMATION_DURATION = 0.25;
                selectedOptionSetter:selectedOptionSetter];
 }
 
-- (NSString *) makeEventsSummaryStringForSource:(NSString *)sourceString {
+- (NSString *) makeEventsSummaryStringForSource:(EventsListMode)sourceMode {
     
     NSString * priceReadable    = nil;
     NSString * dateReadable     = nil;
@@ -3222,7 +3220,7 @@ double const EVENTS_LIST_MODE_ANIMATION_DURATION = 0.25;
     NSString * locationReadable = nil;
     NSString * locationItself   = nil;
         
-    if ([sourceString isEqualToString:EVENTS_SOURCE_BROWSE]) {
+    if (sourceMode == Browse) {
         priceReadable    = self.selectedPriceFilterOption.readable;
         dateReadable     = self.selectedDateFilterOption.readable;
         categoryReadable = self.categoryURI ? [self.coreDataModel getCategoryWithURI:self.categoryURI].title : nil;
@@ -3230,14 +3228,14 @@ double const EVENTS_LIST_MODE_ANIMATION_DURATION = 0.25;
         locationReadable = self.selectedLocationFilterOption.readable;
         locationItself   = self.dvLocationSetLocationButton.titleLabel.text;
 //        locationItself   = self.dvLocationTextField.text;
-    } else if ([sourceString isEqualToString:EVENTS_SOURCE_SEARCH]) {
+    } else if (sourceMode == Search) {
         dateReadable     = self.selectedDateSearchFilterOption.readable;
         locationReadable = self.selectedLocationSearchFilterOption.readable;
         locationItself   = self.dvLocationSearchSetLocationButton.titleLabel.text;
 //        locationItself   = self.dvLocationSearchTextField.text;
         timeReadable     = self.selectedTimeSearchFilterOption.readable;
     } else {
-        NSLog(@"ERROR in EventsViewController filtersSummaryStringForSource:andUpdateSummaryLabel: - unrecognized source string.");
+        NSLog(@"ERROR in EventsViewController makeEventsSummaryStringForSource - unrecognized source mode.");
     }
     
     // Location HACK
@@ -3275,7 +3273,7 @@ double const EVENTS_LIST_MODE_ANIMATION_DURATION = 0.25;
     }
     [summaryString deleteCharactersInRange:NSMakeRange(summaryString.length-1, 1)];
     
-    if ([sourceString isEqualToString:EVENTS_SOURCE_SEARCH]) {
+    if (sourceMode == Search) {
         [summaryString replaceOccurrencesOfString:@"events" withString:[NSString stringWithFormat:@"events matching '%@'", self.searchTextField.text] options:0 range:NSMakeRange(0, summaryString.length)];
     } else {
         summaryString = [NSString stringWithFormat:@"recommended %@", summaryString];
@@ -3563,10 +3561,10 @@ double const EVENTS_LIST_MODE_ANIMATION_DURATION = 0.25;
     }
     if (shouldUpdateEventsSummaryStringForCurrentSource) {
         if (!self.isSearchOn) {
-            self.eventsSummaryStringBrowse = [self makeEventsSummaryStringForSource:EVENTS_SOURCE_BROWSE];
+            self.eventsSummaryStringBrowse = [self makeEventsSummaryStringForSource:Browse];
             [self setFeedbackViewMessageType:CloseDrawerToLoadPrompt eventsSummaryString:self.eventsSummaryStringBrowse searchString:nil animated:animated];
         } else {
-            self.eventsSummaryStringSearch = [self makeEventsSummaryStringForSource:EVENTS_SOURCE_SEARCH];
+            self.eventsSummaryStringSearch = [self makeEventsSummaryStringForSource:Search];
             [self setFeedbackViewMessageType:CloseDrawerToLoadPrompt eventsSummaryString:self.eventsSummaryStringSearch searchString:self.searchTextField.text animated:animated];
         }
     }
