@@ -22,16 +22,17 @@ typedef enum {
     UIView * shadow_;
     
     LocationUpdatedFeedbackMessageType messageType_;
+    NSDate * dateLastUpdated_;
     
 }
 
 //- (void) setBackgroundImage:(UIImage *)backgroundImage;
 //- (void) setForegroundImage:(UIImage *)foregroundImage;
 
+- (void) setVisible:(BOOL)visible animated:(BOOL)animated;
 - (void) setLabelText:(NSString *)labelText animated:(BOOL)animated;
 - (void) setLabelTextToUpdatingAnimated:(BOOL)animated; // "updating location"
 - (void) setLabelTextToUpdatedDate:(NSDate *)dateLastUpdated animated:(BOOL)animated; // "updated ... ago"
-
-- (void) setVisible:(BOOL)visible animated:(BOOL)animated;
+- (void) updateLabelTextForCurrentUpdatedDateAnimated:(BOOL)animated;
 
 @end

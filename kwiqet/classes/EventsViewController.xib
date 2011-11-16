@@ -1094,34 +1094,20 @@
 									<int key="NSfFlags">16</int>
 								</object>
 							</object>
-							<object class="IBUIButton" id="44200439">
+							<object class="IBUIView" id="497479030">
 								<reference key="NSNextResponder" ref="444150659"/>
-								<int key="NSvFlags">292</int>
+								<int key="NSvFlags">293</int>
 								<string key="NSFrame">{{20, 16}, {42, 42}}</string>
 								<reference key="NSSuperview" ref="444150659"/>
 								<reference key="NSWindow"/>
 								<reference key="NSNextKeyView" ref="397027132"/>
-								<string key="NSReuseIdentifierKey">_NS:225</string>
-								<bool key="IBUIOpaque">NO</bool>
+								<string key="NSReuseIdentifierKey">_NS:196</string>
+								<object class="NSColor" key="IBUIBackgroundColor">
+									<int key="NSColorSpace">3</int>
+									<bytes key="NSWhite">MQA</bytes>
+									<reference key="NSCustomColorSpace" ref="386540379"/>
+								</object>
 								<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
-								<int key="IBUIContentHorizontalAlignment">0</int>
-								<int key="IBUIContentVerticalAlignment">0</int>
-								<reference key="IBUIHighlightedTitleColor" ref="738196627"/>
-								<object class="NSColor" key="IBUINormalTitleColor">
-									<int key="NSColorSpace">1</int>
-									<bytes key="NSRGB">MC4xOTYwNzg0MzQ2IDAuMzA5ODAzOTMyOSAwLjUyMTU2ODY1NgA</bytes>
-								</object>
-								<reference key="IBUINormalTitleShadowColor" ref="608504503"/>
-								<object class="NSCustomResource" key="IBUIHighlightedBackgroundImage" id="141898152">
-									<string key="NSClassName">NSImage</string>
-									<string key="NSResourceName">btn_findlocation_touch.png</string>
-								</object>
-								<object class="NSCustomResource" key="IBUINormalBackgroundImage" id="233286926">
-									<string key="NSClassName">NSImage</string>
-									<string key="NSResourceName">btn_findlocation.png</string>
-								</object>
-								<reference key="IBUIFontDescription" ref="88052031"/>
-								<reference key="IBUIFont" ref="695759820"/>
 							</object>
 							<object class="IBUIView" id="136236129">
 								<reference key="NSNextResponder" ref="444150659"/>
@@ -1143,7 +1129,7 @@
 						<string key="NSFrame">{{1280, 0}, {320, 255}}</string>
 						<reference key="NSSuperview" ref="918147613"/>
 						<reference key="NSWindow"/>
-						<reference key="NSNextKeyView" ref="44200439"/>
+						<reference key="NSNextKeyView" ref="497479030"/>
 						<string key="NSReuseIdentifierKey">_NS:180</string>
 						<reference key="IBUIBackgroundColor" ref="580520201"/>
 						<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
@@ -1927,28 +1913,20 @@
 								<reference key="IBUIFontDescription" ref="88052031"/>
 								<reference key="IBUIFont" ref="695759820"/>
 							</object>
-							<object class="IBUIButton" id="929470902">
+							<object class="IBUIView" id="584789528">
 								<reference key="NSNextResponder" ref="179713694"/>
-								<int key="NSvFlags">292</int>
+								<int key="NSvFlags">293</int>
 								<string key="NSFrame">{{20, 16}, {42, 42}}</string>
 								<reference key="NSSuperview" ref="179713694"/>
 								<reference key="NSWindow"/>
 								<reference key="NSNextKeyView" ref="396734258"/>
-								<string key="NSReuseIdentifierKey">_NS:225</string>
-								<bool key="IBUIOpaque">NO</bool>
-								<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
-								<int key="IBUIContentHorizontalAlignment">0</int>
-								<int key="IBUIContentVerticalAlignment">0</int>
-								<reference key="IBUIHighlightedTitleColor" ref="738196627"/>
-								<object class="NSColor" key="IBUINormalTitleColor">
-									<int key="NSColorSpace">1</int>
-									<bytes key="NSRGB">MC4xOTYwNzg0MzQ2IDAuMzA5ODAzOTMyOSAwLjUyMTU2ODY1NgA</bytes>
+								<string key="NSReuseIdentifierKey">_NS:196</string>
+								<object class="NSColor" key="IBUIBackgroundColor">
+									<int key="NSColorSpace">3</int>
+									<bytes key="NSWhite">MQA</bytes>
+									<reference key="NSCustomColorSpace" ref="386540379"/>
 								</object>
-								<reference key="IBUINormalTitleShadowColor" ref="608504503"/>
-								<reference key="IBUIHighlightedBackgroundImage" ref="141898152"/>
-								<reference key="IBUINormalBackgroundImage" ref="233286926"/>
-								<reference key="IBUIFontDescription" ref="88052031"/>
-								<reference key="IBUIFont" ref="695759820"/>
+								<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
 							</object>
 							<object class="IBUIView" id="191645115">
 								<reference key="NSNextResponder" ref="179713694"/>
@@ -1967,7 +1945,7 @@
 						<string key="NSFrame">{{320, 0}, {320, 145}}</string>
 						<reference key="NSSuperview" ref="973209869"/>
 						<reference key="NSWindow"/>
-						<reference key="NSNextKeyView" ref="929470902"/>
+						<reference key="NSNextKeyView" ref="584789528"/>
 						<string key="NSReuseIdentifierKey">_NS:180</string>
 						<object class="NSColor" key="IBUIBackgroundColor">
 							<int key="NSColorSpace">1</int>
@@ -3052,22 +3030,6 @@
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBCocoaTouchOutletConnection" key="connection">
-						<string key="label">dvLocationSearchCurrentLocationButton</string>
-						<reference key="source" ref="372490531"/>
-						<reference key="destination" ref="929470902"/>
-					</object>
-					<int key="connectionID">380</int>
-				</object>
-				<object class="IBConnectionRecord">
-					<object class="IBCocoaTouchOutletConnection" key="connection">
-						<string key="label">dvLocationCurrentLocationButton</string>
-						<reference key="source" ref="372490531"/>
-						<reference key="destination" ref="44200439"/>
-					</object>
-					<int key="connectionID">382</int>
-				</object>
-				<object class="IBConnectionRecord">
-					<object class="IBCocoaTouchOutletConnection" key="connection">
 						<string key="label">dvLocationSearchSetLocationButton</string>
 						<reference key="source" ref="372490531"/>
 						<reference key="destination" ref="396734258"/>
@@ -3121,6 +3083,22 @@
 						<reference key="destination" ref="191645115"/>
 					</object>
 					<int key="connectionID">399</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBCocoaTouchOutletConnection" key="connection">
+						<string key="label">dvLocationSearchCurrentLocationButton</string>
+						<reference key="source" ref="372490531"/>
+						<reference key="destination" ref="584789528"/>
+					</object>
+					<int key="connectionID">402</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBCocoaTouchOutletConnection" key="connection">
+						<string key="label">dvLocationCurrentLocationButton</string>
+						<reference key="source" ref="372490531"/>
+						<reference key="destination" ref="497479030"/>
+					</object>
+					<int key="connectionID">403</int>
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBCocoaTouchOutletConnection" key="connection">
@@ -3264,15 +3242,6 @@
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBCocoaTouchEventConnection" key="connection">
-						<string key="label">currentLocationButtonTouched:</string>
-						<reference key="source" ref="44200439"/>
-						<reference key="destination" ref="372490531"/>
-						<int key="IBEventType">7</int>
-					</object>
-					<int key="connectionID">376</int>
-				</object>
-				<object class="IBConnectionRecord">
-					<object class="IBCocoaTouchEventConnection" key="connection">
 						<string key="label">setLocationButtonTouched:</string>
 						<reference key="source" ref="397027132"/>
 						<reference key="destination" ref="372490531"/>
@@ -3288,15 +3257,6 @@
 						<int key="IBEventType">7</int>
 					</object>
 					<int key="connectionID">378</int>
-				</object>
-				<object class="IBConnectionRecord">
-					<object class="IBCocoaTouchEventConnection" key="connection">
-						<string key="label">currentLocationButtonTouched:</string>
-						<reference key="source" ref="929470902"/>
-						<reference key="destination" ref="372490531"/>
-						<int key="IBEventType">7</int>
-					</object>
-					<int key="connectionID">379</int>
 				</object>
 			</object>
 			<object class="IBMutableOrderedSet" key="objectRecords">
@@ -3432,9 +3392,9 @@
 							<reference ref="596324112"/>
 							<reference ref="585168900"/>
 							<reference ref="990260503"/>
-							<reference ref="44200439"/>
 							<reference ref="397027132"/>
 							<reference ref="136236129"/>
+							<reference ref="497479030"/>
 						</object>
 						<reference key="parent" ref="918147613"/>
 					</object>
@@ -3835,8 +3795,8 @@
 							<reference ref="712652132"/>
 							<reference ref="266842995"/>
 							<reference ref="396734258"/>
-							<reference ref="929470902"/>
 							<reference ref="191645115"/>
+							<reference ref="584789528"/>
 						</object>
 						<reference key="parent" ref="973209869"/>
 					</object>
@@ -4131,16 +4091,6 @@
 						<reference key="parent" ref="263086087"/>
 					</object>
 					<object class="IBObjectRecord">
-						<int key="objectID">370</int>
-						<reference key="object" ref="44200439"/>
-						<reference key="parent" ref="444150659"/>
-					</object>
-					<object class="IBObjectRecord">
-						<int key="objectID">375</int>
-						<reference key="object" ref="929470902"/>
-						<reference key="parent" ref="179713694"/>
-					</object>
-					<object class="IBObjectRecord">
 						<int key="objectID">374</int>
 						<reference key="object" ref="396734258"/>
 						<reference key="parent" ref="179713694"/>
@@ -4177,6 +4127,16 @@
 					<object class="IBObjectRecord">
 						<int key="objectID">397</int>
 						<reference key="object" ref="191645115"/>
+						<reference key="parent" ref="179713694"/>
+					</object>
+					<object class="IBObjectRecord">
+						<int key="objectID">400</int>
+						<reference key="object" ref="497479030"/>
+						<reference key="parent" ref="444150659"/>
+					</object>
+					<object class="IBObjectRecord">
+						<int key="objectID">401</int>
+						<reference key="object" ref="584789528"/>
 						<reference key="parent" ref="179713694"/>
 					</object>
 				</object>
@@ -4342,14 +4302,10 @@
 					<string>365.IBPluginDependency</string>
 					<string>367.IBPluginDependency</string>
 					<string>37.IBPluginDependency</string>
-					<string>370.IBPluginDependency</string>
-					<string>370.IBUIButtonInspectorSelectedStateConfigurationMetadataKey</string>
 					<string>373.IBPluginDependency</string>
 					<string>373.IBUIButtonInspectorSelectedStateConfigurationMetadataKey</string>
 					<string>374.IBPluginDependency</string>
 					<string>374.IBUIButtonInspectorSelectedStateConfigurationMetadataKey</string>
-					<string>375.IBPluginDependency</string>
-					<string>375.IBUIButtonInspectorSelectedStateConfigurationMetadataKey</string>
 					<string>38.IBPluginDependency</string>
 					<string>39.IBPluginDependency</string>
 					<string>391.IBPluginDependency</string>
@@ -4361,6 +4317,10 @@
 					<string>4.CustomClassName</string>
 					<string>4.IBPluginDependency</string>
 					<string>40.IBPluginDependency</string>
+					<string>400.CustomClassName</string>
+					<string>400.IBPluginDependency</string>
+					<string>401.CustomClassName</string>
+					<string>401.IBPluginDependency</string>
 					<string>48.IBPluginDependency</string>
 					<string>52.IBPluginDependency</string>
 				</object>
@@ -4524,13 +4484,9 @@
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
-					<real value="1"/>
-					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<real value="0.0"/>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<real value="0.0"/>
-					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
-					<real value="1"/>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
@@ -4541,6 +4497,10 @@
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<string>EventsFeedbackView</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
+					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
+					<string>UIButtonWithOverlayView</string>
+					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
+					<string>UIButtonWithOverlayView</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
@@ -4558,7 +4518,7 @@
 				<reference key="dict.values" ref="0"/>
 			</object>
 			<nil key="sourceID"/>
-			<int key="maxID">399</int>
+			<int key="maxID">403</int>
 		</object>
 		<object class="IBClassDescriber" key="IBDocument.Classes">
 			<object class="NSMutableArray" key="referencedPartialClassDescriptions">
@@ -4781,12 +4741,12 @@
 							<string>UIButtonWithOverlayView</string>
 							<string>UIButtonWithOverlayView</string>
 							<string>UIButtonWithOverlayView</string>
-							<string>UIButton</string>
 							<string>UIButtonWithOverlayView</string>
 							<string>UIButtonWithOverlayView</string>
 							<string>UIButtonWithOverlayView</string>
 							<string>UIButtonWithOverlayView</string>
-							<string>UIButton</string>
+							<string>UIButtonWithOverlayView</string>
+							<string>UIButtonWithOverlayView</string>
 							<string>UIButton</string>
 							<string>LocationUpdatedFeedbackView</string>
 							<string>UIButton</string>
@@ -5028,7 +4988,7 @@
 							</object>
 							<object class="IBToOneOutletInfo">
 								<string key="name">dvLocationCurrentLocationButton</string>
-								<string key="candidateClassName">UIButton</string>
+								<string key="candidateClassName">UIButtonWithOverlayView</string>
 							</object>
 							<object class="IBToOneOutletInfo">
 								<string key="name">dvLocationSearchButtonBorough</string>
@@ -5048,7 +5008,7 @@
 							</object>
 							<object class="IBToOneOutletInfo">
 								<string key="name">dvLocationSearchCurrentLocationButton</string>
-								<string key="candidateClassName">UIButton</string>
+								<string key="candidateClassName">UIButtonWithOverlayView</string>
 							</object>
 							<object class="IBToOneOutletInfo">
 								<string key="name">dvLocationSearchSetLocationButton</string>
@@ -5292,8 +5252,6 @@
 				<string>btn_filterbar_left_touch.png</string>
 				<string>btn_filterbar_right.png</string>
 				<string>btn_filterbar_right_touch.png</string>
-				<string>btn_findlocation.png</string>
-				<string>btn_findlocation_touch.png</string>
 				<string>btn_reload.png</string>
 				<string>btn_reload_touch.png</string>
 				<string>btn_search.png</string>
@@ -5320,8 +5278,6 @@
 				<string>{64, 44}</string>
 				<string>{64, 44}</string>
 				<string>{64, 44}</string>
-				<string>{42, 42}</string>
-				<string>{42, 42}</string>
 				<string>{320, 40}</string>
 				<string>{320, 40}</string>
 				<string>{61, 31}</string>

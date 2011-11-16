@@ -167,7 +167,7 @@ double const EVENTS_LIST_MODE_ANIMATION_DURATION = 0.25;
 // Drawer view location
 @property (retain) IBOutlet UIView * drawerViewLocation;
 @property (retain) IBOutlet UIButton * dvLocationSetLocationButton;
-@property (retain) IBOutlet UIButton * dvLocationCurrentLocationButton;
+@property (retain) IBOutlet UIButtonWithOverlayView * dvLocationCurrentLocationButton;
 @property (retain) IBOutlet LocationUpdatedFeedbackView * dvLocationUpdatedView;
 @property (retain) IBOutlet UIButtonWithOverlayView * dvLocationButtonWalking;
 @property (retain) IBOutlet UIButtonWithOverlayView * dvLocationButtonNeighborhood;
@@ -176,7 +176,7 @@ double const EVENTS_LIST_MODE_ANIMATION_DURATION = 0.25;
 // Drawer view location search
 @property (retain) IBOutlet UIView * drawerViewLocationSearch;
 @property (retain) IBOutlet UIButton * dvLocationSearchSetLocationButton;
-@property (retain) IBOutlet UIButton * dvLocationSearchCurrentLocationButton;
+@property (retain) IBOutlet UIButtonWithOverlayView * dvLocationSearchCurrentLocationButton;
 @property (retain) IBOutlet LocationUpdatedFeedbackView * dvLocationSearchUpdatedView;
 @property (retain) IBOutlet UIButtonWithOverlayView * dvLocationSearchButtonWalking;
 @property (retain) IBOutlet UIButtonWithOverlayView * dvLocationSearchButtonNeighborhood;
@@ -203,6 +203,12 @@ double const EVENTS_LIST_MODE_ANIMATION_DURATION = 0.25;
 
 @property (nonatomic, readonly) WebConnector * webConnector;
 @property (nonatomic, readonly) WebDataTranslator * webDataTranslator;
+
+////////////////////////
+// Location properties
+@property LocationMode locationMode;
+@property (retain) UserLocation * mostRecentUserLocation;
+@property (retain) MKReverseGeocoder * reverseGeocoder;
 
 /////////////////////
 // Assorted methods
@@ -245,6 +251,7 @@ double const EVENTS_LIST_MODE_ANIMATION_DURATION = 0.25;
 - (void) resetSearchFilters;
 - (void) updateSearchFilterViewsFromCurrentSelectedSearchFilterOptions;
 - (void) searchExecutionRequestedByUser;
+//- (void) setCurrentLocationButtonToBlinking:(BOOL)blinking;
 - (void) setDrawerScrollViewToDisplayViewsForSource:(EventsListMode)sourceMode;
 - (void) setDrawerToShowFilter:(EventsFilter *)filter animated:(BOOL)animated;
 - (void) setFiltersBarToDisplayViewsForSource:(EventsListMode)sourceMode;
@@ -253,6 +260,7 @@ double const EVENTS_LIST_MODE_ANIMATION_DURATION = 0.25;
 - (void) setLocationSetterViewIsVisible:(BOOL)isVisible animated:(BOOL)animated animationBasedInKeyboardNotificationUserInfo:(NSDictionary *)keyboardNotificationUserInfo;
 - (void) setLogoButtonImageForCategoryURI:(NSString *)theCategoryURI;
 - (void) setLogoButtonImageWithImageNamed:(NSString *)imageName;
+- (void) setMostRecentUserLocation:(UserLocation *)mostRecentUserLocation updateViews:(BOOL)shouldUpdateLocationViews animated:(BOOL)animated;
 - (void) setPushableContainerViewsOriginY:(CGFloat)originY adjustHeightToFillMainView:(BOOL)shouldAdjustHeight;
 //- (void) setSearchFiltersToMatchEventsWebQuery:(EventsWebQuery *)eventsWebQueryToMatch;
 - (void) setShouldReloadOnDrawerClose:(BOOL)shouldNowReloadOnDrawerClose updateDrawerReloadIndicatorView:(BOOL)shouldUpdateDrawerReloadIndicatorView shouldUpdateEventsSummaryStringForCurrentSource:(BOOL)shouldUpdateEventsSummaryStringForCurrentSource animated:(BOOL)animated;
@@ -316,7 +324,10 @@ double const EVENTS_LIST_MODE_ANIMATION_DURATION = 0.25;
 @synthesize debugTextView;
 @synthesize listMode;
 @synthesize eventsWebQuery, eventsWebQueryFromSearch, events, eventsFromSearch;
-@synthesize locationManager;
+@synthesize locationManager=locationManager_;
+@synthesize locationMode=locationMode_;
+@synthesize mostRecentUserLocation=mostRecentUserLocation_;
+@synthesize reverseGeocoder=reverseGeocoder_;
 @synthesize coreDataModel=coreDataModel_, webActivityView, concreteParentCategoriesDictionary;
 @synthesize concreteParentCategoriesArray;
 @synthesize oldFilterString, categoryURI;
@@ -344,7 +355,9 @@ double const EVENTS_LIST_MODE_ANIMATION_DURATION = 0.25;
     [indexPathOfSelectedRow release];
     [webConnector release];
     [webDataTranslator release];
-    [locationManager release];
+    [locationManager_ release];
+    [mostRecentUserLocation_ release];
+    [reverseGeocoder_ release];
     [selectedCategoryFilterOption release];
     [selectedDateFilterOption release];
     [selectedDateSearchFilterOption release];
@@ -945,6 +958,32 @@ double const EVENTS_LIST_MODE_ANIMATION_DURATION = 0.25;
     [self setUpFiltersUI:self.filters withOptionButtonSelectors:filterOptionButtonSelectors compressedOptionButtons:NO];
     [self setUpFiltersUI:self.filtersSearch withOptionButtonSelectors:filterOptionButtonSelectors compressedOptionButtons:YES];
     
+    // Update location buttons
+    // Target
+    [self.dvLocationCurrentLocationButton.button addTarget:self action:@selector(currentLocationButtonTouched:) forControlEvents:UIControlEventTouchUpInside];
+    [self.dvLocationSearchCurrentLocationButton.button addTarget:self action:@selector(currentLocationButtonTouched:) forControlEvents:UIControlEventTouchUpInside];
+    // Background Image
+    UIImage * backgroundImageNormal = [UIImage imageNamed:@"btn_findlocation.png"];
+    UIImage * backgroundImageTouch = [UIImage imageNamed:@"btn_findlocation_touch.png"];
+    [self.dvLocationCurrentLocationButton.button setBackgroundImage:backgroundImageNormal forState:UIControlStateNormal];
+    [self.dvLocationCurrentLocationButton.button setBackgroundImage:backgroundImageTouch forState:UIControlStateHighlighted];
+    [self.dvLocationSearchCurrentLocationButton.button setBackgroundImage:backgroundImageNormal forState:UIControlStateNormal];
+    [self.dvLocationSearchCurrentLocationButton.button setBackgroundImage:backgroundImageTouch forState:UIControlStateHighlighted];
+    // Image
+    UIImage * crosshairImage = [UIImage imageNamed:@"btn_findlocation_crosshair.png"];
+    self.dvLocationCurrentLocationButton.buttonIconImage = crosshairImage;
+    self.dvLocationSearchCurrentLocationButton.buttonIconImage = crosshairImage;
+    // Overlay
+    UIImage * glossImage = [UIImage imageNamed:@"btn_findlocation_gloss.png"];
+    self.dvLocationCurrentLocationButton.overlay.image = glossImage;
+    self.dvLocationSearchCurrentLocationButton.overlay.image = glossImage;
+    // Shadows
+    self.dvLocationCurrentLocationButton.isShadowVisibleWhenButtonNormal = NO;
+    self.dvLocationCurrentLocationButton.isShadowVisibleWhenButtonHighlighted = NO;
+    self.dvLocationSearchCurrentLocationButton.isShadowVisibleWhenButtonNormal = NO;
+    self.dvLocationSearchCurrentLocationButton.isShadowVisibleWhenButtonHighlighted = NO;
+    
+    // Views always start with drawer closed, and should not reload. We will recover/restore values if appropriate using other instance variables. (Check the header file.)
     self.isDrawerOpen = NO;
     self.shouldReloadOnDrawerClose = NO;
     
@@ -1090,7 +1129,8 @@ double const EVENTS_LIST_MODE_ANIMATION_DURATION = 0.25;
     ////////////////////
     // DEBUGGING BELOW
     
-    BOOL debugging = NO;
+    // DEBUGGING BLOCK 1
+    BOOL debuggingBlock1 = NO;
     
     debugTextView = [[UITextView alloc] initWithFrame:CGRectMake(self.tableView.bounds.size.width / 2.0, 0, self.tableView.bounds.size.width / 2.0, self.tableView.bounds.size.height)];
     self.debugTextView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
@@ -1108,8 +1148,8 @@ double const EVENTS_LIST_MODE_ANIMATION_DURATION = 0.25;
     self.debugTextView.text = debugText;
     NSLog(@"%@", debugText);
     
-    self.debugTextView.hidden = !debugging;
-    
+    self.debugTextView.hidden = !debuggingBlock1;
+        
     // DEBUGGING ABOVE
     ////////////////////
     
@@ -1297,6 +1337,7 @@ double const EVENTS_LIST_MODE_ANIMATION_DURATION = 0.25;
     //    NSLog(@"\n\nINDEX PATH FOR SELECTED ROW ACCORDING TO TABLEVIEW IS %@\n\n", self.indexPathOfSelectedRow);
     
     [self updateTimeFilterOptions:[self filterForFilterCode:EVENTS_FILTER_TIME inFiltersArray:self.filtersForCurrentSource].options forSearch:self.isSearchOn givenSelectedDateFilterOption:self.isSearchOn ? self.selectedDateSearchFilterOption : self.selectedDateFilterOption userTime:[NSDate date]];
+    [(self.isSearchOn ? self.dvLocationSearchUpdatedView : self.dvLocationUpdatedView) updateLabelTextForCurrentUpdatedDateAnimated:NO];
     
 //    NSLog(@"FIGURING THIS OUT, at the end of viewWillAppear self.tableView.contentOffset is %@", NSStringFromCGPoint(self.tableView.contentOffset));
     
@@ -2108,7 +2149,6 @@ double const EVENTS_LIST_MODE_ANIMATION_DURATION = 0.25;
             }
             [self setFeedbackViewMessageType:(self.shouldReloadOnDrawerClose ? CloseDrawerToLoadPrompt : SetFiltersPrompt) eventsSummaryString:self.eventsSummaryStringForCurrentSource searchString:(self.isSearchOn ? self.searchTextField.text : nil) animated:animated];
             [self setFeedbackViewIsVisible:YES animated:animated];
-            [self updateTimeFilterOptions:[self filterForFilterCode:EVENTS_FILTER_TIME inFiltersArray:self.filtersForCurrentSource].options forSearch:self.isSearchOn givenSelectedDateFilterOption:self.isSearchOn ? self.selectedDateSearchFilterOption : self.selectedDateFilterOption userTime:[NSDate date]];
         } else {
 //            CGRect drawerScrollViewFrame = self.drawerScrollView.frame;
 //            drawerScrollViewFrame.size.height = 0;
@@ -2147,6 +2187,11 @@ double const EVENTS_LIST_MODE_ANIMATION_DURATION = 0.25;
 //            self.tableView.contentInset = tableViewInset;
         }
     };
+    
+    if (!self.isDrawerOpen) {
+        [self updateTimeFilterOptions:[self filterForFilterCode:EVENTS_FILTER_TIME inFiltersArray:self.filtersForCurrentSource].options forSearch:self.isSearchOn givenSelectedDateFilterOption:self.isSearchOn ? self.selectedDateSearchFilterOption : self.selectedDateFilterOption userTime:[NSDate date]];
+        [(self.isSearchOn ? self.dvLocationSearchUpdatedView : self.dvLocationUpdatedView) updateLabelTextForCurrentUpdatedDateAnimated:NO];
+    }
     
     if (animated) {
         CGFloat animationDurationSearch = /*2.8;//*/0.3;
@@ -3546,11 +3591,26 @@ double const EVENTS_LIST_MODE_ANIMATION_DURATION = 0.25;
 }
 
 - (void)setLocationViewController:(SetLocationViewController *)setLocationViewController didSelectUserLocation:(UserLocation *)location {
-    [self.dvLocationSetLocationButton setTitle:location.addressFormatted forState:UIControlStateNormal];
-    [self.dvLocationSearchSetLocationButton setTitle:location.addressFormatted forState:UIControlStateNormal];
+    [self setMostRecentUserLocation:location updateViews:YES animated:NO];
     [self dismissModalViewControllerAnimated:YES];
     self.setLocationViewController = nil;
     [self setShouldReloadOnDrawerClose:YES updateDrawerReloadIndicatorView:YES shouldUpdateEventsSummaryStringForCurrentSource:YES animated:YES];
+}
+
+- (void) setMostRecentUserLocation:(UserLocation *)mostRecentUserLocation updateViews:(BOOL)shouldUpdateLocationViews animated:(BOOL)animated {
+    self.mostRecentUserLocation = mostRecentUserLocation;
+    if (shouldUpdateLocationViews) {
+        [self.dvLocationSetLocationButton setTitle:self.mostRecentUserLocation.addressFormatted forState:UIControlStateNormal];
+        [self.dvLocationSearchSetLocationButton setTitle:self.mostRecentUserLocation.addressFormatted forState:UIControlStateNormal];
+        if (!self.mostRecentUserLocation.isManual.boolValue) {
+            [self.dvLocationUpdatedView setLabelTextToUpdatedDate:self.mostRecentUserLocation.datetimeRecorded animated:animated];
+            [self.dvLocationSearchUpdatedView setLabelTextToUpdatedDate:self.mostRecentUserLocation.datetimeRecorded animated:animated];
+        }
+        [self.dvLocationUpdatedView setVisible:!self.mostRecentUserLocation.isManual.boolValue animated:animated];
+        [self.dvLocationSearchUpdatedView setVisible:!self.mostRecentUserLocation.isManual.boolValue animated:animated];
+        [self.dvLocationCurrentLocationButton stopSpinningButtonImage];
+        [self.dvLocationSearchCurrentLocationButton stopSpinningButtonImage];
+    }
 }
 
 - (void) setShouldReloadOnDrawerClose:(BOOL)shouldNowReloadOnDrawerClose updateDrawerReloadIndicatorView:(BOOL)shouldUpdateDrawerReloadIndicatorView shouldUpdateEventsSummaryStringForCurrentSource:(BOOL)shouldUpdateEventsSummaryStringForCurrentSource animated:(BOOL)animated {
@@ -3572,9 +3632,19 @@ double const EVENTS_LIST_MODE_ANIMATION_DURATION = 0.25;
 }
 
 - (IBAction) currentLocationButtonTouched:(UIButton *)currentLocationButton {
-    [self.dvLocationSetLocationButton setTitle:@"Current Location" forState:UIControlStateNormal];
-    [self.dvLocationSearchSetLocationButton setTitle:@"Current Location" forState:UIControlStateNormal];
-    [self setShouldReloadOnDrawerClose:YES updateDrawerReloadIndicatorView:YES shouldUpdateEventsSummaryStringForCurrentSource:YES animated:YES];
+    BOOL debuggingSpinner = YES;
+    if (debuggingSpinner) {
+        UIButtonWithOverlayView * view = (currentLocationButton == self.dvLocationCurrentLocationButton.button) ? self.dvLocationCurrentLocationButton : self.dvLocationSearchCurrentLocationButton;
+        if (view.isButtonImageSpinning) {
+            [view stopSpinningButtonImage];
+        } else {
+            [view startSpinningButtonImage];
+        }
+    } else {
+        [self.dvLocationSetLocationButton setTitle:@"Current Location" forState:UIControlStateNormal];
+        [self.dvLocationSearchSetLocationButton setTitle:@"Current Location" forState:UIControlStateNormal];
+        [self setShouldReloadOnDrawerClose:YES updateDrawerReloadIndicatorView:YES shouldUpdateEventsSummaryStringForCurrentSource:YES animated:YES];
+    }
 }
 
 - (IBAction) setLocationButtonTouched:(UIButton *)setLocationButton {
@@ -3610,5 +3680,34 @@ double const EVENTS_LIST_MODE_ANIMATION_DURATION = 0.25;
 //    }
 
 }
+
+//- (void) setCurrentLocationButtonToBlinking:(BOOL)blinking {
+//    NSLog(@"setCurrentLocationButtonToBlinking:%d", blinking);
+//    if (blinking) {
+//        NSLog(@"Blinking");
+//        [UIView animateWithDuration:0.25 
+//                              delay:0.0 
+//                            options:UIViewAnimationOptionRepeat|UIViewAnimationOptionAutoreverse|UIViewAnimationOptionBeginFromCurrentState 
+//                         animations:^{ 
+//                             NSLog(@"Animating");
+//                             self.dvLocationCurrentLocationButton.frame = CGRectMake(self.dvLocationCurrentLocationButton.frame.origin.x+1, self.dvLocationCurrentLocationButton.frame.origin.y, self.dvLocationCurrentLocationButton.frame.size.width, self.dvLocationCurrentLocationButton.frame.size.height);
+//                             self.dvLocationCurrentLocationButton.imageView.alpha = 1.0 - self.dvLocationCurrentLocationButton.imageView.alpha;
+//                             self.dvLocationSearchCurrentLocationButton.imageView.alpha = 1.0 - self.dvLocationSearchCurrentLocationButton.imageView.alpha;
+//                         }
+//                         completion:^(BOOL finished){
+//                             // ...
+//                         }];
+//    } else {
+//        NSLog(@"Not blinking");
+//        [UIView animateWithDuration:0.25 delay:0.0 options:UIViewAnimationOptionBeginFromCurrentState 
+//                         animations:^{
+//                             self.dvLocationCurrentLocationButton.imageView.alpha = 0.0;
+//                             self.dvLocationSearchCurrentLocationButton.imageView.alpha = 0.0;
+//                         }
+//                         completion:^(BOOL finished){
+//                             
+//                         }];
+//    }
+//}
 
 @end

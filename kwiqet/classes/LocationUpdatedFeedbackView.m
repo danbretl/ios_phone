@@ -21,6 +21,7 @@ CGFloat const LUFV_LABEL_PADDING_RIGHT = 5.0;
 @property (retain) UIImageView * foregroundImageView;
 @property (retain) UIView * shadow;
 @property LocationUpdatedFeedbackMessageType messageType;
+@property (retain) NSDate * dateLastUpdated;
 @end
 
 @implementation LocationUpdatedFeedbackView
@@ -28,6 +29,7 @@ CGFloat const LUFV_LABEL_PADDING_RIGHT = 5.0;
 @synthesize label=label_, backgroundImageView=backgroundImageView_, foregroundImageView=foregroundImageView_;
 @synthesize shadow=shadow_;
 @synthesize messageType=messageType_;
+@synthesize dateLastUpdated=dateLastUpdated_;
 
 - (id)initWithFrame:(CGRect)frame
 {
@@ -99,6 +101,7 @@ CGFloat const LUFV_LABEL_PADDING_RIGHT = 5.0;
     [backgroundImageView_ release];
     [foregroundImageView_ release];
     [shadow_ release];
+    [dateLastUpdated_ release];
     [super dealloc];
 }
 
@@ -154,6 +157,7 @@ CGFloat const LUFV_LABEL_PADDING_RIGHT = 5.0;
 // - minutes            : "updated 17 min ago" (rounded down to nearest minute)
 // - less than a minute : "updated a moment ago"
 - (void) setLabelTextToUpdatedDate:(NSDate *)dateLastUpdated animated:(BOOL)animated {
+    self.dateLastUpdated = dateLastUpdated;
     int secondsSinceUpdate = abs((int)[dateLastUpdated timeIntervalSinceNow]);
     int minutesSinceUpdate = secondsSinceUpdate / 60;
     int hoursSinceUpdate = minutesSinceUpdate / 60;
@@ -180,6 +184,13 @@ CGFloat const LUFV_LABEL_PADDING_RIGHT = 5.0;
     [self setLabelText:labelText animated:animated fadeTextIfAnimated:self.messageType != Updated];
     NSLog(@"LocationUpdatedFeedbackView labelText set to %@", labelText);
     self.messageType = Updated;
+}
+
+// The implementation of this method is currently quite stupid and wasteful!
+- (void) updateLabelTextForCurrentUpdatedDateAnimated:(BOOL)animated {
+    if (self.messageType == Updated && self.dateLastUpdated != nil) {
+        [self setLabelTextToUpdatedDate:self.dateLastUpdated animated:animated];
+    }
 }
 
 - (void) setVisible:(BOOL)visible animated:(BOOL)animated {

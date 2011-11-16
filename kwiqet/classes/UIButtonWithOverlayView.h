@@ -18,10 +18,11 @@
     UIImageView * overlay_;
     UIView * shadow_;
 
-    BOOL isShadowVisibleWhenButtonNormal;
-    BOOL isShadowVisibleWhenButtonHighlighted;
+    BOOL isShadowVisibleWhenButtonNormal_;
+    BOOL isShadowVisibleWhenButtonHighlighted_;
     
     BOOL isEnabled_;
+    BOOL isButtonImageSpinning_;
     
 }
 
@@ -33,9 +34,13 @@
 @property (nonatomic, readonly) UIView * shadow;
 
 @property (nonatomic) CGFloat cornerRadius;
-@property BOOL isShadowVisibleWhenButtonNormal;
-@property BOOL isShadowVisibleWhenButtonHighlighted;
+@property (nonatomic) BOOL isShadowVisibleWhenButtonNormal;
+@property (nonatomic) BOOL isShadowVisibleWhenButtonHighlighted;
 
 @property (nonatomic) BOOL enabled;
+
+@property (readonly) BOOL isButtonImageSpinning;
+- (void) startSpinningButtonImage;
+- (void) stopSpinningButtonImage; // Animation is rough at the end. Fix this later.
 
 @end

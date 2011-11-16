@@ -22,6 +22,7 @@
 #import <CoreLocation/CoreLocation.h>
 #import "SetLocationViewController.h"
 #import "LocationUpdatedFeedbackView.h"
+#import "LocationUtil.h"
 
 typedef enum {
     Browse = 1,
@@ -162,7 +163,7 @@ typedef enum {
     // Drawer view location
     IBOutlet UIView * drawerViewLocation;
     IBOutlet UIButton * dvLocationSetLocationButton;
-    IBOutlet UIButton * dvLocationCurrentLocationButton;
+    IBOutlet UIButtonWithOverlayView * dvLocationCurrentLocationButton;
     IBOutlet LocationUpdatedFeedbackView * dvLocationUpdatedView;
     IBOutlet UIButtonWithOverlayView * dvLocationButtonWalking;
     IBOutlet UIButtonWithOverlayView * dvLocationButtonNeighborhood;
@@ -171,7 +172,7 @@ typedef enum {
     // Drawer view location search
     IBOutlet UIView * drawerViewLocationSearch;
     IBOutlet UIButton * dvLocationSearchSetLocationButton;
-    IBOutlet UIButton * dvLocationSearchCurrentLocationButton;
+    IBOutlet UIButtonWithOverlayView * dvLocationSearchCurrentLocationButton;
     IBOutlet LocationUpdatedFeedbackView * dvLocationSearchUpdatedView;
     IBOutlet UIButtonWithOverlayView * dvLocationSearchButtonWalking;
     IBOutlet UIButtonWithOverlayView * dvLocationSearchButtonNeighborhood;
@@ -203,10 +204,10 @@ typedef enum {
     /////////////
     // Location
     
-    CLLocationManager * locationManager;
-    UserLocation * userLocationForCurrentList;
-    UserLocation * userLocationForNextWebCall;
-    MKReverseGeocoder * reverseGeocoder;
+    LocationMode locationMode_;
+    CLLocationManager * locationManager_;
+    UserLocation * mostRecentUserLocation_;
+    MKReverseGeocoder * reverseGeocoder_;
 
 }
 
