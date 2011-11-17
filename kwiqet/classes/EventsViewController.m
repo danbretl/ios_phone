@@ -208,6 +208,7 @@ double const EVENTS_LIST_MODE_ANIMATION_DURATION = 0.25;
 // Location properties
 @property LocationMode locationMode;
 @property BOOL shouldSuppressAutoLocationFailureAlerts;
+@property BOOL webLoadWaitingForUpdatedUserLocation;
 
 /////////////////////
 // Assorted methods
@@ -247,6 +248,7 @@ double const EVENTS_LIST_MODE_ANIMATION_DURATION = 0.25;
 - (void) keyboardWillShow:(NSNotification *)notification;
 - (void) loginActivity:(NSNotification *)notification;
 - (void) matchTableViewCoverViewToTableView;
+- (void) proceedWithWaitingWebLoadForCurrentSource;
 - (void) releaseReconstructableViews;
 - (void) resetSearchFilters;
 - (void) updateSearchFilterViewsFromCurrentSelectedSearchFilterOptions;
@@ -327,6 +329,7 @@ double const EVENTS_LIST_MODE_ANIMATION_DURATION = 0.25;
 @synthesize locationManager=locationManager_;
 @synthesize locationMode=locationMode_;
 @synthesize shouldSuppressAutoLocationFailureAlerts=shouldSuppressAutoLocationFailureAlerts_;
+@synthesize webLoadWaitingForUpdatedUserLocation=webLoadWaitingForUpdatedUserLocation_;
 @synthesize userLocationMostRecent=userLocationMostRecent_;
 @synthesize coreDataModel=coreDataModel_, webActivityView, concreteParentCategoriesDictionary;
 @synthesize concreteParentCategoriesArray;
@@ -1627,10 +1630,14 @@ double const EVENTS_LIST_MODE_ANIMATION_DURATION = 0.25;
     
     [self setLogoButtonImageForCategoryURI:self.categoryURI];
 //    [self setFeedbackViewIsVisible:YES adjustMessages:YES withMessageType:LoadingEvents eventsSummaryString:self.eventsSummaryStringForCurrentSource animated:YES]; // Moving this outside of this method, because we don't always want to do it when doing a web call. We could do it within this method conditionally using some sort of parameter, but I don't have the patience to make that kind of change right now. I also don't really think that would be appropriate, despite being easier.
-    [self showWebLoadingViews];
-    [self.webConnector getRecommendedEventsWithCategoryURI:self.categoryURI minPrice:self.eventsWebQuery.filterPriceMinimum maxPrice:self.eventsWebQuery.filterPriceMaximum startDateEarliest:self.eventsWebQuery.filterDateEarliest startDateLatest:self.eventsWebQuery.filterDateLatest startTimeEarliest:self.eventsWebQuery.filterTimeEarliest startTimeLatest:self.eventsWebQuery.filterTimeLatest];
-//    [self.webConnector getEventsListWithFilter:self.oldFilterString categoryURI:self.categoryURI];
     
+    [self showWebLoadingViews];
+    if (!self.locationManager.isFindingLocation) {
+        self.webLoadWaitingForUpdatedUserLocation = NO;
+        [self.webConnector getRecommendedEventsWithCategoryURI:self.categoryURI minPrice:self.eventsWebQuery.filterPriceMinimum maxPrice:self.eventsWebQuery.filterPriceMaximum startDateEarliest:self.eventsWebQuery.filterDateEarliest startDateLatest:self.eventsWebQuery.filterDateLatest startTimeEarliest:self.eventsWebQuery.filterTimeEarliest startTimeLatest:self.eventsWebQuery.filterTimeLatest];
+    } else {
+        self.webLoadWaitingForUpdatedUserLocation = YES;
+    }
     /////////////////////
     // Localytics below
     NSString * localyticsFilterString = @"recommended";
@@ -1752,9 +1759,14 @@ double const EVENTS_LIST_MODE_ANIMATION_DURATION = 0.25;
         self.eventsSummaryStringSearch = [self makeEventsSummaryStringForSource:Search];
         [self setFeedbackViewIsVisible:YES animated:YES];
         [self setFeedbackViewMessageType:LoadingEvents eventsSummaryString:self.eventsSummaryStringSearch searchString:self.eventsWebQueryFromSearch.searchTerm animated:YES];
+        
         [self showWebLoadingViews];
-        [self.webConnector getEventsListForSearchString:self.searchTextField.text startDateEarliest:self.eventsWebQueryFromSearch.filterDateEarliest startDateLatest:self.eventsWebQueryFromSearch.filterDateLatest startTimeEarliest:self.eventsWebQueryFromSearch.filterTimeEarliest startTimeLatest:self.eventsWebQueryFromSearch.filterTimeLatest];
-//        [self.webConnector getEventsListForSearchString:searchTerm];
+        if (!self.locationManager.isFindingLocation) {
+            self.webLoadWaitingForUpdatedUserLocation = NO;
+            [self.webConnector getEventsListForSearchString:self.searchTextField.text startDateEarliest:self.eventsWebQueryFromSearch.filterDateEarliest startDateLatest:self.eventsWebQueryFromSearch.filterDateLatest startTimeEarliest:self.eventsWebQueryFromSearch.filterTimeEarliest startTimeLatest:self.eventsWebQueryFromSearch.filterTimeLatest];
+        } else {
+            self.webLoadWaitingForUpdatedUserLocation = YES;
+        }
         
     } else {
         
@@ -3730,47 +3742,81 @@ double const EVENTS_LIST_MODE_ANIMATION_DURATION = 0.25;
     // Model update
     self.locationMode = LocationModeAuto;
     [self setUserLocationMostRecent:location updateViews:YES animated:YES];
-    [self setShouldReloadOnDrawerClose:YES updateDrawerReloadIndicatorView:YES shouldUpdateEventsSummaryStringForCurrentSource:YES animated:YES];
+    if (!self.webLoadWaitingForUpdatedUserLocation) {
+        [self setShouldReloadOnDrawerClose:YES updateDrawerReloadIndicatorView:YES shouldUpdateEventsSummaryStringForCurrentSource:YES animated:YES];
+    } else {
+        [self proceedWithWaitingWebLoadForCurrentSource];
+    }
 }
 
 - (void)kwiqetLocationManager:(KwiqetLocationManager *)kwiqetLocationManager didFailWithLatestUserLocation:(UserLocation *)location {
     self.locationMode = LocationModeAuto;
     [self setUserLocationMostRecent:location updateViews:YES animated:YES];
-    [self setShouldReloadOnDrawerClose:YES updateDrawerReloadIndicatorView:YES shouldUpdateEventsSummaryStringForCurrentSource:YES animated:YES];
-    if (!self.shouldSuppressAutoLocationFailureAlerts) {
-        UIAlertView * currentLocationFailAlertView = [[UIAlertView alloc] initWithTitle:@"Trouble finding location" message:@"We had some trouble accurately finding your current location. You might want to enter a location yourself instead." delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
-        [currentLocationFailAlertView show];
-        [currentLocationFailAlertView release];
+    if (!self.webLoadWaitingForUpdatedUserLocation) {
+        [self setShouldReloadOnDrawerClose:YES updateDrawerReloadIndicatorView:YES shouldUpdateEventsSummaryStringForCurrentSource:YES animated:YES];
+        if (!self.shouldSuppressAutoLocationFailureAlerts) {
+            UIAlertView * currentLocationFailAlertView = [[UIAlertView alloc] initWithTitle:@"Trouble finding location" message:@"We had some trouble accurately finding your current location. You might want to enter a location yourself instead." delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
+            [currentLocationFailAlertView show];
+            [currentLocationFailAlertView release];
+        }
+    } else {
+        [self proceedWithWaitingWebLoadForCurrentSource];
     }
 }
 
 - (void)kwiqetLocationManager:(KwiqetLocationManager *)kwiqetLocationManager didFailWithAccessDeniedError:(CLError)errorCode {
     [self setUserLocationMostRecent:self.userLocationMostRecent updateViews:YES animated:YES];
-    if (!self.shouldSuppressAutoLocationFailureAlerts) {
-        UIAlertView * currentLocationFailAlertView = [[UIAlertView alloc] initWithTitle:@"Location is Unavailable" message:@"Location services are currently unavailable. Please enable them in the 'Settings' app, or enter a location yourself." delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil]; // In iOS5, I think we are able to spruce this alert view up a little bit to provide a button that opens the "Settings" app programatically. Find the right catch for "do we have that ability", and implement this conditional behavior.
-        [currentLocationFailAlertView show];
-        [currentLocationFailAlertView release];
+    if (!self.webLoadWaitingForUpdatedUserLocation) {
+        if (!self.shouldSuppressAutoLocationFailureAlerts) {
+            UIAlertView * currentLocationFailAlertView = [[UIAlertView alloc] initWithTitle:@"Location is Unavailable" message:@"Location services are currently unavailable. Please enable them in the 'Settings' app, or enter a location yourself." delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil]; // In iOS5, I think we are able to spruce this alert view up a little bit to provide a button that opens the "Settings" app programatically. Find the right catch for "do we have that ability", and implement this conditional behavior.
+            [currentLocationFailAlertView show];
+            [currentLocationFailAlertView release];
+        }
+    } else {
+        [self proceedWithWaitingWebLoadForCurrentSource];
     }
 }
 
 - (void)kwiqetLocationManager:(KwiqetLocationManager *)kwiqetLocationManager didFailWithNetworkError:(CLError)errorCode {
     [self setUserLocationMostRecent:self.userLocationMostRecent updateViews:YES animated:YES];
-    if (!self.shouldSuppressAutoLocationFailureAlerts) {
-        UIAlertView * currentLocationFailAlertView = [[UIAlertView alloc] initWithTitle:@"Network Error" message:@"Your current location could not be determined due to a network error. Check your settings and try again, or enter a location yourself." delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
-        [currentLocationFailAlertView show];
-        [currentLocationFailAlertView release];
+    if (!self.webLoadWaitingForUpdatedUserLocation) {
+        if (!self.shouldSuppressAutoLocationFailureAlerts) {
+            UIAlertView * currentLocationFailAlertView = [[UIAlertView alloc] initWithTitle:@"Network Error" message:@"Your current location could not be determined due to a network error. Check your settings and try again, or enter a location yourself." delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
+            [currentLocationFailAlertView show];
+            [currentLocationFailAlertView release];
+        }
+    } else {
+        [self proceedWithWaitingWebLoadForCurrentSource];
     }
 }
 
 - (void)kwiqetLocationManager:(KwiqetLocationManager *)kwiqetLocationManager didFailWithAssortedError:(CLError)errorCode {
     [self setUserLocationMostRecent:self.userLocationMostRecent updateViews:YES animated:YES];
-    if (!self.shouldSuppressAutoLocationFailureAlerts) {
-        UIAlertView * currentLocationFailAlertView = [[UIAlertView alloc] initWithTitle:@"Couldn't find location" message:@"Your current location could not be determined. Please check your settings and try again, or enter a location yourself." delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
-        [currentLocationFailAlertView show];
-        [currentLocationFailAlertView release];
+    if (!self.webLoadWaitingForUpdatedUserLocation) {
+        if (!self.shouldSuppressAutoLocationFailureAlerts) {
+            UIAlertView * currentLocationFailAlertView = [[UIAlertView alloc] initWithTitle:@"Couldn't find location" message:@"Your current location could not be determined. Please check your settings and try again, or enter a location yourself." delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
+            [currentLocationFailAlertView show];
+            [currentLocationFailAlertView release];
+        }
+    } else {
+        [self proceedWithWaitingWebLoadForCurrentSource];
     }
 }
 
-
+- (void) proceedWithWaitingWebLoadForCurrentSource {
+    
+    if (!self.isSearchOn) {
+        
+        [self.webConnector getRecommendedEventsWithCategoryURI:self.categoryURI minPrice:self.eventsWebQuery.filterPriceMinimum maxPrice:self.eventsWebQuery.filterPriceMaximum startDateEarliest:self.eventsWebQuery.filterDateEarliest startDateLatest:self.eventsWebQuery.filterDateLatest startTimeEarliest:self.eventsWebQuery.filterTimeEarliest startTimeLatest:self.eventsWebQuery.filterTimeLatest];
+        
+    } else {
+        
+        [self.webConnector getEventsListForSearchString:self.searchTextField.text startDateEarliest:self.eventsWebQueryFromSearch.filterDateEarliest startDateLatest:self.eventsWebQueryFromSearch.filterDateLatest startTimeEarliest:self.eventsWebQueryFromSearch.filterTimeEarliest startTimeLatest:self.eventsWebQueryFromSearch.filterTimeLatest];        
+        
+    }
+    
+    self.webLoadWaitingForUpdatedUserLocation = NO;
+    
+}
 
 @end
