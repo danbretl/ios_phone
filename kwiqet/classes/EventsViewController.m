@@ -207,8 +207,6 @@ double const EVENTS_LIST_MODE_ANIMATION_DURATION = 0.25;
 ////////////////////////
 // Location properties
 @property LocationMode locationMode;
-@property (retain) UserLocation * mostRecentUserLocation;
-@property (retain) MKReverseGeocoder * reverseGeocoder;
 
 /////////////////////
 // Assorted methods
@@ -257,10 +255,10 @@ double const EVENTS_LIST_MODE_ANIMATION_DURATION = 0.25;
 - (void) setFiltersBarToDisplayViewsForSource:(EventsListMode)sourceMode;
 - (void) setFiltersBarViewsOriginY:(CGFloat)originY adjustDrawerViewsAccordingly:(BOOL)shouldAdjustDrawerViews;
 - (void) setImagesForCategoryButton:(UIButton *)button forCategory:(Category *)category;
-- (void) setLocationSetterViewIsVisible:(BOOL)isVisible animated:(BOOL)animated animationBasedInKeyboardNotificationUserInfo:(NSDictionary *)keyboardNotificationUserInfo;
+//- (void) setLocationSetterViewIsVisible:(BOOL)isVisible animated:(BOOL)animated animationBasedInKeyboardNotificationUserInfo:(NSDictionary *)keyboardNotificationUserInfo;
 - (void) setLogoButtonImageForCategoryURI:(NSString *)theCategoryURI;
 - (void) setLogoButtonImageWithImageNamed:(NSString *)imageName;
-- (void) setMostRecentUserLocation:(UserLocation *)mostRecentUserLocation updateViews:(BOOL)shouldUpdateLocationViews animated:(BOOL)animated;
+- (void) setUserLocationMostRecent:(UserLocation *)mostRecentUserLocation updateViews:(BOOL)shouldUpdateLocationViews animated:(BOOL)animated;
 - (void) setPushableContainerViewsOriginY:(CGFloat)originY adjustHeightToFillMainView:(BOOL)shouldAdjustHeight;
 //- (void) setSearchFiltersToMatchEventsWebQuery:(EventsWebQuery *)eventsWebQueryToMatch;
 - (void) setShouldReloadOnDrawerClose:(BOOL)shouldNowReloadOnDrawerClose updateDrawerReloadIndicatorView:(BOOL)shouldUpdateDrawerReloadIndicatorView shouldUpdateEventsSummaryStringForCurrentSource:(BOOL)shouldUpdateEventsSummaryStringForCurrentSource animated:(BOOL)animated;
@@ -326,8 +324,7 @@ double const EVENTS_LIST_MODE_ANIMATION_DURATION = 0.25;
 @synthesize eventsWebQuery, eventsWebQueryFromSearch, events, eventsFromSearch;
 @synthesize locationManager=locationManager_;
 @synthesize locationMode=locationMode_;
-@synthesize mostRecentUserLocation=mostRecentUserLocation_;
-@synthesize reverseGeocoder=reverseGeocoder_;
+@synthesize userLocationMostRecent=userLocationMostRecent_;
 @synthesize coreDataModel=coreDataModel_, webActivityView, concreteParentCategoriesDictionary;
 @synthesize concreteParentCategoriesArray;
 @synthesize oldFilterString, categoryURI;
@@ -356,8 +353,7 @@ double const EVENTS_LIST_MODE_ANIMATION_DURATION = 0.25;
     [webConnector release];
     [webDataTranslator release];
     [locationManager_ release];
-    [mostRecentUserLocation_ release];
-    [reverseGeocoder_ release];
+    [userLocationMostRecent_ release];
     [selectedCategoryFilterOption release];
     [selectedDateFilterOption release];
     [selectedDateSearchFilterOption release];
@@ -384,15 +380,13 @@ double const EVENTS_LIST_MODE_ANIMATION_DURATION = 0.25;
     if (self) {
         // Custom initialization
         self.listMode = Browse;
-        self.deletedFromEventCard = NO;
-//        locationManager = [[CLLocationManager alloc] init];
-//        self.locationManager.delegate = self;
+        self.locationMode = LocationModeManual;
         
         self.oldFilterString = EVENTS_OLDFILTER_RECOMMENDED; // This is deprecated, and constant.
         
         NSMutableArray * categoryOptions = [NSMutableArray arrayWithCapacity:self.concreteParentCategoriesArray.count];
         [categoryOptions addObject:[EventsFilterOption eventsFilterOptionWithCode:[EventsFilterOption eventsFilterOptionCategoryCodeForCategoryURI:nil] readableString:nil buttonText:nil]];
-        // The other 8 main category options will be added to the category filter object when the coreDataModel property is set for this view controller. Kind of really horribly depressingly ugly? Yup. Especially because we absolutely need that to happen before the view does load! Rework this as soon as you have a chance.
+        // The other 8 main category options will be added to the category filter object after the coreDataModel property is set for this view controller. Kind of really horribly depressingly ugly? Yup. Especially because we are simply counting on the coreDataModel property having been set by the time viewDidLoad fires! Rework this as soon as you have a chance.
         NSArray * priceOptions = [NSArray arrayWithObjects:
                                   [EventsFilterOption 
                                    eventsFilterOptionWithCode: EFO_CODE_PRICE_FREE
@@ -644,19 +638,24 @@ double const EVENTS_LIST_MODE_ANIMATION_DURATION = 0.25;
         [coreDataModel_ release];
         coreDataModel_ = [coreDataModel retain];
     }
-    EventsFilter * categoryFilter = [self filterForFilterCode:EVENTS_FILTER_CATEGORIES inFiltersArray:self.filters];
-    if (categoryFilter.options.count < 9) {
-        for (Category * category in self.concreteParentCategoriesArray) {
-            NSString * efoCode = [EventsFilterOption eventsFilterOptionCategoryCodeForCategoryURI:category.uri];
-            [categoryFilter.options addObject:[EventsFilterOption eventsFilterOptionWithCode:efoCode readableString:nil buttonText:nil]];
-            NSLog(@"Setting up category EFOs, efoCode=%@", efoCode);
-        }
-    }
 }
 
 // Implement viewDidLoad to do additional setup after loading the view, typically from a nib.
 - (void)viewDidLoad {
     [super viewDidLoad];
+    
+    NSLog(@"EventsViewController setCoreDataModel");
+    EventsFilter * categoryFilter = [self filterForFilterCode:EVENTS_FILTER_CATEGORIES inFiltersArray:self.filters];
+    if (categoryFilter.options.count < 9) {
+        NSLog(@"categoryFilter options count is less than 9");
+        NSLog(@"going to loop through self.concreteParentCategoriesArray %@ (count %d)", self.concreteParentCategoriesArray, self.concreteParentCategoriesArray.count);
+        for (Category * category in self.concreteParentCategoriesArray) {
+            NSLog(@"adding category filter option for category with uri %@", category.uri);
+            NSString * efoCode = [EventsFilterOption eventsFilterOptionCategoryCodeForCategoryURI:category.uri];
+            [categoryFilter.options addObject:[EventsFilterOption eventsFilterOptionWithCode:efoCode readableString:nil buttonText:nil]];
+            NSLog(@"Setting up category EFOs, efoCode=%@", efoCode);
+        }
+    }
     
 //    NSLog(@"\n\n\n\n\n\n\n\n");
 //    NSLog(@"testing");
@@ -835,7 +834,9 @@ double const EVENTS_LIST_MODE_ANIMATION_DURATION = 0.25;
     UIView * categoryButtonsContainer = [[UIView alloc] initWithFrame:CGRectMake(categoryButtonsContainerLeftEdge, categoryButtonsContainerTopEdge, categoryButtonContainerSize.width * 3, categoryButtonContainerSize.height * 3)];
     [self.drawerViewCategories addSubview:categoryButtonsContainer];
     int x = 0; int y = 0;
+    NSLog(@"EventsViewController viewDidLoad categoryOptions loop");
     for (int i=0; i<categoryOptionsCount; i++) {
+        NSLog(@"loop %d", i);
         x = i % 3; y = i / 3;
         // Container
         UIView * categoryButtonContainer = [[[UIView alloc] initWithFrame:CGRectMake(x * categoryButtonContainerSize.width, y * categoryButtonContainerSize.height, categoryButtonContainerSize.width, categoryButtonContainerSize.height)] autorelease];
@@ -996,8 +997,20 @@ double const EVENTS_LIST_MODE_ANIMATION_DURATION = 0.25;
     // Get the most recent events web queries, if they exist
     self.eventsWebQuery = [self.coreDataModel getMostRecentEventsRecommendedWebQuery];
     self.events = [self.eventsWebQuery.eventResultsEventsInOrder.mutableCopy autorelease];
-    NSLog(@"eventsWebQueryFromSearch was just updated in viewDidLoad and is now %@", self.eventsWebQueryFromSearch);
-    NSLog(@"eventsWebQueryFromSearch was actually just pulled in for the first time and it is %@ which is notable right now *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***", self.eventsWebQueryFromSearch);
+    
+    // Get location info, and update views. There is guaranteed at least one location candidate available (from at least one of various possible data sources).
+    UserLocation * userLocationToUse = nil;
+    if (self.userLocationMostRecent != nil) {
+        userLocationToUse = self.userLocationMostRecent;
+    } else {
+        if (self.eventsWebQuery != nil && self.eventsWebQuery.filterLocation != nil) {
+            userLocationToUse = self.eventsWebQuery.filterLocation;
+        } else {
+            NSArray * mostRecentLocations = [self.coreDataModel getRecentUserLocations];
+            userLocationToUse = [mostRecentLocations objectAtIndex:0];
+        }
+    }
+    [self setUserLocationMostRecent:userLocationToUse updateViews:YES animated:NO];
         
     // Block with which to find the index of a given filter option in a filter's options array, given ann array of filters and the desired filter code
     NSUInteger(^indexOfEventsFilterOptionBlock)(NSString *, NSArray *, NSString *)=^(NSString * filterCode, NSArray * filtersArray, NSString * filterOptionCode){
@@ -1021,7 +1034,6 @@ double const EVENTS_LIST_MODE_ANIMATION_DURATION = 0.25;
     int indexOfSelectedDateFilterOption = browseDateFilter.options.count - 1;
     int indexOfSelectedTimeFilterOption = browseTimeFilter.options.count - 1;
     int indexOfSelectedLocationFilterOption = browseLocationFilter.options.count - 1;
-    NSString * locationString = nil;
     
     // Set a bunch of indexes from above
     if (self.eventsWebQuery != nil) {
@@ -1032,7 +1044,6 @@ double const EVENTS_LIST_MODE_ANIMATION_DURATION = 0.25;
         indexOfSelectedDateFilterOption = indexOfEventsFilterOptionBlock(EVENTS_FILTER_DATE, self.filters, self.eventsWebQuery.filterDateBucketString);
         indexOfSelectedTimeFilterOption = indexOfEventsFilterOptionBlock(EVENTS_FILTER_TIME, self.filters, self.eventsWebQuery.filterTimeBucketString);
         indexOfSelectedLocationFilterOption = indexOfEventsFilterOptionBlock(EVENTS_FILTER_LOCATION, self.filters, self.eventsWebQuery.filterDistanceBucketString);
-        locationString = self.eventsWebQuery.filterLocationString;
     }
     
     // Set the browse filter settings
@@ -1063,8 +1074,6 @@ double const EVENTS_LIST_MODE_ANIMATION_DURATION = 0.25;
 
     // Update views
     // Update filter option button states for browse
-    [self.dvLocationSetLocationButton setTitle:locationString forState:UIControlStateNormal];
-    [self.dvLocationSearchSetLocationButton setTitle:locationString forState:UIControlStateNormal];
     [self updateFilterOptionButtonStatesOldSelected:nil newSelected:self.selectedPriceFilterOption];
     [self updateFilterOptionButtonStatesOldSelected:nil newSelected:self.selectedDateFilterOption];
     [self updateFilterOptionButtonStatesOldSelected:nil newSelected:self.selectedTimeFilterOption];
@@ -1601,8 +1610,8 @@ double const EVENTS_LIST_MODE_ANIMATION_DURATION = 0.25;
     }
     self.eventsWebQuery.filterDateBucketString = self.selectedDateFilterOption.code;
     self.eventsWebQuery.filterDistanceBucketString = self.selectedLocationFilterOption.code;
-    self.eventsWebQuery.filterLocationString = self.dvLocationSetLocationButton.titleLabel.text; // LOCATION HACK
-//    self.eventsWebQuery.filterLocationString = self.dvLocationTextField.text.length > 0 ? self.dvLocationTextField.text : @"Current Location"; // LOCATION HACK
+    self.eventsWebQuery.filterLocation = self.userLocationMostRecent;
+    self.eventsWebQuery.filterLocationString = self.userLocationMostRecent.addressFormatted; // Deprecated
     self.eventsWebQuery.filterPriceBucketString = self.selectedPriceFilterOption.code;
     self.eventsWebQuery.filterTimeBucketString = self.selectedTimeFilterOption.code;
     Category * filterCategory = [self.coreDataModel getCategoryWithURI:theProposedCategoryURI];
@@ -1729,8 +1738,8 @@ double const EVENTS_LIST_MODE_ANIMATION_DURATION = 0.25;
         self.eventsWebQueryFromSearch.searchTerm = self.searchTextField.text;
         self.eventsWebQueryFromSearch.filterDateBucketString = self.selectedDateSearchFilterOption.code;
         self.eventsWebQueryFromSearch.filterDistanceBucketString = self.selectedLocationSearchFilterOption.code;
-        self.eventsWebQueryFromSearch.filterLocationString = self.dvLocationSetLocationButton.titleLabel.text; // LOCATION HACK
-//        self.eventsWebQueryFromSearch.filterLocationString = self.dvLocationSearchTextField.text.length > 0 ? self.dvLocationSearchTextField.text : @"Current Location"; // LOCATION HACK
+        self.eventsWebQueryFromSearch.filterLocation = self.userLocationMostRecent;
+        self.eventsWebQueryFromSearch.filterLocationString = self.userLocationMostRecent.addressFormatted; // Deprecated
         self.eventsWebQueryFromSearch.filterTimeBucketString = self.selectedTimeSearchFilterOption.code;
         [self.coreDataModel coreDataSave];
         self.eventsFromSearch = [self.eventsWebQueryFromSearch.eventResultsEventsInOrder.mutableCopy autorelease];
@@ -2698,8 +2707,7 @@ double const EVENTS_LIST_MODE_ANIMATION_DURATION = 0.25;
     self.cardPageViewController.coreDataModel = self.coreDataModel;
     self.cardPageViewController.delegate = self;
     self.cardPageViewController.hidesBottomBarWhenPushed = YES;
-    NSLog(@"self.eventsWebQueryForCurrentSource.filterLocationString = %@", self.eventsWebQueryForCurrentSource.filterLocationString);
-    [self.cardPageViewController setUserLocation:nil withUserLocationString:self.eventsWebQueryForCurrentSource.filterLocationString]; // THIS NEEDS TO BE UPDATED SO THAT WE ACTUALLY PASS ON THE USER'S LOCATION. THAT COULD JUST BE A STARTING POINT THOUGH - REALLY, THE EVENT VIEW CONTROLLER SHOULD CONTINUE DOING ITS OWN LOCATION UPDATING ETC.
+    [self.cardPageViewController setUserLocation:nil withUserLocationString:self.userLocationMostRecent.addressFormatted]; // THIS NEEDS TO BE UPDATED SO THAT WE ACTUALLY PASS ON THE USER'S LOCATION. THAT COULD JUST BE A STARTING POINT THOUGH - REALLY, THE EVENT VIEW CONTROLLER SHOULD CONTINUE DOING ITS OWN LOCATION UPDATING ETC. // THIS NEEDS TO BE UPDATED SO THAT WE ACTUALLY PASS ON THE USER'S LOCATION. THAT COULD JUST BE A STARTING POINT THOUGH - REALLY, THE EVENT VIEW CONTROLLER SHOULD CONTINUE DOING ITS OWN LOCATION UPDATING ETC. // THIS NEEDS TO BE UPDATED SO THAT WE ACTUALLY PASS ON THE USER'S LOCATION. THAT COULD JUST BE A STARTING POINT THOUGH - REALLY, THE EVENT VIEW CONTROLLER SHOULD CONTINUE DOING ITS OWN LOCATION UPDATING ETC. // THIS NEEDS TO BE UPDATED SO THAT WE ACTUALLY PASS ON THE USER'S LOCATION. THAT COULD JUST BE A STARTING POINT THOUGH - REALLY, THE EVENT VIEW CONTROLLER SHOULD CONTINUE DOING ITS OWN LOCATION UPDATING ETC. // THIS NEEDS TO BE UPDATED SO THAT WE ACTUALLY PASS ON THE USER'S LOCATION. THAT COULD JUST BE A STARTING POINT THOUGH - REALLY, THE EVENT VIEW CONTROLLER SHOULD CONTINUE DOING ITS OWN LOCATION UPDATING ETC. // THIS NEEDS TO BE UPDATED SO THAT WE ACTUALLY PASS ON THE USER'S LOCATION. THAT COULD JUST BE A STARTING POINT THOUGH - REALLY, THE EVENT VIEW CONTROLLER SHOULD CONTINUE DOING ITS OWN LOCATION UPDATING ETC. // THIS NEEDS TO BE UPDATED SO THAT WE ACTUALLY PASS ON THE USER'S LOCATION. THAT COULD JUST BE A STARTING POINT THOUGH - REALLY, THE EVENT VIEW CONTROLLER SHOULD CONTINUE DOING ITS OWN LOCATION UPDATING ETC. // THIS NEEDS TO BE UPDATED SO THAT WE ACTUALLY PASS ON THE USER'S LOCATION. THAT COULD JUST BE A STARTING POINT THOUGH - REALLY, THE EVENT VIEW CONTROLLER SHOULD CONTINUE DOING ITS OWN LOCATION UPDATING ETC. // THIS NEEDS TO BE UPDATED SO THAT WE ACTUALLY PASS ON THE USER'S LOCATION. THAT COULD JUST BE A STARTING POINT THOUGH - REALLY, THE EVENT VIEW CONTROLLER SHOULD CONTINUE DOING ITS OWN LOCATION UPDATING ETC.
     
     [self.webConnector sendLearnedDataAboutEvent:event.uri withUserAction:@"V"]; // Attempt to send the learning to our server.
     [self.webConnector getEventWithURI:event.uri]; // Attempt to get the full event info
@@ -2828,8 +2836,8 @@ double const EVENTS_LIST_MODE_ANIMATION_DURATION = 0.25;
     
 }
 
-- (void) setLocationSetterViewIsVisible:(BOOL)isVisible animated:(BOOL)animated animationBasedInKeyboardNotificationUserInfo:(NSDictionary *)keyboardNotificationUserInfo {
-    
+//- (void) setLocationSetterViewIsVisible:(BOOL)isVisible animated:(BOOL)animated animationBasedInKeyboardNotificationUserInfo:(NSDictionary *)keyboardNotificationUserInfo {
+//    
 //	CGSize keyboardSize = [[keyboardNotificationUserInfo objectForKey:UIKeyboardFrameBeginUserInfoKey] CGRectValue].size;
 //    double keyboardAnimationDuration = [[keyboardNotificationUserInfo objectForKey:UIKeyboardAnimationDurationUserInfoKey] doubleValue];
 //    UIViewAnimationCurve keyboardAnimationCurve = [[keyboardNotificationUserInfo objectForKey:UIKeyboardAnimationCurveUserInfoKey] integerValue];
@@ -2854,8 +2862,8 @@ double const EVENTS_LIST_MODE_ANIMATION_DURATION = 0.25;
 //        locationSetterViewFrame.origin.x = endingLocationSetterViewOriginX;
 //        self.locationSetterView.frame = locationSetterViewFrame;
 //    } completion:^(BOOL finished){ self.userRequestedToShowLocationSetter = isVisible; }];
-    
-}
+//    
+//}
 
 - (void)keyboardWillShow:(NSNotification *)notification {
     NSDictionary * info = [notification userInfo];
@@ -2863,7 +2871,7 @@ double const EVENTS_LIST_MODE_ANIMATION_DURATION = 0.25;
     double keyboardAnimationDuration = [[info objectForKey:UIKeyboardAnimationDurationUserInfoKey] doubleValue];
     UIViewAnimationCurve keyboardAnimationCurve = [[info objectForKey:UIKeyboardAnimationCurveUserInfoKey] integerValue];
     if (self.userRequestedToShowLocationSetter) {
-        [self setLocationSetterViewIsVisible:YES animated:YES animationBasedInKeyboardNotificationUserInfo:info];
+//        [self setLocationSetterViewIsVisible:YES animated:YES animationBasedInKeyboardNotificationUserInfo:info];
     } else {
         [UIView animateWithDuration:keyboardAnimationDuration delay:0.0 options:keyboardAnimationCurve animations:^{
             UIEdgeInsets insets = self.tableView.contentInset;
@@ -2881,7 +2889,7 @@ double const EVENTS_LIST_MODE_ANIMATION_DURATION = 0.25;
     double keyboardAnimationDuration = [[info objectForKey:UIKeyboardAnimationDurationUserInfoKey] doubleValue];
     UIViewAnimationCurve keyboardAnimationCurve = [[info objectForKey:UIKeyboardAnimationCurveUserInfoKey] integerValue];
     if (self.userRequestedToShowLocationSetter) {
-        [self setLocationSetterViewIsVisible:NO animated:YES animationBasedInKeyboardNotificationUserInfo:info];
+//        [self setLocationSetterViewIsVisible:NO animated:YES animationBasedInKeyboardNotificationUserInfo:info];
     } else {
         [UIView animateWithDuration:keyboardAnimationDuration delay:0.0 options:keyboardAnimationCurve animations:^{
             UIEdgeInsets insets = self.tableView.contentInset;
@@ -3031,6 +3039,7 @@ double const EVENTS_LIST_MODE_ANIMATION_DURATION = 0.25;
 }
 
 - (EventsFilterOption *) filterOptionForFilterOptionCode:(NSString *)filterOptionCode inFilterOptionsArray:(NSArray *)filterOptions {
+    NSLog(@"EventsViewController filterOptionForFilterOptionCode:%@ inFilterOptionsArray:%@", filterOptionCode, filterOptions);
     EventsFilterOption * filterOption = nil;
     NSArray * resultsArray = [filterOptions filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"code == %@", filterOptionCode]];
     if (resultsArray && [resultsArray count] > 0) {
@@ -3271,20 +3280,22 @@ double const EVENTS_LIST_MODE_ANIMATION_DURATION = 0.25;
         categoryReadable = self.categoryURI ? [self.coreDataModel getCategoryWithURI:self.categoryURI].title : nil;
         timeReadable     = self.selectedTimeFilterOption.readable;
         locationReadable = self.selectedLocationFilterOption.readable;
-        locationItself   = self.dvLocationSetLocationButton.titleLabel.text;
+        locationItself   = self.userLocationMostRecent.addressFormatted;
+//        locationItself   = self.dvLocationSetLocationButton.titleLabel.text;
 //        locationItself   = self.dvLocationTextField.text;
     } else if (sourceMode == Search) {
         dateReadable     = self.selectedDateSearchFilterOption.readable;
         locationReadable = self.selectedLocationSearchFilterOption.readable;
-        locationItself   = self.dvLocationSearchSetLocationButton.titleLabel.text;
+        locationItself   = self.userLocationMostRecent.addressFormatted;
+//        locationItself   = self.dvLocationSearchSetLocationButton.titleLabel.text;
 //        locationItself   = self.dvLocationSearchTextField.text;
         timeReadable     = self.selectedTimeSearchFilterOption.readable;
     } else {
         NSLog(@"ERROR in EventsViewController makeEventsSummaryStringForSource - unrecognized source mode.");
     }
     
-    // Location HACK
-    if (!(locationItself.length > 0) || [locationItself.lowercaseString isEqualToString:@"current location"]) {
+    // Location tweak - if user's location is an auto-location, then in the summary string we are going to display "your current location" rather than the actual address.
+    if (!self.userLocationMostRecent.isManual.boolValue) {
         locationItself = @"your current location";
     }
     
@@ -3591,23 +3602,26 @@ double const EVENTS_LIST_MODE_ANIMATION_DURATION = 0.25;
 }
 
 - (void)setLocationViewController:(SetLocationViewController *)setLocationViewController didSelectUserLocation:(UserLocation *)location {
-    [self setMostRecentUserLocation:location updateViews:YES animated:NO];
+    self.locationMode = location.isManual.boolValue ? LocationModeManual : LocationModeAuto;
+    [self setUserLocationMostRecent:location updateViews:YES animated:NO];
     [self dismissModalViewControllerAnimated:YES];
     self.setLocationViewController = nil;
     [self setShouldReloadOnDrawerClose:YES updateDrawerReloadIndicatorView:YES shouldUpdateEventsSummaryStringForCurrentSource:YES animated:YES];
 }
 
-- (void) setMostRecentUserLocation:(UserLocation *)mostRecentUserLocation updateViews:(BOOL)shouldUpdateLocationViews animated:(BOOL)animated {
-    self.mostRecentUserLocation = mostRecentUserLocation;
+- (void) setUserLocationMostRecent:(UserLocation *)userLocationMostRecent updateViews:(BOOL)shouldUpdateLocationViews animated:(BOOL)animated {
+    self.userLocationMostRecent = userLocationMostRecent;
     if (shouldUpdateLocationViews) {
-        [self.dvLocationSetLocationButton setTitle:self.mostRecentUserLocation.addressFormatted forState:UIControlStateNormal];
-        [self.dvLocationSearchSetLocationButton setTitle:self.mostRecentUserLocation.addressFormatted forState:UIControlStateNormal];
-        if (!self.mostRecentUserLocation.isManual.boolValue) {
-            [self.dvLocationUpdatedView setLabelTextToUpdatedDate:self.mostRecentUserLocation.datetimeRecorded animated:animated];
-            [self.dvLocationSearchUpdatedView setLabelTextToUpdatedDate:self.mostRecentUserLocation.datetimeRecorded animated:animated];
+        self.dvLocationSetLocationButton.titleLabel.alpha = 1.0;
+        self.dvLocationSearchSetLocationButton.titleLabel.alpha = 1.0;
+        [self.dvLocationSetLocationButton setTitle:self.userLocationMostRecent.addressFormatted forState:UIControlStateNormal];
+        [self.dvLocationSearchSetLocationButton setTitle:self.userLocationMostRecent.addressFormatted forState:UIControlStateNormal];
+        if (!self.userLocationMostRecent.isManual.boolValue) {
+            [self.dvLocationUpdatedView setLabelTextToUpdatedDate:self.userLocationMostRecent.datetimeRecorded animated:animated];
+            [self.dvLocationSearchUpdatedView setLabelTextToUpdatedDate:self.userLocationMostRecent.datetimeRecorded animated:animated];
         }
-        [self.dvLocationUpdatedView setVisible:!self.mostRecentUserLocation.isManual.boolValue animated:animated];
-        [self.dvLocationSearchUpdatedView setVisible:!self.mostRecentUserLocation.isManual.boolValue animated:animated];
+        [self.dvLocationUpdatedView setVisible:!self.userLocationMostRecent.isManual.boolValue animated:animated];
+        [self.dvLocationSearchUpdatedView setVisible:!self.userLocationMostRecent.isManual.boolValue animated:animated];
         [self.dvLocationCurrentLocationButton stopSpinningButtonImage];
         [self.dvLocationSearchCurrentLocationButton stopSpinningButtonImage];
     }
@@ -3632,7 +3646,7 @@ double const EVENTS_LIST_MODE_ANIMATION_DURATION = 0.25;
 }
 
 - (IBAction) currentLocationButtonTouched:(UIButton *)currentLocationButton {
-    BOOL debuggingSpinner = YES;
+    BOOL debuggingSpinner = NO;
     if (debuggingSpinner) {
         UIButtonWithOverlayView * view = (currentLocationButton == self.dvLocationCurrentLocationButton.button) ? self.dvLocationCurrentLocationButton : self.dvLocationSearchCurrentLocationButton;
         if (view.isButtonImageSpinning) {
@@ -3641,9 +3655,32 @@ double const EVENTS_LIST_MODE_ANIMATION_DURATION = 0.25;
             [view startSpinningButtonImage];
         }
     } else {
-        [self.dvLocationSetLocationButton setTitle:@"Current Location" forState:UIControlStateNormal];
-        [self.dvLocationSearchSetLocationButton setTitle:@"Current Location" forState:UIControlStateNormal];
-        [self setShouldReloadOnDrawerClose:YES updateDrawerReloadIndicatorView:YES shouldUpdateEventsSummaryStringForCurrentSource:YES animated:YES];
+        CLAuthorizationStatus locAuthStatus = [CLLocationManager authorizationStatus];
+        if (locAuthStatus == kCLAuthorizationStatusRestricted ||
+            locAuthStatus == kCLAuthorizationStatusDenied) {
+            NSString * message = nil;
+            if (locAuthStatus == kCLAuthorizationStatusRestricted) {
+                message = @"Your location services are restricted, so we can't determine your current location. Please enter a location yourself.";
+            } else {
+                message = @"Your location services are currently disabled. Please enable them in the 'Settings' app, or enter a location yourself.";
+            }
+            UIAlertView * alert = [[UIAlertView alloc] initWithTitle:@"Location is Unavailable" message:message delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil]; // In iOS5, I think we are able to spruce this alert view up a little bit to provide a button that opens the "Settings" app programatically. Find the right catch for "do we have that ability", and implement this conditional behavior.
+            [alert show];
+            [alert release];
+        } else {
+            // Start finding location
+            [self.locationManager findUserLocation];
+            // Views updates
+            [self.dvLocationCurrentLocationButton startSpinningButtonImage];
+            [self.dvLocationSearchCurrentLocationButton startSpinningButtonImage];
+            self.dvLocationSetLocationButton.titleLabel.alpha = 0.5;
+            self.dvLocationSearchSetLocationButton.titleLabel.alpha = 0.5;
+            [self.dvLocationUpdatedView setLabelTextToUpdatingAnimated:YES];
+            [self.dvLocationSearchUpdatedView setLabelTextToUpdatingAnimated:YES];
+            [self.dvLocationUpdatedView setVisible:YES animated:YES];
+            [self.dvLocationSearchUpdatedView setVisible:YES animated:YES];
+            [self setShouldReloadOnDrawerClose:YES updateDrawerReloadIndicatorView:YES shouldUpdateEventsSummaryStringForCurrentSource:YES animated:YES];
+        }
     }
 }
 
@@ -3657,57 +3694,55 @@ double const EVENTS_LIST_MODE_ANIMATION_DURATION = 0.25;
     self.setLocationViewController.delegate = self;
     self.setLocationViewController.hidesBottomBarWhenPushed = YES;
     [self presentModalViewController:self.setLocationViewController animated:YES];
-    
-//    if (textField == self.dvLocationTextField ||
-//        textField == self.dvLocationSearchTextField) {
-//        [self.dvLocationTextField resignFirstResponder];
-//        [self.dvLocationSearchTextField resignFirstResponder];
-//        
-//        /* WARNING: THE FOLLOWING CODE IS COPIED FROM THE METHOD ...filterOptionButtonTouched...*/
-//        self.shouldReloadOnDrawerClose = YES;
-//        [self setDrawerReloadIndicatorViewIsVisible:self.shouldReloadOnDrawerClose animated:self.isDrawerOpen];
-//        
-//        if (!self.isSearchOn) {
-//            self.eventsSummaryStringBrowse = [self makeEventsSummaryStringForSource:EVENTS_SOURCE_BROWSE];
-//            [self setFeedbackViewMessageType:CloseDrawerToLoadPrompt eventsSummaryString:self.eventsSummaryStringBrowse searchString:nil animated:YES];
-//        } else {
-//            self.eventsSummaryStringSearch = [self makeEventsSummaryStringForSource:EVENTS_SOURCE_SEARCH];
-//            [self setFeedbackViewMessageType:CloseDrawerToLoadPrompt eventsSummaryString:self.eventsSummaryStringSearch searchString:self.searchTextField.text animated:YES];
-//        }
-//        /* WARNING: THE CODE ABOVE IS COPIED FROM THE METHOD ...filterOptionButtonTouched...*/
-//        
-//        shouldReturn = NO;
-//    }
 
 }
 
-//- (void) setCurrentLocationButtonToBlinking:(BOOL)blinking {
-//    NSLog(@"setCurrentLocationButtonToBlinking:%d", blinking);
-//    if (blinking) {
-//        NSLog(@"Blinking");
-//        [UIView animateWithDuration:0.25 
-//                              delay:0.0 
-//                            options:UIViewAnimationOptionRepeat|UIViewAnimationOptionAutoreverse|UIViewAnimationOptionBeginFromCurrentState 
-//                         animations:^{ 
-//                             NSLog(@"Animating");
-//                             self.dvLocationCurrentLocationButton.frame = CGRectMake(self.dvLocationCurrentLocationButton.frame.origin.x+1, self.dvLocationCurrentLocationButton.frame.origin.y, self.dvLocationCurrentLocationButton.frame.size.width, self.dvLocationCurrentLocationButton.frame.size.height);
-//                             self.dvLocationCurrentLocationButton.imageView.alpha = 1.0 - self.dvLocationCurrentLocationButton.imageView.alpha;
-//                             self.dvLocationSearchCurrentLocationButton.imageView.alpha = 1.0 - self.dvLocationSearchCurrentLocationButton.imageView.alpha;
-//                         }
-//                         completion:^(BOOL finished){
-//                             // ...
-//                         }];
-//    } else {
-//        NSLog(@"Not blinking");
-//        [UIView animateWithDuration:0.25 delay:0.0 options:UIViewAnimationOptionBeginFromCurrentState 
-//                         animations:^{
-//                             self.dvLocationCurrentLocationButton.imageView.alpha = 0.0;
-//                             self.dvLocationSearchCurrentLocationButton.imageView.alpha = 0.0;
-//                         }
-//                         completion:^(BOOL finished){
-//                             
-//                         }];
-//    }
-//}
+- (KwiqetLocationManager *)locationManager {
+    if (locationManager_ == nil) {
+        locationManager_ = [[KwiqetLocationManager alloc] init];
+        locationManager_.delegate = self;    
+        locationManager_.coreDataModel = self.coreDataModel;
+    }
+    return locationManager_;
+}
+
+- (void)kwiqetLocationManager:(KwiqetLocationManager *)kwiqetLocationManager didFindUserLocation:(UserLocation *)location {
+    // Model update
+    self.locationMode = LocationModeAuto;
+    [self setUserLocationMostRecent:location updateViews:YES animated:YES];
+    [self setShouldReloadOnDrawerClose:YES updateDrawerReloadIndicatorView:YES shouldUpdateEventsSummaryStringForCurrentSource:YES animated:YES];
+}
+
+- (void)kwiqetLocationManager:(KwiqetLocationManager *)kwiqetLocationManager didFailWithLatestUserLocation:(UserLocation *)location {
+    self.locationMode = LocationModeAuto;
+    [self setUserLocationMostRecent:location updateViews:YES animated:YES];
+    [self setShouldReloadOnDrawerClose:YES updateDrawerReloadIndicatorView:YES shouldUpdateEventsSummaryStringForCurrentSource:YES animated:YES];
+    UIAlertView * currentLocationFailAlertView = [[UIAlertView alloc] initWithTitle:@"Trouble finding location" message:@"We had some trouble accurately finding your current location. You might want to enter a location yourself instead." delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
+    [currentLocationFailAlertView show];
+    [currentLocationFailAlertView release];
+}
+
+- (void)kwiqetLocationManager:(KwiqetLocationManager *)kwiqetLocationManager didFailWithAccessDeniedError:(CLError)errorCode {
+    UIAlertView * currentLocationFailAlertView = [[UIAlertView alloc] initWithTitle:@"Location is Unavailable" message:@"Location services are currently unavailable. Please enable them in the 'Settings' app, or enter a location yourself." delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil]; // In iOS5, I think we are able to spruce this alert view up a little bit to provide a button that opens the "Settings" app programatically. Find the right catch for "do we have that ability", and implement this conditional behavior.
+    [currentLocationFailAlertView show];
+    [currentLocationFailAlertView release];
+    [self setUserLocationMostRecent:self.userLocationMostRecent updateViews:YES animated:YES];
+}
+
+- (void)kwiqetLocationManager:(KwiqetLocationManager *)kwiqetLocationManager didFailWithNetworkError:(CLError)errorCode {
+    UIAlertView * currentLocationFailAlertView = [[UIAlertView alloc] initWithTitle:@"Network Error" message:@"Your current location could not be determined due to a network error. Check your settings and try again, or enter a location yourself." delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
+    [currentLocationFailAlertView show];
+    [currentLocationFailAlertView release];
+    [self setUserLocationMostRecent:self.userLocationMostRecent updateViews:YES animated:YES];
+}
+
+- (void)kwiqetLocationManager:(KwiqetLocationManager *)kwiqetLocationManager didFailWithAssortedError:(CLError)errorCode {
+    UIAlertView * currentLocationFailAlertView = [[UIAlertView alloc] initWithTitle:@"Couldn't find location" message:@"Your current location could not be determined. Please check your settings and try again, or enter a location yourself." delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
+    [currentLocationFailAlertView show];
+    [currentLocationFailAlertView release];
+    [self setUserLocationMostRecent:self.userLocationMostRecent updateViews:YES animated:YES];
+}
+
+
 
 @end

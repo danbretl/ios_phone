@@ -112,8 +112,8 @@
 
 // User Locations
 - (void) addSeedUserLocationNYC;
-- (UserLocation *) addUserLocationThatIsManual:(BOOL)isManual withLatitude:(CLLocationDegrees)latitude longitude:(CLLocationDegrees)longitude addressFormatted:(NSString *)addressFormatted typeGoogle:(NSString *)typeGoogle;
-- (void) updateUserLocation:(UserLocation *)location isManual:(BOOL)isManual latitude:(CLLocationDegrees)latitude longitude:(CLLocationDegrees)longitude addressFormatted:(NSString *)addressFormatted typeGoogle:(NSString *)typeGoogle updateDatetimeRecorded:(BOOL)shouldUpdateDatetimeRecorded updateDatetimeLastUsed:(BOOL)shouldUpdateDatetimeLastUsed;
+- (UserLocation *) addUserLocationThatIsManual:(BOOL)isManual withLatitude:(CLLocationDegrees)latitude longitude:(CLLocationDegrees)longitude accuracy:(NSNumber *)accuracy addressFormatted:(NSString *)addressFormatted typeGoogle:(NSString *)typeGoogle;
+- (void) updateUserLocation:(UserLocation *)location isManual:(BOOL)isManual latitude:(CLLocationDegrees)latitude longitude:(CLLocationDegrees)longitude accuracy:(NSNumber *)accuracy addressFormatted:(NSString *)addressFormatted typeGoogle:(NSString *)typeGoogle updateDatetimeRecorded:(BOOL)shouldUpdateDatetimeRecorded updateDatetimeLastUsed:(BOOL)shouldUpdateDatetimeLastUsed;
 - (void) updateUserLocationLastUseDate:(UserLocation *)location;
 - (NSArray *) getRecentUserLocations;
 - (NSArray *) getRecentAutoUserLocations;

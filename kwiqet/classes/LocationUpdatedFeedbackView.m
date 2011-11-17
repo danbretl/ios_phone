@@ -116,21 +116,28 @@ CGFloat const LUFV_LABEL_PADDING_RIGHT = 5.0;
         NSLog(@"LocationUpdatedFeedbackView frame change, original:%@", NSStringFromCGRect(self.frame));
         CGRect selfFrame = self.frame;
         selfFrame.size.width = textSize.width + LUFV_LABEL_PADDING_LEFT + LUFV_LABEL_PADDING_RIGHT;
-        selfFrame.origin.x += (oldSelfWidth - selfFrame.size.width);
+        selfFrame.origin.x = selfFrame.origin.x + oldSelfWidth - selfFrame.size.width;
         self.frame = selfFrame;
         NSLog(@"LocationUpdatedFeedbackView frame change, modified:%@", NSStringFromCGRect(self.frame));
     };
     if (animated) {
         if (fadeTextIfAnimated) {
-            [UIView animateWithDuration:LUFV_ANIMATION_DURATION/2.0 delay:0.0 options:/*UIViewAnimationOptionCurveEaseIn*/0 animations:^{ textAlphaBlock(NO); } completion:^(BOOL finished) {
-                self.label.text = labelText;
-                [UIView animateWithDuration:LUFV_ANIMATION_DURATION/2.0 delay:0.0 options:/*UIViewAnimationOptionCurveEaseOut*/0 animations:^{ textAlphaBlock(YES); } completion:^(BOOL finished){}];
+            [UIView animateWithDuration:LUFV_ANIMATION_DURATION/2.0 delay:0.0 options:/*UIViewAnimationOptionCurveEaseIn*/UIViewAnimationOptionBeginFromCurrentState 
+                             animations:^{ 
+                                 textAlphaBlock(NO); 
+                             } 
+                             completion:^(BOOL finished) {
+                                 self.label.text = labelText;
+                                 [UIView animateWithDuration:LUFV_ANIMATION_DURATION/2.0 delay:0.0 options:/*UIViewAnimationOptionCurveEaseOut*/UIViewAnimationOptionBeginFromCurrentState animations:^{ textAlphaBlock(YES); } completion:NULL];
             }];
         } else {
             self.label.text = labelText;
         }
-        [UIView animateWithDuration:LUFV_ANIMATION_DURATION animations:^{
+        [UIView animateWithDuration:LUFV_ANIMATION_DURATION delay:0.0 options:UIViewAnimationOptionBeginFromCurrentState animations:^{
             resizeBlockForText(labelText);
+        } completion:^(BOOL finished) {
+            // Safeguard...
+            self.label.text = labelText;
         }];
     } else {
         self.label.text = labelText;
@@ -198,7 +205,7 @@ CGFloat const LUFV_LABEL_PADDING_RIGHT = 5.0;
         self.alpha = visible ? 1.0 : 0.0;
     };
     if (animated) {
-        [UIView animateWithDuration:LUFV_ANIMATION_DURATION animations:alphaChangeBlock];
+        [UIView animateWithDuration:LUFV_ANIMATION_DURATION delay:0.0 options:UIViewAnimationOptionBeginFromCurrentState animations:alphaChangeBlock completion:NULL];
     } else {
         alphaChangeBlock();
     }

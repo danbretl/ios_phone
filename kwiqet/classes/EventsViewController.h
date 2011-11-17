@@ -23,13 +23,14 @@
 #import "SetLocationViewController.h"
 #import "LocationUpdatedFeedbackView.h"
 #import "LocationUtil.h"
+#import "KwiqetLocationManager.h"
 
 typedef enum {
     Browse = 1,
     Search = 2,
 } EventsListMode;
 
-@interface EventsViewController : UIViewController <UITableViewDelegate, UITableViewDataSource, UIAlertViewDelegate, CardPageViewControllerDelegate, WebConnectorDelegate, UIScrollViewDelegate, UITextFieldDelegate, CLLocationManagerDelegate, SetLocationViewControllerDelegate> {
+@interface EventsViewController : UIViewController <UITableViewDelegate, UITableViewDataSource, UIAlertViewDelegate, CardPageViewControllerDelegate, WebConnectorDelegate, UIScrollViewDelegate, UITextFieldDelegate, SetLocationViewControllerDelegate, KwiqetLocationManagerDelegate> {
     
     ///////////
     // Models
@@ -205,9 +206,8 @@ typedef enum {
     // Location
     
     LocationMode locationMode_;
-    CLLocationManager * locationManager_;
-    UserLocation * mostRecentUserLocation_;
-    MKReverseGeocoder * reverseGeocoder_;
+    UserLocation * userLocationMostRecent_;
+    KwiqetLocationManager * locationManager_;
 
 }
 
@@ -215,7 +215,8 @@ typedef enum {
 // Public properties
 
 @property (nonatomic, retain) CoreDataModel * coreDataModel;
-@property (retain) CLLocationManager * locationManager;
+@property (nonatomic, retain) KwiqetLocationManager * locationManager;
+@property (retain) UserLocation * userLocationMostRecent;
 
 ///////////////////
 // Public methods

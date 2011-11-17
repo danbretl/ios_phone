@@ -827,16 +827,16 @@
 ////////////////////
 
 - (void) addSeedUserLocationNYC {
-    [self addUserLocationThatIsManual:YES withLatitude:40.7358633 longitude:-73.9910835 addressFormatted:@"Union Square, New York, NY, USA" typeGoogle:@"neighborhood"];
+    [self addUserLocationThatIsManual:YES withLatitude:40.7358633 longitude:-73.9910835 accuracy:nil addressFormatted:@"Union Square, New York, NY, USA" typeGoogle:@"neighborhood"];
 }
 
-- (UserLocation *) addUserLocationThatIsManual:(BOOL)isManual withLatitude:(CLLocationDegrees)latitude longitude:(CLLocationDegrees)longitude addressFormatted:(NSString *)addressFormatted typeGoogle:(NSString *)typeGoogle {
+- (UserLocation *) addUserLocationThatIsManual:(BOOL)isManual withLatitude:(CLLocationDegrees)latitude longitude:(CLLocationDegrees)longitude accuracy:(NSNumber *)accuracy addressFormatted:(NSString *)addressFormatted typeGoogle:(NSString *)typeGoogle {
     UserLocation * userLocationObject = [NSEntityDescription insertNewObjectForEntityForName:@"UserLocation" inManagedObjectContext:self.managedObjectContext];
-    [self updateUserLocation:userLocationObject isManual:isManual latitude:latitude longitude:longitude addressFormatted:addressFormatted typeGoogle:typeGoogle updateDatetimeRecorded:YES updateDatetimeLastUsed:YES];
+    [self updateUserLocation:userLocationObject isManual:isManual latitude:latitude longitude:longitude accuracy:accuracy addressFormatted:addressFormatted typeGoogle:typeGoogle updateDatetimeRecorded:YES updateDatetimeLastUsed:YES];
     return userLocationObject;
 }
 
-- (void) updateUserLocation:(UserLocation *)location isManual:(BOOL)isManual latitude:(CLLocationDegrees)latitude longitude:(CLLocationDegrees)longitude addressFormatted:(NSString *)addressFormatted typeGoogle:(NSString *)typeGoogle updateDatetimeRecorded:(BOOL)shouldUpdateDatetimeRecorded updateDatetimeLastUsed:(BOOL)shouldUpdateDatetimeLastUsed {
+- (void) updateUserLocation:(UserLocation *)location isManual:(BOOL)isManual latitude:(CLLocationDegrees)latitude longitude:(CLLocationDegrees)longitude accuracy:(NSNumber *)accuracy addressFormatted:(NSString *)addressFormatted typeGoogle:(NSString *)typeGoogle updateDatetimeRecorded:(BOOL)shouldUpdateDatetimeRecorded updateDatetimeLastUsed:(BOOL)shouldUpdateDatetimeLastUsed {
     
     if (shouldUpdateDatetimeRecorded || shouldUpdateDatetimeLastUsed) {
         NSDate * now = [NSDate date];
@@ -847,6 +847,7 @@
     location.isManual = [NSNumber numberWithBool:isManual];
     location.latitude = [NSNumber numberWithDouble:latitude];
     location.longitude = [NSNumber numberWithDouble:longitude];
+    location.accuracy = accuracy;
     location.addressFormatted = addressFormatted;
     location.typeGoogle = typeGoogle;
     location.typeKwiqet = @"Unknown_NotYetImplemented"; // Not yet implemented! Not yet implemented! Not yet implemented! Not yet implemented! Not yet implemented! Not yet implemented! Not yet implemented! Not yet implemented! Not yet implemented! Not yet implemented! Not yet implemented! Not yet implemented! Not yet implemented! Not yet implemented! Not yet implemented! Not yet implemented! Not yet implemented! Not yet implemented!

@@ -14,6 +14,7 @@
 
 @dynamic latitude;
 @dynamic longitude;
+@dynamic accuracy;
 @dynamic addressFormatted;
 @dynamic typeGoogle;
 @dynamic typeKwiqet;

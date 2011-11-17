@@ -31,7 +31,7 @@
 @property BOOL matchLocationsRequestMade;
 @property (retain) NSArray * recentLocations; // Array of UserLocation objects
 @property (retain) CLLocation * currentLocation;
-@property (copy) NSString * currentLocationAddress;
+//@property (copy) NSString * currentLocationAddress;
 
 @property (nonatomic, readonly) NSDateFormatter * recentLocationsDateFormatter;
 @property (nonatomic, readonly) NSDateFormatter * recentLocationsTimeFormatter;
@@ -74,7 +74,7 @@
 @synthesize matchLocationsRequestMade=matchLocationsRequestMade_;
 @synthesize recentLocations=recentLocations_;
 @synthesize currentLocation=currentLocation_;
-@synthesize currentLocationAddress=currentLocationAddress_;
+//@synthesize currentLocationAddress=currentLocationAddress_;
 
 @synthesize recentLocationsDateFormatter=recentLocationsDateFormatter_;
 @synthesize recentLocationsTimeFormatter=recentLocationsTimeFormatter_;
@@ -100,7 +100,7 @@
     [forwardGeocoder_ release];
     [reverseGeocoder_ release];
     [currentLocation_ release];
-    [currentLocationAddress_ release];
+//    [currentLocationAddress_ release];
     [coreDataModel_ release];
     [recentLocationsDateFormatter_ release];
     [recentLocationsTimeFormatter_ release];
@@ -306,17 +306,17 @@
 - (void)locationManagerTimerDidFire:(NSTimer *)theTimer {
     [self.locationManager stopUpdatingLocation];
     self.currentLocation = self.locationManager.location;
-    self.currentLocationAddress = nil;
+//    self.currentLocationAddress = nil;
     BOOL showAlertView = self.currentLocation == nil;
     if (self.currentLocation != nil) {
         NSTimeInterval howRecent = [self.currentLocation.timestamp timeIntervalSinceNow];
-        BOOL isRecent = (abs(howRecent) < 15.0); // Locations from the last 15 seconds are considered to be "recent enough" to be accurate.
+        BOOL isRecent = (abs(howRecent) < 30.0); // Locations from the last 15 seconds are considered to be "recent enough" to be accurate.
         BOOL isModeratelyAccurate = self.currentLocation.horizontalAccuracy <= 250; // Locations with an accuracy less than or equal to 250 meters are considered to be accurate. (We have lowered our standards since the timer has fired.)
         BOOL isAcceptable = (isRecent && isModeratelyAccurate);
         showAlertView = !isAcceptable;
         if (isAcceptable) {
             NSLog(@"SetLocationViewController locationManager took too long to determine current location. Timer fired, current location with lat/lon (%+.6f, %+.6f) accepted (howRecent=%f, howAccurate=%f) is good enough.", self.currentLocation.coordinate.latitude, self.currentLocation.coordinate.longitude, howRecent, self.currentLocation.horizontalAccuracy);
-            self.reverseGeocoder = [[MKReverseGeocoder alloc] initWithCoordinate:self.currentLocation.coordinate];
+            self.reverseGeocoder = [[[MKReverseGeocoder alloc] initWithCoordinate:self.currentLocation.coordinate] autorelease];
             self.reverseGeocoder.delegate = self;
             [self.reverseGeocoder start];        
         } else {
@@ -359,8 +359,8 @@
 - (void)locationManager:(CLLocationManager *)manager didUpdateToLocation:(CLLocation *)newLocation fromLocation:(CLLocation *)oldLocation {
     NSLog(@"SetLocationViewController locationManager didUpdateToLocation");
     NSTimeInterval howRecent = [newLocation.timestamp timeIntervalSinceNow];
-    BOOL isRecent = (abs(howRecent) < 15.0); // Locations from the last 15 seconds are considered to be "recent enough" to be accurate.
-    BOOL isAccurate = newLocation.horizontalAccuracy <= 50; // Locations with an accuracy less than or equal to 50 meters are considered to be accurate.
+    BOOL isRecent = (abs(howRecent) < 30.0); // Locations from the last 15 seconds are considered to be "recent enough" to be accurate.
+    BOOL isAccurate = newLocation.horizontalAccuracy <= 75; // Locations with an accuracy less than or equal to 50 meters are considered to be accurate.
     self.currentLocation = newLocation;
     if (isRecent && isAccurate) {
         NSLog(@"Location with lat/lon (%+.6f, %+.6f) accepted ::: howRecent=%f, howAccurate=%f", newLocation.coordinate.latitude, newLocation.coordinate.longitude, howRecent, newLocation.horizontalAccuracy);
@@ -370,8 +370,8 @@
         [self.locationManagerTimer invalidate];
         self.locationManagerTimer = nil;
         // Reverse geocode the location
-        self.currentLocationAddress = nil;
-        self.reverseGeocoder = [[MKReverseGeocoder alloc] initWithCoordinate:self.currentLocation.coordinate];
+//        self.currentLocationAddress = nil;
+        self.reverseGeocoder = [[[MKReverseGeocoder alloc] initWithCoordinate:self.currentLocation.coordinate] autorelease];
         self.reverseGeocoder.delegate = self;
         [self.reverseGeocoder start];
     } else {
@@ -546,7 +546,7 @@
         first = NO;
     }
     
-    UserLocation * userLocationObject = [self.coreDataModel addUserLocationThatIsManual:NO withLatitude:location.coordinate.latitude longitude:location.coordinate.longitude addressFormatted:addressFormatted typeGoogle:@"unknown-unknown-unknown"];
+    UserLocation * userLocationObject = [self.coreDataModel addUserLocationThatIsManual:NO withLatitude:location.coordinate.latitude longitude:location.coordinate.longitude accuracy:[NSNumber numberWithDouble:location.horizontalAccuracy] addressFormatted:addressFormatted typeGoogle:@"unknown-unknown-unknown"];
     [self.coreDataModel coreDataSave];
     [self.delegate setLocationViewController:self didSelectUserLocation:userLocationObject];
     
@@ -554,7 +554,7 @@
 
 - (void) didSelectNewMatchedLocation:(BSKmlResult *)location {
     
-    UserLocation * userLocationObject = [self.coreDataModel addUserLocationThatIsManual:YES withLatitude:location.latitude longitude:location.longitude addressFormatted:location.address typeGoogle:@"unknown-unknown-unknown"];
+    UserLocation * userLocationObject = [self.coreDataModel addUserLocationThatIsManual:YES withLatitude:location.latitude longitude:location.longitude accuracy:nil addressFormatted:location.address typeGoogle:@"unknown-unknown-unknown"];
     [self.coreDataModel coreDataSave];
     [self.delegate setLocationViewController:self didSelectUserLocation:userLocationObject];
     

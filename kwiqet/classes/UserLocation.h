@@ -15,6 +15,7 @@
 
 @property (nonatomic, retain) NSNumber * latitude;
 @property (nonatomic, retain) NSNumber * longitude;
+@property (nonatomic, retain) NSNumber * accuracy;
 @property (nonatomic, retain) NSString * addressFormatted;
 @property (nonatomic, retain) NSString * typeGoogle;
 @property (nonatomic, retain) NSString * typeKwiqet;
