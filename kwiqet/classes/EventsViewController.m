@@ -1976,6 +1976,10 @@ double const EVENTS_LIST_MODE_ANIMATION_DURATION = 0.25;
 }
 
 - (IBAction) reloadEventsListButtonTouched:(id)sender {
+    if (self.locationMode == LocationModeAuto && 
+        (self.userLocationMostRecent.accuracy.doubleValue > self.locationManager.foundLocationAccuracyRequirementPreTimer || abs(self.userLocationMostRecent.datetimeRecorded.timeIntervalSinceNow) > self.locationManager.foundLocationRecencyRequirementPreTimer)) {
+        [self findUserLocationAndAdjustViews:YES animated:YES suppressFailureAlerts:YES];
+    }
     [self setFeedbackViewMessageType:LoadingEvents eventsSummaryString:self.eventsSummaryStringBrowse searchString:nil animated:YES]; // This button only gets used/touched in browse mode
     [self setFeedbackViewIsVisible:YES animated:YES]; // In case the feedback view was hidden due to the table view being scrolled to the very bottom. (I think we want the feedback view to pop up immediately, rather than wait for the web response.)
     [self webConnectGetEventsListWithCurrentOldFilterAndCategory];
