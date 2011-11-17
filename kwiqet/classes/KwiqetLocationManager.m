@@ -27,6 +27,7 @@
 @synthesize foundLocation=foundLocation_;
 @synthesize reverseGeocoder=reverseGeocoder_;
 @synthesize foundLocationAddress=foundLocationAddress_;
+@synthesize isFindingLocation=isFindingLocation_;
 @synthesize coreDataModel=coreDataModel_;
 @synthesize delegate;
 
@@ -38,6 +39,7 @@
         self.foundLocationRecencyRequirementPostTimer = 30.0;
         self.foundLocationAccuracyRequirementPreTimer = 75.0;
         self.foundLocationAccuracyRequirementPostTimer = 250.0;
+        isFindingLocation_ = NO;
         
     }
     return self;
@@ -76,10 +78,13 @@
 }
 
 - (void)findUserLocation {
-    if ([CLLocationManager authorizationStatus] == kCLAuthorizationStatusAuthorized) {
-        self.locationManagerTimer = self.freshScheduledLocationManagerTimer;
+    if (!self.isFindingLocation) {
+        if ([CLLocationManager authorizationStatus] == kCLAuthorizationStatusAuthorized) {
+            self.locationManagerTimer = self.freshScheduledLocationManagerTimer;
+        }
+        isFindingLocation_ = YES;
+        [self.locationManager startUpdatingLocation];
     }
-    [self.locationManager startUpdatingLocation];
 }
 
 - (void)locationManager:(CLLocationManager *)manager didChangeAuthorizationStatus:(CLAuthorizationStatus)status {
@@ -120,6 +125,7 @@
     if (error.code == kCLErrorLocationUnknown) {
         // Simply wasn't able to receive location right away. Just sit tight. (Could we be waiting forever though, or would a different error fire eventually? Look into this.)
     } else {
+        isFindingLocation_ = NO;
         if (error.code == kCLErrorDenied) {
             [self.delegate kwiqetLocationManager:self didFailWithAccessDeniedError:error.code];
         } else if (error.code == kCLErrorNetwork) {
@@ -147,6 +153,7 @@
             [self didFailWithLatestLocation:self.foundLocation];
         }
     } else {
+        isFindingLocation_ = NO;
         [self.delegate kwiqetLocationManager:self didFailWithAssortedError:kCLErrorLocationUnknown];
     }
 }
@@ -182,6 +189,7 @@
         
     }
     
+    isFindingLocation_ = NO;
     if (success) {
         [self.delegate kwiqetLocationManager:self didFindUserLocation:userLocationObject];
     } else {

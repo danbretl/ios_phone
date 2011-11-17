@@ -25,6 +25,7 @@
     CLLocation * foundLocation_;
     MKReverseGeocoder * reverseGeocoder_;
     NSString * foundLocationAddress_;
+    BOOL isFindingLocation_;
     
     CoreDataModel * coreDataModel_;
     
@@ -40,6 +41,7 @@
 @property NSTimeInterval foundLocationRecencyRequirementPostTimer;
 @property CLLocationAccuracy foundLocationAccuracyRequirementPreTimer;
 @property CLLocationAccuracy foundLocationAccuracyRequirementPostTimer;
+@property (readonly) BOOL isFindingLocation;
 
 - (void) findUserLocation;
 

@@ -207,6 +207,7 @@ double const EVENTS_LIST_MODE_ANIMATION_DURATION = 0.25;
 ////////////////////////
 // Location properties
 @property LocationMode locationMode;
+@property BOOL shouldSuppressAutoLocationFailureAlerts;
 
 /////////////////////
 // Assorted methods
@@ -237,6 +238,7 @@ double const EVENTS_LIST_MODE_ANIMATION_DURATION = 0.25;
 - (EventsFilterOption *) filterOptionForFilterOptionButton:(UIButton *)filterOptionButton inFilterOptionsArray:(NSArray *)filterOptions;
 - (EventsFilterOption *) filterOptionForFilterOptionCode:(NSString *)filterOptionCode inFilterOptionsArray:(NSArray *)filterOptions;
 - (EventsFilterOption *) filterOptionForFilterOptionCode:(NSString *)filterOptionCode filterCode:(NSString *)filterCode source:(EventsListMode)sourceMode;
+- (void) findUserLocationAndAdjustViews:(BOOL)adjustViews animated:(BOOL)animated suppressFailureAlerts:(BOOL)shouldSuppressFailureAlerts;
 - (NSString *) makeEventsSummaryStringForSource:(EventsListMode)source;
 - (void) hideWebLoadingViews;
 - (BOOL) isTableViewFilledOut;
@@ -324,6 +326,7 @@ double const EVENTS_LIST_MODE_ANIMATION_DURATION = 0.25;
 @synthesize eventsWebQuery, eventsWebQueryFromSearch, events, eventsFromSearch;
 @synthesize locationManager=locationManager_;
 @synthesize locationMode=locationMode_;
+@synthesize shouldSuppressAutoLocationFailureAlerts=shouldSuppressAutoLocationFailureAlerts_;
 @synthesize userLocationMostRecent=userLocationMostRecent_;
 @synthesize coreDataModel=coreDataModel_, webActivityView, concreteParentCategoriesDictionary;
 @synthesize concreteParentCategoriesArray;
@@ -1010,6 +1013,7 @@ double const EVENTS_LIST_MODE_ANIMATION_DURATION = 0.25;
             userLocationToUse = [mostRecentLocations objectAtIndex:0];
         }
     }
+    self.locationMode = userLocationToUse.isManual.boolValue ? LocationModeManual : LocationModeAuto;
     [self setUserLocationMostRecent:userLocationToUse updateViews:YES animated:NO];
         
     // Block with which to find the index of a given filter option in a filter's options array, given ann array of filters and the desired filter code
@@ -3181,19 +3185,15 @@ double const EVENTS_LIST_MODE_ANIMATION_DURATION = 0.25;
             [self updateAdjustedSearchFiltersOrderedWithAdjustedFilter:filter selectedFilterOption:newSelectedOption];
         }
         
-        /* WARNING: THE FOLLOWING CODE HAS BEEN COPIED TO SETLOCATIONVIEWCONTROLLER DELEGATE PROTOCOL METHODS */
-        self.shouldReloadOnDrawerClose = YES;
-        [self setDrawerReloadIndicatorViewIsVisible:self.shouldReloadOnDrawerClose animated:self.isDrawerOpen];
-        
-        if (!self.isSearchOn) {
-            self.eventsSummaryStringBrowse = [self makeEventsSummaryStringForSource:Browse];
-            [self setFeedbackViewMessageType:CloseDrawerToLoadPrompt eventsSummaryString:self.eventsSummaryStringBrowse searchString:nil animated:YES];
+        NSLog(@"self.locationMode =? LocationModeAuto ::: %d", self.locationMode == LocationModeAuto);
+        NSLog(@"self.userLocationMostRecent.accuracy.doubleValue (%f) >? self.locationManager.foundLocationAccuracyRequirementPreTimer (%f) ::: %d", self.userLocationMostRecent.accuracy.doubleValue, self.locationManager.foundLocationAccuracyRequirementPreTimer, self.userLocationMostRecent.accuracy.doubleValue > self.locationManager.foundLocationAccuracyRequirementPreTimer);
+        NSLog(@"abs(self.userLocationMostRecent.datetimeRecorded.timeIntervalSinceNow) (%d) >? self.locationManager.foundLocationRecencyRequirementPreTimer (%f) ::: %d", abs(self.userLocationMostRecent.datetimeRecorded.timeIntervalSinceNow), self.locationManager.foundLocationRecencyRequirementPreTimer, abs(self.userLocationMostRecent.datetimeRecorded.timeIntervalSinceNow) > self.locationManager.foundLocationRecencyRequirementPreTimer);
+        if (self.locationMode == LocationModeAuto && 
+            (self.userLocationMostRecent.accuracy.doubleValue > self.locationManager.foundLocationAccuracyRequirementPreTimer || abs(self.userLocationMostRecent.datetimeRecorded.timeIntervalSinceNow) > self.locationManager.foundLocationRecencyRequirementPreTimer)) {
+            [self findUserLocationAndAdjustViews:YES animated:YES suppressFailureAlerts:YES];
         } else {
-            self.eventsSummaryStringSearch = [self makeEventsSummaryStringForSource:Search];
-            [self setFeedbackViewMessageType:CloseDrawerToLoadPrompt eventsSummaryString:self.eventsSummaryStringSearch searchString:self.searchTextField.text animated:YES];
+            [self setShouldReloadOnDrawerClose:YES updateDrawerReloadIndicatorView:YES shouldUpdateEventsSummaryStringForCurrentSource:YES animated:YES];
         }
-        /* WARNING: THE CODE ABOVE HAS BEEN COPIED TO SETLOCATIONVIEWCONTROLLER DELEGATE PROTOCOL METHODS */
-
     }
 }
 
@@ -3612,6 +3612,10 @@ double const EVENTS_LIST_MODE_ANIMATION_DURATION = 0.25;
 - (void) setUserLocationMostRecent:(UserLocation *)userLocationMostRecent updateViews:(BOOL)shouldUpdateLocationViews animated:(BOOL)animated {
     self.userLocationMostRecent = userLocationMostRecent;
     if (shouldUpdateLocationViews) {
+        self.dvLocationCurrentLocationButton.userInteractionEnabled = YES;
+        self.dvLocationSearchCurrentLocationButton.userInteractionEnabled = YES;
+        self.dvLocationSetLocationButton.userInteractionEnabled = YES;
+        self.dvLocationSearchSetLocationButton.userInteractionEnabled = YES;
         self.dvLocationSetLocationButton.titleLabel.alpha = 1.0;
         self.dvLocationSearchSetLocationButton.titleLabel.alpha = 1.0;
         [self.dvLocationSetLocationButton setTitle:self.userLocationMostRecent.addressFormatted forState:UIControlStateNormal];
@@ -3655,9 +3659,18 @@ double const EVENTS_LIST_MODE_ANIMATION_DURATION = 0.25;
             [view startSpinningButtonImage];
         }
     } else {
-        CLAuthorizationStatus locAuthStatus = [CLLocationManager authorizationStatus];
-        if (locAuthStatus == kCLAuthorizationStatusRestricted ||
-            locAuthStatus == kCLAuthorizationStatusDenied) {
+        if (self.locationMode == LocationModeAuto && 
+            (self.userLocationMostRecent.accuracy.doubleValue > self.locationManager.foundLocationAccuracyRequirementPreTimer || abs(self.userLocationMostRecent.datetimeRecorded.timeIntervalSinceNow) > 5.0)) {
+            [self findUserLocationAndAdjustViews:YES animated:YES suppressFailureAlerts:NO];
+        }
+    }
+}
+
+- (void) findUserLocationAndAdjustViews:(BOOL)adjustViews animated:(BOOL)animated suppressFailureAlerts:(BOOL)shouldSuppressFailureAlerts {
+    CLAuthorizationStatus locAuthStatus = [CLLocationManager authorizationStatus];
+    if (locAuthStatus == kCLAuthorizationStatusRestricted ||
+        locAuthStatus == kCLAuthorizationStatusDenied) {
+        if (!shouldSuppressFailureAlerts) {
             NSString * message = nil;
             if (locAuthStatus == kCLAuthorizationStatusRestricted) {
                 message = @"Your location services are restricted, so we can't determine your current location. Please enter a location yourself.";
@@ -3667,20 +3680,26 @@ double const EVENTS_LIST_MODE_ANIMATION_DURATION = 0.25;
             UIAlertView * alert = [[UIAlertView alloc] initWithTitle:@"Location is Unavailable" message:message delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil]; // In iOS5, I think we are able to spruce this alert view up a little bit to provide a button that opens the "Settings" app programatically. Find the right catch for "do we have that ability", and implement this conditional behavior.
             [alert show];
             [alert release];
-        } else {
-            // Start finding location
-            [self.locationManager findUserLocation];
-            // Views updates
+        }
+    } else {
+        if (adjustViews) {
+            self.dvLocationCurrentLocationButton.userInteractionEnabled = NO;
+            self.dvLocationSearchCurrentLocationButton.userInteractionEnabled = NO;
+            self.dvLocationSetLocationButton.userInteractionEnabled = NO;
+            self.dvLocationSearchSetLocationButton.userInteractionEnabled = NO;
             [self.dvLocationCurrentLocationButton startSpinningButtonImage];
             [self.dvLocationSearchCurrentLocationButton startSpinningButtonImage];
             self.dvLocationSetLocationButton.titleLabel.alpha = 0.5;
             self.dvLocationSearchSetLocationButton.titleLabel.alpha = 0.5;
-            [self.dvLocationUpdatedView setLabelTextToUpdatingAnimated:YES];
-            [self.dvLocationSearchUpdatedView setLabelTextToUpdatingAnimated:YES];
-            [self.dvLocationUpdatedView setVisible:YES animated:YES];
-            [self.dvLocationSearchUpdatedView setVisible:YES animated:YES];
-            [self setShouldReloadOnDrawerClose:YES updateDrawerReloadIndicatorView:YES shouldUpdateEventsSummaryStringForCurrentSource:YES animated:YES];
+            [self.dvLocationUpdatedView setLabelTextToUpdatingAnimated:animated];
+            [self.dvLocationSearchUpdatedView setLabelTextToUpdatingAnimated:animated];
+            [self.dvLocationUpdatedView setVisible:YES animated:animated];
+            [self.dvLocationSearchUpdatedView setVisible:YES animated:animated];
+            [self setShouldReloadOnDrawerClose:YES updateDrawerReloadIndicatorView:YES shouldUpdateEventsSummaryStringForCurrentSource:YES animated:animated];
         }
+        // Start finding location
+        self.shouldSuppressAutoLocationFailureAlerts = shouldSuppressFailureAlerts;
+        [self.locationManager findUserLocation];
     }
 }
 
@@ -3717,30 +3736,38 @@ double const EVENTS_LIST_MODE_ANIMATION_DURATION = 0.25;
     self.locationMode = LocationModeAuto;
     [self setUserLocationMostRecent:location updateViews:YES animated:YES];
     [self setShouldReloadOnDrawerClose:YES updateDrawerReloadIndicatorView:YES shouldUpdateEventsSummaryStringForCurrentSource:YES animated:YES];
-    UIAlertView * currentLocationFailAlertView = [[UIAlertView alloc] initWithTitle:@"Trouble finding location" message:@"We had some trouble accurately finding your current location. You might want to enter a location yourself instead." delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
-    [currentLocationFailAlertView show];
-    [currentLocationFailAlertView release];
+    if (!self.shouldSuppressAutoLocationFailureAlerts) {
+        UIAlertView * currentLocationFailAlertView = [[UIAlertView alloc] initWithTitle:@"Trouble finding location" message:@"We had some trouble accurately finding your current location. You might want to enter a location yourself instead." delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
+        [currentLocationFailAlertView show];
+        [currentLocationFailAlertView release];
+    }
 }
 
 - (void)kwiqetLocationManager:(KwiqetLocationManager *)kwiqetLocationManager didFailWithAccessDeniedError:(CLError)errorCode {
-    UIAlertView * currentLocationFailAlertView = [[UIAlertView alloc] initWithTitle:@"Location is Unavailable" message:@"Location services are currently unavailable. Please enable them in the 'Settings' app, or enter a location yourself." delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil]; // In iOS5, I think we are able to spruce this alert view up a little bit to provide a button that opens the "Settings" app programatically. Find the right catch for "do we have that ability", and implement this conditional behavior.
-    [currentLocationFailAlertView show];
-    [currentLocationFailAlertView release];
     [self setUserLocationMostRecent:self.userLocationMostRecent updateViews:YES animated:YES];
+    if (!self.shouldSuppressAutoLocationFailureAlerts) {
+        UIAlertView * currentLocationFailAlertView = [[UIAlertView alloc] initWithTitle:@"Location is Unavailable" message:@"Location services are currently unavailable. Please enable them in the 'Settings' app, or enter a location yourself." delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil]; // In iOS5, I think we are able to spruce this alert view up a little bit to provide a button that opens the "Settings" app programatically. Find the right catch for "do we have that ability", and implement this conditional behavior.
+        [currentLocationFailAlertView show];
+        [currentLocationFailAlertView release];
+    }
 }
 
 - (void)kwiqetLocationManager:(KwiqetLocationManager *)kwiqetLocationManager didFailWithNetworkError:(CLError)errorCode {
-    UIAlertView * currentLocationFailAlertView = [[UIAlertView alloc] initWithTitle:@"Network Error" message:@"Your current location could not be determined due to a network error. Check your settings and try again, or enter a location yourself." delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
-    [currentLocationFailAlertView show];
-    [currentLocationFailAlertView release];
     [self setUserLocationMostRecent:self.userLocationMostRecent updateViews:YES animated:YES];
+    if (!self.shouldSuppressAutoLocationFailureAlerts) {
+        UIAlertView * currentLocationFailAlertView = [[UIAlertView alloc] initWithTitle:@"Network Error" message:@"Your current location could not be determined due to a network error. Check your settings and try again, or enter a location yourself." delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
+        [currentLocationFailAlertView show];
+        [currentLocationFailAlertView release];
+    }
 }
 
 - (void)kwiqetLocationManager:(KwiqetLocationManager *)kwiqetLocationManager didFailWithAssortedError:(CLError)errorCode {
-    UIAlertView * currentLocationFailAlertView = [[UIAlertView alloc] initWithTitle:@"Couldn't find location" message:@"Your current location could not be determined. Please check your settings and try again, or enter a location yourself." delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
-    [currentLocationFailAlertView show];
-    [currentLocationFailAlertView release];
     [self setUserLocationMostRecent:self.userLocationMostRecent updateViews:YES animated:YES];
+    if (!self.shouldSuppressAutoLocationFailureAlerts) {
+        UIAlertView * currentLocationFailAlertView = [[UIAlertView alloc] initWithTitle:@"Couldn't find location" message:@"Your current location could not be determined. Please check your settings and try again, or enter a location yourself." delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
+        [currentLocationFailAlertView show];
+        [currentLocationFailAlertView release];
+    }
 }
 
 

@@ -208,6 +208,7 @@ typedef enum {
     LocationMode locationMode_;
     UserLocation * userLocationMostRecent_;
     KwiqetLocationManager * locationManager_;
+    BOOL shouldSuppressAutoLocationFailureAlerts_;
 
 }
 
