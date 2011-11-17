@@ -3185,9 +3185,9 @@ double const EVENTS_LIST_MODE_ANIMATION_DURATION = 0.25;
             [self updateAdjustedSearchFiltersOrderedWithAdjustedFilter:filter selectedFilterOption:newSelectedOption];
         }
         
-        NSLog(@"self.locationMode =? LocationModeAuto ::: %d", self.locationMode == LocationModeAuto);
-        NSLog(@"self.userLocationMostRecent.accuracy.doubleValue (%f) >? self.locationManager.foundLocationAccuracyRequirementPreTimer (%f) ::: %d", self.userLocationMostRecent.accuracy.doubleValue, self.locationManager.foundLocationAccuracyRequirementPreTimer, self.userLocationMostRecent.accuracy.doubleValue > self.locationManager.foundLocationAccuracyRequirementPreTimer);
-        NSLog(@"abs(self.userLocationMostRecent.datetimeRecorded.timeIntervalSinceNow) (%d) >? self.locationManager.foundLocationRecencyRequirementPreTimer (%f) ::: %d", abs(self.userLocationMostRecent.datetimeRecorded.timeIntervalSinceNow), self.locationManager.foundLocationRecencyRequirementPreTimer, abs(self.userLocationMostRecent.datetimeRecorded.timeIntervalSinceNow) > self.locationManager.foundLocationRecencyRequirementPreTimer);
+//        NSLog(@"self.locationMode =? LocationModeAuto ::: %d", self.locationMode == LocationModeAuto);
+//        NSLog(@"self.userLocationMostRecent.accuracy.doubleValue (%f) >? self.locationManager.foundLocationAccuracyRequirementPreTimer (%f) ::: %d", self.userLocationMostRecent.accuracy.doubleValue, self.locationManager.foundLocationAccuracyRequirementPreTimer, self.userLocationMostRecent.accuracy.doubleValue > self.locationManager.foundLocationAccuracyRequirementPreTimer);
+//        NSLog(@"abs(self.userLocationMostRecent.datetimeRecorded.timeIntervalSinceNow) (%d) >? self.locationManager.foundLocationRecencyRequirementPreTimer (%f) ::: %d", abs(self.userLocationMostRecent.datetimeRecorded.timeIntervalSinceNow), self.locationManager.foundLocationRecencyRequirementPreTimer, abs(self.userLocationMostRecent.datetimeRecorded.timeIntervalSinceNow) > self.locationManager.foundLocationRecencyRequirementPreTimer);
         if (self.locationMode == LocationModeAuto && 
             (self.userLocationMostRecent.accuracy.doubleValue > self.locationManager.foundLocationAccuracyRequirementPreTimer || abs(self.userLocationMostRecent.datetimeRecorded.timeIntervalSinceNow) > self.locationManager.foundLocationRecencyRequirementPreTimer)) {
             [self findUserLocationAndAdjustViews:YES animated:YES suppressFailureAlerts:YES];
@@ -3659,10 +3659,11 @@ double const EVENTS_LIST_MODE_ANIMATION_DURATION = 0.25;
             [view startSpinningButtonImage];
         }
     } else {
-        if (self.locationMode == LocationModeAuto && 
-            (self.userLocationMostRecent.accuracy.doubleValue > self.locationManager.foundLocationAccuracyRequirementPreTimer || abs(self.userLocationMostRecent.datetimeRecorded.timeIntervalSinceNow) > 5.0)) {
-            [self findUserLocationAndAdjustViews:YES animated:YES suppressFailureAlerts:NO];
-        }
+        if (self.locationMode == LocationModeManual ||
+            (self.locationMode == LocationModeAuto && 
+             (self.userLocationMostRecent.accuracy.doubleValue > self.locationManager.foundLocationAccuracyRequirementPreTimer || abs(self.userLocationMostRecent.datetimeRecorded.timeIntervalSinceNow) > 5.0))) {
+                [self findUserLocationAndAdjustViews:YES animated:YES suppressFailureAlerts:NO];
+            }
     }
 }
 
