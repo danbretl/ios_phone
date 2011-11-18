@@ -205,8 +205,10 @@ typedef enum {
     /////////////
     // Location
     
-    LocationMode locationMode_;
-    UserLocation * userLocationMostRecent_;
+    LocationMode locationModeBrowse_;
+    LocationMode locationModeSearch_;
+    UserLocation * userLocationBrowse_;
+    UserLocation * userLocationSearch_;
     KwiqetLocationManager * locationManager_;
     BOOL shouldSuppressAutoLocationFailureAlerts_;
     BOOL webLoadWaitingForUpdatedUserLocation_;
@@ -218,7 +220,6 @@ typedef enum {
 
 @property (nonatomic, retain) CoreDataModel * coreDataModel;
 @property (nonatomic, retain) KwiqetLocationManager * locationManager;
-@property (retain) UserLocation * userLocationMostRecent;
 
 ///////////////////
 // Public methods
