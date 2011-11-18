@@ -850,7 +850,7 @@
     location.accuracy = accuracy;
     location.addressFormatted = addressFormatted;
     location.typeGoogle = typeGoogle;
-    location.typeKwiqet = @"Unknown_NotYetImplemented"; // Not yet implemented! Not yet implemented! Not yet implemented! Not yet implemented! Not yet implemented! Not yet implemented! Not yet implemented! Not yet implemented! Not yet implemented! Not yet implemented! Not yet implemented! Not yet implemented! Not yet implemented! Not yet implemented! Not yet implemented! Not yet implemented! Not yet implemented! Not yet implemented!
+    
 }
 
 - (void)updateUserLocationLastUseDate:(UserLocation *)location {

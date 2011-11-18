@@ -8,6 +8,7 @@
 
 #import "SetLocationViewController.h"
 #import "UIFont+Kwiqet.h"
+#import "Analytics.h"
 
 @interface SetLocationViewController()
 
@@ -247,23 +248,61 @@
 }
 
 - (void)forwardGeocoderFoundLocation:(BSForwardGeocoder *)geocoder {
-    NSMutableArray * filteredArrayTempOnlyUSA = [NSMutableArray arrayWithCapacity:geocoder.results.count]; // We should do a more intelligent filter soon, where we compare the city to the cities that we are currently operating in. We should also do this filter on Google's side, if they let you, so that it's easier for them to geocode. (If we switch over to Apple's iOS5 geocoder, we can provide an acceptable region.)
+    NSMutableArray * filteredArray = [NSMutableArray arrayWithCapacity:geocoder.results.count]; // We should do a more intelligent filter soon, where we compare the city to the cities that we are currently operating in. We should also do this filter on Google's side, if they let you, so that it's easier for them to geocode. (If we switch over to Apple's iOS5 geocoder, we can provide an acceptable region.)
     for (BSKmlResult * location in geocoder.results) {
-//        NSLog(@"location.address=%@, location.countryNameCode=%@, location.countryName=%@, location.subAdministrativeAreaName=%@, location.localityName=%@", location.address, location.countryNameCode, location.countryName, location.subAdministrativeAreaName, location.localityName);
-//        NSLog(@"%@", location.addressComponents);
-//        for (BSAddressComponent * component in location.addressComponents) {
-//            NSLog(@"%@ %@", component.longName, component.shortName);
-//            for (NSString * theType in component.types) {
-//                NSLog(@"type: %@", theType);
-//            }
-//        }
         NSArray * countryComponents = [location findAddressComponent:@"country"];
         BSAddressComponent * countryComponent = [countryComponents objectAtIndex:0];
-        if ([countryComponent.shortName isEqualToString:@"US"]) {
-            [filteredArrayTempOnlyUSA addObject:location];
+        // Filter out...
+        // - locations outside of USA
+        // - locations that are of type "route", "country", "administrative_area_level_1", "administrative_area_level_2", "natural_feature", "colloquial_area", "park"
+        // - ignore type "political"
+        NSMutableArray * locationTypes = [location.types mutableCopy];
+        [locationTypes removeObject:@"route"];
+        [locationTypes removeObject:@"country"];
+        [locationTypes removeObject:@"administrative_area_level_1"];
+        [locationTypes removeObject:@"administrative_area_level_2"];
+        [locationTypes removeObject:@"administrative_area_level_3"];
+        [locationTypes removeObject:@"natural_feature"];
+        [locationTypes removeObject:@"colloquial_area"];
+        [locationTypes removeObject:@"park"];
+        [locationTypes removeObject:@"political"];
+        BOOL shouldAccept = (locationTypes.count > 0 &&
+                             [countryComponent.shortName isEqualToString:@"US"]);
+        [locationTypes release];
+        if (shouldAccept) {
+            [filteredArray addObject:location];
+            NSLog(@"ACCEPTED matched location:");
+            NSLog(@"  location.address=%@", location.address);
+            NSLog(@"  type:");
+            for (NSString * type in location.types) {
+                NSLog(@"    %@", type);
+            }
+            NSLog(@"  address components:");
+            for (BSAddressComponent * component in location.addressComponents) {
+                NSLog(@"    %@ (%@)", component.longName, component.shortName);
+                for (NSString * theType in component.types) {
+                    NSLog(@"      type:");
+                    NSLog(@"        %@", theType);
+                }
+            }
+        } else {
+            NSLog(@"FILTERED OUT matched location:");
+            NSLog(@"  location.address=%@", location.address);
+            NSLog(@"  type:");
+            for (NSString * type in location.types) {
+                NSLog(@"    %@", type);
+            }
+            NSLog(@"  address components:");
+            for (BSAddressComponent * component in location.addressComponents) {
+                NSLog(@"    %@ (%@)", component.longName, component.shortName);
+                for (NSString * theType in component.types) {
+                    NSLog(@"      type:");
+                    NSLog(@"        %@", theType);
+                }
+            }
         }
     }
-    self.matchedLocations = filteredArrayTempOnlyUSA;
+    self.matchedLocations = filteredArray;
     self.matchLocationsRequestMade = YES;
     [self.locationsTableView reloadData];
     [self.locationsTableView scrollToRowAtIndexPath:[NSIndexPath indexPathForRow:0 inSection:0] atScrollPosition:UITableViewScrollPositionTop animated:YES];
@@ -453,7 +492,7 @@
     sectionHeaderTitleLabel.text = [self tableView:tableView titleForHeaderInSection:section];
     sectionHeaderTitleLabel.backgroundColor = [UIColor clearColor];
     [sectionHeaderView addSubview:sectionHeaderTitleLabel];
-    NSLog(@"%@ and %@", NSStringFromCGRect(sectionHeaderView.frame), NSStringFromCGRect(sectionHeaderTitleLabel.frame));
+//    NSLog(@"%@ and %@", NSStringFromCGRect(sectionHeaderView.frame), NSStringFromCGRect(sectionHeaderTitleLabel.frame));
     [sectionHeaderTitleLabel release];
     return [sectionHeaderView autorelease];
 }
@@ -546,7 +585,7 @@
         first = NO;
     }
     
-    UserLocation * userLocationObject = [self.coreDataModel addUserLocationThatIsManual:NO withLatitude:location.coordinate.latitude longitude:location.coordinate.longitude accuracy:[NSNumber numberWithDouble:location.horizontalAccuracy] addressFormatted:addressFormatted typeGoogle:@"unknown-unknown-unknown"];
+    UserLocation * userLocationObject = [self.coreDataModel addUserLocationThatIsManual:NO withLatitude:location.coordinate.latitude longitude:location.coordinate.longitude accuracy:[NSNumber numberWithDouble:location.horizontalAccuracy] addressFormatted:addressFormatted typeGoogle:@"point"];
     [self.coreDataModel coreDataSave];
     [self.delegate setLocationViewController:self didSelectUserLocation:userLocationObject];
     
@@ -554,7 +593,18 @@
 
 - (void) didSelectNewMatchedLocation:(BSKmlResult *)location {
     
-    UserLocation * userLocationObject = [self.coreDataModel addUserLocationThatIsManual:YES withLatitude:location.latitude longitude:location.longitude accuracy:nil addressFormatted:location.address typeGoogle:@"unknown-unknown-unknown"];
+    // For now, we are going to hope/assume that we can always get down to just one Google geo type. Towards this end, we are going to get rid of the following types: "political", ...
+    NSMutableArray * typesGoogleFiltered = [location.types mutableCopy];
+    [typesGoogleFiltered removeObject:@"political"];
+    NSString * typeGoogle = [typesGoogleFiltered objectAtIndex:0];
+    if (typesGoogleFiltered.count > 1) {
+        NSLog(@"ERROR THAT WE NEED TO ADDRESS in SetLocationViewController, removed Google geo type 'political' but still this manual location has multiple geo types to pick from. We arbitrarily picked the first type %@, but there were %d others.", typeGoogle, typesGoogleFiltered.count - 1);
+        [Analytics localyticsSendWarning:@"Google Geocode Multiple Location Types" sourceLocation:@"SetLocationViewController.m" attributes:[NSDictionary dictionaryWithObjectsAndKeys:location.address, @"location address", nil]];
+    }
+    [typesGoogleFiltered release];
+    // Need to translate from Google geo type to Kwiqet geo type...
+    
+    UserLocation * userLocationObject = [self.coreDataModel addUserLocationThatIsManual:YES withLatitude:location.latitude longitude:location.longitude accuracy:nil addressFormatted:location.address typeGoogle:typeGoogle];
     [self.coreDataModel coreDataSave];
     [self.delegate setLocationViewController:self didSelectUserLocation:userLocationObject];
     

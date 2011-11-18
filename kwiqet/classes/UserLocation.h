@@ -18,7 +18,7 @@
 @property (nonatomic, retain) NSNumber * accuracy;
 @property (nonatomic, retain) NSString * addressFormatted;
 @property (nonatomic, retain) NSString * typeGoogle;
-@property (nonatomic, retain) NSString * typeKwiqet;
+//@property (nonatomic, retain) NSString * typeKwiqet;
 @property (nonatomic, retain) NSSet * queries;
 @property (nonatomic, retain) NSNumber * isManual;
 @property (nonatomic, retain) NSDate * datetimeRecorded;

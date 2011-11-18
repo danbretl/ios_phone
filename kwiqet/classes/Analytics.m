@@ -20,6 +20,16 @@ static NSString * const ANALYTICS_LETS_GO_METHOD_FACEBOOK = @"facebook";
 
 @implementation Analytics
 
++ (void) localyticsSendWarning:(NSString *)warningName sourceLocation:(NSString *)sourceLocationString attributes:(NSDictionary *)attributes {
+    
+    NSMutableDictionary * localyticsDictionary = [NSMutableDictionary dictionaryWithDictionary:attributes];
+    [localyticsDictionary setObject:warningName forKey:@"name"];
+    [localyticsDictionary setObject:sourceLocationString forKey:@"source"];
+    
+    [[LocalyticsSession sharedLocalyticsSession] tagEvent:@"App Warning" attributes:localyticsDictionary];
+    
+}
+
 + (void) localyticsSendGetEventsWithFilter:(NSString *)filterString category:(NSString *)categoryString {
     
     NSMutableDictionary * localyticsDictionary = [NSMutableDictionary dictionary];

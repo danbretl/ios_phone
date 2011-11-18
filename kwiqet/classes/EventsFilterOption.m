@@ -208,6 +208,27 @@ static NSString * const EFO_ICON_EXT = @".png";
     return [self filterTimeForCode:timeCode withUserTime:userTime lookingForEarliest:NO];
 }
 
+// Remember that what we used to be referring to as borough is becoming city, and what we used to refer to as city is becoming metropolitan area.
+// Currently, the user has no way of selecting a location that is more general / larger than a city, so city and metro area will always be acceptable options.
++ (NSSet *) acceptableLocationFilterOptionCodesForUserLocation:(UserLocation *)userLocation {
+    NSMutableSet * acceptableLocationFilterOptionCodes = [NSMutableSet setWithObjects:EFO_CODE_LOCATION_WALKING, EFO_CODE_LOCATION_NEIGHBORHOOD, EFO_CODE_LOCATION_BOROUGH, EFO_CODE_LOCATION_CITY, nil];
+    BOOL biggerThanBorough = NO;
+    BOOL biggerThanNeighborhood = biggerThanBorough || ([userLocation.typeGoogle isEqualToString:@"locality"] || [userLocation.typeGoogle isEqualToString:@"sublocality"] || [userLocation.typeGoogle isEqualToString:@"postal_code"]);
+    BOOL biggerThanWalking = biggerThanNeighborhood || ([userLocation.typeGoogle isEqualToString:@"neighborhood"] || [userLocation.typeGoogle isEqualToString:@"airport"]);
+    if (biggerThanBorough) {
+        [acceptableLocationFilterOptionCodes removeObject:EFO_CODE_LOCATION_BOROUGH];
+    }
+    if (biggerThanNeighborhood) {
+        [acceptableLocationFilterOptionCodes removeObject:EFO_CODE_LOCATION_NEIGHBORHOOD];
+    }
+    if (biggerThanWalking) {
+        [acceptableLocationFilterOptionCodes removeObject:EFO_CODE_LOCATION_WALKING];
+    }
+    return acceptableLocationFilterOptionCodes;
+}
+                                                            
+
+
 - (void)dealloc {
     [code_ release];
     [readable_ release];

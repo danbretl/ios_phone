@@ -30,7 +30,8 @@
 	float longitude;
 	float height;
 	NSInteger accuracy;
-	NSArray *addressComponents;
+	NSArray * addressComponents;
+    NSMutableArray * types;
 }
 
 @property (nonatomic, retain) NSString *address;
@@ -40,6 +41,7 @@
 @property (nonatomic, retain) NSString *subAdministrativeAreaName;
 @property (nonatomic, retain) NSString *localityName;
 @property (nonatomic, retain) NSArray *addressComponents;
+@property (nonatomic, retain) NSMutableArray * types;
 @property (nonatomic, assign) float latitude;
 @property (nonatomic, assign) float longitude;
 

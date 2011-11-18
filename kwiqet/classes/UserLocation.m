@@ -17,7 +17,7 @@
 @dynamic accuracy;
 @dynamic addressFormatted;
 @dynamic typeGoogle;
-@dynamic typeKwiqet;
+//@dynamic typeKwiqet;
 @dynamic queries;
 @dynamic isManual;
 @dynamic datetimeRecorded;

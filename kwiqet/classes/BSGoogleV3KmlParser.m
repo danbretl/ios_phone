@@ -62,13 +62,19 @@
  qualifiedName:(NSString *)qName 
 	attributes:(NSDictionary *)attributeDict
 {
+    
+    NSLog(@"parsing google kml - %@%@", elementName, parserInAddressComponent ? @" (in address component)" : @"");
+    
 	if (qName) {
         elementName = qName;
     }
+    
+    if ([elementName isEqualToString:@"address_component"]) {
+        parserInAddressComponent = YES;
+    }
 	
 	// The response could contain multiple placemarks
-	if([elementName isEqualToString:@"result"])
-	{
+	if([elementName isEqualToString:@"result"]) {
 		// Set up an array to hold placemarks
 		if(results == nil)
 		{
@@ -77,14 +83,14 @@
 		
 		// Create a new placemark object to fill with information
 		currentResult = [[BSKmlResult alloc] init];
+        currentResult.types = [NSMutableArray array];
 		
 		isLocation = NO;
 		isViewPort = NO;
 		isBounds = NO;
 		isSouthWest = NO;
-	}
-	else if(ignoreAddressComponents == FALSE && [elementName isEqualToString:@"address_component"])
-	{
+	} else if (ignoreAddressComponents == FALSE && 
+               [elementName isEqualToString:@"address_component"]) {
 		// Set up an array to hold address components 
 		if(addressComponents == nil)
 		{
@@ -93,44 +99,36 @@
 		
 		currentAddressComponent = [[BSAddressComponent alloc] init];
 		typesArray = [[NSMutableArray alloc] init];
-	}
-	else if([elementName isEqualToString:@"location"]) {
+	} else if([elementName isEqualToString:@"location"]) {
 		isLocation = YES;
-	}
-	else if([elementName isEqualToString:@"viewport"]) {
+	} else if([elementName isEqualToString:@"viewport"]) {
 		isViewPort = YES;
-	}
-	else if([elementName isEqualToString:@"bounds"]) {
+	} else if([elementName isEqualToString:@"bounds"]) {
 		isBounds = YES;
-	}
-	else if([elementName isEqualToString:@"southwest"]) {
+	} else if([elementName isEqualToString:@"southwest"]) {
 		isSouthWest = YES;
-	}
-	
-	
+	} else if (!parserInAddressComponent && [elementName isEqualToString:@"type"]) {
+        // ...
+    }
 	
 	// These are the elements we read information from.
-	if(([elementName isEqualToString:@"status"] || [elementName isEqualToString:@"formatted_address"] || 
-		[elementName isEqualToString:@"lat"] || [elementName isEqualToString:@"lng"]) || 
-	    (ignoreAddressComponents == FALSE && ([elementName isEqualToString:@"type"] || 
-											  [elementName isEqualToString:@"long_name"] ||
-											  [elementName isEqualToString:@"short_name"])
-		)
-	   )
-	{
-		// Create a mutable string to hold the contents of the elements.
+	if(([elementName isEqualToString:@"status"] || 
+        [elementName isEqualToString:@"formatted_address"] || 
+        [elementName isEqualToString:@"lat"] || 
+        [elementName isEqualToString:@"lng"]) || 
+	    (ignoreAddressComponents == FALSE && 
+         ([elementName isEqualToString:@"type"] || 
+          [elementName isEqualToString:@"long_name"] ||
+          [elementName isEqualToString:@"short_name"]))
+	   ) {
+        // Create a mutable string to hold the contents of the elements.
         // The content is collected in parser:foundCharacters:.
-        if(contentsOfCurrentProperty == nil)
-		{
+        if (contentsOfCurrentProperty == nil) {
 			contentsOfCurrentProperty = [NSMutableString string];
-		}
-		else 
-		{
+		} else {
 			[contentsOfCurrentProperty setString:@""];
 		}
-	}
-	else if (contentsOfCurrentProperty != nil)
-	{
+	} else if (contentsOfCurrentProperty != nil) {
 		// If we're not interested in the element we set the variable used 
 		// to collect information to nil.
 		contentsOfCurrentProperty = nil;
@@ -144,6 +142,10 @@
 { 
 	if (qName) {
         elementName = qName;
+    }
+    
+    if ([elementName isEqualToString:@"address_component"]) {
+        parserInAddressComponent = NO;
     }
 	
 	// If we reach the end of a placemark element we add it to our array
@@ -219,7 +221,14 @@
 		currentAddressComponent.shortName = elementValue;
     }
 	else if ([elementName isEqualToString:@"type"]) {
-		[typesArray addObject:elementValue];
+        if (parserInAddressComponent) {
+            [typesArray addObject:elementValue];
+        } else {
+            NSLog(@"parser didEndElement type parserNOTInAddressComponent");
+            [currentResult.types addObject:elementValue];
+            NSLog(@"parser just added type '%@' to types array for current result ; types array now has %d elements", elementValue, currentResult.types.count);
+//            [typesArrayLocationItself addObject:elementValue];
+        }
     }
 	else if ([elementName isEqualToString:@"formatted_address"]) {
 		currentResult.address = elementValue;
@@ -278,6 +287,7 @@
 	
 	[elementValue release];
 	contentsOfCurrentProperty = nil;
+
 }
 
 - (void)parser:(NSXMLParser *)parser foundCharacters:(NSString *)string

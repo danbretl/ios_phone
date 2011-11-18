@@ -21,7 +21,7 @@
 
 
 
-@synthesize address, accuracy, countryNameCode, countryName, subAdministrativeAreaName, localityName, addressComponents;
+@synthesize address, accuracy, countryNameCode, countryName, subAdministrativeAreaName, localityName, addressComponents, types;
 @synthesize viewportSouthWestLat, viewportSouthWestLon, viewportNorthEastLat, viewportNorthEastLon;
 @synthesize boundsSouthWestLat, boundsSouthWestLon, boundsNorthEastLat, boundsNorthEastLon, latitude, longitude;
 
@@ -91,6 +91,7 @@
     [subAdministrativeAreaName release];
     [localityName release];
     [addressComponents release];
+    [types release];
 	[super dealloc];
 }
 

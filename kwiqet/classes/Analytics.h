@@ -23,4 +23,6 @@
 + (void) localyticsSendLetsGoAddToCalendarWithEvent:(Event *)event;
 + (void) localyticsSendLetsGoCreateFacebookEventWithEvent:(Event *)event;
 
++ (void) localyticsSendWarning:(NSString *)warningName sourceLocation:(NSString *)sourceLocationString attributes:(NSDictionary *)attributes;
+
 @end

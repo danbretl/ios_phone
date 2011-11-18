@@ -18,7 +18,7 @@
 	int statusCode;
 	NSMutableArray *results;
 	NSMutableArray *addressComponents;
-	NSMutableArray *typesArray;
+	NSMutableArray * typesArray;
 	BSKmlResult *currentResult;
 	BSAddressComponent *currentAddressComponent;
 	BOOL ignoreAddressComponents;
@@ -26,6 +26,7 @@
 	BOOL isViewPort;
 	BOOL isBounds;
 	BOOL isSouthWest;
+    BOOL parserInAddressComponent;
 }
 
 @property (nonatomic, readonly) int statusCode;

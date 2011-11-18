@@ -251,6 +251,8 @@ double const EVENTS_LIST_MODE_ANIMATION_DURATION = 0.25;
 - (void) proceedWithWaitingWebLoadForCurrentSource;
 - (void) releaseReconstructableViews;
 - (void) resetSearchFilters;
+- (void) updateLocationFilterOptionViewsGivenUserLocation:(UserLocation *)givenUserLocation animated:(BOOL)animated;
+- (void) updateLocationFilterOptionViewsForSource:(EventsListMode)eventsSource givenAcceptableFilterOptionCodes:(NSSet *)acceptableFilterOptionCodes ;
 - (void) updateSearchFilterViewsFromCurrentSelectedSearchFilterOptions;
 - (void) searchExecutionRequestedByUser;
 //- (void) setCurrentLocationButtonToBlinking:(BOOL)blinking;
@@ -469,6 +471,7 @@ double const EVENTS_LIST_MODE_ANIMATION_DURATION = 0.25;
                                   buttonText: @"Any Time of Day"],
 //                                  buttonView: self.dvTimeButtonAny],
                                  nil];
+        // It is important that locationOptions maintains its order from most specific (walking) to least specific (metro), so that we can use this when potentially bumping a selected location filter option to the next least specific if a just-set user location demands it.
         NSArray * locationOptions = [NSArray arrayWithObjects:
                                      [EventsFilterOption 
                                       eventsFilterOptionWithCode: EFO_CODE_LOCATION_WALKING 
@@ -648,6 +651,7 @@ double const EVENTS_LIST_MODE_ANIMATION_DURATION = 0.25;
 
 // Implement viewDidLoad to do additional setup after loading the view, typically from a nib.
 - (void)viewDidLoad {
+    NSLog(@"--- --- --- --- --- EventsViewController viewDidLoad --- --- --- --- ---");
     [super viewDidLoad];
     
     NSLog(@"EventsViewController setCoreDataModel");
@@ -1145,26 +1149,26 @@ double const EVENTS_LIST_MODE_ANIMATION_DURATION = 0.25;
     ////////////////////
     // DEBUGGING BELOW
     
-    // DEBUGGING BLOCK 1
-    BOOL debuggingBlock1 = NO;
-    
-    debugTextView = [[UITextView alloc] initWithFrame:CGRectMake(self.tableView.bounds.size.width / 2.0, 0, self.tableView.bounds.size.width / 2.0, self.tableView.bounds.size.height)];
-    self.debugTextView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-    self.debugTextView.contentInset = UIEdgeInsetsMake(0, 0, self.tableView.bounds.size.height, 0);
-    self.debugTextView.backgroundColor = [UIColor colorWithWhite:0.25 alpha:1.0];
-    self.debugTextView.textColor = [UIColor whiteColor];
-    self.debugTextView.font = [UIFont systemFontOfSize:12.0];
-    [self.tableView addSubview:self.debugTextView];
-    
-    NSMutableString * debugText = [NSMutableString stringWithString:@"viewDidLoad finished:\n"];
-    [debugText appendFormat:@"--- mostRecentViewMode was %d (%@)\n", self.listMode, self.listMode == Browse ? @"Browse" : self.listMode == Search ? @"Search" : @"NotSet"];
-    [debugText appendFormat:@"--- shouldDisplaySearchMode? %@\n", shouldDisplaySearchMode ? @"YES" : @"NO"];
-    [debugText appendFormat:@"--- eventsWebQuery had %d associated events (which we are reading as %d events in our events array)\n", self.eventsWebQueryForCurrentSource.eventResults.count, self.eventsForCurrentSource.count];
-    [debugText appendFormat:@"--- %@\n", self.eventsWebQueryForCurrentSource];
-    self.debugTextView.text = debugText;
-    NSLog(@"%@", debugText);
-    
-    self.debugTextView.hidden = !debuggingBlock1;
+//    // DEBUGGING BLOCK 1
+//    BOOL debuggingBlock1 = NO;
+//    
+//    debugTextView = [[UITextView alloc] initWithFrame:CGRectMake(self.tableView.bounds.size.width / 2.0, 0, self.tableView.bounds.size.width / 2.0, self.tableView.bounds.size.height)];
+//    self.debugTextView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+//    self.debugTextView.contentInset = UIEdgeInsetsMake(0, 0, self.tableView.bounds.size.height, 0);
+//    self.debugTextView.backgroundColor = [UIColor colorWithWhite:0.25 alpha:1.0];
+//    self.debugTextView.textColor = [UIColor whiteColor];
+//    self.debugTextView.font = [UIFont systemFontOfSize:12.0];
+//    [self.tableView addSubview:self.debugTextView];
+//    
+//    NSMutableString * debugText = [NSMutableString stringWithString:@"viewDidLoad finished:\n"];
+//    [debugText appendFormat:@"--- mostRecentViewMode was %d (%@)\n", self.listMode, self.listMode == Browse ? @"Browse" : self.listMode == Search ? @"Search" : @"NotSet"];
+//    [debugText appendFormat:@"--- shouldDisplaySearchMode? %@\n", shouldDisplaySearchMode ? @"YES" : @"NO"];
+//    [debugText appendFormat:@"--- eventsWebQuery had %d associated events (which we are reading as %d events in our events array)\n", self.eventsWebQueryForCurrentSource.eventResults.count, self.eventsForCurrentSource.count];
+//    [debugText appendFormat:@"--- %@\n", self.eventsWebQueryForCurrentSource];
+//    self.debugTextView.text = debugText;
+//    NSLog(@"%@", debugText);
+//    
+//    self.debugTextView.hidden = !debuggingBlock1;
         
     // DEBUGGING ABOVE
     ////////////////////
@@ -1306,6 +1310,7 @@ double const EVENTS_LIST_MODE_ANIMATION_DURATION = 0.25;
 }
 
 - (void)viewWillAppear:(BOOL)animated {
+    NSLog(@"--- --- --- --- --- EventsViewController viewWillAppear --- --- --- --- ---");
     [super viewWillAppear:animated];
     if (self.eventsForCurrentSource.count == 0) {
         if (self.isSearchOn) {
@@ -1353,6 +1358,7 @@ double const EVENTS_LIST_MODE_ANIMATION_DURATION = 0.25;
     //    NSLog(@"\n\nINDEX PATH FOR SELECTED ROW ACCORDING TO TABLEVIEW IS %@\n\n", self.indexPathOfSelectedRow);
     
     [self updateTimeFilterOptions:[self filterForFilterCode:EVENTS_FILTER_TIME inFiltersArray:self.filtersForCurrentSource].options forSearch:self.isSearchOn givenSelectedDateFilterOption:self.isSearchOn ? self.selectedDateSearchFilterOption : self.selectedDateFilterOption userTime:[NSDate date]];
+//    [self updateLocationFilterOptionViewsGivenUserLocation:self.userLocationMostRecent animated:NO]; // This seems like a random place to do this... Really, we should just be firing this method whenever the userLocationMostRecent is changed. Changing accordingly.
     [(self.isSearchOn ? self.dvLocationSearchUpdatedView : self.dvLocationUpdatedView) updateLabelTextForCurrentUpdatedDateAnimated:NO];
     
 //    NSLog(@"FIGURING THIS OUT, at the end of viewWillAppear self.tableView.contentOffset is %@", NSStringFromCGPoint(self.tableView.contentOffset));
@@ -1362,6 +1368,7 @@ double const EVENTS_LIST_MODE_ANIMATION_DURATION = 0.25;
 // On viewDidAppear, we should deselect the highlighted row (if there is one).
 - (void)viewDidAppear:(BOOL)animated
 {
+    NSLog(@"--- --- --- --- --- EventsViewController viewDidAppear --- --- --- --- ---");
     
 //    NSLog(@"FIGURING THIS OUT, in viewDidAppear 0 self.tableView.contentOffset is %@", NSStringFromCGPoint(self.tableView.contentOffset));
     
@@ -3612,6 +3619,75 @@ double const EVENTS_LIST_MODE_ANIMATION_DURATION = 0.25;
 //    }
 }
 
+- (void) updateLocationFilterOptionViewsGivenUserLocation:(UserLocation *)givenUserLocation animated:(BOOL)animated {
+    NSSet * acceptableFilterOptionCodes = [EventsFilterOption acceptableLocationFilterOptionCodesForUserLocation:givenUserLocation];
+    EventsFilterOption * selectedLocationEFOBrowse = self.selectedLocationFilterOption;
+    EventsFilterOption * selectedLocationEFOSearch = self.selectedLocationSearchFilterOption;
+    EventsFilterOption * selectedLocationEFOForCurrentSource = self.isSearchOn ? selectedLocationEFOSearch : selectedLocationEFOBrowse;
+    NSLog(@"Old selectedLocationEFOBrowse=%@", selectedLocationEFOBrowse.code);
+    NSLog(@"Old selectedLocationEFOSearch=%@", selectedLocationEFOSearch.code);
+    [self updateLocationFilterOptionViewsForSource:Browse givenAcceptableFilterOptionCodes:acceptableFilterOptionCodes];
+    if (self.isSearchOn) {
+        [self updateLocationFilterOptionViewsForSource:Search givenAcceptableFilterOptionCodes:acceptableFilterOptionCodes];
+    }
+    if (selectedLocationEFOForCurrentSource != (self.isSearchOn ? self.selectedLocationSearchFilterOption : self.selectedLocationFilterOption)) {
+        NSLog(@"Changes happened in current source (from %@ to %@)! Should reload drawer on close.", selectedLocationEFOForCurrentSource.code, (self.isSearchOn ? self.selectedLocationSearchFilterOption : self.selectedLocationFilterOption).code);
+        [self setShouldReloadOnDrawerClose:YES updateDrawerReloadIndicatorView:YES shouldUpdateEventsSummaryStringForCurrentSource:YES animated:animated];
+    }
+    NSLog(@"New selectedLocationEFOBrowse=%@", self.selectedLocationFilterOption.code);
+    NSLog(@"New selectedLocationEFOSearch=%@", self.selectedLocationSearchFilterOption.code);
+}
+
+- (void) updateLocationFilterOptionViewsForSource:(EventsListMode)eventsSource givenAcceptableFilterOptionCodes:(NSSet *)acceptableFilterOptionCodes {
+    
+    NSArray * filtersForSource = (eventsSource == Browse) ? self.filters : self.filtersSearch;
+    EventsFilter * filterForSource = [self filterForFilterCode:EVENTS_FILTER_LOCATION inFiltersArray:filtersForSource];
+    EventsFilterOption * selectedFilterOptionForSource = (eventsSource == Browse) ? self.selectedLocationFilterOption : self.selectedLocationSearchFilterOption;
+    
+    BOOL selectedFilterOptionWasDisabled = NO;
+    BOOL shouldSelectNext = NO;
+    EventsFilterOption * nextMostSpecificEnabledFilterOption = nil;
+    for (EventsFilterOption * filterOption in filterForSource.options) {
+        BOOL enable = [acceptableFilterOptionCodes containsObject:filterOption.code];
+        if (self.view) { // This protects against the case where this view controller's view was unloaded while the SetLocationViewController was up. In that case, the filterOption.buttonView has been released, so trying to set its 'enabled' property causes a crash. Really, I don't think that should be happening if we handle our memory propertly, but, this takes care of things for now.
+            filterOption.buttonView.enabled = enable;
+        }
+        if (enable) {
+            if (shouldSelectNext) {
+                nextMostSpecificEnabledFilterOption = filterOption;
+                NSLog(@"nextMostSpecificEnabledFilterOption set to %@", nextMostSpecificEnabledFilterOption.code);
+                shouldSelectNext = NO;
+            }
+        } else {
+            BOOL wasSelected = selectedFilterOptionForSource == filterOption;
+            shouldSelectNext = shouldSelectNext || wasSelected;
+            if (shouldSelectNext) {
+                NSLog(@"shouldSelectNext set to YES when looping with filterOption=%@", filterOption.code);
+            }
+            selectedFilterOptionWasDisabled = selectedFilterOptionWasDisabled || wasSelected;
+        }
+    }
+    
+    if (selectedFilterOptionWasDisabled) {
+        
+        NSLog(@"selectedFilterOptionWasDisabled=YES");
+        NSLog(@"selectedFilterOption to switch from %@ to %@", selectedFilterOptionForSource, nextMostSpecificEnabledFilterOption);
+        
+        if (eventsSource == Browse) {
+            self.selectedLocationFilterOption = nextMostSpecificEnabledFilterOption;
+        } else {
+            self.selectedLocationSearchFilterOption = nextMostSpecificEnabledFilterOption;
+        }
+        [self updateFilterOptionButtonStatesOldSelected:selectedFilterOptionForSource newSelected:nextMostSpecificEnabledFilterOption];
+        [self updateFilter:filterForSource buttonImageForFilterOption:nextMostSpecificEnabledFilterOption];
+        if (eventsSource == Search) {
+            [self updateAdjustedSearchFiltersOrderedWithAdjustedFilter:filterForSource selectedFilterOption:nextMostSpecificEnabledFilterOption];
+        }
+
+    }    
+    
+}
+
 - (void) setLocationViewControllerDidCancel:(SetLocationViewController *)setLocationViewController {
     [self dismissModalViewControllerAnimated:YES];
     self.setLocationViewController = nil;
@@ -3626,8 +3702,11 @@ double const EVENTS_LIST_MODE_ANIMATION_DURATION = 0.25;
 }
 
 - (void) setUserLocationMostRecent:(UserLocation *)userLocationMostRecent updateViews:(BOOL)shouldUpdateLocationViews animated:(BOOL)animated {
+    
     self.userLocationMostRecent = userLocationMostRecent;
+    
     if (shouldUpdateLocationViews) {
+        
         self.dvLocationCurrentLocationButton.userInteractionEnabled = YES;
         self.dvLocationSearchCurrentLocationButton.userInteractionEnabled = YES;
         self.dvLocationSetLocationButton.userInteractionEnabled = YES;
@@ -3644,7 +3723,11 @@ double const EVENTS_LIST_MODE_ANIMATION_DURATION = 0.25;
         [self.dvLocationSearchUpdatedView setVisible:!self.userLocationMostRecent.isManual.boolValue animated:animated];
         [self.dvLocationCurrentLocationButton stopSpinningButtonImage];
         [self.dvLocationSearchCurrentLocationButton stopSpinningButtonImage];
+        
+        [self updateLocationFilterOptionViewsGivenUserLocation:self.userLocationMostRecent animated:animated];
+        
     }
+    
 }
 
 - (void) setShouldReloadOnDrawerClose:(BOOL)shouldNowReloadOnDrawerClose updateDrawerReloadIndicatorView:(BOOL)shouldUpdateDrawerReloadIndicatorView shouldUpdateEventsSummaryStringForCurrentSource:(BOOL)shouldUpdateEventsSummaryStringForCurrentSource animated:(BOOL)animated {

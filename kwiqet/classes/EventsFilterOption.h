@@ -9,6 +9,7 @@
 #import <Foundation/Foundation.h>
 #import "UIButtonWithOverlayView.h"
 #import "Category.h"
+#import "UserLocation.h"
 
 // Price filter option codes
 static NSString * const EFO_CODE_PRICE_FREE = @"free";
@@ -63,5 +64,6 @@ static NSString * const EFO_CODE_CATEGORY_POSTFIX_ALL = @"all"; // Most general 
 + (NSDate *) dateLatestForCode:(NSString *)dateCode withUserDate:(NSDate *)userDate;
 + (NSDate *) timeEarliestForCode:(NSString *)timeCode withUserTime:(NSDate *)userTime;
 + (NSDate *) timeLatestForCode:(NSString *)timeCode withUserTime:(NSDate *)userTime;
++ (NSSet *) acceptableLocationFilterOptionCodesForUserLocation:(UserLocation *)userLocation;
 
 @end

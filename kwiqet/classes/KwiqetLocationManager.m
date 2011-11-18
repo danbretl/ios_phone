@@ -184,7 +184,7 @@
             }
         }
         
-        userLocationObject = [self.coreDataModel addUserLocationThatIsManual:NO withLatitude:location.coordinate.latitude longitude:location.coordinate.longitude accuracy:[NSNumber numberWithDouble:location.horizontalAccuracy] addressFormatted:addressFormatted typeGoogle:@"unknown-unknown-unknown"];
+        userLocationObject = [self.coreDataModel addUserLocationThatIsManual:NO withLatitude:location.coordinate.latitude longitude:location.coordinate.longitude accuracy:[NSNumber numberWithDouble:location.horizontalAccuracy] addressFormatted:addressFormatted typeGoogle:@"point"];
         [self.coreDataModel coreDataSave];
         
     }

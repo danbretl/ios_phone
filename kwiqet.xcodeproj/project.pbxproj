@@ -970,6 +970,7 @@
 		327C4DB513DA301D00DAAD51 /* Analytics.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Analytics.m; sourceTree = "<group>"; };
 		3288360D13DDE7320090AFE0 /* EventsViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = EventsViewController.xib; sourceTree = "<group>"; };
 		3288427D13F07DC900C06DDE /* EventViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = EventViewController.xib; sourceTree = "<group>"; };
+		328CD6CF1475C23600F9F5B3 /* kwiqet 014.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "kwiqet 014.xcdatamodel"; sourceTree = "<group>"; };
 		32929C4013E9C02E001D0FE7 /* UIButtonWithOverlayView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UIButtonWithOverlayView.h; sourceTree = "<group>"; };
 		32929C4113E9C02E001D0FE7 /* UIButtonWithOverlayView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UIButtonWithOverlayView.m; sourceTree = "<group>"; };
 		32929C4813EA0103001D0FE7 /* btn_filter_option_selected_touch.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = btn_filter_option_selected_touch.png; path = ../btn_filter_option_selected_touch.png; sourceTree = "<group>"; };
@@ -3219,6 +3220,7 @@
 		32FD364D13AFF3B6007549B6 /* kwiqet.xcdatamodeld */ = {
 			isa = XCVersionGroup;
 			children = (
+				328CD6CF1475C23600F9F5B3 /* kwiqet 014.xcdatamodel */,
 				32066259147488AA00FB74DB /* kwiqet 013.xcdatamodel */,
 				32059A71146C41740086DCFC /* kwiqet 012.xcdatamodel */,
 				32B36CD913B27DF1004C2068 /* kwiqet 002.xcdatamodel */,
@@ -3233,7 +3235,7 @@
 				326E20151468798C0056623C /* kwiqet 011.xcdatamodel */,
 				32FD364E13AFF3B6007549B6 /* kwiqet 001.xcdatamodel */,
 			);
-			currentVersion = 32066259147488AA00FB74DB /* kwiqet 013.xcdatamodel */;
+			currentVersion = 328CD6CF1475C23600F9F5B3 /* kwiqet 014.xcdatamodel */;
 			path = kwiqet.xcdatamodeld;
 			sourceTree = "<group>";
 			versionGroupType = wrapper.xcdatamodel;
