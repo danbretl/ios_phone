@@ -51,4 +51,5 @@
 @property (nonatomic, readonly) NSDate * filterDateLatest;
 @property (nonatomic, readonly) NSDate * filterTimeEarliest;
 @property (nonatomic, readonly) NSDate * filterTimeLatest;
+@property (nonatomic, readonly) NSString * geoQueryString;
 @end

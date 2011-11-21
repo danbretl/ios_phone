@@ -289,7 +289,7 @@ static NSString * const URL_BUILDER_GET_EVENTS_LIST_FILTER_POPULAR = @"popular";
 //    return [self buildGetEventsListURLWithFilter:@"recommended" categoryURI:nil];
 //}
 
-- (NSURL *) buildGetRecommendedEventsURLWithCategoryURI:(NSString *)categoryURI minPrice:(NSNumber *)minPriceInclusive maxPrice:(NSNumber *)maxPriceInclusive startDateEarliest:(NSDate *)startDateEarliestInclusive startDateLatest:(NSDate *)startDateLatestInclusive startTimeEarliest:(NSDate *)startTimeEarliestInclusive startTimeLatest:(NSDate *)startTimeLatestInclusive {
+- (NSURL *) buildGetRecommendedEventsURLWithCategoryURI:(NSString *)categoryURI minPrice:(NSNumber *)minPriceInclusive maxPrice:(NSNumber *)maxPriceInclusive startDateEarliest:(NSDate *)startDateEarliestInclusive startDateLatest:(NSDate *)startDateLatestInclusive startTimeEarliest:(NSDate *)startTimeEarliestInclusive startTimeLatest:(NSDate *)startTimeLatestInclusive locationLatitude:(NSNumber *)locationLatitude locationLongitude:(NSNumber *)locationLongitude geoQueryString:(NSString *)geoQueryString {
     
     NSString * urlPList = [[NSBundle mainBundle] pathForResource:@"urls" ofType:@"plist"];
     NSDictionary * urlDictionary = [NSDictionary dictionaryWithContentsOfFile:urlPList];
@@ -348,6 +348,18 @@ static NSString * const URL_BUILDER_GET_EVENTS_LIST_FILTER_POPULAR = @"popular";
     NSString * latestTimeString = dateOrTimeStringBlock(startTimeLatestInclusive, NO, NO);
     if (earliestTimeString != nil) { [urlString appendString:earliestTimeString]; }
     if (latestTimeString != nil) { [urlString appendString:latestTimeString]; }
+    // Location filters
+    NSString * locationLatLonString = nil;
+    if (locationLatitude  != nil && locationLatitude.doubleValue  != 0.0 && 
+        locationLongitude != nil && locationLongitude.doubleValue != 0.0) {
+        locationLatLonString = [NSString stringWithFormat:@"&lat=%f&lon=%f", locationLatitude.doubleValue, locationLongitude.doubleValue];
+        [urlString appendString:locationLatLonString];
+    }
+    NSLog(@"Checking the value of geoQueryString : %@", geoQueryString);
+    if (geoQueryString != nil) {
+        NSLog(@"geoQueryString is not nil");
+        [urlString appendString:[NSString stringWithFormat:@"&gq=%@", geoQueryString]];
+    }
     /* THE PREVIOUS CODE IS DUPLICATED IN SEARCH URLS */
     
     NSURL * url = [NSURL URLWithString:urlString];
@@ -365,7 +377,7 @@ static NSString * const URL_BUILDER_GET_EVENTS_LIST_FILTER_POPULAR = @"popular";
 //    return [self buildGetEventsListURLWithFilter:@"popular" categoryURI:nil];
 //}
 
-- (NSURL *)buildGetEventsListSearchURLWithSearchString:(NSString *)searchString startDateEarliest:(NSDate *)startDateEarliestInclusive startDateLatest:(NSDate *)startDateLatestInclusive startTimeEarliest:(NSDate *)startTimeEarliestInclusive startTimeLatest:(NSDate *)startTimeLatestInclusive {
+- (NSURL *)buildGetEventsListSearchURLWithSearchString:(NSString *)searchString startDateEarliest:(NSDate *)startDateEarliestInclusive startDateLatest:(NSDate *)startDateLatestInclusive startTimeEarliest:(NSDate *)startTimeEarliestInclusive startTimeLatest:(NSDate *)startTimeLatestInclusive locationLatitude:(NSNumber *)locationLatitude locationLongitude:(NSNumber *)locationLongitude geoQueryString:(NSString *)geoQueryString {
     
     NSString * urlPList = [[NSBundle mainBundle] pathForResource:@"urls" ofType:@"plist"];
     NSDictionary * urlDictionary = [NSDictionary dictionaryWithContentsOfFile:urlPList];
@@ -409,6 +421,18 @@ static NSString * const URL_BUILDER_GET_EVENTS_LIST_FILTER_POPULAR = @"popular";
     NSString * latestTimeString = dateOrTimeStringBlock(startTimeLatestInclusive, NO, NO);
     if (earliestTimeString != nil) { [urlString appendString:earliestTimeString]; }
     if (latestTimeString != nil) { [urlString appendString:latestTimeString]; }
+    // Location filters
+    NSString * locationLatLonString = nil;
+    if (locationLatitude  != nil && locationLatitude.doubleValue  != 0.0 && 
+        locationLongitude != nil && locationLongitude.doubleValue != 0.0) {
+        locationLatLonString = [NSString stringWithFormat:@"&lat=%f&lon=%f", locationLatitude.doubleValue, locationLongitude.doubleValue];
+        [urlString appendString:locationLatLonString];
+    }
+    NSLog(@"Checking the value of geoQueryString : %@", geoQueryString);
+    if (geoQueryString != nil) {
+        NSLog(@"geoQueryString is not nil");
+        [urlString appendString:[NSString stringWithFormat:@"&gq=%@", geoQueryString]];
+    }
     /* THE PREVIOUS CODE IS DUPLICATED IN BROWSE (RECOMMENDED EVENTS) URLS */
     
     NSURL * url = [NSURL URLWithString:urlString];

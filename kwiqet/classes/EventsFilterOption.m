@@ -65,7 +65,7 @@ static NSString * const EFO_ICON_EXT = @".png";
 //    option.buttonView = buttonView;
     option.isMostGeneralOption = ([code isEqualToString:EFO_CODE_PRICE_ANY] ||
                                   [code isEqualToString:EFO_CODE_DATE_ANY] ||
-                                  [code isEqualToString:EFO_CODE_LOCATION_CITY] ||
+                                  [code isEqualToString:EFO_CODE_LOCATION_METRO] ||
                                   [code isEqualToString:EFO_CODE_TIME_ANY] ||
                                   [code isEqualToString:[NSString stringWithFormat:@"%@%@", EFO_CODE_CATEGORY_PREFIX, EFO_CODE_CATEGORY_POSTFIX_ALL]]);
     return [option autorelease];
@@ -208,13 +208,35 @@ static NSString * const EFO_ICON_EXT = @".png";
     return [self filterTimeForCode:timeCode withUserTime:userTime lookingForEarliest:NO];
 }
 
-// Remember that what we used to be referring to as borough is becoming city, and what we used to refer to as city is becoming metropolitan area.
-// Currently, the user has no way of selecting a location that is more general / larger than a city, so city and metro area will always be acceptable options.
++ (NSString *)locationGeoQueryStringForCode:(NSString *)locationCode {
+    NSLog(@"Looking for geoQueryString matching distance bucket string of %@", locationCode);
+    NSString * geoQueryString = nil;
+    if (locationCode != nil) {
+        if ([locationCode isEqualToString:EFO_CODE_LOCATION_METRO]) {
+            geoQueryString = @"m";
+        } else if ([locationCode isEqualToString:EFO_CODE_LOCATION_CITY]) {
+            geoQueryString = @"c";
+        } else if ([locationCode isEqualToString:EFO_CODE_LOCATION_BOROUGH]) {
+            geoQueryString = @"b";
+        } else if ([locationCode isEqualToString:EFO_CODE_LOCATION_NEIGHBORHOOD]) {
+            geoQueryString = @"n";
+        } else if ([locationCode isEqualToString:EFO_CODE_LOCATION_WALKING]) {
+            geoQueryString = @"r";
+        } else {
+            NSLog(@"ERROR in EventsWebQuery - unrecognized filter location distance bucket string");
+        }
+    }
+    NSLog(@"Found geoQueryString of %@", geoQueryString);
+    return geoQueryString;
+}
+
+// Remember that what we used to be referring to as borough is becoming city, and what we used to refer to as city is becoming metropolitan area. // UPDATE: No, not really. Really, there should be five options - walking, neighborhood, borough, city, and metro. There should only ever be four active / shown to the user though. When we're dealing in NYC-area, borough and metro area will show. Otherwise, city and metro area will show.
 + (NSSet *) acceptableLocationFilterOptionCodesForUserLocation:(UserLocation *)userLocation {
-    NSMutableSet * acceptableLocationFilterOptionCodes = [NSMutableSet setWithObjects:EFO_CODE_LOCATION_WALKING, EFO_CODE_LOCATION_NEIGHBORHOOD, EFO_CODE_LOCATION_BOROUGH, EFO_CODE_LOCATION_CITY, nil];
-    BOOL biggerThanBorough = NO;
-    BOOL biggerThanNeighborhood = biggerThanBorough || ([userLocation.typeGoogle isEqualToString:@"locality"] || [userLocation.typeGoogle isEqualToString:@"sublocality"] || [userLocation.typeGoogle isEqualToString:@"postal_code"]);
-    BOOL biggerThanWalking = biggerThanNeighborhood || ([userLocation.typeGoogle isEqualToString:@"neighborhood"] || [userLocation.typeGoogle isEqualToString:@"airport"]);
+    NSMutableSet * acceptableLocationFilterOptionCodes = [NSMutableSet setWithObjects:EFO_CODE_LOCATION_WALKING, EFO_CODE_LOCATION_NEIGHBORHOOD, EFO_CODE_LOCATION_BOROUGH, EFO_CODE_LOCATION_METRO, nil];
+    BOOL biggerThanMetroArea = NO; // We don't let the user select a location that is "bigger" than a metro area, so this option should always be available/acceptable.
+    BOOL biggerThanBorough = biggerThanMetroArea || ([userLocation.typeGoogle isEqualToString:@"locality"] || [userLocation.typeGoogle isEqualToString:@"postal_code"]);
+    BOOL biggerThanNeighborhood = biggerThanBorough || ([userLocation.typeGoogle isEqualToString:@"sublocality"]);
+    BOOL biggerThanWalking = biggerThanNeighborhood || ([userLocation.typeGoogle isEqualToString:@"neighborhood"]);
     if (biggerThanBorough) {
         [acceptableLocationFilterOptionCodes removeObject:EFO_CODE_LOCATION_BOROUGH];
     }

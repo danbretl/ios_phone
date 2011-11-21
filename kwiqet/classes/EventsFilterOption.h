@@ -25,8 +25,9 @@ static NSString * const EFO_CODE_DATE_ANY = @"anydate"; // Most general date
 // Location filter option codes
 static NSString * const EFO_CODE_LOCATION_WALKING = @"walking";
 static NSString * const EFO_CODE_LOCATION_NEIGHBORHOOD = @"neighborhood";
-static NSString * const EFO_CODE_LOCATION_BOROUGH = @"borough";
-static NSString * const EFO_CODE_LOCATION_CITY = @"city"; // Most general location
+static NSString * const EFO_CODE_LOCATION_BOROUGH = @"borough"; // This will only be used for NYC area.
+static NSString * const EFO_CODE_LOCATION_CITY = @"city"; // This won't be used for NYC area.
+static NSString * const EFO_CODE_LOCATION_METRO = @"metro"; // Most general location
 // Time filter option codes
 static NSString * const EFO_CODE_TIME_MORNING = @"morning";
 static NSString * const EFO_CODE_TIME_AFTERNOON = @"afternoon";
@@ -64,6 +65,7 @@ static NSString * const EFO_CODE_CATEGORY_POSTFIX_ALL = @"all"; // Most general 
 + (NSDate *) dateLatestForCode:(NSString *)dateCode withUserDate:(NSDate *)userDate;
 + (NSDate *) timeEarliestForCode:(NSString *)timeCode withUserTime:(NSDate *)userTime;
 + (NSDate *) timeLatestForCode:(NSString *)timeCode withUserTime:(NSDate *)userTime;
++ (NSString *) locationGeoQueryStringForCode:(NSString *)locationCode;
 + (NSSet *) acceptableLocationFilterOptionCodesForUserLocation:(UserLocation *)userLocation;
 
 @end

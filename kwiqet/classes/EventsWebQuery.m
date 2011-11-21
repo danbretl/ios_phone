@@ -61,4 +61,8 @@
     return [EventsFilterOption timeLatestForCode:self.filterTimeBucketString withUserTime:[NSDate date]];
 }
 
+- (NSString *)geoQueryString {
+    return [EventsFilterOption locationGeoQueryStringForCode:self.filterDistanceBucketString];
+}
+
 @end

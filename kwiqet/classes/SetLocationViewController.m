@@ -254,7 +254,7 @@
         BSAddressComponent * countryComponent = [countryComponents objectAtIndex:0];
         // Filter out...
         // - locations outside of USA
-        // - locations that are of type "route", "country", "administrative_area_level_1", "administrative_area_level_2", "natural_feature", "colloquial_area", "park"
+        // - locations that are of type "route", "country", "administrative_area_level_1", "administrative_area_level_2", administrative_area_level_3", "natural_feature", "colloquial_area", "park"
         // - ignore type "political"
         NSMutableArray * locationTypes = [location.types mutableCopy];
         [locationTypes removeObject:@"route"];

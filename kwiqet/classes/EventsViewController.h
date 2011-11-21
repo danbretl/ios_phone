@@ -169,7 +169,7 @@ typedef enum {
     IBOutlet UIButtonWithOverlayView * dvLocationButtonWalking;
     IBOutlet UIButtonWithOverlayView * dvLocationButtonNeighborhood;
     IBOutlet UIButtonWithOverlayView * dvLocationButtonBorough;
-    IBOutlet UIButtonWithOverlayView * dvLocationButtonCity;
+    IBOutlet UIButtonWithOverlayView * dvLocationButtonMetro;
     // Drawer view location search
     IBOutlet UIView * drawerViewLocationSearch;
     IBOutlet UIButton * dvLocationSearchSetLocationButton;
@@ -178,7 +178,7 @@ typedef enum {
     IBOutlet UIButtonWithOverlayView * dvLocationSearchButtonWalking;
     IBOutlet UIButtonWithOverlayView * dvLocationSearchButtonNeighborhood;
     IBOutlet UIButtonWithOverlayView * dvLocationSearchButtonBorough;
-    IBOutlet UIButtonWithOverlayView * dvLocationSearchButtonCity;
+    IBOutlet UIButtonWithOverlayView * dvLocationSearchButtonMetro;
     // Location setter views
     SetLocationViewController * setLocationViewController_;
     // Assorted views

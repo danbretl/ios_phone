@@ -173,7 +173,7 @@ double const EVENTS_LIST_MODE_ANIMATION_DURATION = 0.25;
 @property (retain) IBOutlet UIButtonWithOverlayView * dvLocationButtonWalking;
 @property (retain) IBOutlet UIButtonWithOverlayView * dvLocationButtonNeighborhood;
 @property (retain) IBOutlet UIButtonWithOverlayView * dvLocationButtonBorough;
-@property (retain) IBOutlet UIButtonWithOverlayView * dvLocationButtonCity;
+@property (retain) IBOutlet UIButtonWithOverlayView * dvLocationButtonMetro;
 // Drawer view location search
 @property (retain) IBOutlet UIView * drawerViewLocationSearch;
 @property (retain) IBOutlet UIButton * dvLocationSearchSetLocationButton;
@@ -182,7 +182,7 @@ double const EVENTS_LIST_MODE_ANIMATION_DURATION = 0.25;
 @property (retain) IBOutlet UIButtonWithOverlayView * dvLocationSearchButtonWalking;
 @property (retain) IBOutlet UIButtonWithOverlayView * dvLocationSearchButtonNeighborhood;
 @property (retain) IBOutlet UIButtonWithOverlayView * dvLocationSearchButtonBorough;
-@property (retain) IBOutlet UIButtonWithOverlayView * dvLocationSearchButtonCity;
+@property (retain) IBOutlet UIButtonWithOverlayView * dvLocationSearchButtonMetro;
 // Assorted views
 @property (nonatomic, retain) WebActivityView * webActivityView;
 @property (nonatomic, readonly) UIAlertView * connectionErrorStandardAlertView;
@@ -321,8 +321,8 @@ double const EVENTS_LIST_MODE_ANIMATION_DURATION = 0.25;
 @synthesize drawerViewCategories;
 @synthesize drawerViewTime, dvTimeButtonAny, dvTimeButtonMorning, dvTimeButtonAfternoon, dvTimeButtonEvening, dvTimeButtonNight;
 @synthesize drawerViewTimeSearch, dvTimeSearchButtonMorning, dvTimeSearchButtonAfternoon, dvTimeSearchButtonEvening, dvTimeSearchButtonNight, dvTimeSearchButtonAny;
-@synthesize drawerViewLocation, dvLocationSetLocationButton, dvLocationCurrentLocationButton, dvLocationUpdatedView, dvLocationButtonWalking, dvLocationButtonNeighborhood, dvLocationButtonBorough, dvLocationButtonCity;
-@synthesize drawerViewLocationSearch, dvLocationSearchSetLocationButton, dvLocationSearchCurrentLocationButton, dvLocationSearchUpdatedView, dvLocationSearchButtonWalking, dvLocationSearchButtonNeighborhood, dvLocationSearchButtonBorough, dvLocationSearchButtonCity;
+@synthesize drawerViewLocation, dvLocationSetLocationButton, dvLocationCurrentLocationButton, dvLocationUpdatedView, dvLocationButtonWalking, dvLocationButtonNeighborhood, dvLocationButtonBorough, dvLocationButtonMetro;
+@synthesize drawerViewLocationSearch, dvLocationSearchSetLocationButton, dvLocationSearchCurrentLocationButton, dvLocationSearchUpdatedView, dvLocationSearchButtonWalking, dvLocationSearchButtonNeighborhood, dvLocationSearchButtonBorough, dvLocationSearchButtonMetro;
 @synthesize tableView=tableView_;
 @synthesize tableViewCoverViewContainer, tableViewCoverView, tableViewBackgroundView;
 @synthesize tableViewBackgroundViewContainer, tableViewStaticHeightBackgroundView;
@@ -496,10 +496,10 @@ double const EVENTS_LIST_MODE_ANIMATION_DURATION = 0.25;
                                       buttonText: @"In the Borough"],
 //                                      buttonView: self.dvLocationButtonBorough],
                                      [EventsFilterOption 
-                                      eventsFilterOptionWithCode: EFO_CODE_LOCATION_CITY 
+                                      eventsFilterOptionWithCode: EFO_CODE_LOCATION_METRO 
                                       readableString: nil
                                       buttonText: @"In the City"],
-//                                      buttonView: self.dvLocationButtonCity],
+//                                      buttonView: self.dvLocationButtonMetro],
                                      nil];
         
         // New filter "view models"
@@ -612,10 +612,10 @@ double const EVENTS_LIST_MODE_ANIMATION_DURATION = 0.25;
                                             buttonText: @"Borough"],
 //                                            buttonView: self.dvLocationSearchButtonBorough],
                                            [EventsFilterOption 
-                                            eventsFilterOptionWithCode: EFO_CODE_LOCATION_CITY 
+                                            eventsFilterOptionWithCode: EFO_CODE_LOCATION_METRO 
                                             readableString: nil
                                             buttonText: @"City"],
-//                                            buttonView: self.dvLocationSearchButtonCity],
+//                                            buttonView: self.dvLocationSearchButtonMetro],
                                            nil];
         
         // Search filter view models
@@ -928,7 +928,7 @@ double const EVENTS_LIST_MODE_ANIMATION_DURATION = 0.25;
     [self filterOptionForFilterOptionCode:EFO_CODE_LOCATION_WALKING inFilterOptionsArray:browseLocationFilter.options].buttonView = self.dvLocationButtonWalking;
     [self filterOptionForFilterOptionCode:EFO_CODE_LOCATION_NEIGHBORHOOD inFilterOptionsArray:browseLocationFilter.options].buttonView = self.dvLocationButtonNeighborhood;
     [self filterOptionForFilterOptionCode:EFO_CODE_LOCATION_BOROUGH inFilterOptionsArray:browseLocationFilter.options].buttonView = self.dvLocationButtonBorough;
-    [self filterOptionForFilterOptionCode:EFO_CODE_LOCATION_CITY inFilterOptionsArray:browseLocationFilter.options].buttonView = self.dvLocationButtonCity;
+    [self filterOptionForFilterOptionCode:EFO_CODE_LOCATION_METRO inFilterOptionsArray:browseLocationFilter.options].buttonView = self.dvLocationButtonMetro;
     
     // Associating Search Filter Views with Filter Models
     EventsFilter * searchDateFilter = [self filterForFilterCode:EVENTS_FILTER_DATE inFiltersArray:self.filtersSearch];
@@ -958,7 +958,7 @@ double const EVENTS_LIST_MODE_ANIMATION_DURATION = 0.25;
     [self filterOptionForFilterOptionCode:EFO_CODE_LOCATION_WALKING inFilterOptionsArray:searchLocationFilter.options].buttonView = self.dvLocationSearchButtonWalking;
     [self filterOptionForFilterOptionCode:EFO_CODE_LOCATION_NEIGHBORHOOD inFilterOptionsArray:searchLocationFilter.options].buttonView = self.dvLocationSearchButtonNeighborhood;
     [self filterOptionForFilterOptionCode:EFO_CODE_LOCATION_BOROUGH inFilterOptionsArray:searchLocationFilter.options].buttonView = self.dvLocationSearchButtonBorough;
-    [self filterOptionForFilterOptionCode:EFO_CODE_LOCATION_CITY inFilterOptionsArray:searchLocationFilter.options].buttonView = self.dvLocationSearchButtonCity;
+    [self filterOptionForFilterOptionCode:EFO_CODE_LOCATION_METRO inFilterOptionsArray:searchLocationFilter.options].buttonView = self.dvLocationSearchButtonMetro;
     
     NSDictionary * filterOptionButtonSelectors = [NSDictionary dictionaryWithObjectsAndKeys:
                                                   [NSValue valueWithPointer:@selector(priceFilterOptionButtonTouched:)],
@@ -1278,7 +1278,7 @@ double const EVENTS_LIST_MODE_ANIMATION_DURATION = 0.25;
     self.dvLocationButtonWalking = nil;
     self.dvLocationButtonNeighborhood = nil;
     self.dvLocationButtonBorough = nil;
-    self.dvLocationButtonCity = nil;
+    self.dvLocationButtonMetro = nil;
     
     self.drawerViewLocationSearch = nil;
     self.dvLocationSearchSetLocationButton = nil;
@@ -1287,7 +1287,7 @@ double const EVENTS_LIST_MODE_ANIMATION_DURATION = 0.25;
     self.dvLocationSearchButtonWalking = nil;
     self.dvLocationSearchButtonNeighborhood = nil;
     self.dvLocationSearchButtonBorough = nil;
-    self.dvLocationSearchButtonCity = nil;
+    self.dvLocationSearchButtonMetro = nil;
     
     self.webActivityView = nil;
     [connectionErrorStandardAlertView release];
@@ -1655,7 +1655,7 @@ double const EVENTS_LIST_MODE_ANIMATION_DURATION = 0.25;
     [self showWebLoadingViews];
     if (!self.locationManager.isFindingLocation) {
         self.webLoadWaitingForUpdatedUserLocation = NO;
-        [self.webConnector getRecommendedEventsWithCategoryURI:self.categoryURI minPrice:self.eventsWebQuery.filterPriceMinimum maxPrice:self.eventsWebQuery.filterPriceMaximum startDateEarliest:self.eventsWebQuery.filterDateEarliest startDateLatest:self.eventsWebQuery.filterDateLatest startTimeEarliest:self.eventsWebQuery.filterTimeEarliest startTimeLatest:self.eventsWebQuery.filterTimeLatest];
+        [self.webConnector getRecommendedEventsWithCategoryURI:self.categoryURI minPrice:self.eventsWebQuery.filterPriceMinimum maxPrice:self.eventsWebQuery.filterPriceMaximum startDateEarliest:self.eventsWebQuery.filterDateEarliest startDateLatest:self.eventsWebQuery.filterDateLatest startTimeEarliest:self.eventsWebQuery.filterTimeEarliest startTimeLatest:self.eventsWebQuery.filterTimeLatest locationLatitude:self.eventsWebQuery.filterLocation.latitude locationLongitude:self.eventsWebQuery.filterLocation.longitude geoQueryString:self.eventsWebQuery.geoQueryString];
     } else {
         self.webLoadWaitingForUpdatedUserLocation = YES;
     }
@@ -1677,7 +1677,7 @@ double const EVENTS_LIST_MODE_ANIMATION_DURATION = 0.25;
 }
 
 // Process the new retrieved events (if there are indeed successfully retrieved events) and get them into Core Data
-- (void) webConnector:(WebConnector *)webConnector getRecommendedEventsSuccess:(ASIHTTPRequest *)request withCategoryURI:(NSString *)categoryURI minPrice:(NSNumber *)minPriceInclusive maxPrice:(NSNumber *)maxPriceInclusive startDateEarliest:(NSDate *)startDateEarliestInclusive startDateLatest:(NSDate *)startDateLatestInclusive startTimeEarliest:(NSDate *)startTimeEarliestInclusive startTimeLatest:(NSDate *)startTimeLatestInclusive {
+- (void) webConnector:(WebConnector *)webConnector getRecommendedEventsSuccess:(ASIHTTPRequest *)request withCategoryURI:(NSString *)categoryURI minPrice:(NSNumber *)minPriceInclusive maxPrice:(NSNumber *)maxPriceInclusive startDateEarliest:(NSDate *)startDateEarliestInclusive startDateLatest:(NSDate *)startDateLatestInclusive startTimeEarliest:(NSDate *)startTimeEarliestInclusive startTimeLatest:(NSDate *)startTimeLatestInclusive locationLatitude:(NSNumber *)locationLatitude locationLongitude:(NSNumber *)locationLongitude geoQueryString:(NSString *)geoQueryString {
 
     NSString * responseString = [request responseString];
     //    NSLog(@"EventsViewController webConnector:getEventsListSuccess:withFilter:categoryURI: - response is %@", responseString);
@@ -1730,7 +1730,7 @@ double const EVENTS_LIST_MODE_ANIMATION_DURATION = 0.25;
     
 }
 
-- (void)webConnector:(WebConnector *)webConnector getRecommendedEventsFailure:(ASIHTTPRequest *)request withCategoryURI:(NSString *)categoryURI minPrice:(NSNumber *)minPriceInclusive maxPrice:(NSNumber *)maxPriceInclusive startDateEarliest:(NSDate *)startDateEarliestInclusive startDateLatest:(NSDate *)startDateLatestInclusive startTimeEarliest:(NSDate *)startTimeEarliestInclusive startTimeLatest:(NSDate *)startTimeLatestInclusive {
+- (void)webConnector:(WebConnector *)webConnector getRecommendedEventsFailure:(ASIHTTPRequest *)request withCategoryURI:(NSString *)categoryURI minPrice:(NSNumber *)minPriceInclusive maxPrice:(NSNumber *)maxPriceInclusive startDateEarliest:(NSDate *)startDateEarliestInclusive startDateLatest:(NSDate *)startDateLatestInclusive startTimeEarliest:(NSDate *)startTimeEarliestInclusive startTimeLatest:(NSDate *)startTimeLatestInclusive locationLatitude:(NSNumber *)locationLatitude locationLongitude:(NSNumber *)locationLongitude geoQueryString:(NSString *)geoQueryString {
     
     NSString * statusMessage = [request responseStatusMessage];
 	NSLog(@"%@",statusMessage);
@@ -1784,7 +1784,7 @@ double const EVENTS_LIST_MODE_ANIMATION_DURATION = 0.25;
         [self showWebLoadingViews];
         if (!self.locationManager.isFindingLocation) {
             self.webLoadWaitingForUpdatedUserLocation = NO;
-            [self.webConnector getEventsListForSearchString:self.searchTextField.text startDateEarliest:self.eventsWebQueryFromSearch.filterDateEarliest startDateLatest:self.eventsWebQueryFromSearch.filterDateLatest startTimeEarliest:self.eventsWebQueryFromSearch.filterTimeEarliest startTimeLatest:self.eventsWebQueryFromSearch.filterTimeLatest];
+            [self.webConnector getEventsListForSearchString:self.searchTextField.text startDateEarliest:self.eventsWebQueryFromSearch.filterDateEarliest startDateLatest:self.eventsWebQueryFromSearch.filterDateLatest startTimeEarliest:self.eventsWebQueryFromSearch.filterTimeEarliest startTimeLatest:self.eventsWebQueryFromSearch.filterTimeLatest locationLatitude:self.eventsWebQueryFromSearch.filterLocation.latitude locationLongitude:self.eventsWebQueryFromSearch.filterLocation.longitude geoQueryString:self.eventsWebQueryFromSearch.geoQueryString];
         } else {
             self.webLoadWaitingForUpdatedUserLocation = YES;
         }
@@ -1799,7 +1799,7 @@ double const EVENTS_LIST_MODE_ANIMATION_DURATION = 0.25;
     
 }
 
-- (void)webConnector:(WebConnector *)webConnector getEventsListSuccess:(ASIHTTPRequest *)request forSearchString:(NSString *)searchString startDateEarliest:(NSDate *)startDateEarliestInclusive startDateLatest:(NSDate *)startDateLatestInclusive startTimeEarliest:(NSDate *)startTimeEarliestInclusive startTimeLatest:(NSDate *)startTimeLatestInclusive {
+- (void)webConnector:(WebConnector *)webConnector getEventsListSuccess:(ASIHTTPRequest *)request forSearchString:(NSString *)searchString startDateEarliest:(NSDate *)startDateEarliestInclusive startDateLatest:(NSDate *)startDateLatestInclusive startTimeEarliest:(NSDate *)startTimeEarliestInclusive startTimeLatest:(NSDate *)startTimeLatestInclusive locationLatitude:(NSNumber *)locationLatitude locationLongitude:(NSNumber *)locationLongitude geoQueryString:(NSString *)geoQueryString {
     
     NSString * responseString = [request responseString];
     //    NSLog(@"EventsViewController webConnector:getEventsListSuccess:withFilter:categoryURI: - response is %@", responseString);
@@ -1847,7 +1847,7 @@ double const EVENTS_LIST_MODE_ANIMATION_DURATION = 0.25;
     
 }
 
-- (void)webConnector:(WebConnector *)webConnector getEventsListFailure:(ASIHTTPRequest *)request forSearchString:(NSString *)searchString startDateEarliest:(NSDate *)startDateEarliestInclusive startDateLatest:(NSDate *)startDateLatestInclusive startTimeEarliest:(NSDate *)startTimeEarliestInclusive startTimeLatest:(NSDate *)startTimeLatestInclusive {
+- (void)webConnector:(WebConnector *)webConnector getEventsListFailure:(ASIHTTPRequest *)request forSearchString:(NSString *)searchString startDateEarliest:(NSDate *)startDateEarliestInclusive startDateLatest:(NSDate *)startDateLatestInclusive startTimeEarliest:(NSDate *)startTimeEarliestInclusive startTimeLatest:(NSDate *)startTimeLatestInclusive locationLatitude:(NSNumber *)locationLatitude locationLongitude:(NSNumber *)locationLongitude geoQueryString:(NSString *)geoQueryString {
     
     NSString *statusMessage = [request responseStatusMessage];
 	NSLog(@"%@",statusMessage);
@@ -3926,11 +3926,11 @@ double const EVENTS_LIST_MODE_ANIMATION_DURATION = 0.25;
     
     if (!self.isSearchOn) {
         
-        [self.webConnector getRecommendedEventsWithCategoryURI:self.categoryURI minPrice:self.eventsWebQuery.filterPriceMinimum maxPrice:self.eventsWebQuery.filterPriceMaximum startDateEarliest:self.eventsWebQuery.filterDateEarliest startDateLatest:self.eventsWebQuery.filterDateLatest startTimeEarliest:self.eventsWebQuery.filterTimeEarliest startTimeLatest:self.eventsWebQuery.filterTimeLatest];
+        [self.webConnector getRecommendedEventsWithCategoryURI:self.categoryURI minPrice:self.eventsWebQuery.filterPriceMinimum maxPrice:self.eventsWebQuery.filterPriceMaximum startDateEarliest:self.eventsWebQuery.filterDateEarliest startDateLatest:self.eventsWebQuery.filterDateLatest startTimeEarliest:self.eventsWebQuery.filterTimeEarliest startTimeLatest:self.eventsWebQuery.filterTimeLatest locationLatitude:self.eventsWebQuery.filterLocation.latitude locationLongitude:self.eventsWebQuery.filterLocation.longitude geoQueryString:self.eventsWebQuery.geoQueryString];
         
     } else {
         
-        [self.webConnector getEventsListForSearchString:self.searchTextField.text startDateEarliest:self.eventsWebQueryFromSearch.filterDateEarliest startDateLatest:self.eventsWebQueryFromSearch.filterDateLatest startTimeEarliest:self.eventsWebQueryFromSearch.filterTimeEarliest startTimeLatest:self.eventsWebQueryFromSearch.filterTimeLatest];        
+        [self.webConnector getEventsListForSearchString:self.searchTextField.text startDateEarliest:self.eventsWebQueryFromSearch.filterDateEarliest startDateLatest:self.eventsWebQueryFromSearch.filterDateLatest startTimeEarliest:self.eventsWebQueryFromSearch.filterTimeEarliest startTimeLatest:self.eventsWebQueryFromSearch.filterTimeLatest locationLatitude:self.eventsWebQueryFromSearch.filterLocation.latitude locationLongitude:self.eventsWebQueryFromSearch.filterLocation.longitude geoQueryString:self.eventsWebQueryFromSearch.geoQueryString];
         
     }
     
