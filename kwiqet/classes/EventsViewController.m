@@ -3926,10 +3926,12 @@ double const EVENTS_LIST_MODE_ANIMATION_DURATION = 0.25;
     
     if (!self.isSearchOn) {
         
+        self.eventsWebQuery.filterLocation = self.userLocationBrowse;
         [self.webConnector getRecommendedEventsWithCategoryURI:self.categoryURI minPrice:self.eventsWebQuery.filterPriceMinimum maxPrice:self.eventsWebQuery.filterPriceMaximum startDateEarliest:self.eventsWebQuery.filterDateEarliest startDateLatest:self.eventsWebQuery.filterDateLatest startTimeEarliest:self.eventsWebQuery.filterTimeEarliest startTimeLatest:self.eventsWebQuery.filterTimeLatest locationLatitude:self.eventsWebQuery.filterLocation.latitude locationLongitude:self.eventsWebQuery.filterLocation.longitude geoQueryString:self.eventsWebQuery.geoQueryString];
         
     } else {
-        
+
+        self.eventsWebQueryFromSearch.filterLocation = self.userLocationSearch;
         [self.webConnector getEventsListForSearchString:self.searchTextField.text startDateEarliest:self.eventsWebQueryFromSearch.filterDateEarliest startDateLatest:self.eventsWebQueryFromSearch.filterDateLatest startTimeEarliest:self.eventsWebQueryFromSearch.filterTimeEarliest startTimeLatest:self.eventsWebQueryFromSearch.filterTimeLatest locationLatitude:self.eventsWebQueryFromSearch.filterLocation.latitude locationLongitude:self.eventsWebQueryFromSearch.filterLocation.longitude geoQueryString:self.eventsWebQueryFromSearch.geoQueryString];
         
     }
