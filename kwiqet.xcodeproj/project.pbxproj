@@ -225,6 +225,8 @@
 		32590DA91417D658006F65D4 /* OccurrenceSummaryDate.m in Sources */ = {isa = PBXBuildFile; fileRef = 32590DA81417D658006F65D4 /* OccurrenceSummaryDate.m */; };
 		32590DAC1417D66A006F65D4 /* OccurrenceSummaryVenue.m in Sources */ = {isa = PBXBuildFile; fileRef = 32590DAB1417D66A006F65D4 /* OccurrenceSummaryVenue.m */; };
 		32590DAF1418172B006F65D4 /* OccurrenceTimeCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 32590DAE1418172A006F65D4 /* OccurrenceTimeCell.m */; };
+		325A0944148406EF00CA5538 /* AccountPromptViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 325A0942148406EF00CA5538 /* AccountPromptViewController.m */; };
+		325A0945148406EF00CA5538 /* AccountPromptViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 325A0943148406EF00CA5538 /* AccountPromptViewController.xib */; };
 		325FBB6D14482570007255FA /* LocalyticsDatabase.m in Sources */ = {isa = PBXBuildFile; fileRef = 325FBB6C14482570007255FA /* LocalyticsDatabase.m */; };
 		325FBB70144825D8007255FA /* libz.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 325FBB6F144825D8007255FA /* libz.dylib */; };
 		325FBB72144825EB007255FA /* libsqlite3.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 325FBB71144825EB007255FA /* libsqlite3.dylib */; };
@@ -832,6 +834,9 @@
 		32590DAB1417D66A006F65D4 /* OccurrenceSummaryVenue.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OccurrenceSummaryVenue.m; sourceTree = "<group>"; };
 		32590DAD1418172A006F65D4 /* OccurrenceTimeCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OccurrenceTimeCell.h; sourceTree = "<group>"; };
 		32590DAE1418172A006F65D4 /* OccurrenceTimeCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OccurrenceTimeCell.m; sourceTree = "<group>"; };
+		325A0941148406EF00CA5538 /* AccountPromptViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AccountPromptViewController.h; sourceTree = "<group>"; };
+		325A0942148406EF00CA5538 /* AccountPromptViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AccountPromptViewController.m; sourceTree = "<group>"; };
+		325A0943148406EF00CA5538 /* AccountPromptViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = AccountPromptViewController.xib; sourceTree = "<group>"; };
 		325FBB6B14482570007255FA /* LocalyticsDatabase.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LocalyticsDatabase.h; sourceTree = "<group>"; };
 		325FBB6C14482570007255FA /* LocalyticsDatabase.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LocalyticsDatabase.m; sourceTree = "<group>"; };
 		325FBB6F144825D8007255FA /* libz.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libz.dylib; path = usr/lib/libz.dylib; sourceTree = SDKROOT; };
@@ -2080,6 +2085,9 @@
 				320556F61457231100847D77 /* SetLocationViewController.h */,
 				320556F71457231100847D77 /* SetLocationViewController.m */,
 				320556F81457231100847D77 /* SetLocationViewController.xib */,
+				325A0941148406EF00CA5538 /* AccountPromptViewController.h */,
+				325A0942148406EF00CA5538 /* AccountPromptViewController.m */,
+				325A0943148406EF00CA5538 /* AccountPromptViewController.xib */,
 			);
 			name = "view controllers";
 			sourceTree = "<group>";
@@ -2944,6 +2952,7 @@
 				32668604147B047C00216F48 /* ico_metro@2x.png in Resources */,
 				32668607147B049C00216F48 /* ico_larger_metro.png in Resources */,
 				32668608147B049C00216F48 /* ico_larger_metro@2x.png in Resources */,
+				325A0945148406EF00CA5538 /* AccountPromptViewController.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3049,6 +3058,7 @@
 				3232ED94146997400086D545 /* LocationUtil.m in Sources */,
 				320850C2146AE91000062F36 /* LocationUpdatedFeedbackView.m in Sources */,
 				320662571474318700FB74DB /* KwiqetLocationManager.m in Sources */,
+				325A0944148406EF00CA5538 /* AccountPromptViewController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
