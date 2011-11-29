@@ -78,7 +78,7 @@
     
     self.settingsModel = [NSArray arrayWithObjects:
                           [NSDictionary dictionaryWithObjectsAndKeys:
-                           @"Reset Machine Learning", @"textLabel", 
+                           @"Reset Recommendations", @"textLabel", 
                            @"apple_settings_30.png", @"imageName",
                            [NSValue valueWithPointer:@selector(resetMachineLearningButtonTouched)], @"selector",
                            [NSNumber numberWithBool:NO], @"showAccessoryArrow",
@@ -306,7 +306,7 @@
     if (resetMachineLearningWarningAlertView == nil) {
         resetMachineLearningWarningAlertView = 
         [[UIAlertView alloc] initWithTitle:@"Warning" 
-                                   message:@"Resetting machine learning will erase your entire history, thus losing your personalized recommendations. Are you sure you want to proceed?" 
+                                   message:@"Resetting recommendations will erase your entire history, and we'll forget everything we've learned about you! Are you sure you want to proceed?" 
                                   delegate:self 
                          cancelButtonTitle:@"Yes" 
                          otherButtonTitles:@"No",nil];
