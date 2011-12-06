@@ -87,6 +87,7 @@
     // THE PROBLEM currently with waiting to create the tab bar controller and its assorted view controllers is that the web request for content for featuredEventViewController isn't made until featuredEventViewController exists. (So, there is potentially a slight delay between the time when the splash screen fades away once all of that business is done, and when the featuredEventViewController displays its content underneath.)
     
     BOOL facebookTesting = NO;
+    BOOL newAccountFeaturesTesting = NO;
     
     if (!facebookTesting) {
         
@@ -122,8 +123,17 @@
         settingsNavController = [[UINavigationController alloc] initWithRootViewController:self.settingsViewController];
         self.settingsNavController.navigationBarHidden = YES;
         
+        AccountPromptViewController * accountPromptViewController = nil;
+        if (newAccountFeaturesTesting) {
+            accountPromptViewController = [[[AccountPromptViewController alloc] initWithNibName:@"AccountPromptViewController" bundle:[NSBundle mainBundle]] autorelease];
+            accountPromptViewController.tabBarItem = self.settingsViewController.tabBarItem;
+        }        
         // Setting it all up
-        self.tabBarController.viewControllers = [NSArray arrayWithObjects:self.featuredEventViewController, self.eventsNavController, self.settingsNavController, nil];
+        if (newAccountFeaturesTesting) {
+        self.tabBarController.viewControllers = [NSArray arrayWithObjects:self.featuredEventViewController, self.eventsNavController, accountPromptViewController, nil];
+        } else {
+        self.tabBarController.viewControllers = [NSArray arrayWithObjects:self.featuredEventViewController, self.eventsNavController, self.settingsNavController, nil];   
+        }
         [self.window addSubview:tabBarController.view];
         [self.window bringSubviewToFront:self.splashScreenViewController.view]; // Make sure the splash screen stays in front
 

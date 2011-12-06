@@ -45,6 +45,8 @@ static NSString * const WEB_CONNECTOR_SEND_LEARNED_DATA_ABOUT_EVENT_USER_INFO_KE
 - (void) getEventsListForSearchStringFailure:(ASIHTTPRequest *)request;
 - (void) sendLearnedDataAboutEventSuccess:(ASIHTTPRequest *)request;
 - (void) sendLearnedDataAboutEventFailure:(ASIHTTPRequest *)request;
+- (void) accountConnectEmailPasswordSuccess:(ASIHTTPRequest *)request;
+- (void) accountConnectEmailPasswordFailure:(ASIHTTPRequest *)request;
 @end
 
 @implementation WebConnector
@@ -498,6 +500,68 @@ static NSString * const WEB_CONNECTOR_SEND_LEARNED_DATA_ABOUT_EVENT_USER_INFO_KE
     NSString * userAction = [userInfo objectForKey:WEB_CONNECTOR_SEND_LEARNED_DATA_ABOUT_EVENT_USER_INFO_KEY_ACTION];
     
     [self.delegate webConnector:self sendLearnedDataFailure:request aboutEvent:eventURI userAction:userAction];
+    
+}
+
+/////////////
+// ACCOUNT //
+/////////////
+
+- (void)accountConnectWithEmail:(NSString *)emailString password:(NSString *)passwordString {
+    
+    if (self.availableToMakeWebConnection) {
+        
+        [ASIHTTPRequest setSessionCookies:nil]; // A little unclear about this line... Leaving it in for now.
+        ASIHTTPRequest * accountConnectRequest = [ASIHTTPRequest requestWithURL:[self.urlBuilder buildLoginURL]];
+        [self.connectionsInProgress addObject:accountConnectRequest];
+        [accountConnectRequest setUsername:emailString];
+        [accountConnectRequest setPassword:passwordString];
+        accountConnectRequest.requestMethod = @"GET";
+        accountConnectRequest.useSessionPersistence = NO;
+        accountConnectRequest.delegate = self;
+        accountConnectRequest.didFinishSelector = @selector(accountConnectEmailPasswordSuccess:);
+        accountConnectRequest.didFailSelector = @selector(accountConnectEmailPasswordFailure:);
+        [accountConnectRequest startAsynchronous];
+        
+    }
+    
+}
+
+- (void)accountConnectEmailPasswordSuccess:(ASIHTTPRequest *)request {
+    
+    [self.connectionsInProgress removeObject:request];
+    
+    NSLog(@"code: %i",[request responseStatusCode]);
+	NSString * responseString = [request responseString];
+    NSLog(@"response: %@",responseString);
+    NSError * error = nil;
+    
+	NSDictionary * dictionaryFromJSON = [responseString yajl_JSONWithOptions:YAJLParserOptionsAllowComments error:&error];
+    NSString * apiKey = [[[dictionaryFromJSON valueForKey:@"objects"] objectAtIndex:0] valueForKey:@"key"];
+    NSString * fullName = [[[dictionaryFromJSON valueForKey:@"objects"] objectAtIndex:0] valueForKey:@"full_name"];
+    NSString * kwiqetIdentifier = fullName && [fullName length] > 0 ? fullName : request.username;
+    
+    // There is still a possibility that we successfully got a response, but that that response is nil. We should check for this, and switch our assessment to "failure" if necessary.
+    if (request != nil && apiKey != nil) {
+        [self.delegate webConnector:self accountConnectSuccess:request withEmail:request.username kwiqetIdentifier:kwiqetIdentifier apiKey:apiKey];
+    } else {
+        [self.delegate webConnector:self accountConnectFailure:request withEmail:request.username];
+    }
+    
+
+    
+}
+
+- (void)accountConnectEmailPasswordFailure:(ASIHTTPRequest *)request {
+    
+    [self.connectionsInProgress removeObject:request];
+    
+    int responseCode = [request responseStatusCode];
+    NSLog(@"code: %i",responseCode);
+	NSError * error = [request error];
+	NSLog(@"%@",error);
+    
+    [self.delegate webConnector:self accountConnectFailure:request withEmail:request.username];
     
 }
 

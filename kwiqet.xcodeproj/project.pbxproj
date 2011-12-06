@@ -383,6 +383,7 @@
 		3298994D145F419000583D21 /* event_cell_category_bar_border_right.png in Resources */ = {isa = PBXBuildFile; fileRef = 3298994B145F418800583D21 /* event_cell_category_bar_border_right.png */; };
 		3298994E145F419000583D21 /* event_cell_category_bar_border_right@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 3298994C145F418B00583D21 /* event_cell_category_bar_border_right@2x.png */; };
 		32A1033214167E6800C9FABE /* OccurrenceVenueCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 32A1033114167E6800C9FABE /* OccurrenceVenueCell.m */; };
+		32A13ABB148D59EC0024773A /* AccountInputView.m in Sources */ = {isa = PBXBuildFile; fileRef = 32A13ABA148D59EC0024773A /* AccountInputView.m */; };
 		32BEE72F13BA4720009D583E /* cardbg.png in Resources */ = {isa = PBXBuildFile; fileRef = 32BEE72913BA4720009D583E /* cardbg.png */; };
 		32BEE73013BA4720009D583E /* cardbg@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 32BEE72A13BA4720009D583E /* cardbg@2x.png */; };
 		32C3A61A13CC005F00A12C12 /* ContactCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 32C3A61913CC005F00A12C12 /* ContactCell.m */; };
@@ -1038,6 +1039,8 @@
 		32A0C8A913E353C300F5DDDC /* kwiqet 008.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "kwiqet 008.xcdatamodel"; sourceTree = "<group>"; };
 		32A1033014167E6800C9FABE /* OccurrenceVenueCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OccurrenceVenueCell.h; sourceTree = "<group>"; };
 		32A1033114167E6800C9FABE /* OccurrenceVenueCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OccurrenceVenueCell.m; sourceTree = "<group>"; };
+		32A13AB9148D59EC0024773A /* AccountInputView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AccountInputView.h; sourceTree = "<group>"; };
+		32A13ABA148D59EC0024773A /* AccountInputView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AccountInputView.m; sourceTree = "<group>"; };
 		32ABA3BD141FC33B003523DA /* kwiqet 009.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "kwiqet 009.xcdatamodel"; sourceTree = "<group>"; };
 		32B36CD913B27DF1004C2068 /* kwiqet 002.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "kwiqet 002.xcdatamodel"; sourceTree = "<group>"; };
 		32BEE72913BA4720009D583E /* cardbg.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = cardbg.png; sourceTree = "<group>"; };
@@ -1855,6 +1858,30 @@
 			path = kwiqet/classes/JSON;
 			sourceTree = SOURCE_ROOT;
 		};
+		3284103B14882714007E8A98 /* Account */ = {
+			isa = PBXGroup;
+			children = (
+				32FD386413AFF52F007549B6 /* SettingsViewController.h */,
+				32FD386513AFF52F007549B6 /* SettingsViewController.m */,
+				32FD386613AFF52F007549B6 /* SettingsViewController.xib */,
+				325A0941148406EF00CA5538 /* AccountPromptViewController.h */,
+				325A0942148406EF00CA5538 /* AccountPromptViewController.m */,
+				325A0943148406EF00CA5538 /* AccountPromptViewController.xib */,
+				32A13AB9148D59EC0024773A /* AccountInputView.h */,
+				32A13ABA148D59EC0024773A /* AccountInputView.m */,
+				32FD384713AFF52F007549B6 /* LoginViewController.h */,
+				32FD384813AFF52F007549B6 /* LoginViewController.m */,
+				32FD384913AFF52F007549B6 /* LoginViewController.xib */,
+				32FD385113AFF52F007549B6 /* RegistrationViewController.h */,
+				32FD385213AFF52F007549B6 /* RegistrationViewController.m */,
+				32FD385313AFF52F007549B6 /* RegistrationViewController.xib */,
+				32253F4113C36884004FBDD6 /* FacebookViewController.h */,
+				32253F4213C36884004FBDD6 /* FacebookViewController.m */,
+				32253F4313C36884004FBDD6 /* FacebookViewController.xib */,
+			);
+			name = Account;
+			sourceTree = "<group>";
+		};
 		32929C4713EA00E7001D0FE7 /* Filter option buttons */ = {
 			isa = PBXGroup;
 			children = (
@@ -2061,33 +2088,19 @@
 				32D13D6413DF4A5E00EBB192 /* EventsViewController */,
 				32FD384213AFF52F007549B6 /* FeaturedEventViewController.h */,
 				32FD384313AFF52F007549B6 /* FeaturedEventViewController.m */,
-				32FD384713AFF52F007549B6 /* LoginViewController.h */,
-				32FD384813AFF52F007549B6 /* LoginViewController.m */,
-				32FD384913AFF52F007549B6 /* LoginViewController.xib */,
 				32FD384A13AFF52F007549B6 /* MapViewController.h */,
 				32FD384B13AFF52F007549B6 /* MapViewController.m */,
 				32FD384C13AFF52F007549B6 /* MapViewController.xib */,
-				32FD385113AFF52F007549B6 /* RegistrationViewController.h */,
-				32FD385213AFF52F007549B6 /* RegistrationViewController.m */,
-				32FD385313AFF52F007549B6 /* RegistrationViewController.xib */,
-				32FD386413AFF52F007549B6 /* SettingsViewController.h */,
-				32FD386513AFF52F007549B6 /* SettingsViewController.m */,
-				32FD386613AFF52F007549B6 /* SettingsViewController.xib */,
 				32FD386713AFF52F007549B6 /* SplashScreenViewController.h */,
 				32FD386813AFF52F007549B6 /* SplashScreenViewController.m */,
 				32FD386913AFF52F007549B6 /* SplashScreenViewController.xib */,
-				32253F4113C36884004FBDD6 /* FacebookViewController.h */,
-				32253F4213C36884004FBDD6 /* FacebookViewController.m */,
-				32253F4313C36884004FBDD6 /* FacebookViewController.xib */,
 				32F3092213C3BB16003930F2 /* ContactsSelectViewController.h */,
 				32F3092313C3BB16003930F2 /* ContactsSelectViewController.m */,
 				32F3092413C3BB16003930F2 /* ContactsSelectViewController.xib */,
 				320556F61457231100847D77 /* SetLocationViewController.h */,
 				320556F71457231100847D77 /* SetLocationViewController.m */,
 				320556F81457231100847D77 /* SetLocationViewController.xib */,
-				325A0941148406EF00CA5538 /* AccountPromptViewController.h */,
-				325A0942148406EF00CA5538 /* AccountPromptViewController.m */,
-				325A0943148406EF00CA5538 /* AccountPromptViewController.xib */,
+				3284103B14882714007E8A98 /* Account */,
 			);
 			name = "view controllers";
 			sourceTree = "<group>";
@@ -3059,6 +3072,7 @@
 				320850C2146AE91000062F36 /* LocationUpdatedFeedbackView.m in Sources */,
 				320662571474318700FB74DB /* KwiqetLocationManager.m in Sources */,
 				325A0944148406EF00CA5538 /* AccountPromptViewController.m in Sources */,
+				32A13ABB148D59EC0024773A /* AccountInputView.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

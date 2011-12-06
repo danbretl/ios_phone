@@ -14,6 +14,7 @@
 #import "WebConnector.h"
 #import "CoreDataModel.h"
 #import "FacebookManager.h"
+#import "AccountPromptViewController.h"
 
 @interface kwiqetAppDelegate : NSObject <UIApplicationDelegate, UITabBarControllerDelegate, SplashScreenViewControllerDelegate, WebConnectorDelegate, ContactsSelectViewControllerDelegate> {
 
