@@ -111,7 +111,7 @@ static NSString * const WEB_CONNECTOR_ACCOUNT_USER_INFO_KEY_EMAIL = @"email";
 - (void) getCategoryTreeSuccess:(ASIHTTPRequest *)request {
     [self.connectionsInProgress removeObject:request];
     // There is still a possibility that we successfully got a response, but that that response is nil. We should check for this, and switch our assessment to "failure" if necessary.
-    if (request) {
+    if (request && request.responseStatusCode < 400) {
         [self.delegate webConnector:self getCategoryTreeSuccess:request];
     } else {
         [self.delegate webConnector:self getCategoryTreeFailure:request];
@@ -152,7 +152,7 @@ static NSString * const WEB_CONNECTOR_ACCOUNT_USER_INFO_KEY_EMAIL = @"email";
     NSString * eventURI = [userInfo valueForKey:WEB_CONNECTOR_USER_INFO_KEY_EVENT_URI];
     
     // There is still a possibility that we successfully got a response, but that that response is nil. We should check for this, and switch our assessment to "failure" if necessary.
-    if (request) {
+    if (request && request.responseStatusCode < 400) {
         [self.delegate webConnector:self getEventSuccess:request forEventURI:eventURI];
     } else {
         [self.delegate webConnector:self getEventFailure:request forEventURI:eventURI];
@@ -196,7 +196,7 @@ static NSString * const WEB_CONNECTOR_ACCOUNT_USER_INFO_KEY_EMAIL = @"email";
     NSString * eventURI = [userInfo valueForKey:WEB_CONNECTOR_USER_INFO_KEY_EVENT_URI];
     
     // There is still a possibility that we successfully got a response, but that that response is nil. We should check for this, and switch our assessment to "failure" if necessary.
-    if (request) {
+    if (request && request.responseStatusCode < 400) {
         [self.delegate webConnector:self getAllOccurrencesSuccess:request forEventURI:eventURI];
     } else {
         [self.delegate webConnector:self getAllOccurrencesFailure:request forEventURI:eventURI];
@@ -237,7 +237,7 @@ static NSString * const WEB_CONNECTOR_ACCOUNT_USER_INFO_KEY_EMAIL = @"email";
 - (void) getFeaturedEventSuccess:(ASIHTTPRequest *)request {
     [self.connectionsInProgress removeObject:request];
     // There is still a possibility that we successfully got a response, but that that response is nil. We should check for this, and switch our assessment to "failure" if necessary.
-    if (request) {
+    if (request && request.responseStatusCode < 400) {
         [self.delegate webConnector:self getFeaturedEventSuccess:request];
     } else {
         [self.delegate webConnector:self getFeaturedEventFailure:request];
@@ -336,7 +336,7 @@ static NSString * const WEB_CONNECTOR_ACCOUNT_USER_INFO_KEY_EMAIL = @"email";
     /* THE PREVIOUS CODE IS DUPLICATED IN FAILURE CALLBACK METHOD, AND (IN PART) IN SEARCH SUCCESS & FAILURE METHODS */
     
     // There is still a possibility that we successfully got a response, but that that response is nil. We should check for this, and switch our assessment to "failure" if necessary.
-    if (request) {
+    if (request && request.responseStatusCode < 400) {
         [self.delegate webConnector:self getRecommendedEventsSuccess:request withCategoryURI:categoryURI minPrice:minPriceInclusive maxPrice:maxPriceInclusive startDateEarliest:startDateEarliestInclusive startDateLatest:startDateLatestInclusive startTimeEarliest:startTimeEarliestInclusive startTimeLatest:startTimeLatestInclusive locationLatitude:locationLatitude locationLongitude:locationLongitude geoQueryString:geoQueryString];
     } else {
         [self.delegate webConnector:self getRecommendedEventsFailure:request withCategoryURI:categoryURI minPrice:minPriceInclusive maxPrice:maxPriceInclusive startDateEarliest:startDateEarliestInclusive startDateLatest:startDateLatestInclusive startTimeEarliest:startTimeEarliestInclusive startTimeLatest:startTimeLatestInclusive locationLatitude:locationLatitude locationLongitude:locationLongitude geoQueryString:geoQueryString];
@@ -423,7 +423,7 @@ static NSString * const WEB_CONNECTOR_ACCOUNT_USER_INFO_KEY_EMAIL = @"email";
     /* THE PREVIOUS CODE IS DUPLICATED IN FAILURE CALLBACK METHOD, AND (IN PART) IN SEARCH SUCCESS & FAILURE METHODS */
     
     // There is still a possibility that we successfully got a response, but that that response is nil. We should check for this, and switch our assessment to "failure" if necessary.
-    if (request) {
+    if (request && request.responseStatusCode < 400) {
         [self.delegate webConnector:self getEventsListSuccess:request forSearchString:searchString startDateEarliest:startDateEarliestInclusive startDateLatest:startDateLatestInclusive startTimeEarliest:startTimeEarliestInclusive startTimeLatest:startTimeLatestInclusive locationLatitude:locationLatitude locationLongitude:locationLongitude geoQueryString:geoQueryString];
     } else {
         [self.delegate webConnector:self getEventsListFailure:request forSearchString:searchString startDateEarliest:startDateEarliestInclusive startDateLatest:startDateLatestInclusive startTimeEarliest:startTimeEarliestInclusive startTimeLatest:startTimeLatestInclusive locationLatitude:locationLatitude locationLongitude:locationLongitude geoQueryString:geoQueryString];
@@ -487,7 +487,7 @@ static NSString * const WEB_CONNECTOR_ACCOUNT_USER_INFO_KEY_EMAIL = @"email";
     NSString * userAction = [userInfo objectForKey:WEB_CONNECTOR_SEND_LEARNED_DATA_ABOUT_EVENT_USER_INFO_KEY_ACTION];
     
     // There is still a possibility that we successfully got a response, but that that response is nil. We should check for this, and switch our assessment to "failure" if necessary.
-    if (request) {
+    if (request && request.responseStatusCode < 400) {
         [self.delegate webConnector:self sendLearnedDataSuccess:request aboutEvent:eventURI userAction:userAction];
     } else {
         [self.delegate webConnector:self sendLearnedDataFailure:request aboutEvent:eventURI userAction:userAction];
@@ -549,7 +549,7 @@ static NSString * const WEB_CONNECTOR_ACCOUNT_USER_INFO_KEY_EMAIL = @"email";
     NSString * kwiqetIdentifier = fullName && [fullName length] > 0 ? fullName : request.username;
     
     // There is still a possibility that we successfully got a response, but that that response is nil. We should check for this, and switch our assessment to "failure" if necessary.
-    if (request != nil && apiKey != nil) {
+    if (request != nil && apiKey != nil && request.responseStatusCode < 400) {
         [self.delegate webConnector:self accountConnectSuccess:request withEmail:request.username kwiqetIdentifier:kwiqetIdentifier apiKey:apiKey];
     } else {
         [self.delegate webConnector:self accountConnectFailure:request failureCode:GeneralFailure withEmail:request.username];
@@ -602,7 +602,11 @@ static NSString * const WEB_CONNECTOR_ACCOUNT_USER_INFO_KEY_EMAIL = @"email";
     
     [self.connectionsInProgress removeObject:request];
     
-    [self.delegate webConnector:self forgotPasswordSuccess:request forAccountAssociatedWithEmail:[request.userInfo objectForKey:WEB_CONNECTOR_ACCOUNT_USER_INFO_KEY_EMAIL]];
+    if (request && request.responseStatusCode < 400) {
+        [self.delegate webConnector:self forgotPasswordSuccess:request forAccountAssociatedWithEmail:[request.userInfo objectForKey:WEB_CONNECTOR_ACCOUNT_USER_INFO_KEY_EMAIL]];
+    } else {
+        [self.delegate webConnector:self forgotPasswordFailure:request forAccountAssociatedWithEmail:[request.userInfo objectForKey:WEB_CONNECTOR_ACCOUNT_USER_INFO_KEY_EMAIL]];
+    }
     
 }
 

@@ -212,20 +212,29 @@
 
 - (void)webConnector:(WebConnector *)theWebConnector getCategoryTreeSuccess:(ASIHTTPRequest *)request {
     
+    NSLog(@"kwiqetAppDelegate webConnector:getCategoryTreeSuccess:");
+    
     // The following is a RIDICULOUS way to check that we got valid input.
     BOOL allGoodForProcessing = NO;
     NSString * responseString = [request responseString];
+    NSLog(@"kwiqetAppDelegate webConnector:getCategoryTreeSuccess checking if all good for processing");
     if (responseString) {
+        NSLog(@"responseString is not null, request status code is %d, length is %d", request.responseStatusCode, responseString.length);
+        NSLog(@"%@", responseString);
         NSDictionary * dictionary = [responseString yajl_JSON];
         if (dictionary) {
+            NSLog(@"responseString yajl_JSON is not null");
             NSArray * categoriesArray = [dictionary valueForKey:@"objects"];
             if (categoriesArray && [categoriesArray count] > 0) {
+                NSLog(@"responseString yajl_JSON objects is not null - we have a categories array");
                 allGoodForProcessing = YES;
             }
         }
     }
+    NSLog(@"kwiqetAppDelegate webConnector:getCategoryTreeSuccess checked if all good for processing (answer? %d)", allGoodForProcessing);
     
     if (allGoodForProcessing) {
+        NSLog(@"kwiqetAppDelegate webConnector:getCategoryTreeSuccess allGoodForProcessing=YES");
         [self processLoadedCategoriesFromHTTPRequest:request];
         categoryTreeHasBeenRetrieved = YES;
         // Animate out the SplashScreenViewController's view
@@ -235,12 +244,14 @@
         [self.splashScreenViewController explodeAndFadeViewAnimated];
         [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"forceGetCategoryTreeOneTimeForceCompleteLocalDataModel010"];
     } else {
+        NSLog(@"kwiqetAppDelegate webConnector:getCategoryTreeSuccess allGoodForProcessing=NO");
         [self webConnector:theWebConnector getCategoryTreeFailure:request];
     }
     
 }
 
 - (void) webConnector:(WebConnector *)webConnector getCategoryTreeFailure:(ASIHTTPRequest *)request {
+    NSLog(@"kwiqetAppDelegate webConnector:getCategoryTreeFailure:");
     //	NSString *statusMessage = [request responseStatusMessage];
     //	NSLog(@"%@",statusMessage);
     //	NSError *error = [request error];

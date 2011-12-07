@@ -372,15 +372,24 @@ CGFloat const FEV_DESCRIPTION_LABEL_PADDING_HORIZONTAL = 20.0;
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(facebookAuthFailure:) name:FBM_AUTH_ERROR_KEY object:nil];
     
     self.featuredEvent = [self.coreDataModel getFeaturedEvent]; // This could be nil
+    NSLog(@"FeaturedEventViewController about to call updateInterfaceFromFeaturedEvent from viewDidLoad");
     [self updateInterfaceFromFeaturedEvent:self.featuredEvent];
+    NSLog(@"FeaturedEventViewController just called updateInterfaceFromFeaturedEvent from viewDidLoad");
     
 }
 
-- (void)viewWillAppear:(BOOL)animated {
+- (void) viewWillAppear:(BOOL)animated {
+    NSLog(@"FeaturedEventViewController viewWillAppear start");
     [super viewWillAppear:animated];
 //    [self suggestToGetNewFeaturedEvent]; NSLog(@"FROM EVENT DAY VIEW CONTROLLER VIEW WILL APPEAR LINE 291");
     [self tempSolutionResetAndEnableLetsGoButton];
-    
+    NSLog(@"FeaturedEventViewController viewWillAppear end");
+}
+
+- (void) viewDidAppear:(BOOL)animated {
+    NSLog(@"FeaturedEventViewController viewDidAppear start");
+    [super viewDidAppear:animated];
+    NSLog(@"FeaturedEventViewController viewDidAppear end");
 }
 
 - (void) viewDidDisappear:(BOOL)animated {
@@ -456,6 +465,8 @@ CGFloat const FEV_DESCRIPTION_LABEL_PADDING_HORIZONTAL = 20.0;
 	NSError * error = nil;
     NSDictionary * featuredEventJSONDictionary = [[[NSDictionary dictionaryWithDictionary:[responseString yajl_JSONWithOptions:YAJLParserOptionsAllowComments error:&error]] valueForKey:@"objects"] objectAtIndex:0];
     
+    NSLog(@"getFeaturedEventSuccess with JSONDictionary %@", featuredEventJSONDictionary);
+    
     // Add to/update core data
     Event * currentFeatured = [self.coreDataModel getOrCreateFeaturedEvent]; // Could be an old featured event, or it could be an empty event (if we had never before successfully retrieved a featured event from the web).
     NSString * oldFeaturedImageLocation = [[currentFeatured.imageLocation copy] autorelease];
@@ -465,7 +476,9 @@ CGFloat const FEV_DESCRIPTION_LABEL_PADDING_HORIZONTAL = 20.0;
     self.featuredEvent = currentFeatured;
     
     [DefaultsModel saveLastFeaturedEventGetDate:[NSDate date]];
+    NSLog(@"FeaturedEventViewController about to call updateInterfaceFromFeaturedEvent from webConnector:getFeaturedEventSuccess:");
     [self updateInterfaceFromFeaturedEvent:self.featuredEvent];
+    NSLog(@"FeaturedEventViewController just called updateInterfaceFromFeaturedEvent from webConnector:getFeaturedEventSuccess:");
     
     if (self.imageView.image == nil ||
         oldFeaturedImageLocation == nil ||
@@ -483,7 +496,9 @@ CGFloat const FEV_DESCRIPTION_LABEL_PADDING_HORIZONTAL = 20.0;
 	NSLog(@"%@",error);
 	//[self serverError];
     self.featuredEvent = [self.coreDataModel getFeaturedEvent]; // This could be an old featured event, or it could be nil (if we had never before successfully retrieved a featured event from the web).
+    NSLog(@"FeaturedEventViewController about to call updateInterfaceFromFeaturedEvent from webConnector:getFeaturedEventFailure:");
     [self updateInterfaceFromFeaturedEvent:self.featuredEvent]; // This could be an old featured event, or it could be nothing.
+    NSLog(@"FeaturedEventViewController just called updateInterfaceFromFeaturedEvent from webConnector:getFeaturedEventFailure:");
     if (self.imageView.image == nil) {
         [self.imageView setImageWithURL:[URLBuilder imageURLForImageLocation:self.featuredEvent.imageLocation] placeholderImage:[UIImage imageNamed:@"feat_event_img_placeholder.png"]];
     }
@@ -499,6 +514,8 @@ CGFloat const FEV_DESCRIPTION_LABEL_PADDING_HORIZONTAL = 20.0;
 }
 
 - (void) updateInterfaceFromFeaturedEvent:(Event *)theFeaturedEvent {
+    
+    NSLog(@"start updateInterfaceFromFeaturedEvent %@", theFeaturedEvent);
     
     if (theFeaturedEvent) {
         self.noFeaturedEventView.alpha = 0.0;
@@ -524,6 +541,8 @@ CGFloat const FEV_DESCRIPTION_LABEL_PADDING_HORIZONTAL = 20.0;
     }
     
     if (theFeaturedEvent) {
+        
+        NSLog(@"updateInterfaceFromFeaturedEvent - (theFeaturedEvent is not null)");
 
         // Title
         NSString * title = theFeaturedEvent.title;
@@ -635,7 +654,12 @@ CGFloat const FEV_DESCRIPTION_LABEL_PADDING_HORIZONTAL = 20.0;
 //        [operation release];
 //        [queue release];
         
+    } else {
+        NSLog(@"updateInterfaceFromFeaturedEvent - (theFeaturedEvent is null)");
     }
+    
+    NSLog(@"finish updateInterfaceFromFeaturedEvent %@", theFeaturedEvent);
+    
 }
 
 //- (void)loadImageWithLocation:(NSString *)imageLocation {
