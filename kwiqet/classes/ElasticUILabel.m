@@ -35,7 +35,9 @@ double const ELASTICUILABEL_ELASTIC_DELAY_LENGTH = 1.0;
     [text release];
     [color release];
     [overlayView_ release];
+//    [elasticDelayTimer_ invalidate];
     [elasticDelayTimer_ release];
+//    elasticDelayTimer_ = nil;
     [super dealloc];
 }
 
@@ -158,6 +160,15 @@ double const ELASTICUILABEL_ELASTIC_DELAY_LENGTH = 1.0;
         self.backgroundColor = self.color;
         self.gradientView.colorEnd = self.color;
     }
+}
+
+- (void)invalidateTimerAndScrollTextToOriginAnimated:(BOOL)animated {
+    NSLog(@"Invalidate timer. Timer: %@ (valid? %d)", self.elasticDelayTimer, self.elasticDelayTimer.isValid);
+    [self.elasticDelayTimer invalidate];
+    NSLog(@"Invalidate timer. Timer: %@ (valid? %d)", self.elasticDelayTimer, self.elasticDelayTimer.isValid);
+    self.elasticDelayTimer = nil;
+    NSLog(@"Invalidate timer. Timer: %@ (valid? %d)", self.elasticDelayTimer, self.elasticDelayTimer.isValid);
+    [self scrollTextToOriginAnimated:animated];
 }
 
 //- (void)flashScrollBar {

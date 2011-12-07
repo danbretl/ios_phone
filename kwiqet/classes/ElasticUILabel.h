@@ -33,5 +33,6 @@ extern CGFloat const ELASTICUILABEL_GRADIENT_VIEW_WIDTH;
 //- (void) wiggleLabel;
 //- (void) flashScrollBar;
 - (void) scrollTextToOriginAnimated:(BOOL)animated;
+- (void)invalidateTimerAndScrollTextToOriginAnimated:(BOOL)animated;
 
 @end
