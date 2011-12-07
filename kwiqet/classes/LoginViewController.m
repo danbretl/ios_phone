@@ -223,7 +223,7 @@
     //show alert
     UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Password Reset" 
                                                     message:@"Check your email and follow the link provided to set a new password." delegate:nil 
-                                          cancelButtonTitle:@"Ok" otherButtonTitles:nil];
+                                          cancelButtonTitle:@"OK" otherButtonTitles:nil];
     [alert show]; 
     [alert release];
     [responseString release];
@@ -324,7 +324,7 @@
     //alert user that they logged in
     UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Logged In!" 
                                                     message:@"Have fun at the events!" delegate:self 
-                                          cancelButtonTitle:@"Ok" otherButtonTitles:nil]; 
+                                          cancelButtonTitle:@"OK" otherButtonTitles:nil]; 
     [alert show]; 
     [alert release];
     
@@ -346,7 +346,7 @@
     
     UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Log In Error!" 
                                                     message:@"Your password and/or username was not found. Please try again." delegate:self 
-                                          cancelButtonTitle:@"Ok" otherButtonTitles:nil]; 
+                                          cancelButtonTitle:@"OK" otherButtonTitles:nil]; 
     [alert show]; 
     [alert release];
 }

@@ -202,7 +202,7 @@
             UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Logged Out" 
                                                             message:@"Log back in later to retrieve your personalized recommendations."
                                                            delegate:self 
-                                                  cancelButtonTitle:@"Ok" 
+                                                  cancelButtonTitle:@"OK" 
                                                   otherButtonTitles:nil];
             [alert show];
             [alert release];
@@ -274,7 +274,7 @@
                           initWithTitle:@"Behavior Reset Successful"
                           message:nil
                           delegate:nil
-                          cancelButtonTitle:@"Ok"
+                          cancelButtonTitle:@"OK"
                           otherButtonTitles:nil];
     [alert show];
     [alert release];
@@ -293,7 +293,7 @@
                           initWithTitle:@"Connection Error"
                           message:@"An error occured while trying to reset behavior."
                           delegate:nil
-                          cancelButtonTitle:@"Ok"
+                          cancelButtonTitle:@"OK"
                           otherButtonTitles:nil];
     [alert show];
     [alert release];

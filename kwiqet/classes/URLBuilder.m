@@ -129,8 +129,7 @@ static NSString * const URL_BUILDER_GET_EVENTS_LIST_FILTER_POPULAR = @"popular";
 }
 
 - (NSURL*) buildForgotPasswordURL  {
-    NSString *urlplist = [[NSBundle mainBundle]
-                          pathForResource:@"urls" ofType:@"plist"];
+    NSString *urlplist = [[NSBundle mainBundle] pathForResource:@"urls" ofType:@"plist"];
     NSDictionary *urlDictionary = [[NSDictionary alloc] initWithContentsOfFile:urlplist];
     
     NSString *baseURL = [[NSString alloc]initWithString:[urlDictionary valueForKey:self.baseURLKey]];

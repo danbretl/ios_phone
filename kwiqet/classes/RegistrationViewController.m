@@ -154,7 +154,7 @@
     else {
         UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Uh-Oh!" 
                                                         message:@"Your passwords did not match. Re-enter please." delegate:self 
-                                              cancelButtonTitle:@"Ok" otherButtonTitles:nil]; 
+                                              cancelButtonTitle:@"OK" otherButtonTitles:nil]; 
         [alert show]; 
         [alert release];
     }
@@ -174,7 +174,7 @@
     if (emailUsed) {
         UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Uh-Oh!" 
                                                         message:@"This email has already been registered. Please try another." delegate:self 
-                                              cancelButtonTitle:@"Ok" otherButtonTitles:nil]; 
+                                              cancelButtonTitle:@"OK" otherButtonTitles:nil]; 
         [alert show]; 
         [alert release];
     } else {
@@ -187,7 +187,7 @@
         //alert user that they logged in
         UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Logged In!" 
                                                         message:@"Have fun at the events!" delegate:self 
-                                              cancelButtonTitle:@"Ok" otherButtonTitles:nil]; 
+                                              cancelButtonTitle:@"OK" otherButtonTitles:nil]; 
         [alert show]; 
         [alert release];
         
@@ -202,7 +202,7 @@
 	NSLog(@"%@",error);
     UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Uh-Oh!" 
                                                     message:@"Something went wrong..please try again!" delegate:self 
-                                          cancelButtonTitle:@"Ok" otherButtonTitles:nil]; 
+                                          cancelButtonTitle:@"OK" otherButtonTitles:nil]; 
     [alert show]; 
     [alert release];
 }
