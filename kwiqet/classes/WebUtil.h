@@ -24,6 +24,8 @@ static NSString * const WEB_CONNECTION_ERROR_MESSAGE_STANDARD = @"There seems to
 + (BOOL) isNumberEmpty:(NSNumber *)number;
 + (NSNumber *) numberOrNil:(NSNumber *)number;
 
++ (BOOL) isValidEmailAddress:(NSString *)emailAddressString;
+
 // The following functions take raw web input, and provide good output (good real values, or nil)
 // Dealing with event summary dictionaries
 //+ (NSString *)validTitleFromEventSummaryDictionary:(NSDictionary *)eventSummaryDictionary;

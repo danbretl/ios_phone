@@ -28,6 +28,8 @@ static NSString * const WEB_CONNECTOR_GET_EVENTS_LIST_USER_INFO_KEY_FILTER_LOCAT
 static NSString * const WEB_CONNECTOR_GET_EVENTS_LIST_USER_INFO_KEY_FILTER_LOCATION_GEO_QUERY = @"filterLocationGeoQuery";
 static NSString * const WEB_CONNECTOR_SEND_LEARNED_DATA_ABOUT_EVENT_USER_INFO_KEY_EVENT_URI = @"eventURI";
 static NSString * const WEB_CONNECTOR_SEND_LEARNED_DATA_ABOUT_EVENT_USER_INFO_KEY_ACTION = @"action";
+static NSString * const WEB_CONNECTOR_ACCOUNT_DOES_NOT_EXIST_STRING = @"NOT REGISTERED";
+static NSString * const WEB_CONNECTOR_ACCOUNT_USER_INFO_KEY_EMAIL = @"email";
 
 @interface WebConnector()
 @property (retain) NSMutableArray * connectionsInProgress;
@@ -47,6 +49,8 @@ static NSString * const WEB_CONNECTOR_SEND_LEARNED_DATA_ABOUT_EVENT_USER_INFO_KE
 - (void) sendLearnedDataAboutEventFailure:(ASIHTTPRequest *)request;
 - (void) accountConnectEmailPasswordSuccess:(ASIHTTPRequest *)request;
 - (void) accountConnectEmailPasswordFailure:(ASIHTTPRequest *)request;
+- (void) forgotPasswordForAccountSuccess:(ASIHTTPRequest *)request;
+- (void) forgotPasswordForAccountFailure:(ASIHTTPRequest *)request;
 @end
 
 @implementation WebConnector
@@ -523,6 +527,8 @@ static NSString * const WEB_CONNECTOR_SEND_LEARNED_DATA_ABOUT_EVENT_USER_INFO_KE
         accountConnectRequest.didFailSelector = @selector(accountConnectEmailPasswordFailure:);
         [accountConnectRequest startAsynchronous];
         
+        NSLog(@"accountConnectWithEmail webRequest --- %@", accountConnectRequest.url);
+        
     }
     
 }
@@ -531,6 +537,7 @@ static NSString * const WEB_CONNECTOR_SEND_LEARNED_DATA_ABOUT_EVENT_USER_INFO_KE
     
     [self.connectionsInProgress removeObject:request];
     
+    NSLog(@"accountConnectWithEmail success with email %@!", request.username);
     NSLog(@"code: %i",[request responseStatusCode]);
 	NSString * responseString = [request responseString];
     NSLog(@"response: %@",responseString);
@@ -545,10 +552,8 @@ static NSString * const WEB_CONNECTOR_SEND_LEARNED_DATA_ABOUT_EVENT_USER_INFO_KE
     if (request != nil && apiKey != nil) {
         [self.delegate webConnector:self accountConnectSuccess:request withEmail:request.username kwiqetIdentifier:kwiqetIdentifier apiKey:apiKey];
     } else {
-        [self.delegate webConnector:self accountConnectFailure:request withEmail:request.username];
+        [self.delegate webConnector:self accountConnectFailure:request failureCode:GeneralFailure withEmail:request.username];
     }
-    
-
     
 }
 
@@ -556,12 +561,56 @@ static NSString * const WEB_CONNECTOR_SEND_LEARNED_DATA_ABOUT_EVENT_USER_INFO_KE
     
     [self.connectionsInProgress removeObject:request];
     
-    int responseCode = [request responseStatusCode];
-    NSLog(@"code: %i",responseCode);
+    NSLog(@"accountConnectWithEmail failure with email %@!", request.username);
+    NSLog(@"code: %i",[request responseStatusCode]);
+	NSString * responseString = [request responseString];
+    NSLog(@"response: %@",responseString);
 	NSError * error = [request error];
 	NSLog(@"%@",error);
     
-    [self.delegate webConnector:self accountConnectFailure:request withEmail:request.username];
+    WebConnectorFailure failureCode = GeneralFailure;
+    if (request.responseStatusCode == 401) {
+        if ([request.responseString isEqualToString:WEB_CONNECTOR_ACCOUNT_DOES_NOT_EXIST_STRING]) {
+            failureCode = AccountConnectAccountDoesNotExist;
+        } else {
+            failureCode = AccountConnectPasswordIncorrect;
+        }
+    }
+    
+    [self.delegate webConnector:self accountConnectFailure:request failureCode:failureCode withEmail:request.username];
+    
+}
+
+- (void) forgotPasswordForAccountAssociatedWithEmail:(NSString *)emailString {
+    
+    ASIHTTPRequest * request = [ASIHTTPRequest requestWithURL:[self.urlBuilder buildForgotPasswordURL]];
+    [self.connectionsInProgress addObject:request];
+    
+    [request addRequestHeader:@"Content-Type" value:@"application/json"];
+    NSDictionary * jsonDict = [NSDictionary dictionaryWithObjectsAndKeys:emailString, @"email", nil];
+    [request appendPostData:[jsonDict.JSONRepresentation dataUsingEncoding:NSUTF8StringEncoding]];
+    request.delegate = self;
+    request.didFinishSelector = @selector(forgotPasswordForAccountSuccess:);
+    request.didFailSelector = @selector(forgotPasswordForAccountFailure:);
+    NSDictionary * userInfo = [NSDictionary dictionaryWithObjectsAndKeys:emailString, WEB_CONNECTOR_ACCOUNT_USER_INFO_KEY_EMAIL, nil];
+    request.userInfo = userInfo;
+    [request startAsynchronous];
+    
+}
+
+- (void)forgotPasswordForAccountSuccess:(ASIHTTPRequest *)request {
+    
+    [self.connectionsInProgress removeObject:request];
+    
+    [self.delegate webConnector:self forgotPasswordSuccess:request forAccountAssociatedWithEmail:[request.userInfo objectForKey:WEB_CONNECTOR_ACCOUNT_USER_INFO_KEY_EMAIL]];
+    
+}
+
+- (void)forgotPasswordForAccountFailure:(ASIHTTPRequest *)request {
+    
+    [self.connectionsInProgress removeObject:request];
+    
+    [self.delegate webConnector:self forgotPasswordFailure:request forAccountAssociatedWithEmail:[request.userInfo objectForKey:WEB_CONNECTOR_ACCOUNT_USER_INFO_KEY_EMAIL]];
     
 }
 

@@ -10,6 +10,7 @@
 #import <QuartzCore/QuartzCore.h>
 #import "UIFont+Kwiqet.h"
 #import "DefaultsModel.h"
+#import "WebUtil.h"
 
 double const AP_NAV_BUTTONS_ANIMATION_DURATION = 0.25;
 
@@ -47,14 +48,19 @@ double const AP_NAV_BUTTONS_ANIMATION_DURATION = 0.25;
 - (IBAction) cancelButtonTouched:(id)sender;
 - (IBAction) doneButtonTouched:(id)sender;
 - (IBAction) accountOptionButtonTouched:(id)accountOptionButton;
-- (void) connectionAttemptRequested;
+- (void) userInputSubmissionAttemptRequested;
+- (void) accountConnectionAttemptRequested;
+- (void) accountCreationAttemptRequested;
+- (void) resignFirstResponderForAllTextFields;
 
 - (void) showContainer:(UIView *)viewsContainer animated:(BOOL)animated;
-- (void) showAccountCreationInputViews:(BOOL)shouldShowCreationViews showPasswordConfirmation:(BOOL)shouldShowPasswordConfirmation animated:(BOOL)animated;
+- (void) showAccountCreationInputViews:(BOOL)shouldShowCreationViews showPasswordConfirmation:(BOOL)shouldShowPasswordConfirmation activateAppropriateFirstResponder:(BOOL)shouldActivateFirstResponder animated:(BOOL)animated;
 
 @property (retain) WebActivityView * webActivityView;
 - (void) showWebActivityView;
 - (void) hideWebActivityView;
+@property (nonatomic, readonly) UIAlertView * passwordIncorrectAlertView;
+@property (nonatomic, readonly) UIAlertView * forgotPasswordConnectionErrorAlertView;
 
 @property (nonatomic, readonly) WebConnector * webConnector;
 
@@ -101,6 +107,8 @@ double const AP_NAV_BUTTONS_ANIMATION_DURATION = 0.25;
     [emailPasswordContainer release];
     [emailAccountAssuranceLabel release];
     [webActivityView release];
+    [passwordIncorrectAlertView release];
+    [forgotPasswordConnectionErrorAlertView release];
     [webConnector release];
     [confirmPasswordTextField release];
     [namePictureContainer release];
@@ -171,7 +179,7 @@ double const AP_NAV_BUTTONS_ANIMATION_DURATION = 0.25;
     [self.mainViewsContainer addSubview:self.inputContainer];
     self.inputContainer.frame = CGRectMake(self.mainViewsContainer.frame.size.width, 0, self.inputContainer.frame.size.width, self.inputContainer.frame.size.height);
     
-    [self showAccountCreationInputViews:NO showPasswordConfirmation:NO animated:NO];
+    [self showAccountCreationInputViews:NO showPasswordConfirmation:NO activateAppropriateFirstResponder:NO animated:NO];
     [self showContainer:self.accountOptionsContainer animated:NO];
     
 }
@@ -262,10 +270,16 @@ double const AP_NAV_BUTTONS_ANIMATION_DURATION = 0.25;
     [self showContainer:self.accountOptionsContainer animated:YES];
 }
 
+- (void)userInputSubmissionAttemptRequested {
+    if (accountCreationViewsVisible) {
+        [self accountCreationAttemptRequested];
+    } else {
+        [self accountConnectionAttemptRequested];
+    }    
+}
+
 - (IBAction) doneButtonTouched:(id)sender {
-    NSLog(@"Done button touched - connectionAttemptRequested");
-    [self showAccountCreationInputViews:!accountCreationViewsVisible showPasswordConfirmation:YES animated:YES];
-//    [self connectionAttemptRequested];
+    [self userInputSubmissionAttemptRequested];
 }
 
 - (BOOL)textFieldShouldBeginEditing:(UITextField *)textField {
@@ -286,125 +300,144 @@ double const AP_NAV_BUTTONS_ANIMATION_DURATION = 0.25;
         if (confirmPasswordVisible) {
             [self.confirmPasswordTextField becomeFirstResponder];
         } else {
-            NSLog(@"Done on password text field");
-//            [self connectionAttemptRequested];
+            [self userInputSubmissionAttemptRequested];
         }
     } else if (textField == self.confirmPasswordTextField) {
         NSLog(@"Done on confirm password text field");
-//        [self connectionAttemptRequested];
+        [self userInputSubmissionAttemptRequested];
     } else {
         NSLog(@"ERROR in AccountPromptViewController - unrecognized textField");
     }
     return NO;
 }
 
-//-(IBAction)forgotPasswordButtonTouched:(id)sender {
-//    
-//    if ([self.emailTextField.text length] > 0) {
-//        
-//        [self.emailTextField resignFirstResponder];
-//        [self.passwordTextField resignFirstResponder];
-//        
-//        URLBuilder *urlBuilder = [[URLBuilder alloc]init];
-//        NSURL *url = [urlBuilder buildForgotPasswordURL];
-//        
-//        //build json with {"email": email.text}
-//        NSString * usernameValue = [NSString stringWithString:self.emailTextField.text];
-//        NSDictionary *jsonDictionary = [[NSDictionary alloc]initWithObjectsAndKeys:usernameValue,@"email", nil];
-//        NSString *jsonString = [jsonDictionary JSONRepresentation];
-//        [jsonDictionary release];
-//        NSLog(@"json: %@",jsonString);
-//        NSLog(@"url: %@",url);
-//        
-//        ASIFormDataRequest * forgotPasswordRequest = [ASIFormDataRequest requestWithURL:url];
-//        [forgotPasswordRequest addRequestHeader:@"Content-Type" value:@"application/json"];
-//        [forgotPasswordRequest appendPostData:[jsonString  dataUsingEncoding:NSUTF8StringEncoding]];
-//        [forgotPasswordRequest setDelegate:self];
-//        [forgotPasswordRequest setDidFinishSelector:@selector(passwordRequestFinished:)];
-//        [forgotPasswordRequest setDidFailSelector:@selector(passwordRequestFailed:)];
-//        [forgotPasswordRequest startAsynchronous];
-//        
-//        [urlBuilder release];
-//        
-//        [self showWebActivityView];
-//        
-//    } else {
-//        
-//        [self.emailTextField becomeFirstResponder];
-//        
-//        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Missing Information" 
-//                                                        message:@"You must enter a valid email."
-//                                                       delegate:nil 
-//                                              cancelButtonTitle:@"OK" 
-//                                              otherButtonTitles:nil];
-//        [alert show]; 
-//        [alert release];
-//        
-//    }
-//    
-//}
-//
-//- (void)passwordRequestFinished:(ASIHTTPRequest *)request {
-//    
-//    [self hideWebActivityView];
-//    NSLog(@"LoginViewController passwordRequestFinished:");
-//    
-//	NSString *responseString = [[NSString alloc]initWithString:[request responseString]];
-//	NSLog(@"%@",responseString);
-//    
-//    NSError *error = nil;
-//    NSDictionary *dictionaryFromJSON = [responseString yajl_JSONWithOptions:YAJLParserOptionsAllowComments error:&error];
-//    NSLog(@"%@",dictionaryFromJSON);
-//    NSString * responseMessage = [[dictionaryFromJSON valueForKey:@"email"]objectAtIndex:0];
-//    NSLog(@"%@",responseMessage);
-//    
-//    //show alert
-//    UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Password Reset" 
-//                                                    message:@"Check your email and follow the link provided to set a new password." delegate:nil 
-//                                          cancelButtonTitle:@"Ok" otherButtonTitles:nil];
-//    [alert show]; 
-//    [alert release];
-//    [responseString release];
-//}
-//
-//- (void)passwordRequestFailed:(ASIHTTPRequest *)request
-//{
-//    NSLog(@"LoginViewController passwordRequestFailed:");
-//    [self hideWebActivityView];
-//    
-//	NSError *error = [request error];
-//	NSLog(@"%@",error);
-//    UIAlertView * alert = [[UIAlertView alloc] initWithTitle:@"Connection Error" message:WEB_CONNECTION_ERROR_MESSAGE_STANDARD delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil];
-//    [alert show];
-//    [alert release];
-//}
-
-
-
--(void) connectionAttemptRequested {
-    NSLog(@"LoginViewController connectionAttemptRequested");
-    
-    if ([self.passwordTextField.text length] > 0 &&
-        [self.emailTextField.text length] > 0) {
-        
-        [self.webConnector accountConnectWithEmail:self.emailTextField.text password:self.passwordTextField.text];
-        [self showWebActivityView];
-        
-    } else {
-        
-        if ([self.emailTextField.text length] == 0) {
-            [self.emailTextField becomeFirstResponder];
-        } else if ([self.passwordTextField.text length] == 0) {
-            [self.passwordTextField becomeFirstResponder];
+- (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex {
+    if (alertView == self.passwordIncorrectAlertView ||
+        alertView == self.forgotPasswordConnectionErrorAlertView) {
+        if (buttonIndex == alertView.cancelButtonIndex) {
+            // Start 'forgot password' flow.
+            [self.webConnector forgotPasswordForAccountAssociatedWithEmail:self.emailTextField.text];
+            [self showWebActivityView];
+        } else {
+            // Do nothing.
         }
-        
+    }
+}
+
+- (void)webConnector:(WebConnector *)webConnector forgotPasswordSuccess:(ASIHTTPRequest *)request forAccountAssociatedWithEmail:(NSString *)emailString {
+    
+    [self hideWebActivityView];
+    
+    UIAlertView * alert = [[UIAlertView alloc] initWithTitle:@"Password Reset" message:[NSString stringWithFormat:@"Check your email at %@ and follow the link provided to set a new password.", emailString] delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
+    [alert show]; 
+    [alert release];
+    
+    [self.passwordTextField becomeFirstResponder];
+    self.passwordTextField.text = @"";
+    self.confirmPasswordTextField.text = @""; // Sort of silly.
+    
+}
+
+- (void)webConnector:(WebConnector *)webConnector forgotPasswordFailure:(ASIHTTPRequest *)request forAccountAssociatedWithEmail:(NSString *)emailString {
+    
+    [self hideWebActivityView];
+    [self.forgotPasswordConnectionErrorAlertView show];
+    
+}
+
+- (void) accountConnectionAttemptRequested {
+    
+    BOOL emailEntered = self.emailTextField.text.length > 0;
+    BOOL emailValid = emailEntered && [WebUtil isValidEmailAddress:self.emailTextField.text];
+    
+    if (emailEntered) {
+        if (emailValid) {
+            [self.webConnector accountConnectWithEmail:self.emailTextField.text password:self.passwordTextField.text];
+            [self showWebActivityView];
+        } else {
+            UIAlertView * alert = [[UIAlertView alloc] initWithTitle:@"Invalid Email" 
+                                                             message:@"You must enter a valid email address."
+                                                            delegate:nil 
+                                                   cancelButtonTitle:@"OK" 
+                                                   otherButtonTitles:nil];
+            [alert show]; 
+            [alert release];
+        }
+    } else {
+        [self.emailTextField becomeFirstResponder];
         UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Missing Information" 
-                                                        message:@"You must enter a valid email and password."
+                                                        message:@"You must enter at least an email address."
                                                        delegate:nil 
                                               cancelButtonTitle:@"OK" 
                                               otherButtonTitles:nil];
         [alert show]; 
         [alert release];
+    }
+    
+}
+
+- (void)accountCreationAttemptRequested {
+    
+    BOOL nameEntered = self.firstNameTextField.text.length > 0 && self.lastNameTextField.text.length > 0;
+    BOOL emailEntered = self.emailTextField.text.length > 0;
+    BOOL emailValid = emailEntered && [WebUtil isValidEmailAddress:self.emailTextField.text];
+    BOOL passwordsEntered = self.passwordTextField.text.length > 0 && (!confirmPasswordVisible || self.confirmPasswordTextField.text.length > 0);
+    BOOL passwordsMatch = passwordsEntered && (!confirmPasswordVisible || [self.passwordTextField.text isEqualToString:self.confirmPasswordTextField.text]);
+    
+    if (!(nameEntered && emailEntered && emailValid && passwordsEntered && passwordsMatch)) {
+        
+        NSString * alertTitle = nil;
+        NSString * alertMessage = nil;
+        UITextField * nextFirstResponder = nil;
+        if (!nameEntered) {
+            // Missing Information
+            // Enter your name, so that we'll know who to expect at events!
+            // -> Make name (first or last) first responder
+            alertTitle = @"Missing Information";
+            alertMessage = @"Enter your name, so that we'll know who to expect at events!";
+            nextFirstResponder = self.firstNameTextField.text.length == 0 ? self.firstNameTextField : self.lastNameTextField;
+        } else if (!emailValid) {
+            // Invalid Email
+            // You must enter a valid email address.
+            // -> Make email first responder
+            alertTitle = @"Invalid Email";
+            alertMessage = @"You must enter a valid email address.";
+            nextFirstResponder = self.emailTextField;
+        } else if (!passwordsEntered) {
+            // Missing Information
+            // You must enter a password.
+            // -> Make password first responder
+            // Please confirm your password.
+            // -> Make confirm password first responder
+            alertTitle = @"Missing Information";
+            if (self.passwordTextField.text.length == 0) {
+                alertMessage = @"You must enter a password.";
+                nextFirstResponder = self.passwordTextField;
+            } else {
+                alertMessage = @"Please confirm your password.";
+                nextFirstResponder = self.confirmPasswordTextField;
+            }
+        } else if (!passwordsMatch) {
+            // Password Unconfirmed
+            // Your password confirmation does not match. Please try again.
+            // -> Clear confirm password, make confirm password first responder.
+            alertTitle = @"Password Unconfirmed";
+            alertMessage = @"Your password confirmation does not match. Please try again.";
+            nextFirstResponder = self.confirmPasswordTextField;
+            self.confirmPasswordTextField.text = @"";
+        }
+        
+        UIAlertView * alertView = [[UIAlertView alloc] initWithTitle:alertTitle message:alertMessage delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
+        [alertView show];
+        [alertView release];
+        
+        [nextFirstResponder becomeFirstResponder];
+        
+    } else {
+        
+        UIAlertView * alertView = [[UIAlertView alloc] initWithTitle:@"Registration Disabled" message:@"How annoying! Your input is great, but you can't actually create an account yet!" delegate:nil cancelButtonTitle:@"Oh Well..." otherButtonTitles:nil];
+        [alertView show];
+        [alertView release];
         
     }
     
@@ -420,25 +453,25 @@ double const AP_NAV_BUTTONS_ANIMATION_DURATION = 0.25;
     [[NSNotificationCenter defaultCenter] postNotificationName:@"loginActivity" object:self userInfo:infoDictionary];
     
     //alert user that they logged in
-    UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Logged In!" 
-                                                    message:@"Have fun at the events!" delegate:self 
-                                          cancelButtonTitle:@"Ok" otherButtonTitles:nil]; 
+    UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Logged In!" message:@"Have fun at the events!" delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil];
     [alert show]; 
     [alert release];
     
 }
 
-- (void)webConnector:(WebConnector *)webConnector accountConnectFailure:(ASIHTTPRequest *)request withEmail:(NSString *)emailString {
+- (void) webConnector:(WebConnector *)webConnector accountConnectFailure:(ASIHTTPRequest *)request failureCode:(WebConnectorFailure)failureCode withEmail:(NSString *)emailString {
 
     [self hideWebActivityView];
     
-    UIAlertView * alert = [[UIAlertView alloc] initWithTitle:@"Log In Error!" 
-                                                     message:@"Your password and/or username was not found. Please try again."
-                                                    delegate:self 
-                                           cancelButtonTitle:@"Ok" 
-                                           otherButtonTitles:nil];
-    [alert show]; 
-    [alert release];
+    if (failureCode == AccountConnectPasswordIncorrect) {
+        [self.passwordIncorrectAlertView show];
+    } else if (failureCode == AccountConnectAccountDoesNotExist) {
+        [self showAccountCreationInputViews:YES showPasswordConfirmation:YES activateAppropriateFirstResponder:YES animated:YES];
+    } else {
+        UIAlertView * alert = [[UIAlertView alloc] initWithTitle:@"Connection Error" message:@"Sorry - there was a problem connecting with Kwiqet. Please check your connection and try again." delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil];
+        [alert show]; 
+        [alert release];
+    }
     
 }
 
@@ -492,7 +525,7 @@ double const AP_NAV_BUTTONS_ANIMATION_DURATION = 0.25;
                          completion:^(BOOL finished) {
                              if (!shouldShowInputViews) {
                                  resetInputBlock();
-                                 [self showAccountCreationInputViews:NO showPasswordConfirmation:NO animated:NO];
+                                 [self showAccountCreationInputViews:NO showPasswordConfirmation:NO activateAppropriateFirstResponder:NO animated:NO];
                              }
                          }];
     } else {
@@ -502,22 +535,26 @@ double const AP_NAV_BUTTONS_ANIMATION_DURATION = 0.25;
         buttonsAlphaBlock(shouldShowInputViews);
         if (!shouldShowInputViews) {
             resetInputBlock();
-            [self showAccountCreationInputViews:NO showPasswordConfirmation:NO animated:NO];
+            [self showAccountCreationInputViews:NO showPasswordConfirmation:NO activateAppropriateFirstResponder:NO animated:NO];
         }
     }
     if (shouldShowInputViews) {
         [self.emailTextField becomeFirstResponder];
     } else {
-        [self.firstNameTextField resignFirstResponder];
-        [self.lastNameTextField resignFirstResponder];
-        [self.emailTextField resignFirstResponder];
-        [self.passwordTextField resignFirstResponder];
-        [self.confirmPasswordTextField resignFirstResponder];
+        [self resignFirstResponderForAllTextFields];
     }
     
 }
 
-- (void) showAccountCreationInputViews:(BOOL)shouldShowCreationViews showPasswordConfirmation:(BOOL)shouldShowPasswordConfirmation animated:(BOOL)animated {
+- (void) resignFirstResponderForAllTextFields {
+    [self.firstNameTextField resignFirstResponder];
+    [self.lastNameTextField resignFirstResponder];
+    [self.emailTextField resignFirstResponder];
+    [self.passwordTextField resignFirstResponder];
+    [self.confirmPasswordTextField resignFirstResponder];
+}
+
+- (void) showAccountCreationInputViews:(BOOL)shouldShowCreationViews showPasswordConfirmation:(BOOL)shouldShowPasswordConfirmation activateAppropriateFirstResponder:(BOOL)shouldActivateFirstResponder animated:(BOOL)animated {
     
     shouldShowPasswordConfirmation &= shouldShowCreationViews;
     
@@ -540,11 +577,31 @@ double const AP_NAV_BUTTONS_ANIMATION_DURATION = 0.25;
         }
         emailPasswordContainerFrame.size.height = calculatedHeight;
         self.emailPasswordContainer.frame = emailPasswordContainerFrame;
-        self.passwordTextField.returnKeyType = shouldExpand ? UIReturnKeyNext : UIReturnKeySend;
+        NSLog(@"%d", self.passwordTextField.returnKeyType);
+        self.passwordTextField.returnKeyType = shouldExpand ? UIReturnKeyNext : UIReturnKeySend; // If passwordTextField is first responder when this call is made, the returnKeyType does not get updated until another text field becomes first responder, and then this one becomes it once again. It does not help to quickly switch to another and come back right here, either. Strange bug.
     };
     
     void(^emailAccountAssuranceAlphaBlock)(BOOL) = ^(BOOL shouldShow){
         self.emailAccountAssuranceLabel.alpha = shouldShow ? 1.0 : 0.0;
+    };
+    
+    void(^firstResponderBlock)(void) = ^{
+        if (shouldShowCreationViews) {
+            NSArray * inputTextFields = [NSArray arrayWithObjects:self.firstNameTextField, self.lastNameTextField, self.emailTextField, self.passwordTextField, self.confirmPasswordTextField, nil];
+            for (UITextField * inputTextField in inputTextFields) {
+                if (inputTextField.text.length == 0) {
+                    [inputTextField becomeFirstResponder];
+                    break;
+                }
+            }
+        } else {
+            if (self.emailTextField.text.length == 0) {
+                [self.emailTextField becomeFirstResponder];
+            } else {
+                [self.passwordTextField becomeFirstResponder];
+            }
+            
+        }
     };
     
     if (animated) {
@@ -569,6 +626,9 @@ double const AP_NAV_BUTTONS_ANIMATION_DURATION = 0.25;
         emailAccountAssuranceAlphaBlock(!shouldShowCreationViews);
         accountCreationViewsVisible = shouldShowCreationViews;
         confirmPasswordVisible = shouldShowPasswordConfirmation;
+    }
+    if (shouldActivateFirstResponder) {
+        firstResponderBlock();
     }
     
 }
@@ -597,6 +657,22 @@ double const AP_NAV_BUTTONS_ANIMATION_DURATION = 0.25;
         webConnector.delegate = self;
     }
     return webConnector;
+}
+
+- (UIAlertView *) passwordIncorrectAlertView {
+    if (passwordIncorrectAlertView == nil) {
+        passwordIncorrectAlertView = [[UIAlertView alloc] initWithTitle:@"Wrong Password" message:@"Your password was incorrect. Please try again." delegate:self cancelButtonTitle:@"Forgot" otherButtonTitles:@"Try Again", nil];
+        passwordIncorrectAlertView.delegate = self;
+    }
+    return passwordIncorrectAlertView;
+}
+
+- (UIAlertView *) forgotPasswordConnectionErrorAlertView {
+    if (forgotPasswordConnectionErrorAlertView == nil) {
+        forgotPasswordConnectionErrorAlertView = [[UIAlertView alloc] initWithTitle:@"Connection Error" message:@"Something went wrong while trying to reset your password. Check your connection and try again." delegate:self cancelButtonTitle:@"Try Again" otherButtonTitles:@"OK", nil];
+        forgotPasswordConnectionErrorAlertView.delegate = self;
+    }
+    return forgotPasswordConnectionErrorAlertView;
 }
 
 @end

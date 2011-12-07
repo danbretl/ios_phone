@@ -15,6 +15,12 @@
 extern int const WEB_CONNECTOR_TIMEOUT_LENGTH_DEFAULT;
 extern BOOL const WEB_CONNECTOR_ALLOW_SIMULTANEOUS_CONNECTIONS_DEFAULT;
 
+typedef enum {
+    GeneralFailure = 001,
+    AccountConnectPasswordIncorrect = 500,
+    AccountConnectAccountDoesNotExist = 501,
+} WebConnectorFailure;
+
 @protocol WebConnectorDelegate;
 
 @interface WebConnector : NSObject {
@@ -46,6 +52,7 @@ extern BOOL const WEB_CONNECTOR_ALLOW_SIMULTANEOUS_CONNECTIONS_DEFAULT;
 - (void) sendLearnedDataAboutEvent:(NSString *)eventURI withUserAction:(NSString *)userAction;
 // ACCOUNT
 - (void) accountConnectWithEmail:(NSString *)emailString password:(NSString *)passwordString;
+- (void) forgotPasswordForAccountAssociatedWithEmail:(NSString *)emailString;
 
 @end
 
@@ -66,5 +73,7 @@ extern BOOL const WEB_CONNECTOR_ALLOW_SIMULTANEOUS_CONNECTIONS_DEFAULT;
 - (void) webConnector:(WebConnector *)webConnector sendLearnedDataSuccess:(ASIHTTPRequest *)request aboutEvent:(NSString *)eventURI userAction:(NSString *)userAction;
 - (void) webConnector:(WebConnector *)webConnector sendLearnedDataFailure:(ASIHTTPRequest *)request aboutEvent:(NSString *)eventURI userAction:(NSString *)userAction;
 - (void) webConnector:(WebConnector *)webConnector accountConnectSuccess:(ASIHTTPRequest *)request withEmail:(NSString *)emailString kwiqetIdentifier:(NSString *)identifierString apiKey:(NSString *)apiKey;
-- (void) webConnector:(WebConnector *)webConnector accountConnectFailure:(ASIHTTPRequest *)request withEmail:(NSString *)emailString;
+- (void) webConnector:(WebConnector *)webConnector accountConnectFailure:(ASIHTTPRequest *)request failureCode:(WebConnectorFailure)failureCode withEmail:(NSString *)emailString;
+- (void) webConnector:(WebConnector *)webConnector forgotPasswordSuccess:(ASIHTTPRequest *)request forAccountAssociatedWithEmail:(NSString *)emailString;
+- (void) webConnector:(WebConnector *)webConnector forgotPasswordFailure:(ASIHTTPRequest *)request forAccountAssociatedWithEmail:(NSString *)emailString;
 @end

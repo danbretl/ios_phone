@@ -10,7 +10,7 @@
 #import "WebActivityView.h"
 #import "WebConnector.h"
 
-@interface AccountPromptViewController : UIViewController <UITextFieldDelegate, WebConnectorDelegate> {
+@interface AccountPromptViewController : UIViewController <UITextFieldDelegate, WebConnectorDelegate, UIAlertViewDelegate> {
     
     IBOutlet UIView * navBar;
     IBOutlet UIButton * logoButton;
@@ -47,6 +47,8 @@
     BOOL confirmPasswordVisible;
     
     WebActivityView * webActivityView;
+    UIAlertView * passwordIncorrectAlertView;
+    UIAlertView * forgotPasswordConnectionErrorAlertView;
     
     WebConnector * webConnector;
     

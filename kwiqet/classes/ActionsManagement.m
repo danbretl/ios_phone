@@ -65,7 +65,7 @@
 //    // Add to calendar
 //    [ActionsManagement addEventToCalendar:self.event usingWebDataTranslator:self.webDataTranslator];
 //    // Show confirmation alert
-//    UIAlertView * alert = [[UIAlertView alloc] initWithTitle:@"Event added to Calendar!" message:[NSString stringWithFormat:@"The event \"%@\" has been added to your calendar.", self.event.title] delegate:nil cancelButtonTitle:@"Ok" otherButtonTitles:nil];
+//    UIAlertView * alert = [[UIAlertView alloc] initWithTitle:@"Event added to Calendar!" message:[NSString stringWithFormat:@"The event \"%@\" has been added to your calendar.", self.event.title] delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
 //    [alert show];
 //    [alert release];
 //    
