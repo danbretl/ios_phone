@@ -18,8 +18,9 @@ static NSString * const DM_FACEBOOK_ACCESS_INFO_DICTIONARY_EXPIRATION_DATE_KEY =
 + (BOOL) synchronize;
 
 + (BOOL) isLoggedInWithKwiqet;
-+ (void) saveAPIToUserDefaults:(NSString*)loginString;
-+ (NSString *) retrieveAPIFromUserDefaults;
++ (void) saveAPIKey:(NSString*)loginString;
++ (NSString *) loadAPIKey;
++ (BOOL) loadIsUserLoggedIn;
 
 + (void) deleteAPIKey;
 

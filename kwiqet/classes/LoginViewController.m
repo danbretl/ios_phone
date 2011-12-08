@@ -316,7 +316,7 @@
 //    fullName = nil; // DISABLING THIS FUNCTIONALITY UNTIL WE CAN LOOK INTO IT MORE. Going back to email for now.
     NSString * kwiqetIdentifier = fullName && [fullName length] > 0 ? fullName : self.usernameField.text;
     
-    [DefaultsModel saveAPIToUserDefaults:apiKey];
+    [DefaultsModel saveAPIKey:apiKey];
     [DefaultsModel saveKwiqetUserIdentifierToUserDefaults:kwiqetIdentifier]; // TEMPORARY HACK - IN FUTURE, WE WILL GET THE USER IDENTIFIER FROM OUR WEB CALL RESPONSE, JUST THE SAME AS HOW WE'RE GETTING THE API KEY // This has now been implemented. We are still however falling back on email address, in the case of no identifier being given. // TEMPORARILY DISABLING THIS FUNCTIONALITY UNTIL LATER
     NSDictionary * infoDictionary = [NSDictionary dictionaryWithObjectsAndKeys:@"login", @"action", nil];
     [[NSNotificationCenter defaultCenter] postNotificationName:@"loginActivity" object:self userInfo:infoDictionary];

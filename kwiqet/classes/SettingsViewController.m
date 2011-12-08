@@ -161,7 +161,7 @@
 
 - (void) accountButtonTouched {
     
-    BOOL loggedInWithKwiqet = [DefaultsModel retrieveAPIFromUserDefaults] != nil;
+    BOOL loggedInWithKwiqet = [DefaultsModel loadAPIKey] != nil;
     
     if (loggedInWithKwiqet) {
         
@@ -389,7 +389,7 @@
     NSString * imageName = nil;
     UITableViewCellAccessoryType accessoryType;
     if (indexPath.section == 0) {
-        NSString * apiKey = [DefaultsModel retrieveAPIFromUserDefaults];
+        NSString * apiKey = [DefaultsModel loadAPIKey];
         if (apiKey) {
             NSString * identifier = [DefaultsModel retrieveKwiqetUserIdentifierFromUserDefaults];
             textLabelText = identifier ? identifier : @"Logged In";
@@ -414,7 +414,7 @@
                 accessoryType = [[self.settingsModel objectAtIndex:indexPath.row] valueForKey:@"showAccessoryArrowWhenBooleanYes"] ? UITableViewCellAccessoryDisclosureIndicator : accessoryType;
                 [self setTableViewCell:cell atIndexPath:indexPath appearanceEnabled:self.facebookCellEnabled];
             } else {
-                self.facebookCellEnabled = ([DefaultsModel retrieveAPIFromUserDefaults] != nil);
+                self.facebookCellEnabled = ([DefaultsModel loadAPIKey] != nil);
                 detailTextLabelText = @"Touch to connect";
                 [self setTableViewCell:cell atIndexPath:indexPath appearanceEnabled:self.facebookCellEnabled];
             }
@@ -474,7 +474,7 @@
 - (UIView *)tableView:(UITableView *)tableView viewForFooterInSection:(NSInteger)section {
     UIView * footerView = nil;
     if (section == 0) {
-        if ([DefaultsModel retrieveAPIFromUserDefaults] == nil) {
+        if ([DefaultsModel loadAPIKey] == nil) {
             footerView = [[[UIView alloc] initWithFrame:CGRectMake(0, 0, self.tableView.bounds.size.width, [self tableView:tableView heightForFooterInSection:section])] autorelease]; // HACK, hardcoded duplicate value from heightForFooterInSection... Not sure what the proper way to do this is yet.
             UILabel * theLabel = [[UILabel alloc] initWithFrame:CGRectMake(20, 10, footerView.frame.size.width - 40, footerView.frame.size.height - 20)];
             theLabel.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
@@ -494,7 +494,7 @@
 - (CGFloat)tableView:(UITableView *)tableView heightForFooterInSection:(NSInteger)section {
     CGFloat height = 0;
     if (section == 0) {
-        if ([DefaultsModel retrieveAPIFromUserDefaults] == nil) {
+        if ([DefaultsModel loadAPIKey] == nil) {
             height = 110;
         }
     }

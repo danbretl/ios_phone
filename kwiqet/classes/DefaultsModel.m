@@ -21,12 +21,12 @@ static NSString * const DM_TAB_BAR_SELECTED_INDEX_KEY = @"DM_TAB_BAR_SELECTED_IN
 }
 
 + (BOOL)isLoggedInWithKwiqet {
-    return [DefaultsModel retrieveAPIFromUserDefaults] != nil;
+    return [DefaultsModel loadAPIKey] != nil;
 }
 
 //login methods
-+ (void)saveAPIToUserDefaults:(NSString*)loginString {
-    NSLog(@"DefaultsModel saveAPIToUserDefaults - loginString=%@", loginString);
++ (void)saveAPIKey:(NSString*)loginString {
+    NSLog(@"DefaultsModel saveAPIKey - loginString=%@", loginString);
 
     NSUserDefaults * standardUserDefaults = [NSUserDefaults standardUserDefaults];
     if (standardUserDefaults) {
@@ -34,7 +34,7 @@ static NSString * const DM_TAB_BAR_SELECTED_INDEX_KEY = @"DM_TAB_BAR_SELECTED_IN
     }
 }
 
-+ (NSString*)retrieveAPIFromUserDefaults {
++ (NSString*)loadAPIKey {
     
     NSUserDefaults *standardUserDefaults = [NSUserDefaults standardUserDefaults];
     NSString *val = nil;
@@ -43,10 +43,14 @@ static NSString * const DM_TAB_BAR_SELECTED_INDEX_KEY = @"DM_TAB_BAR_SELECTED_IN
         val = [standardUserDefaults objectForKey:@"API"];
     }
     
-//    NSLog(@"DefaultsModel retrieveAPIFromUserDefaults - returnValue=%@", val);
+//    NSLog(@"DefaultsModel loadAPIKey - returnValue=%@", val);
     
     return val;
     
+}
+
++ (BOOL)loadIsUserLoggedIn {
+    return ([DefaultsModel loadAPIKey] != nil);
 }
 
 + (void)deleteAPIKey  {

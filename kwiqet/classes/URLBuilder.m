@@ -70,7 +70,7 @@ static NSString * const URL_BUILDER_GET_EVENTS_LIST_FILTER_POPULAR = @"popular";
 - (NSString*) buildCredentialString  {
 
     //find if api key is present. if so, append to credentials
-    NSString *apiKey = [DefaultsModel retrieveAPIFromUserDefaults];
+    NSString *apiKey = [DefaultsModel loadAPIKey];
 //    NSLog(@"URLBuilder buildCredentialString - apiKey=%@", apiKey);
     
     NSString * urlplist = [[NSBundle mainBundle] pathForResource:@"urls" ofType:@"plist"];
