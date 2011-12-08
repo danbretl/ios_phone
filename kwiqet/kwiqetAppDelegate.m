@@ -18,6 +18,7 @@
 @interface kwiqetAppDelegate()
 - (void) facebookAuthError:(NSNotification *)notification;
 - (void) facebookFriendsRetrieved:(NSNotification *)notification;
+- (void) loginActivity:(NSNotification *)notification;
 @end
 
 @implementation kwiqetAppDelegate
@@ -50,6 +51,8 @@
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(facebookAuthError:) name:FBM_AUTH_ERROR_KEY object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(facebookFriendsRetrieved:) name:FBM_FRIENDS_UPDATE_SUCCESS_KEY object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(facebookFriendsRetrieved:) name:FBM_FRIENDS_UPDATE_FAILURE_KEY object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(loginActivity:) name:@"loginActivity" object:nil];
+    
     // Variables...
     BOOL forceGetCategoryTree = NO;
     BOOL forceGetCategoryTreeOneTimeForce = YES;
@@ -115,7 +118,8 @@
         
         // Settings View Controller
         self.settingsViewController = [[[SettingsViewController alloc] initWithNibName:@"SettingsViewController" bundle:[NSBundle mainBundle]] autorelease];
-        UITabBarItem * settingsTabBarItem = [[[UITabBarItem alloc] initWithTitle:@"Settings" image:[UIImage imageNamed:@"tab_settings.png"] tag:2] autorelease];
+        NSString * settingsTabBarItemTitle = [DefaultsModel loadIsUserLoggedIn] ? @"Settings" : @"Connect";
+        UITabBarItem * settingsTabBarItem = [[[UITabBarItem alloc] initWithTitle:settingsTabBarItemTitle image:[UIImage imageNamed:@"tab_settings.png"] tag:2] autorelease];
         self.settingsViewController.tabBarItem = settingsTabBarItem;
 //        self.settingsViewController.facebookManager = self.facebookManager;
         self.settingsViewController.coreDataModel = self.coreDataModel;
@@ -164,6 +168,17 @@
 
 - (void) navigateToSettingsViewController {
     [self.tabBarController setSelectedViewController:self.settingsNavController];
+}
+
+- (void)loginActivity:(NSNotification *)notification {
+    self.settingsViewController.tabBarItem.title = [DefaultsModel loadIsUserLoggedIn] ? @"Settings" : @"Connect";
+    NSDictionary * userInfo = [notification userInfo];
+    NSString * action = [userInfo valueForKey:@"action"];
+    if ([action isEqualToString:@"logout"]) {
+        if (self.tabBarController.selectedViewController == self.settingsNavController) {
+            self.tabBarController.selectedViewController = self.eventsNavController;
+        }
+    }
 }
 
 - (void) facebookAuthError:(NSNotification *)notification {
@@ -374,6 +389,8 @@
     
 //    self.tabBarController.selectedIndex = [DefaultsModel loadTabBarSelectedIndex]; // Duh - we get this for free with multitasking.
     
+    self.settingsViewController.tabBarItem.title = [DefaultsModel loadIsUserLoggedIn] ? @"Settings" : @"Connect";
+    
     [[LocalyticsSession sharedLocalyticsSession] resume];
     [[LocalyticsSession sharedLocalyticsSession] upload];
     
@@ -500,6 +517,30 @@
     }    
     
     return persistentStoreCoordinator_;
+}
+
+- (BOOL)tabBarController:(UITabBarController *)tabBarController shouldSelectViewController:(UIViewController *)viewController {
+    BOOL shouldSelect = YES;
+    if (viewController == self.settingsNavController) {
+        shouldSelect = [DefaultsModel loadIsUserLoggedIn];
+        if (!shouldSelect) {
+            AccountPromptViewController * accountPromptViewController = [[AccountPromptViewController alloc] initWithNibName:@"AccountPromptViewController" bundle:[NSBundle mainBundle]];
+            accountPromptViewController.delegate = self;
+            [self.tabBarController.selectedViewController presentModalViewController:accountPromptViewController animated:YES];
+            [accountPromptViewController release];
+        }
+    }
+    return shouldSelect;
+}
+
+- (void)accountPromptViewController:(AccountPromptViewController *)accountPromptViewController didFinishWithConnection:(BOOL)finishedWithConnection {
+    NSLog(@"appDelegate accountPromptViewController:didFinishWithConnection:");
+    [self.tabBarController.selectedViewController dismissModalViewControllerAnimated:YES];
+    if (finishedWithConnection) { // Probably want to take this out at some point. It's dumb and unnecessary.
+        UIAlertView * alert = [[UIAlertView alloc] initWithTitle:@"Logged In!" message:@"Have fun at the events!" delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil];
+        [alert show]; 
+        [alert release];
+    }
 }
 
 

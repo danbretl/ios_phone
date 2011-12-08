@@ -10,6 +10,8 @@
 #import "WebActivityView.h"
 #import "WebConnector.h"
 
+@protocol AccountPromptViewControllerDelegate;
+
 @interface AccountPromptViewController : UIViewController <UITextFieldDelegate, WebConnectorDelegate, UIAlertViewDelegate> {
     
     IBOutlet UIView * navBar;
@@ -43,6 +45,7 @@
     IBOutlet UITextField *confirmPasswordTextField;
     IBOutlet UILabel * emailAccountAssuranceLabel;
     
+    BOOL initialPromptScreenVisible;
     BOOL accountCreationViewsVisible;
     BOOL confirmPasswordVisible;
     
@@ -52,6 +55,16 @@
     
     WebConnector * webConnector;
     
+    id<AccountPromptViewControllerDelegate> delegate;
+    
 }
+
+@property (assign) id<AccountPromptViewControllerDelegate> delegate;
+
+@end
+
+@protocol AccountPromptViewControllerDelegate <NSObject>
+
+- (void) accountPromptViewController:(AccountPromptViewController *)accountPromptViewController didFinishWithConnection:(BOOL)finishedWithConnection;
 
 @end

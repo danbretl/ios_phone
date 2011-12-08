@@ -78,6 +78,7 @@ double const AP_NAV_BUTTONS_ANIMATION_DURATION = 0.25;
 @synthesize emailPasswordContainer, emailTextField, passwordTextField, confirmPasswordTextField;
 @synthesize emailAccountAssuranceLabel;
 @synthesize webActivityView;
+@synthesize delegate;
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
@@ -179,6 +180,7 @@ double const AP_NAV_BUTTONS_ANIMATION_DURATION = 0.25;
     [self.mainViewsContainer addSubview:self.inputContainer];
     self.inputContainer.frame = CGRectMake(self.mainViewsContainer.frame.size.width, 0, self.inputContainer.frame.size.width, self.inputContainer.frame.size.height);
     
+    initialPromptScreenVisible = YES;
     [self showAccountCreationInputViews:NO showPasswordConfirmation:NO activateAppropriateFirstResponder:NO animated:NO];
     [self showContainer:self.accountOptionsContainer animated:NO];
     
@@ -267,7 +269,11 @@ double const AP_NAV_BUTTONS_ANIMATION_DURATION = 0.25;
 }
 
 - (IBAction)cancelButtonTouched:(id)sender {
-    [self showContainer:self.accountOptionsContainer animated:YES];
+    if (initialPromptScreenVisible) {
+        [self.delegate accountPromptViewController:self didFinishWithConnection:NO];
+    } else {
+        [self showContainer:self.accountOptionsContainer animated:YES];
+    }
 }
 
 - (void)userInputSubmissionAttemptRequested {
@@ -451,10 +457,7 @@ double const AP_NAV_BUTTONS_ANIMATION_DURATION = 0.25;
     NSDictionary * infoDictionary = [NSDictionary dictionaryWithObjectsAndKeys:@"login", @"action", nil];
     [[NSNotificationCenter defaultCenter] postNotificationName:@"loginActivity" object:self userInfo:infoDictionary];
     
-    //alert user that they logged in
-    UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Logged In!" message:@"Have fun at the events!" delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil];
-    [alert show]; 
-    [alert release];
+    [self.delegate accountPromptViewController:self didFinishWithConnection:YES];
     
 }
 
@@ -467,7 +470,7 @@ double const AP_NAV_BUTTONS_ANIMATION_DURATION = 0.25;
     } else if (failureCode == AccountConnectAccountDoesNotExist) {
         [self showAccountCreationInputViews:YES showPasswordConfirmation:YES activateAppropriateFirstResponder:YES animated:YES];
     } else {
-        UIAlertView * alert = [[UIAlertView alloc] initWithTitle:@"Logged In!" message:@"Have fun at the events!" delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil];
+        UIAlertView * alert = [[UIAlertView alloc] initWithTitle:@"Connection Error" message:@"Sorry - there was a problem connecting with Kwiqet. Please check your connection and try again." delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil];
         [alert show]; 
         [alert release];
     }
@@ -482,10 +485,8 @@ double const AP_NAV_BUTTONS_ANIMATION_DURATION = 0.25;
     [DefaultsModel saveKwiqetUserIdentifierToUserDefaults:emailString]; // THIS SHOULD BE UPDATED. ONCE THE USER HAS AN API KEY, WE SHOULD USE IT TO GET INFORMATION ABOUT THAT USER. THIS SHOULD BE UPDATED. ONCE THE USER HAS AN API KEY, WE SHOULD USE IT TO GET INFORMATION ABOUT THAT USER. THIS SHOULD BE UPDATED. ONCE THE USER HAS AN API KEY, WE SHOULD USE IT TO GET INFORMATION ABOUT THAT USER. THIS SHOULD BE UPDATED. ONCE THE USER HAS AN API KEY, WE SHOULD USE IT TO GET INFORMATION ABOUT THAT USER. THIS SHOULD BE UPDATED. ONCE THE USER HAS AN API KEY, WE SHOULD USE IT TO GET INFORMATION ABOUT THAT USER. THIS SHOULD BE UPDATED. ONCE THE USER HAS AN API KEY, WE SHOULD USE IT TO GET INFORMATION ABOUT THAT USER. THIS SHOULD BE UPDATED. ONCE THE USER HAS AN API KEY, WE SHOULD USE IT TO GET INFORMATION ABOUT THAT USER. THIS SHOULD BE UPDATED. ONCE THE USER HAS AN API KEY, WE SHOULD USE IT TO GET INFORMATION ABOUT THAT USER. THIS SHOULD BE UPDATED. ONCE THE USER HAS AN API KEY, WE SHOULD USE IT TO GET INFORMATION ABOUT THAT USER. THIS SHOULD BE UPDATED. ONCE THE USER HAS AN API KEY, WE SHOULD USE IT TO GET INFORMATION ABOUT THAT USER. THIS SHOULD BE UPDATED. ONCE THE USER HAS AN API KEY, WE SHOULD USE IT TO GET INFORMATION ABOUT THAT USER. THIS SHOULD BE UPDATED. ONCE THE USER HAS AN API KEY, WE SHOULD USE IT TO GET INFORMATION ABOUT THAT USER. THIS SHOULD BE UPDATED. ONCE THE USER HAS AN API KEY, WE SHOULD USE IT TO GET INFORMATION ABOUT THAT USER. THIS SHOULD BE UPDATED. ONCE THE USER HAS AN API KEY, WE SHOULD USE IT TO GET INFORMATION ABOUT THAT USER.
     NSDictionary * infoDictionary = [NSDictionary dictionaryWithObjectsAndKeys:@"login", @"action", nil];
     [[NSNotificationCenter defaultCenter] postNotificationName:@"loginActivity" object:self userInfo:infoDictionary];
-    
-    UIAlertView * alert = [[UIAlertView alloc] initWithTitle:@"Logged In!" message:@"Have fun at the events!" delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil];
-    [alert show]; 
-    [alert release];
+        
+    [self.delegate accountPromptViewController:self didFinishWithConnection:YES];
     
 }
 
@@ -521,9 +522,8 @@ double const AP_NAV_BUTTONS_ANIMATION_DURATION = 0.25;
     };
     
     void(^buttonsAlphaBlock)(BOOL) = ^(BOOL shouldShow){
-        CGFloat buttonAlpha = shouldShow ? 1.0 : 0.0;
-        self.cancelButton.alpha = buttonAlpha;
-        self.doneButton.alpha = buttonAlpha;
+        self.cancelButton.alpha = 1.0;
+        self.doneButton.alpha = shouldShow ? 1.0 : 0.0;
     };
     
     void(^accountOptionsBlock)(BOOL) = ^(BOOL shouldShow){
@@ -547,7 +547,8 @@ double const AP_NAV_BUTTONS_ANIMATION_DURATION = 0.25;
         self.confirmPasswordTextField.text = @"";
     };
 
-    self.cancelButton.userInteractionEnabled = shouldShowInputViews;
+    initialPromptScreenVisible = !shouldShowInputViews;
+    self.cancelButton.userInteractionEnabled = YES;
     self.doneButton.userInteractionEnabled = shouldShowInputViews;
     if (animated) {
         [UIView animateWithDuration:AP_NAV_BUTTONS_ANIMATION_DURATION 
