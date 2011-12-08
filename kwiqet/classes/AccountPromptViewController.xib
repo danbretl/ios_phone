@@ -498,6 +498,7 @@
 											<int key="IBUIReturnKeyType">4</int>
 											<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
 										</object>
+										<int key="IBUIClearButtonMode">1</int>
 										<object class="IBUIFontDescription" key="IBUIFontDescription" id="69851523">
 											<string key="name">Helvetica</string>
 											<string key="family">Helvetica</string>
@@ -536,6 +537,7 @@
 											<int key="IBUIReturnKeyType">4</int>
 											<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
 										</object>
+										<int key="IBUIClearButtonMode">1</int>
 										<reference key="IBUIFontDescription" ref="69851523"/>
 										<reference key="IBUIFont" ref="467252217"/>
 									</object>
@@ -604,6 +606,7 @@
 									<bool key="IBUISecureTextEntry">YES</bool>
 									<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
 								</object>
+								<int key="IBUIClearButtonMode">1</int>
 								<reference key="IBUIFontDescription" ref="69851523"/>
 								<reference key="IBUIFont" ref="467252217"/>
 							</object>
@@ -644,6 +647,7 @@
 									<int key="IBUIReturnKeyType">4</int>
 									<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
 								</object>
+								<int key="IBUIClearButtonMode">1</int>
 								<reference key="IBUIFontDescription" ref="69851523"/>
 								<reference key="IBUIFont" ref="467252217"/>
 							</object>
@@ -673,6 +677,7 @@
 									<bool key="IBUISecureTextEntry">YES</bool>
 									<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
 								</object>
+								<int key="IBUIClearButtonMode">1</int>
 								<reference key="IBUIFontDescription" ref="69851523"/>
 								<reference key="IBUIFont" ref="467252217"/>
 							</object>

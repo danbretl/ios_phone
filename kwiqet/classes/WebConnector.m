@@ -51,6 +51,8 @@ static NSString * const WEB_CONNECTOR_ACCOUNT_USER_INFO_KEY_EMAIL = @"email";
 - (void) accountConnectEmailPasswordFailure:(ASIHTTPRequest *)request;
 - (void) forgotPasswordForAccountSuccess:(ASIHTTPRequest *)request;
 - (void) forgotPasswordForAccountFailure:(ASIHTTPRequest *)request;
+- (void) accountCreateSuccess:(ASIHTTPRequest *)request;
+- (void) accountCreateFailure:(ASIHTTPRequest *)request;
 @end
 
 @implementation WebConnector
@@ -614,7 +616,65 @@ static NSString * const WEB_CONNECTOR_ACCOUNT_USER_INFO_KEY_EMAIL = @"email";
     
     [self.connectionsInProgress removeObject:request];
     
+    NSLog(@"forgotPasswordForAccountFailure");
+    NSLog(@"code: %i", request.responseStatusCode);
+    NSLog(@"response: %@", request.responseString);
+	NSLog(@"error: %@", request.error);
+    
     [self.delegate webConnector:self forgotPasswordFailure:request forAccountAssociatedWithEmail:[request.userInfo objectForKey:WEB_CONNECTOR_ACCOUNT_USER_INFO_KEY_EMAIL]];
+    
+}
+
+- (void)accountCreateWithEmail:(NSString *)emailString password:(NSString *)passwordString firstName:(NSString *)nameFirst lastName:(NSString *)nameLast image:(UIImage *)image {
+    
+    ASIFormDataRequest * request = [ASIFormDataRequest requestWithURL:[self.urlBuilder buildRegistrationURL]];
+    [self.connectionsInProgress addObject:request];
+    
+    request.requestMethod = @"POST";
+    [request addRequestHeader:@"Content-Type" value:@"application/json"];
+    NSDictionary * jsonDict = [NSDictionary dictionaryWithObjectsAndKeys:emailString, @"email", passwordString, @"password1", passwordString, @"password2", nameFirst, @"first_name", nameLast, @"last_name", nil]; // Currently ignores image (Dec 7, 2011)
+    [request appendPostData:[jsonDict.JSONRepresentation dataUsingEncoding:NSUTF8StringEncoding]];
+    request.delegate = self;
+    request.didFinishSelector = @selector(accountCreateSuccess:);
+    request.didFailSelector = @selector(accountCreateFailure:);
+    NSDictionary * userInfo = [NSDictionary dictionaryWithObjectsAndKeys:emailString, WEB_CONNECTOR_ACCOUNT_USER_INFO_KEY_EMAIL, nil];
+    request.userInfo = userInfo;
+    [request startAsynchronous];
+    
+}
+
+- (void)accountCreateSuccess:(ASIHTTPRequest *)request {
+    
+    [self.connectionsInProgress removeObject:request];
+    
+    NSError * error = nil;
+    NSDictionary * dictionaryFromJSON = [request.responseString yajl_JSONWithOptions:YAJLParserOptionsAllowComments error:&error];
+    NSString * emailFromUserInfo = [request.userInfo valueForKey:WEB_CONNECTOR_ACCOUNT_USER_INFO_KEY_EMAIL];
+    NSString * emailInUseAlreadyIndicator = [dictionaryFromJSON valueForKey:@"email"];
+    BOOL emailInUseAlready = emailInUseAlreadyIndicator != nil;
+    if (emailInUseAlready) {
+        [self.delegate webConnector:self accountCreateFailure:request failureCode:AccountCreateEmailAssociatedWithAnotherAccount withEmail:emailFromUserInfo];
+    } else {
+        if (request && request.responseStatusCode < 400) {
+            NSString * apiKey = request.responseString;
+            [self.delegate webConnector:self accountCreateSuccess:request withEmail:emailFromUserInfo kwiqetIdentifier:emailFromUserInfo apiKey:apiKey];
+        } else {
+            [self.delegate webConnector:self accountCreateFailure:request failureCode:GeneralFailure withEmail:emailFromUserInfo];
+        }
+    }
+
+}
+
+- (void)accountCreateFailure:(ASIHTTPRequest *)request {
+    
+    [self.connectionsInProgress removeObject:request];
+    
+    NSLog(@"accountCreateFailure");
+    NSLog(@"code: %i", request.responseStatusCode);
+    NSLog(@"response: %@", request.responseString);
+	NSLog(@"error: %@", request.error);
+    
+    [self.delegate webConnector:self accountCreateFailure:request failureCode:GeneralFailure withEmail:[request.userInfo valueForKey:WEB_CONNECTOR_ACCOUNT_USER_INFO_KEY_EMAIL]];
     
 }
 

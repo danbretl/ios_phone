@@ -19,6 +19,7 @@ typedef enum {
     GeneralFailure = 001,
     AccountConnectPasswordIncorrect = 500,
     AccountConnectAccountDoesNotExist = 501,
+    AccountCreateEmailAssociatedWithAnotherAccount = 600,
 } WebConnectorFailure;
 
 @protocol WebConnectorDelegate;
@@ -52,6 +53,7 @@ typedef enum {
 - (void) sendLearnedDataAboutEvent:(NSString *)eventURI withUserAction:(NSString *)userAction;
 // ACCOUNT
 - (void) accountConnectWithEmail:(NSString *)emailString password:(NSString *)passwordString;
+- (void) accountCreateWithEmail:(NSString *)emailString password:(NSString *)passwordString firstName:(NSString *)nameFirst lastName:(NSString *)nameLast image:(UIImage *)image; // Currently ignores image (Dec 7, 2011)
 - (void) forgotPasswordForAccountAssociatedWithEmail:(NSString *)emailString;
 
 @end
@@ -76,4 +78,6 @@ typedef enum {
 - (void) webConnector:(WebConnector *)webConnector accountConnectFailure:(ASIHTTPRequest *)request failureCode:(WebConnectorFailure)failureCode withEmail:(NSString *)emailString;
 - (void) webConnector:(WebConnector *)webConnector forgotPasswordSuccess:(ASIHTTPRequest *)request forAccountAssociatedWithEmail:(NSString *)emailString;
 - (void) webConnector:(WebConnector *)webConnector forgotPasswordFailure:(ASIHTTPRequest *)request forAccountAssociatedWithEmail:(NSString *)emailString;
+- (void) webConnector:(WebConnector *)webConnector accountCreateSuccess:(ASIHTTPRequest *)request withEmail:(NSString *)emailString kwiqetIdentifier:(NSString *)identifierString apiKey:(NSString *)apiKey;
+- (void) webConnector:(WebConnector *)webConnector accountCreateFailure:(ASIHTTPRequest *)request failureCode:(WebConnectorFailure)failureCode withEmail:(NSString *)emailString;
 @end

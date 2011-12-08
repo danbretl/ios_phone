@@ -435,9 +435,8 @@ double const AP_NAV_BUTTONS_ANIMATION_DURATION = 0.25;
         
     } else {
         
-        UIAlertView * alertView = [[UIAlertView alloc] initWithTitle:@"Registration Disabled" message:@"How annoying! Your input is great, but you can't actually create an account yet!" delegate:nil cancelButtonTitle:@"Oh Well..." otherButtonTitles:nil];
-        [alertView show];
-        [alertView release];
+        [self.webConnector accountCreateWithEmail:self.emailTextField.text password:self.passwordTextField.text firstName:self.firstNameTextField.text lastName:self.lastNameTextField.text image:self.pictureImageView.image];
+        [self showWebActivityView];
         
     }
     
@@ -468,9 +467,47 @@ double const AP_NAV_BUTTONS_ANIMATION_DURATION = 0.25;
     } else if (failureCode == AccountConnectAccountDoesNotExist) {
         [self showAccountCreationInputViews:YES showPasswordConfirmation:YES activateAppropriateFirstResponder:YES animated:YES];
     } else {
+        UIAlertView * alert = [[UIAlertView alloc] initWithTitle:@"Logged In!" message:@"Have fun at the events!" delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil];
+        [alert show]; 
+        [alert release];
+    }
+    
+}
+
+- (void)webConnector:(WebConnector *)webConnector accountCreateSuccess:(ASIHTTPRequest *)request withEmail:(NSString *)emailString kwiqetIdentifier:(NSString *)identifierString apiKey:(NSString *)apiKey {
+    
+    [self hideWebActivityView];
+    
+    [DefaultsModel saveAPIToUserDefaults:apiKey];
+    [DefaultsModel saveKwiqetUserIdentifierToUserDefaults:emailString]; // THIS SHOULD BE UPDATED. ONCE THE USER HAS AN API KEY, WE SHOULD USE IT TO GET INFORMATION ABOUT THAT USER. THIS SHOULD BE UPDATED. ONCE THE USER HAS AN API KEY, WE SHOULD USE IT TO GET INFORMATION ABOUT THAT USER. THIS SHOULD BE UPDATED. ONCE THE USER HAS AN API KEY, WE SHOULD USE IT TO GET INFORMATION ABOUT THAT USER. THIS SHOULD BE UPDATED. ONCE THE USER HAS AN API KEY, WE SHOULD USE IT TO GET INFORMATION ABOUT THAT USER. THIS SHOULD BE UPDATED. ONCE THE USER HAS AN API KEY, WE SHOULD USE IT TO GET INFORMATION ABOUT THAT USER. THIS SHOULD BE UPDATED. ONCE THE USER HAS AN API KEY, WE SHOULD USE IT TO GET INFORMATION ABOUT THAT USER. THIS SHOULD BE UPDATED. ONCE THE USER HAS AN API KEY, WE SHOULD USE IT TO GET INFORMATION ABOUT THAT USER. THIS SHOULD BE UPDATED. ONCE THE USER HAS AN API KEY, WE SHOULD USE IT TO GET INFORMATION ABOUT THAT USER. THIS SHOULD BE UPDATED. ONCE THE USER HAS AN API KEY, WE SHOULD USE IT TO GET INFORMATION ABOUT THAT USER. THIS SHOULD BE UPDATED. ONCE THE USER HAS AN API KEY, WE SHOULD USE IT TO GET INFORMATION ABOUT THAT USER. THIS SHOULD BE UPDATED. ONCE THE USER HAS AN API KEY, WE SHOULD USE IT TO GET INFORMATION ABOUT THAT USER. THIS SHOULD BE UPDATED. ONCE THE USER HAS AN API KEY, WE SHOULD USE IT TO GET INFORMATION ABOUT THAT USER. THIS SHOULD BE UPDATED. ONCE THE USER HAS AN API KEY, WE SHOULD USE IT TO GET INFORMATION ABOUT THAT USER. THIS SHOULD BE UPDATED. ONCE THE USER HAS AN API KEY, WE SHOULD USE IT TO GET INFORMATION ABOUT THAT USER.
+    NSDictionary * infoDictionary = [NSDictionary dictionaryWithObjectsAndKeys:@"login", @"action", nil];
+    [[NSNotificationCenter defaultCenter] postNotificationName:@"loginActivity" object:self userInfo:infoDictionary];
+    
+    UIAlertView * alert = [[UIAlertView alloc] initWithTitle:@"Logged In!" message:@"Have fun at the events!" delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil];
+    [alert show]; 
+    [alert release];
+    
+}
+
+- (void)webConnector:(WebConnector *)webConnector accountCreateFailure:(ASIHTTPRequest *)request failureCode:(WebConnectorFailure)failureCode withEmail:(NSString *)emailString {
+    
+    [self hideWebActivityView];
+    
+    if (failureCode == AccountCreateEmailAssociatedWithAnotherAccount) {
+        
+        // THIS PATH SHOULD BE UPDATED THIS PATH SHOULD BE UPDATED THIS PATH SHOULD BE UPDATED THIS PATH SHOULD BE UPDATED THIS PATH SHOULD BE UPDATED THIS PATH SHOULD BE UPDATED THIS PATH SHOULD BE UPDATED THIS PATH SHOULD BE UPDATED THIS PATH SHOULD BE UPDATED THIS PATH SHOULD BE UPDATED THIS PATH SHOULD BE UPDATED THIS PATH SHOULD BE UPDATED THIS PATH SHOULD BE UPDATED THIS PATH SHOULD BE UPDATED THIS PATH SHOULD BE UPDATED THIS PATH SHOULD BE UPDATED THIS PATH SHOULD BE UPDATED THIS PATH SHOULD BE UPDATED THIS PATH SHOULD BE UPDATED THIS PATH SHOULD BE UPDATED THIS PATH SHOULD BE UPDATED THIS PATH SHOULD BE UPDATED THIS PATH SHOULD BE UPDATED THIS PATH SHOULD BE UPDATED THIS PATH SHOULD BE UPDATED THIS PATH SHOULD BE UPDATED THIS PATH SHOULD BE UPDATED THIS PATH SHOULD BE UPDATED THIS PATH SHOULD BE UPDATED THIS PATH SHOULD BE UPDATED THIS PATH SHOULD BE UPDATED THIS PATH SHOULD BE UPDATED THIS PATH SHOULD BE UPDATED THIS PATH SHOULD BE UPDATED THIS PATH SHOULD BE UPDATED THIS PATH SHOULD BE UPDATED THIS PATH SHOULD BE UPDATED THIS PATH SHOULD BE UPDATED THIS PATH SHOULD BE UPDATED THIS PATH SHOULD BE UPDATED THIS PATH SHOULD BE UPDATED THIS PATH SHOULD BE UPDATED THIS PATH SHOULD BE UPDATED THIS PATH SHOULD BE UPDATED THIS PATH SHOULD BE UPDATED THIS PATH SHOULD BE UPDATED THIS PATH SHOULD BE UPDATED THIS PATH SHOULD BE UPDATED THIS PATH SHOULD BE UPDATED THIS PATH SHOULD BE UPDATED THIS PATH SHOULD BE UPDATED THIS PATH SHOULD BE UPDATED THIS PATH SHOULD BE UPDATED THIS PATH SHOULD BE UPDATED THIS PATH SHOULD BE UPDATED THIS PATH SHOULD BE UPDATED THIS PATH SHOULD BE UPDATED THIS PATH SHOULD BE UPDATED THIS PATH SHOULD BE UPDATED THIS PATH SHOULD BE UPDATED THIS PATH SHOULD BE UPDATED THIS PATH SHOULD BE UPDATED THIS PATH SHOULD BE UPDATED THIS PATH SHOULD BE UPDATED THIS PATH SHOULD BE UPDATED THIS PATH SHOULD BE UPDATED THIS PATH SHOULD BE UPDATED THIS PATH SHOULD BE UPDATED THIS PATH SHOULD BE UPDATED THIS PATH SHOULD BE UPDATED THIS PATH SHOULD BE UPDATED THIS PATH SHOULD BE UPDATED THIS PATH SHOULD BE UPDATED THIS PATH SHOULD BE UPDATED THIS PATH SHOULD BE UPDATED THIS PATH SHOULD BE UPDATED THIS PATH SHOULD BE UPDATED
+        UIAlertView * alert = [[UIAlertView alloc] initWithTitle:@"Account with Email Exists" message:@"There is already a Kwiqet account associated with that email. Please try logging in with that email address, or enter a different one." delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil];
+        [alert show]; 
+        [alert release];
+        
+        [self.emailTextField becomeFirstResponder];
+        
+    } else {
+        
         UIAlertView * alert = [[UIAlertView alloc] initWithTitle:@"Connection Error" message:@"Sorry - there was a problem connecting with Kwiqet. Please check your connection and try again." delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil];
         [alert show]; 
         [alert release];
+        
     }
     
 }
