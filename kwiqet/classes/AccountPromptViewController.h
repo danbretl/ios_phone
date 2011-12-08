@@ -45,6 +45,8 @@
     IBOutlet UITextField *confirmPasswordTextField;
     IBOutlet UILabel * emailAccountAssuranceLabel;
     
+    UISwipeGestureRecognizer * swipeDownGestureRecognizer;
+    
     BOOL initialPromptScreenVisible;
     BOOL accountCreationViewsVisible;
     BOOL confirmPasswordVisible;
@@ -52,6 +54,7 @@
     WebActivityView * webActivityView;
     UIAlertView * passwordIncorrectAlertView;
     UIAlertView * forgotPasswordConnectionErrorAlertView;
+    UIAlertView * anotherAccountWithEmailExistsAlertView;
     
     WebConnector * webConnector;
     

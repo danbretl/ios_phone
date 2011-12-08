@@ -24,12 +24,14 @@
 + (NSURL *)imageURLForImageLocation:(NSString *)imageLocation;
 
 // Security
--(NSString*)buildCredentialString;
+- (NSString *) buildCredentialString;
+- (NSString *) buildCredentialStringForAPIKey:(NSString *)apiKey;
 
 // Accounts
--(NSURL*)buildLoginURL;
--(NSURL*)buildRegistrationURL;
--(NSURL*)buildForgotPasswordURL;
+- (NSURL *) buildLoginURL;
+- (NSURL *) buildRegistrationURL;
+- (NSURL *) buildForgotPasswordURL;
+- (NSURL *) buildGetUserProfileURLForAPIKey:(NSString *)apiKey;
 
 // Learning
 -(NSURL*)buildLearnURL;

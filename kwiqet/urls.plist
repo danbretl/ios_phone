@@ -42,5 +42,7 @@
 	<string>price_min</string>
 	<key>filter_price_max_key</key>
 	<string>price_max</string>
+	<key>user_profile_uri</key>
+	<string>/api/v1/userprofile/?</string>
 </dict>
 </plist>

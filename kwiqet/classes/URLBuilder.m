@@ -67,30 +67,31 @@ static NSString * const URL_BUILDER_GET_EVENTS_LIST_FILTER_POPULAR = @"popular";
 /////////////
 // SECURITY
 
-- (NSString*) buildCredentialString  {
+- (NSString *) buildCredentialString  {
 
-    //find if api key is present. if so, append to credentials
-    NSString *apiKey = [DefaultsModel loadAPIKey];
-//    NSLog(@"URLBuilder buildCredentialString - apiKey=%@", apiKey);
+    return [self buildCredentialStringForAPIKey:[DefaultsModel loadAPIKey]];
+
+}
+
+- (NSString *) buildCredentialStringForAPIKey:(NSString *)apiKey {
     
     NSString * urlplist = [[NSBundle mainBundle] pathForResource:@"urls" ofType:@"plist"];
-	NSDictionary *urlDictionary = [NSDictionary dictionaryWithContentsOfFile:urlplist];
-    NSString *udid = [[UIDevice currentDevice] uniqueIdentifier];
-    NSString *consumerKey = [urlDictionary valueForKey:@"consumer_key"];
-    NSString *consumerSecret = [urlDictionary valueForKey:@"consumer_secret"];
+	NSDictionary * urlDictionary = [NSDictionary dictionaryWithContentsOfFile:urlplist];
+    NSString * udid = [[UIDevice currentDevice] uniqueIdentifier];
+    NSString * consumerKey = [urlDictionary valueForKey:@"consumer_key"];
+    NSString * consumerSecret = [urlDictionary valueForKey:@"consumer_secret"];
     
     NSString * apiKeyInURL = apiKey ? [NSString stringWithFormat:@"&api_key=%@", apiKey] : @"";
     NSString * credentials = [NSString stringWithFormat:@"consumer_key=%@&consumer_secret=%@&udid=%@%@", consumerKey, consumerSecret, udid, apiKeyInURL];
     
-//    NSLog(@"URLBuilder buildCredentialString - credentials=%@", credentials);
-    
     return credentials;
+    
 }
 
 /////////////
 // ACCOUNTS
 
-- (NSURL*) buildLoginURL  {
+- (NSURL *) buildLoginURL  {
     NSString *urlplist = [[NSBundle mainBundle]
                           pathForResource:@"urls" ofType:@"plist"];
     NSDictionary *urlDictionary = [[NSDictionary alloc] initWithContentsOfFile:urlplist];
@@ -144,6 +145,21 @@ static NSString * const URL_BUILDER_GET_EVENTS_LIST_FILTER_POPULAR = @"popular";
     [credentials release];
     
     return url;
+}
+
+- (NSURL *) buildGetUserProfileURLForAPIKey:(NSString *)apiKey {
+    
+    NSDictionary * urlDictionary = [NSDictionary dictionaryWithContentsOfFile:[[NSBundle mainBundle] pathForResource:@"urls" ofType:@"plist"]];
+    
+    NSString * baseURL = [urlDictionary valueForKey:self.baseURLKey];
+    NSString * URI = [urlDictionary valueForKey:@"user_profile_uri"];
+    NSString * credentials = [self buildCredentialStringForAPIKey:apiKey];
+    NSString * urlString = [NSString stringWithFormat:@"%@%@%@", baseURL, URI, credentials];
+	NSURL * url = [NSURL URLWithString:urlString];
+    NSLog(@"buildGetUserProfileURLForAPIKey:%@ %@", apiKey, urlString);
+    
+    return url;
+    
 }
 
 /////////////

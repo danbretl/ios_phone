@@ -45,9 +45,12 @@ double const AP_NAV_BUTTONS_ANIMATION_DURATION = 0.25;
 @property (retain) UITextField * confirmPasswordTextField;
 @property (retain) UILabel * emailAccountAssuranceLabel;
 
+@property (retain) UISwipeGestureRecognizer * swipeDownGestureRecognizer;
+
 - (IBAction) cancelButtonTouched:(id)sender;
 - (IBAction) doneButtonTouched:(id)sender;
 - (IBAction) accountOptionButtonTouched:(id)accountOptionButton;
+- (void) swipedDown:(UISwipeGestureRecognizer *)swipeGestureRecognizer;
 - (void) userInputSubmissionAttemptRequested;
 - (void) accountConnectionAttemptRequested;
 - (void) accountCreationAttemptRequested;
@@ -61,6 +64,7 @@ double const AP_NAV_BUTTONS_ANIMATION_DURATION = 0.25;
 - (void) hideWebActivityView;
 @property (nonatomic, readonly) UIAlertView * passwordIncorrectAlertView;
 @property (nonatomic, readonly) UIAlertView * forgotPasswordConnectionErrorAlertView;
+@property (nonatomic, readonly) UIAlertView * anotherAccountWithEmailExistsAlertView;
 
 @property (nonatomic, readonly) WebConnector * webConnector;
 
@@ -77,6 +81,7 @@ double const AP_NAV_BUTTONS_ANIMATION_DURATION = 0.25;
 @synthesize namePictureContainer, pictureContainer, pictureButton, pictureImageView, firstNameTextField, lastNameTextField;
 @synthesize emailPasswordContainer, emailTextField, passwordTextField, confirmPasswordTextField;
 @synthesize emailAccountAssuranceLabel;
+@synthesize swipeDownGestureRecognizer;
 @synthesize webActivityView;
 @synthesize delegate;
 
@@ -110,6 +115,7 @@ double const AP_NAV_BUTTONS_ANIMATION_DURATION = 0.25;
     [webActivityView release];
     [passwordIncorrectAlertView release];
     [forgotPasswordConnectionErrorAlertView release];
+    [anotherAccountWithEmailExistsAlertView release];
     [webConnector release];
     [confirmPasswordTextField release];
     [namePictureContainer release];
@@ -119,6 +125,7 @@ double const AP_NAV_BUTTONS_ANIMATION_DURATION = 0.25;
     [pictureContainer release];
     [pictureButton release];
     [accountCreationPromptLabel release];
+    [swipeDownGestureRecognizer release];
     [super dealloc];
 }
 
@@ -183,6 +190,10 @@ double const AP_NAV_BUTTONS_ANIMATION_DURATION = 0.25;
     initialPromptScreenVisible = YES;
     [self showAccountCreationInputViews:NO showPasswordConfirmation:NO activateAppropriateFirstResponder:NO animated:NO];
     [self showContainer:self.accountOptionsContainer animated:NO];
+    
+    swipeDownGestureRecognizer = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(swipedDown:)];
+    self.swipeDownGestureRecognizer.direction = UISwipeGestureRecognizerDirectionDown;
+    [self.view addGestureRecognizer:self.swipeDownGestureRecognizer];
     
 }
 
@@ -327,6 +338,15 @@ double const AP_NAV_BUTTONS_ANIMATION_DURATION = 0.25;
         } else {
             // Do nothing.
         }
+    } else if (alertView == self.anotherAccountWithEmailExistsAlertView) {
+        if (buttonIndex == alertView.cancelButtonIndex) {
+            // Change email
+            [self.emailTextField becomeFirstResponder];
+        } else {
+            // Log in
+            self.passwordTextField.text = @"";
+            [self showAccountCreationInputViews:NO showPasswordConfirmation:NO activateAppropriateFirstResponder:YES animated:YES];
+        }
     }
 }
 
@@ -448,18 +468,35 @@ double const AP_NAV_BUTTONS_ANIMATION_DURATION = 0.25;
     
 }
 
-- (void)webConnector:(WebConnector *)webConnector accountConnectSuccess:(ASIHTTPRequest *)request withEmail:(NSString *)emailString kwiqetIdentifier:(NSString *)identifierString apiKey:(NSString *)apiKey {
+- (void)webConnector:(WebConnector *)webConnector accountConnectSuccess:(ASIHTTPRequest *)request withEmail:(NSString *)emailString firstName:(NSString *)nameFirst lastName:(NSString *)nameLast apiKey:(NSString *)apiKey {
     
     [self hideWebActivityView];
     
+    NSLog(@"AccountPromptViewController accountConnectSuccess email=%@ first=%@ last=%@ apiKey=%@", emailString, nameFirst, nameLast, apiKey);
+    
     [DefaultsModel saveAPIKey:apiKey];
+    NSString * identifierString = (nameFirst && nameFirst.length > 0) || (nameLast && nameLast.length > 0) ? [NSString stringWithFormat:@"%@%@%@", nameFirst, nameFirst != nil ? @" " : @"", nameLast] : emailString;
     [DefaultsModel saveKwiqetUserIdentifierToUserDefaults:identifierString];
+
     NSDictionary * infoDictionary = [NSDictionary dictionaryWithObjectsAndKeys:@"login", @"action", nil];
     [[NSNotificationCenter defaultCenter] postNotificationName:@"loginActivity" object:self userInfo:infoDictionary];
     
     [self.delegate accountPromptViewController:self didFinishWithConnection:YES];
     
 }
+
+//- (void)webConnector:(WebConnector *)webConnector accountConnectSuccess:(ASIHTTPRequest *)request withEmail:(NSString *)emailString kwiqetIdentifier:(NSString *)identifierString apiKey:(NSString *)apiKey {
+//    
+//    [self hideWebActivityView];
+//    
+//    [DefaultsModel saveAPIKey:apiKey];
+//    [DefaultsModel saveKwiqetUserIdentifierToUserDefaults:identifierString];
+//    NSDictionary * infoDictionary = [NSDictionary dictionaryWithObjectsAndKeys:@"login", @"action", nil];
+//    [[NSNotificationCenter defaultCenter] postNotificationName:@"loginActivity" object:self userInfo:infoDictionary];
+//    
+//    [self.delegate accountPromptViewController:self didFinishWithConnection:YES];
+//    
+//}
 
 - (void) webConnector:(WebConnector *)webConnector accountConnectFailure:(ASIHTTPRequest *)request failureCode:(WebConnectorFailure)failureCode withEmail:(NSString *)emailString {
 
@@ -477,18 +514,18 @@ double const AP_NAV_BUTTONS_ANIMATION_DURATION = 0.25;
     
 }
 
-- (void)webConnector:(WebConnector *)webConnector accountCreateSuccess:(ASIHTTPRequest *)request withEmail:(NSString *)emailString kwiqetIdentifier:(NSString *)identifierString apiKey:(NSString *)apiKey {
-    
-    [self hideWebActivityView];
-    
-    [DefaultsModel saveAPIKey:apiKey];
-    [DefaultsModel saveKwiqetUserIdentifierToUserDefaults:emailString]; // THIS SHOULD BE UPDATED. ONCE THE USER HAS AN API KEY, WE SHOULD USE IT TO GET INFORMATION ABOUT THAT USER. THIS SHOULD BE UPDATED. ONCE THE USER HAS AN API KEY, WE SHOULD USE IT TO GET INFORMATION ABOUT THAT USER. THIS SHOULD BE UPDATED. ONCE THE USER HAS AN API KEY, WE SHOULD USE IT TO GET INFORMATION ABOUT THAT USER. THIS SHOULD BE UPDATED. ONCE THE USER HAS AN API KEY, WE SHOULD USE IT TO GET INFORMATION ABOUT THAT USER. THIS SHOULD BE UPDATED. ONCE THE USER HAS AN API KEY, WE SHOULD USE IT TO GET INFORMATION ABOUT THAT USER. THIS SHOULD BE UPDATED. ONCE THE USER HAS AN API KEY, WE SHOULD USE IT TO GET INFORMATION ABOUT THAT USER. THIS SHOULD BE UPDATED. ONCE THE USER HAS AN API KEY, WE SHOULD USE IT TO GET INFORMATION ABOUT THAT USER. THIS SHOULD BE UPDATED. ONCE THE USER HAS AN API KEY, WE SHOULD USE IT TO GET INFORMATION ABOUT THAT USER. THIS SHOULD BE UPDATED. ONCE THE USER HAS AN API KEY, WE SHOULD USE IT TO GET INFORMATION ABOUT THAT USER. THIS SHOULD BE UPDATED. ONCE THE USER HAS AN API KEY, WE SHOULD USE IT TO GET INFORMATION ABOUT THAT USER. THIS SHOULD BE UPDATED. ONCE THE USER HAS AN API KEY, WE SHOULD USE IT TO GET INFORMATION ABOUT THAT USER. THIS SHOULD BE UPDATED. ONCE THE USER HAS AN API KEY, WE SHOULD USE IT TO GET INFORMATION ABOUT THAT USER. THIS SHOULD BE UPDATED. ONCE THE USER HAS AN API KEY, WE SHOULD USE IT TO GET INFORMATION ABOUT THAT USER. THIS SHOULD BE UPDATED. ONCE THE USER HAS AN API KEY, WE SHOULD USE IT TO GET INFORMATION ABOUT THAT USER.
-    NSDictionary * infoDictionary = [NSDictionary dictionaryWithObjectsAndKeys:@"login", @"action", nil];
-    [[NSNotificationCenter defaultCenter] postNotificationName:@"loginActivity" object:self userInfo:infoDictionary];
-        
-    [self.delegate accountPromptViewController:self didFinishWithConnection:YES];
-    
-}
+//- (void)webConnector:(WebConnector *)webConnector accountCreateSuccess:(ASIHTTPRequest *)request withEmail:(NSString *)emailString kwiqetIdentifier:(NSString *)identifierString apiKey:(NSString *)apiKey {
+//    
+//    [self hideWebActivityView];
+//    
+//    [DefaultsModel saveAPIKey:apiKey];
+//    [DefaultsModel saveKwiqetUserIdentifierToUserDefaults:emailString]; // THIS SHOULD BE UPDATED. ONCE THE USER HAS AN API KEY, WE SHOULD USE IT TO GET INFORMATION ABOUT THAT USER. THIS SHOULD BE UPDATED. ONCE THE USER HAS AN API KEY, WE SHOULD USE IT TO GET INFORMATION ABOUT THAT USER. THIS SHOULD BE UPDATED. ONCE THE USER HAS AN API KEY, WE SHOULD USE IT TO GET INFORMATION ABOUT THAT USER. THIS SHOULD BE UPDATED. ONCE THE USER HAS AN API KEY, WE SHOULD USE IT TO GET INFORMATION ABOUT THAT USER. THIS SHOULD BE UPDATED. ONCE THE USER HAS AN API KEY, WE SHOULD USE IT TO GET INFORMATION ABOUT THAT USER. THIS SHOULD BE UPDATED. ONCE THE USER HAS AN API KEY, WE SHOULD USE IT TO GET INFORMATION ABOUT THAT USER. THIS SHOULD BE UPDATED. ONCE THE USER HAS AN API KEY, WE SHOULD USE IT TO GET INFORMATION ABOUT THAT USER. THIS SHOULD BE UPDATED. ONCE THE USER HAS AN API KEY, WE SHOULD USE IT TO GET INFORMATION ABOUT THAT USER. THIS SHOULD BE UPDATED. ONCE THE USER HAS AN API KEY, WE SHOULD USE IT TO GET INFORMATION ABOUT THAT USER. THIS SHOULD BE UPDATED. ONCE THE USER HAS AN API KEY, WE SHOULD USE IT TO GET INFORMATION ABOUT THAT USER. THIS SHOULD BE UPDATED. ONCE THE USER HAS AN API KEY, WE SHOULD USE IT TO GET INFORMATION ABOUT THAT USER. THIS SHOULD BE UPDATED. ONCE THE USER HAS AN API KEY, WE SHOULD USE IT TO GET INFORMATION ABOUT THAT USER. THIS SHOULD BE UPDATED. ONCE THE USER HAS AN API KEY, WE SHOULD USE IT TO GET INFORMATION ABOUT THAT USER. THIS SHOULD BE UPDATED. ONCE THE USER HAS AN API KEY, WE SHOULD USE IT TO GET INFORMATION ABOUT THAT USER.
+//    NSDictionary * infoDictionary = [NSDictionary dictionaryWithObjectsAndKeys:@"login", @"action", nil];
+//    [[NSNotificationCenter defaultCenter] postNotificationName:@"loginActivity" object:self userInfo:infoDictionary];
+//        
+//    [self.delegate accountPromptViewController:self didFinishWithConnection:YES];
+//    
+//}
 
 - (void)webConnector:(WebConnector *)webConnector accountCreateFailure:(ASIHTTPRequest *)request failureCode:(WebConnectorFailure)failureCode withEmail:(NSString *)emailString {
     
@@ -496,12 +533,7 @@ double const AP_NAV_BUTTONS_ANIMATION_DURATION = 0.25;
     
     if (failureCode == AccountCreateEmailAssociatedWithAnotherAccount) {
         
-        // THIS PATH SHOULD BE UPDATED THIS PATH SHOULD BE UPDATED THIS PATH SHOULD BE UPDATED THIS PATH SHOULD BE UPDATED THIS PATH SHOULD BE UPDATED THIS PATH SHOULD BE UPDATED THIS PATH SHOULD BE UPDATED THIS PATH SHOULD BE UPDATED THIS PATH SHOULD BE UPDATED THIS PATH SHOULD BE UPDATED THIS PATH SHOULD BE UPDATED THIS PATH SHOULD BE UPDATED THIS PATH SHOULD BE UPDATED THIS PATH SHOULD BE UPDATED THIS PATH SHOULD BE UPDATED THIS PATH SHOULD BE UPDATED THIS PATH SHOULD BE UPDATED THIS PATH SHOULD BE UPDATED THIS PATH SHOULD BE UPDATED THIS PATH SHOULD BE UPDATED THIS PATH SHOULD BE UPDATED THIS PATH SHOULD BE UPDATED THIS PATH SHOULD BE UPDATED THIS PATH SHOULD BE UPDATED THIS PATH SHOULD BE UPDATED THIS PATH SHOULD BE UPDATED THIS PATH SHOULD BE UPDATED THIS PATH SHOULD BE UPDATED THIS PATH SHOULD BE UPDATED THIS PATH SHOULD BE UPDATED THIS PATH SHOULD BE UPDATED THIS PATH SHOULD BE UPDATED THIS PATH SHOULD BE UPDATED THIS PATH SHOULD BE UPDATED THIS PATH SHOULD BE UPDATED THIS PATH SHOULD BE UPDATED THIS PATH SHOULD BE UPDATED THIS PATH SHOULD BE UPDATED THIS PATH SHOULD BE UPDATED THIS PATH SHOULD BE UPDATED THIS PATH SHOULD BE UPDATED THIS PATH SHOULD BE UPDATED THIS PATH SHOULD BE UPDATED THIS PATH SHOULD BE UPDATED THIS PATH SHOULD BE UPDATED THIS PATH SHOULD BE UPDATED THIS PATH SHOULD BE UPDATED THIS PATH SHOULD BE UPDATED THIS PATH SHOULD BE UPDATED THIS PATH SHOULD BE UPDATED THIS PATH SHOULD BE UPDATED THIS PATH SHOULD BE UPDATED THIS PATH SHOULD BE UPDATED THIS PATH SHOULD BE UPDATED THIS PATH SHOULD BE UPDATED THIS PATH SHOULD BE UPDATED THIS PATH SHOULD BE UPDATED THIS PATH SHOULD BE UPDATED THIS PATH SHOULD BE UPDATED THIS PATH SHOULD BE UPDATED THIS PATH SHOULD BE UPDATED THIS PATH SHOULD BE UPDATED THIS PATH SHOULD BE UPDATED THIS PATH SHOULD BE UPDATED THIS PATH SHOULD BE UPDATED THIS PATH SHOULD BE UPDATED THIS PATH SHOULD BE UPDATED THIS PATH SHOULD BE UPDATED THIS PATH SHOULD BE UPDATED THIS PATH SHOULD BE UPDATED THIS PATH SHOULD BE UPDATED THIS PATH SHOULD BE UPDATED THIS PATH SHOULD BE UPDATED THIS PATH SHOULD BE UPDATED THIS PATH SHOULD BE UPDATED THIS PATH SHOULD BE UPDATED THIS PATH SHOULD BE UPDATED
-        UIAlertView * alert = [[UIAlertView alloc] initWithTitle:@"Account with Email Exists" message:@"There is already a Kwiqet account associated with that email. Please try logging in with that email address, or enter a different one." delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil];
-        [alert show]; 
-        [alert release];
-        
-        [self.emailTextField becomeFirstResponder];
+        [self.anotherAccountWithEmailExistsAlertView show];
         
     } else {
         
@@ -617,6 +649,7 @@ double const AP_NAV_BUTTONS_ANIMATION_DURATION = 0.25;
         self.emailPasswordContainer.frame = emailPasswordContainerFrame;
         NSLog(@"%d", self.passwordTextField.returnKeyType);
         self.passwordTextField.returnKeyType = shouldExpand ? UIReturnKeyNext : UIReturnKeySend; // If passwordTextField is first responder when this call is made, the returnKeyType does not get updated until another text field becomes first responder, and then this one becomes it once again. It does not help to quickly switch to another and come back right here, either. Strange bug.
+        NSLog(@"passwordTextField.returnKeyType=%d (where 'Next'=%d & 'Send'=%d)", self.passwordTextField.returnKeyType, UIReturnKeyNext, UIReturnKeySend);
     };
     
     void(^emailAccountAssuranceAlphaBlock)(BOOL) = ^(BOOL shouldShow){
@@ -642,6 +675,16 @@ double const AP_NAV_BUTTONS_ANIMATION_DURATION = 0.25;
         }
     };
     
+    void(^resetCreationInputBlock)(BOOL) = ^(BOOL resetConfirmPassword){
+        self.firstNameTextField.text = @"";
+        self.lastNameTextField.text = @"";
+        if (resetConfirmPassword) {
+            self.confirmPasswordTextField.text = @"";
+        }
+    };
+    
+    accountCreationViewsVisible = shouldShowCreationViews;
+    confirmPasswordVisible = shouldShowPasswordConfirmation;    
     if (animated) {
         [UIView animateWithDuration:AP_NAV_BUTTONS_ANIMATION_DURATION 
                               delay:0.0 
@@ -653,17 +696,18 @@ double const AP_NAV_BUTTONS_ANIMATION_DURATION = 0.25;
                              emailAccountAssuranceAlphaBlock(!shouldShowCreationViews);
                          }
                          completion:^(BOOL finished){
-                             accountCreationViewsVisible = shouldShowCreationViews;
-                             confirmPasswordVisible = shouldShowPasswordConfirmation;
-
+                             if (!shouldShowCreationViews) {
+                                 resetCreationInputBlock(!confirmPasswordVisible);
+                             }
                          }];
     } else {
         kwiqetLogoAlphaBlock(!shouldShowCreationViews);
         promptNamePictureAlphaBlock(shouldShowCreationViews);
         emailPasswordBlock(shouldShowCreationViews, shouldShowPasswordConfirmation);
         emailAccountAssuranceAlphaBlock(!shouldShowCreationViews);
-        accountCreationViewsVisible = shouldShowCreationViews;
-        confirmPasswordVisible = shouldShowPasswordConfirmation;
+        if (!shouldShowCreationViews) {
+            resetCreationInputBlock(!confirmPasswordVisible);
+        }
     }
     if (shouldActivateFirstResponder) {
         firstResponderBlock();
@@ -711,6 +755,22 @@ double const AP_NAV_BUTTONS_ANIMATION_DURATION = 0.25;
         forgotPasswordConnectionErrorAlertView.delegate = self;
     }
     return forgotPasswordConnectionErrorAlertView;
+}
+
+- (UIAlertView *) anotherAccountWithEmailExistsAlertView {
+    if (anotherAccountWithEmailExistsAlertView == nil) {
+        anotherAccountWithEmailExistsAlertView = [[UIAlertView alloc] initWithTitle:@"Account with Email Exists" message:@"There is already a Kwiqet account associated with that email. Please try logging in with that email address, or enter a different one." delegate:self cancelButtonTitle:@"Change Email" otherButtonTitles:@"Log In", nil];
+        anotherAccountWithEmailExistsAlertView.delegate = self;
+    }
+    return anotherAccountWithEmailExistsAlertView;
+}
+
+- (void)swipedDown:(UISwipeGestureRecognizer *)swipeGestureRecognizer {
+    if (swipeGestureRecognizer == self.swipeDownGestureRecognizer) {
+        if (initialPromptScreenVisible) {
+            [self.delegate accountPromptViewController:self didFinishWithConnection:NO];
+        }
+    }
 }
 
 @end

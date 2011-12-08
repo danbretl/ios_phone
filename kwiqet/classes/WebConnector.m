@@ -30,6 +30,10 @@ static NSString * const WEB_CONNECTOR_SEND_LEARNED_DATA_ABOUT_EVENT_USER_INFO_KE
 static NSString * const WEB_CONNECTOR_SEND_LEARNED_DATA_ABOUT_EVENT_USER_INFO_KEY_ACTION = @"action";
 static NSString * const WEB_CONNECTOR_ACCOUNT_DOES_NOT_EXIST_STRING = @"NOT REGISTERED";
 static NSString * const WEB_CONNECTOR_ACCOUNT_USER_INFO_KEY_EMAIL = @"email";
+static NSString * const WEB_CONNECTOR_ACCOUNT_USER_INFO_KEY_API_KEY = @"apiKey";
+static NSString * const WEB_CONNECTOR_ACCOUNT_USER_INFO_KEY_NAME_FIRST = @"nameFirst";
+static NSString * const WEB_CONNECTOR_ACCOUNT_USER_INFO_KEY_NAME_LAST = @"nameLast";
+static NSString * const WEB_CONNECTOR_ACCOUNT_USER_INFO_KEY_REQUEST_ORIGINATED_WITH_CONNECTION_REQUEST = @"WEB_CONNECTOR_ACCOUNT_USER_INFO_KEY_REQUEST_ORIGINATED_WITH_CONNECTION_REQUEST";
 
 @interface WebConnector()
 @property (retain) NSMutableArray * connectionsInProgress;
@@ -53,6 +57,8 @@ static NSString * const WEB_CONNECTOR_ACCOUNT_USER_INFO_KEY_EMAIL = @"email";
 - (void) forgotPasswordForAccountFailure:(ASIHTTPRequest *)request;
 - (void) accountCreateSuccess:(ASIHTTPRequest *)request;
 - (void) accountCreateFailure:(ASIHTTPRequest *)request;
+- (void) getUserProfileSuccess:(ASIHTTPRequest *)request;
+- (void) getUserProfileFailure:(ASIHTTPRequest *)request;
 @end
 
 @implementation WebConnector
@@ -467,7 +473,7 @@ static NSString * const WEB_CONNECTOR_ACCOUNT_USER_INFO_KEY_EMAIL = @"email";
         NSString * jsonString = [jsonDictionary JSONRepresentation];
         
         [request addRequestHeader:@"Content-Type" value:@"application/json"];
-        [request appendPostData:[jsonString  dataUsingEncoding:NSUTF8StringEncoding]];
+        [request appendPostData:[jsonString dataUsingEncoding:NSUTF8StringEncoding]];
         [request setDelegate:self];
         [request setTimeOutSeconds:self.timeoutLength];
         [request setDidFinishSelector:@selector(sendLearnedDataAboutEventSuccess:)];
@@ -513,6 +519,53 @@ static NSString * const WEB_CONNECTOR_ACCOUNT_USER_INFO_KEY_EMAIL = @"email";
 // ACCOUNT //
 /////////////
 
+- (void) forgotPasswordForAccountAssociatedWithEmail:(NSString *)emailString {
+    
+    if (self.availableToMakeWebConnection) {
+    
+        ASIHTTPRequest * request = [ASIHTTPRequest requestWithURL:[self.urlBuilder buildForgotPasswordURL]];
+        [self.connectionsInProgress addObject:request];
+        
+        [request addRequestHeader:@"Content-Type" value:@"application/json"];
+        NSDictionary * jsonDict = [NSDictionary dictionaryWithObjectsAndKeys:emailString, @"email", nil];
+        [request appendPostData:[jsonDict.JSONRepresentation dataUsingEncoding:NSUTF8StringEncoding]];
+        request.delegate = self;
+        request.timeOutSeconds = self.timeoutLength;
+        request.didFinishSelector = @selector(forgotPasswordForAccountSuccess:);
+        request.didFailSelector = @selector(forgotPasswordForAccountFailure:);
+        NSDictionary * userInfo = [NSDictionary dictionaryWithObjectsAndKeys:emailString, WEB_CONNECTOR_ACCOUNT_USER_INFO_KEY_EMAIL, nil];
+        request.userInfo = userInfo;
+        [request startAsynchronous];
+        
+    }
+    
+}
+
+- (void)forgotPasswordForAccountSuccess:(ASIHTTPRequest *)request {
+    
+    [self.connectionsInProgress removeObject:request];
+    
+    if (request && request.responseStatusCode < 400) {
+        [self.delegate webConnector:self forgotPasswordSuccess:request forAccountAssociatedWithEmail:[request.userInfo objectForKey:WEB_CONNECTOR_ACCOUNT_USER_INFO_KEY_EMAIL]];
+    } else {
+        [self.delegate webConnector:self forgotPasswordFailure:request forAccountAssociatedWithEmail:[request.userInfo objectForKey:WEB_CONNECTOR_ACCOUNT_USER_INFO_KEY_EMAIL]];
+    }
+    
+}
+
+- (void)forgotPasswordForAccountFailure:(ASIHTTPRequest *)request {
+    
+    [self.connectionsInProgress removeObject:request];
+    
+    NSLog(@"forgotPasswordForAccountFailure");
+    NSLog(@"code: %i", request.responseStatusCode);
+    NSLog(@"response: %@", request.responseString);
+	NSLog(@"error: %@", request.error);
+    
+    [self.delegate webConnector:self forgotPasswordFailure:request forAccountAssociatedWithEmail:[request.userInfo objectForKey:WEB_CONNECTOR_ACCOUNT_USER_INFO_KEY_EMAIL]];
+    
+}
+
 - (void)accountConnectWithEmail:(NSString *)emailString password:(NSString *)passwordString {
     
     if (self.availableToMakeWebConnection) {
@@ -525,8 +578,10 @@ static NSString * const WEB_CONNECTOR_ACCOUNT_USER_INFO_KEY_EMAIL = @"email";
         accountConnectRequest.requestMethod = @"GET";
         accountConnectRequest.useSessionPersistence = NO;
         accountConnectRequest.delegate = self;
+        accountConnectRequest.timeOutSeconds = self.timeoutLength;
         accountConnectRequest.didFinishSelector = @selector(accountConnectEmailPasswordSuccess:);
         accountConnectRequest.didFailSelector = @selector(accountConnectEmailPasswordFailure:);
+        accountConnectRequest.userInfo = [NSDictionary dictionaryWithObjectsAndKeys:emailString, WEB_CONNECTOR_ACCOUNT_USER_INFO_KEY_EMAIL, nil];
         [accountConnectRequest startAsynchronous];
         
         NSLog(@"accountConnectWithEmail webRequest --- %@", accountConnectRequest.url);
@@ -545,14 +600,17 @@ static NSString * const WEB_CONNECTOR_ACCOUNT_USER_INFO_KEY_EMAIL = @"email";
     NSLog(@"response: %@",responseString);
     NSError * error = nil;
     
-	NSDictionary * dictionaryFromJSON = [responseString yajl_JSONWithOptions:YAJLParserOptionsAllowComments error:&error];
-    NSString * apiKey = [[[dictionaryFromJSON valueForKey:@"objects"] objectAtIndex:0] valueForKey:@"key"];
-    NSString * fullName = [[[dictionaryFromJSON valueForKey:@"objects"] objectAtIndex:0] valueForKey:@"full_name"];
-    NSString * kwiqetIdentifier = fullName && [fullName length] > 0 ? fullName : request.username;
-    
     // There is still a possibility that we successfully got a response, but that that response is nil. We should check for this, and switch our assessment to "failure" if necessary.
-    if (request != nil && apiKey != nil && request.responseStatusCode < 400) {
-        [self.delegate webConnector:self accountConnectSuccess:request withEmail:request.username kwiqetIdentifier:kwiqetIdentifier apiKey:apiKey];
+    if (request != nil && request.responseStatusCode < 400) {
+        
+        NSDictionary * dictionaryFromJSON = [responseString yajl_JSONWithOptions:YAJLParserOptionsAllowComments error:&error];
+        NSString * apiKey = [[[dictionaryFromJSON valueForKey:@"objects"] objectAtIndex:0] valueForKey:@"key"];
+        
+        NSMutableDictionary * userInfo = [NSMutableDictionary dictionaryWithDictionary:request.userInfo];
+        [userInfo setObject:[NSNumber numberWithBool:YES] forKey:WEB_CONNECTOR_ACCOUNT_USER_INFO_KEY_REQUEST_ORIGINATED_WITH_CONNECTION_REQUEST];
+        [userInfo setObject:apiKey forKey:WEB_CONNECTOR_ACCOUNT_USER_INFO_KEY_API_KEY];
+        [self getUserProfileForAPIKey:apiKey fallbackUserInfo:userInfo];
+        
     } else {
         [self.delegate webConnector:self accountConnectFailure:request failureCode:GeneralFailure withEmail:request.username];
     }
@@ -583,63 +641,26 @@ static NSString * const WEB_CONNECTOR_ACCOUNT_USER_INFO_KEY_EMAIL = @"email";
     
 }
 
-- (void) forgotPasswordForAccountAssociatedWithEmail:(NSString *)emailString {
-    
-    ASIHTTPRequest * request = [ASIHTTPRequest requestWithURL:[self.urlBuilder buildForgotPasswordURL]];
-    [self.connectionsInProgress addObject:request];
-    
-    [request addRequestHeader:@"Content-Type" value:@"application/json"];
-    NSDictionary * jsonDict = [NSDictionary dictionaryWithObjectsAndKeys:emailString, @"email", nil];
-    [request appendPostData:[jsonDict.JSONRepresentation dataUsingEncoding:NSUTF8StringEncoding]];
-    request.delegate = self;
-    request.didFinishSelector = @selector(forgotPasswordForAccountSuccess:);
-    request.didFailSelector = @selector(forgotPasswordForAccountFailure:);
-    NSDictionary * userInfo = [NSDictionary dictionaryWithObjectsAndKeys:emailString, WEB_CONNECTOR_ACCOUNT_USER_INFO_KEY_EMAIL, nil];
-    request.userInfo = userInfo;
-    [request startAsynchronous];
-    
-}
-
-- (void)forgotPasswordForAccountSuccess:(ASIHTTPRequest *)request {
-    
-    [self.connectionsInProgress removeObject:request];
-    
-    if (request && request.responseStatusCode < 400) {
-        [self.delegate webConnector:self forgotPasswordSuccess:request forAccountAssociatedWithEmail:[request.userInfo objectForKey:WEB_CONNECTOR_ACCOUNT_USER_INFO_KEY_EMAIL]];
-    } else {
-        [self.delegate webConnector:self forgotPasswordFailure:request forAccountAssociatedWithEmail:[request.userInfo objectForKey:WEB_CONNECTOR_ACCOUNT_USER_INFO_KEY_EMAIL]];
-    }
-    
-}
-
-- (void)forgotPasswordForAccountFailure:(ASIHTTPRequest *)request {
-    
-    [self.connectionsInProgress removeObject:request];
-    
-    NSLog(@"forgotPasswordForAccountFailure");
-    NSLog(@"code: %i", request.responseStatusCode);
-    NSLog(@"response: %@", request.responseString);
-	NSLog(@"error: %@", request.error);
-    
-    [self.delegate webConnector:self forgotPasswordFailure:request forAccountAssociatedWithEmail:[request.userInfo objectForKey:WEB_CONNECTOR_ACCOUNT_USER_INFO_KEY_EMAIL]];
-    
-}
-
 - (void)accountCreateWithEmail:(NSString *)emailString password:(NSString *)passwordString firstName:(NSString *)nameFirst lastName:(NSString *)nameLast image:(UIImage *)image {
     
-    ASIFormDataRequest * request = [ASIFormDataRequest requestWithURL:[self.urlBuilder buildRegistrationURL]];
-    [self.connectionsInProgress addObject:request];
+    if (self.availableToMakeWebConnection) {
     
-    request.requestMethod = @"POST";
-    [request addRequestHeader:@"Content-Type" value:@"application/json"];
-    NSDictionary * jsonDict = [NSDictionary dictionaryWithObjectsAndKeys:emailString, @"email", passwordString, @"password1", passwordString, @"password2", nameFirst, @"first_name", nameLast, @"last_name", nil]; // Currently ignores image (Dec 7, 2011)
-    [request appendPostData:[jsonDict.JSONRepresentation dataUsingEncoding:NSUTF8StringEncoding]];
-    request.delegate = self;
-    request.didFinishSelector = @selector(accountCreateSuccess:);
-    request.didFailSelector = @selector(accountCreateFailure:);
-    NSDictionary * userInfo = [NSDictionary dictionaryWithObjectsAndKeys:emailString, WEB_CONNECTOR_ACCOUNT_USER_INFO_KEY_EMAIL, nil];
-    request.userInfo = userInfo;
-    [request startAsynchronous];
+        ASIFormDataRequest * request = [ASIFormDataRequest requestWithURL:[self.urlBuilder buildRegistrationURL]];
+        [self.connectionsInProgress addObject:request];
+        
+        request.requestMethod = @"POST";
+        [request addRequestHeader:@"Content-Type" value:@"application/json"];
+        NSDictionary * jsonDict = [NSDictionary dictionaryWithObjectsAndKeys:emailString, @"email", passwordString, @"password1", passwordString, @"password2", nameFirst, @"first_name", nameLast, @"last_name", nil]; // Currently ignores image (Dec 7, 2011)
+        [request appendPostData:[jsonDict.JSONRepresentation dataUsingEncoding:NSUTF8StringEncoding]];
+        request.timeOutSeconds = self.timeoutLength;
+        request.delegate = self;
+        request.didFinishSelector = @selector(accountCreateSuccess:);
+        request.didFailSelector = @selector(accountCreateFailure:);
+        NSDictionary * userInfo = [NSDictionary dictionaryWithObjectsAndKeys:emailString, WEB_CONNECTOR_ACCOUNT_USER_INFO_KEY_EMAIL, nil];
+        request.userInfo = userInfo;
+        [request startAsynchronous];
+        
+    }
     
 }
 
@@ -657,7 +678,11 @@ static NSString * const WEB_CONNECTOR_ACCOUNT_USER_INFO_KEY_EMAIL = @"email";
     } else {
         if (request && request.responseStatusCode < 400) {
             NSString * apiKey = request.responseString;
-            [self.delegate webConnector:self accountCreateSuccess:request withEmail:emailFromUserInfo kwiqetIdentifier:emailFromUserInfo apiKey:apiKey];
+            NSMutableDictionary * userInfo = [NSMutableDictionary dictionaryWithDictionary:request.userInfo];
+            [userInfo setObject:[NSNumber numberWithBool:YES] forKey:WEB_CONNECTOR_ACCOUNT_USER_INFO_KEY_REQUEST_ORIGINATED_WITH_CONNECTION_REQUEST];
+            [userInfo setObject:apiKey forKey:WEB_CONNECTOR_ACCOUNT_USER_INFO_KEY_API_KEY];
+            [self getUserProfileForAPIKey:apiKey fallbackUserInfo:userInfo];
+            
         } else {
             [self.delegate webConnector:self accountCreateFailure:request failureCode:GeneralFailure withEmail:emailFromUserInfo];
         }
@@ -675,6 +700,82 @@ static NSString * const WEB_CONNECTOR_ACCOUNT_USER_INFO_KEY_EMAIL = @"email";
 	NSLog(@"error: %@", request.error);
     
     [self.delegate webConnector:self accountCreateFailure:request failureCode:GeneralFailure withEmail:[request.userInfo valueForKey:WEB_CONNECTOR_ACCOUNT_USER_INFO_KEY_EMAIL]];
+    
+}
+
+- (void) getUserProfileForAPIKey:(NSString *)apiKey fallbackUserInfo:(NSDictionary *)fallbackUserInfo {
+    
+    if (self.availableToMakeWebConnection) {
+        
+        ASIFormDataRequest * request = [ASIFormDataRequest requestWithURL:[self.urlBuilder buildGetUserProfileURLForAPIKey:apiKey]];
+        [self.connectionsInProgress addObject:request];
+        request.delegate = self;
+        request.timeOutSeconds = self.timeoutLength;
+        request.requestMethod = @"GET";
+        request.didFinishSelector = @selector(getUserProfileSuccess:);
+        request.didFailSelector = @selector(getUserProfileFailure:);
+        request.userInfo = fallbackUserInfo;
+        [request startAsynchronous];
+        
+    }
+    
+}
+
+// The implementation of this method is slightly different than most others in this class.
+- (void)getUserProfileSuccess:(ASIHTTPRequest *)request {
+    
+    if (request && request.responseStatusCode < 400) {
+        
+        NSLog(@"getUserProfileSuccess response: %@", request.responseString);
+        
+        [self.connectionsInProgress removeObject:request];
+        
+        NSDictionary * fallbackUserInfo = request.userInfo;
+        BOOL requestSourceWasAccountConnection = [[fallbackUserInfo objectForKey:WEB_CONNECTOR_ACCOUNT_USER_INFO_KEY_REQUEST_ORIGINATED_WITH_CONNECTION_REQUEST] boolValue];
+        
+        NSError * error = nil;
+        NSDictionary * dictionaryFromJSON = [request.responseString yajl_JSONWithOptions:YAJLParserOptionsAllowComments error:&error];
+        NSDictionary * userProfileDictionary = [[dictionaryFromJSON objectForKey:@"objects"] objectAtIndex:0];
+        NSString * nameFirst = [userProfileDictionary valueForKey:@"first_name"];
+        NSString * nameLast = [userProfileDictionary valueForKey:@"last_name"];
+        NSString * email = [userProfileDictionary valueForKey:@"email"]; // As of Dec 8, this is assuredly always 'nil'. Hence, the following silly line.
+        if (requestSourceWasAccountConnection) {
+            email = [fallbackUserInfo valueForKey:WEB_CONNECTOR_ACCOUNT_USER_INFO_KEY_EMAIL];
+        }
+
+        // delegate success
+        if (requestSourceWasAccountConnection) {
+            [self.delegate webConnector:self accountConnectSuccess:nil withEmail:email firstName:nameFirst lastName:nameLast apiKey:[fallbackUserInfo valueForKey:WEB_CONNECTOR_ACCOUNT_USER_INFO_KEY_API_KEY]];   
+        } else {
+            [self.delegate webConnector:self getUserProfileSuccess:request firstName:nameFirst lastName:nameLast];
+        }
+        
+    } else {
+        
+        [self getUserProfileFailure:request];
+        
+    }
+    
+}
+
+- (void)getUserProfileFailure:(ASIHTTPRequest *)request {
+    
+    [self.connectionsInProgress removeObject:request];
+    
+    NSDictionary * fallbackUserInfo = request.userInfo;
+    BOOL requestSourceWasAccountConnection = [[fallbackUserInfo objectForKey:WEB_CONNECTOR_ACCOUNT_USER_INFO_KEY_REQUEST_ORIGINATED_WITH_CONNECTION_REQUEST] boolValue];
+    
+    // delegate failure
+    if (requestSourceWasAccountConnection) {
+        [self.delegate webConnector:self 
+              accountConnectSuccess:nil 
+                          withEmail:[fallbackUserInfo objectForKey:WEB_CONNECTOR_ACCOUNT_USER_INFO_KEY_EMAIL] 
+                          firstName:[fallbackUserInfo objectForKey:WEB_CONNECTOR_ACCOUNT_USER_INFO_KEY_NAME_FIRST] 
+                           lastName:[fallbackUserInfo objectForKey:WEB_CONNECTOR_ACCOUNT_USER_INFO_KEY_NAME_LAST] 
+                             apiKey:[fallbackUserInfo objectForKey:WEB_CONNECTOR_ACCOUNT_USER_INFO_KEY_API_KEY]];
+    } else {
+        [self.delegate webConnector:self getUserProfileFailure:request];
+    }
     
 }
 
