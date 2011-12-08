@@ -258,7 +258,9 @@ double const AP_NAV_BUTTONS_ANIMATION_DURATION = 0.25;
 
 - (void)viewWillAppear:(BOOL)animated {
     self.facebookButton.enabled = NO;
+    self.facebookButton.alpha = 0.5;
     self.twitterButton.enabled = NO;
+    self.twitterButton.alpha = 0.5;
 }
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
