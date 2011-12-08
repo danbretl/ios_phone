@@ -19,6 +19,8 @@
 - (void) facebookAuthError:(NSNotification *)notification;
 - (void) facebookFriendsRetrieved:(NSNotification *)notification;
 - (void) loginActivity:(NSNotification *)notification;
+- (void) updateAccountTabTitleForUserIsLoggedIn:(BOOL)isUserLoggedIn;
+- (void) bumpTabBarSelectedViewControllerIfNecessaryForUserIsLoggedIn:(BOOL)isUserLoggedIn;
 @end
 
 @implementation kwiqetAppDelegate
@@ -134,9 +136,9 @@
         }        
         // Setting it all up
         if (newAccountFeaturesTesting) {
-        self.tabBarController.viewControllers = [NSArray arrayWithObjects:self.featuredEventViewController, self.eventsNavController, accountPromptViewController, nil];
+            self.tabBarController.viewControllers = [NSArray arrayWithObjects:self.featuredEventViewController, self.eventsNavController, accountPromptViewController, nil];
         } else {
-        self.tabBarController.viewControllers = [NSArray arrayWithObjects:self.featuredEventViewController, self.eventsNavController, self.settingsNavController, nil];   
+            self.tabBarController.viewControllers = [NSArray arrayWithObjects:self.featuredEventViewController, self.eventsNavController, self.settingsNavController, nil];
         }
         [self.window addSubview:tabBarController.view];
         [self.window bringSubviewToFront:self.splashScreenViewController.view]; // Make sure the splash screen stays in front
@@ -147,6 +149,9 @@
         [self.facebookManager pullAuthenticationInfoFromDefaults];
         
         self.tabBarController.selectedIndex = [DefaultsModel loadTabBarSelectedIndex];
+        BOOL isUserLoggedIn = [DefaultsModel loadIsUserLoggedIn];
+        [self updateAccountTabTitleForUserIsLoggedIn:isUserLoggedIn];
+        [self bumpTabBarSelectedViewControllerIfNecessaryForUserIsLoggedIn:isUserLoggedIn];
         
     } else {
         
@@ -164,10 +169,6 @@
     //[self animateSplashScreen];
     
     return YES;
-}
-
-- (void) navigateToSettingsViewController {
-    [self.tabBarController setSelectedViewController:self.settingsNavController];
 }
 
 - (void)loginActivity:(NSNotification *)notification {
@@ -373,6 +374,7 @@
 
 
 - (void)applicationWillEnterForeground:(UIApplication *)application {
+    NSLog(@"applicationWillEnterForeground");
     
     [self.facebookManager pullAuthenticationInfoFromDefaults];
     
@@ -389,11 +391,23 @@
     
 //    self.tabBarController.selectedIndex = [DefaultsModel loadTabBarSelectedIndex]; // Duh - we get this for free with multitasking.
     
-    self.settingsViewController.tabBarItem.title = [DefaultsModel loadIsUserLoggedIn] ? @"Settings" : @"Connect";
+    BOOL isUserLoggedIn = [DefaultsModel loadIsUserLoggedIn];
+    [self updateAccountTabTitleForUserIsLoggedIn:isUserLoggedIn];
+    [self bumpTabBarSelectedViewControllerIfNecessaryForUserIsLoggedIn:isUserLoggedIn];
     
     [[LocalyticsSession sharedLocalyticsSession] resume];
     [[LocalyticsSession sharedLocalyticsSession] upload];
     
+}
+
+- (void) updateAccountTabTitleForUserIsLoggedIn:(BOOL)isUserLoggedIn {
+    self.settingsViewController.tabBarItem.title = isUserLoggedIn ? @"Settings" : @"Connect";
+}
+
+- (void) bumpTabBarSelectedViewControllerIfNecessaryForUserIsLoggedIn:(BOOL)isUserLoggedIn {
+    if (!isUserLoggedIn && self.tabBarController.selectedViewController == self.settingsNavController) {
+        self.tabBarController.selectedViewController = self.eventsNavController;
+    }
 }
 
 
