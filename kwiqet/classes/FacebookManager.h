@@ -18,8 +18,15 @@ static NSString * const FBM_ACCOUNT_ACTIVITY_ACTION_KEY = @"fbmAccountActivityAc
 static NSString * const FBM_ACCOUNT_ACTIVITY_ACTION_LOGOUT = @"fbmAccountActivityActionLogout";
 static NSString * const FBM_ACCOUNT_ACTIVITY_ACTION_LOGIN = @"fbmAccountActivityActionLogin";
 static NSString * const FBM_ACCOUNT_ACTIVITY_ACTION_FAILURE = @"fbmAccountActivityActionFailure";
+static NSString * const FBM_ACCOUNT_ACTIVITY_ACTION_LOGOUT_IS_DUE_TO_CANCEL_KEY = @"FBMAAALIDTCK";
 static NSString * const FBM_FRIENDS_UPDATE_SUCCESS_KEY = @"FBM_FRIENDS_UPDATE_SUCCESS_KEY";
 static NSString * const FBM_FRIENDS_UPDATE_FAILURE_KEY = @"FBM_FRIENDS_UPDATE_FAILURE_KEY";
+static NSString * const FBM_GET_BASIC_INFO_AND_EMAIL_SUCCESS_KEY = @"FBM_GET_BASIC_INFO_AND_EMAIL_SUCCESS_KEY";
+static NSString * const FBM_GET_BASIC_INFO_AND_EMAIL_FAILURE_KEY = @"FBM_GET_BASIC_INFO_AND_EMAIL_FAILURE_KEY";
+static NSString * const FBM_BASIC_INFO_NAME_FIRST_KEY = @"FBM_BASIC_INFO_NAME_FIRST_KEY";
+static NSString * const FBM_BASIC_INFO_NAME_LAST_KEY = @"FBM_BASIC_INFO_NAME_LAST_KEY";
+static NSString * const FBM_BASIC_INFO_FACEBOOK_ID_KEY = @"FBM_BASIC_INFO_FACEBOOK_ID_KEY";
+static NSString * const FBM_BASIC_INFO_EMAIL_KEY = @"FBM_BASIC_INFO_EMAIL_KEY";
 static NSString * const FBM_GET_LIKES_SUCCESS_KEY = @"FBM_GET_LIKES_SUCCESS_KEY";
 static NSString * const FBM_GET_LIKES_FAILURE_KEY = @"FBM_GET_LIKES_FAILURE_KEY";
 static NSString * const FBM_FRIENDS_LOCAL_DATA_UPDATED_KEY = @"FBM_FRIENDS_LOCAL_DATA_UPDATED_KEY";
@@ -56,6 +63,7 @@ static NSString * const FBM_AUTH_ERROR_KEY = @"FBM_AUTH_ERROR_KEY";
 - (void) postToFacebookWallWithEvent:(Event *)event;
  
 - (void) updateFacebookFriends;
+- (void) getBasicInfoAndEmail;
 - (void) getLikes;
 - (void) getProfilePictureForFacebookID:(NSString *)fbID;
 - (void) createFacebookEventWithParameters:(NSMutableDictionary *)parameters inviteContacts:(NSArray *)contactsToInvite;
@@ -63,9 +71,9 @@ static NSString * const FBM_AUTH_ERROR_KEY = @"FBM_AUTH_ERROR_KEY";
 
 @end
 
-//@protocol FacebookManagerDelegate <NSObject>
+@protocol FacebookManagerDelegate <NSObject>
 //
 //- (void) gotFacebookFriendsSuccess:(NSArray *)friends;
 //- (void) gotFacebookFriendsFailure:(NSArray *)friends;
 //
-//@end
+@end

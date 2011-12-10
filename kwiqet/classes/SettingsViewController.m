@@ -151,7 +151,7 @@
     } else if ([action isEqualToString:FBM_ACCOUNT_ACTIVITY_ACTION_LOGIN]) {
         [self.tableView reloadData]; // Heavyweight        
     } else if ([action isEqualToString:FBM_ACCOUNT_ACTIVITY_ACTION_FAILURE]) {
-        if (![self.facebookConnectFailureAlertView isVisible]) {
+        if (![self.facebookConnectFailureAlertView isVisible] && self.view.window) {
             self.facebookConnectFailureAlertView = [[[UIAlertView alloc] initWithTitle:@"Facebook Connect Error" message:@"There was a problem while trying to connect with Facebook. Please check your settings and try again." delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil] autorelease];
             [self.facebookConnectFailureAlertView show];
         }

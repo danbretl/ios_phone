@@ -27,7 +27,7 @@
 @synthesize window;
 @synthesize splashView, splashScreenViewController;
 @synthesize tabBarController;
-@synthesize featuredEventViewController, eventsNavController, eventsViewController, settingsNavController, settingsViewController;
+@synthesize featuredEventViewController, eventsNavController, eventsViewController, settingsNavController, settingsViewController, accountPromptViewController;
 
 #pragma mark -
 #pragma mark Application lifecycle
@@ -92,7 +92,6 @@
     // THE PROBLEM currently with waiting to create the tab bar controller and its assorted view controllers is that the web request for content for featuredEventViewController isn't made until featuredEventViewController exists. (So, there is potentially a slight delay between the time when the splash screen fades away once all of that business is done, and when the featuredEventViewController displays its content underneath.)
     
     BOOL facebookTesting = NO;
-    BOOL newAccountFeaturesTesting = NO;
     
     if (!facebookTesting) {
         
@@ -129,17 +128,8 @@
         settingsNavController = [[UINavigationController alloc] initWithRootViewController:self.settingsViewController];
         self.settingsNavController.navigationBarHidden = YES;
         
-        AccountPromptViewController * accountPromptViewController = nil;
-        if (newAccountFeaturesTesting) {
-            accountPromptViewController = [[[AccountPromptViewController alloc] initWithNibName:@"AccountPromptViewController" bundle:[NSBundle mainBundle]] autorelease];
-            accountPromptViewController.tabBarItem = self.settingsViewController.tabBarItem;
-        }        
         // Setting it all up
-        if (newAccountFeaturesTesting) {
-            self.tabBarController.viewControllers = [NSArray arrayWithObjects:self.featuredEventViewController, self.eventsNavController, accountPromptViewController, nil];
-        } else {
-            self.tabBarController.viewControllers = [NSArray arrayWithObjects:self.featuredEventViewController, self.eventsNavController, self.settingsNavController, nil];
-        }
+        self.tabBarController.viewControllers = [NSArray arrayWithObjects:self.featuredEventViewController, self.eventsNavController, self.settingsNavController, nil];
         [self.window addSubview:tabBarController.view];
         [self.window bringSubviewToFront:self.splashScreenViewController.view]; // Make sure the splash screen stays in front
 
@@ -201,7 +191,13 @@
 
 // FOR NOW, the only reason we'd have to handle an open url is to handle Facebook's login response. If that ever changes, then the logic of this method will obviously have to get more complicated.
 - (BOOL)application:(UIApplication *)application handleOpenURL:(NSURL *)url {
-    BOOL returnVal = [self.settingsViewController.facebookManager.fb handleOpenURL:url];
+    FacebookManager * activeFacebookManager = nil;
+    if (self.settingsViewController.view.window) {
+        activeFacebookManager = self.settingsViewController.facebookManager;
+    } else if (self.accountPromptViewController && self.accountPromptViewController.view.window) {
+        activeFacebookManager = self.accountPromptViewController.facebookManager;
+    }
+    BOOL returnVal = [activeFacebookManager.fb handleOpenURL:url];
 //    BOOL returnVal = [self.facebookManager.fb handleOpenURL:url];
 //    if (returnVal) {
 //        [[NSNotificationCenter defaultCenter] postNotificationName:@"HANDLED_FACEBOOK_OPEN_URL" object:self userInfo:nil];
@@ -538,10 +534,11 @@
     if (viewController == self.settingsNavController) {
         shouldSelect = [DefaultsModel loadIsUserLoggedIn];
         if (!shouldSelect) {
-            AccountPromptViewController * accountPromptViewController = [[AccountPromptViewController alloc] initWithNibName:@"AccountPromptViewController" bundle:[NSBundle mainBundle]];
-            accountPromptViewController.delegate = self;
-            [self.tabBarController.selectedViewController presentModalViewController:accountPromptViewController animated:YES];
-            [accountPromptViewController release];
+            AccountPromptViewController * theAccountPromptViewController = [[AccountPromptViewController alloc] initWithNibName:@"AccountPromptViewController" bundle:[NSBundle mainBundle]];
+            self.accountPromptViewController = theAccountPromptViewController;
+            [theAccountPromptViewController release];
+            self.accountPromptViewController.delegate = self;
+            [self.tabBarController.selectedViewController presentModalViewController:self.accountPromptViewController animated:YES];
         }
     }
     return shouldSelect;
@@ -550,11 +547,12 @@
 - (void)accountPromptViewController:(AccountPromptViewController *)accountPromptViewController didFinishWithConnection:(BOOL)finishedWithConnection {
     NSLog(@"appDelegate accountPromptViewController:didFinishWithConnection:");
     [self.tabBarController.selectedViewController dismissModalViewControllerAnimated:YES];
-    if (finishedWithConnection) { // Probably want to take this out at some point. It's dumb and unnecessary.
-        UIAlertView * alert = [[UIAlertView alloc] initWithTitle:@"Logged In!" message:@"Have fun at the events!" delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil];
+    if (finishedWithConnection) {
+        UIAlertView * alert = [[UIAlertView alloc] initWithTitle:@"Logged In!" message:@"Have fun at the events!" delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil]; // Probably want to take this out at some point. It's dumb and unnecessary.
         [alert show]; 
         [alert release];
     }
+    self.accountPromptViewController = nil;
 }
 
 

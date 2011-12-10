@@ -13,11 +13,14 @@
 #import "WebDataTranslator.h"
 #import "Occurrence.h"
 #import "Place.h"
+#import "JSON.h"
+#import <YAJL/YAJL.h>
 
 static NSString * const FB_FACEBOOK_APP_ID = @"210861478950952";
 static NSString * const FB_FACEBOOK_ACCESS_TOKEN_KEY = @"FBAccessTokenKey";
 static NSString * const FB_FACEBOOK_EXPIRATION_DATE_KEY = @"FBExpirationDateKey";
 static NSString * const FBM_REQUEST_UPDATE_FRIENDS = @"fbmRequestTypeUpdateFriends";
+static NSString * const FBM_REQUEST_GET_BASIC_INFO_AND_EMAIL = @"fbmRequestGetBasicInfoAndEmail";
 static NSString * const FBM_REQUEST_GET_LIKES = @"fbmRequestGetLikes";
 static NSString * const FBM_REQUEST_CREATE_EVENT = @"fbmRequestTypeCreateEvent";
 static NSString * const FBM_REQUEST_INVITE_FRIENDS_TO_EVENT = @"fbmRequestTypeInviteFriendsToEvent";
@@ -110,7 +113,7 @@ static NSString * const FBM_REQUEST_PROFILE_PICTURE = @"FBM_REQUEST_PROFILE_PICT
 
 - (void)authorizeWithStandardPermissionsAndDelegate:(id<FBSessionDelegate>)delegate {
     NSLog(@"FacebookManager authorizeWithStandardPermissionsAndDelegate");
-    NSArray * permissions = [NSArray arrayWithObjects:@"user_events", @"create_event", @"rsvp_event", @"user_likes", @"user_interests", @"user_religion_politics", @"offline_access", nil];
+    NSArray * permissions = [NSArray arrayWithObjects:@"user_events", @"create_event", @"rsvp_event", @"user_likes", @"user_interests", @"user_religion_politics", @"offline_access", @"email", nil];
 //    [self.fb authorize:permissions delegate:delegate];
     [self.fb authorize:permissions];
 }
@@ -119,11 +122,11 @@ static NSString * const FBM_REQUEST_PROFILE_PICTURE = @"FBM_REQUEST_PROFILE_PICT
     NSLog(@"fbDidLogin");
     [self pushAuthenticationInfoToDefaults];
     [[NSNotificationCenter defaultCenter] postNotificationName:FBM_ACCOUNT_ACTIVITY_KEY object:self userInfo:[NSDictionary dictionaryWithObjectsAndKeys:FBM_ACCOUNT_ACTIVITY_ACTION_LOGIN, FBM_ACCOUNT_ACTIVITY_ACTION_KEY, nil]];
-    [self updateFacebookFriends];
+    //[self updateFacebookFriends]; // This should not really be here... Move to be lazy / on demand later.
 }
 
 - (void)fbDidNotLogin:(BOOL)cancelled {
-    [[NSNotificationCenter defaultCenter] postNotificationName:FBM_ACCOUNT_ACTIVITY_KEY object:self userInfo:[NSDictionary dictionaryWithObjectsAndKeys:FBM_ACCOUNT_ACTIVITY_ACTION_FAILURE, FBM_ACCOUNT_ACTIVITY_ACTION_KEY, nil]];
+    [[NSNotificationCenter defaultCenter] postNotificationName:FBM_ACCOUNT_ACTIVITY_KEY object:self userInfo:[NSDictionary dictionaryWithObjectsAndKeys:FBM_ACCOUNT_ACTIVITY_ACTION_FAILURE, FBM_ACCOUNT_ACTIVITY_ACTION_KEY, [NSNumber numberWithBool:cancelled], FBM_ACCOUNT_ACTIVITY_ACTION_LOGOUT_IS_DUE_TO_CANCEL_KEY, nil]];
 }
 
 
@@ -172,6 +175,17 @@ static NSString * const FBM_REQUEST_PROFILE_PICTURE = @"FBM_REQUEST_PROFILE_PICT
 - (void) updateFacebookFriends {
     self.currentRequestType = FBM_REQUEST_UPDATE_FRIENDS;
     self.currentRequest = [self.fb requestWithGraphPath:@"me/friends" andDelegate:self];
+}
+
+- (void)getBasicInfoAndEmail {
+    self.currentRequestType = FBM_REQUEST_GET_BASIC_INFO_AND_EMAIL;
+    // We don't actually need to do a batch request because since we have email permission from the user, the user's email will be included in the single "me" graph path request. I didn't understand this about the Facebook SDK previously. Good to learn how to do batch requests anyway though.
+//    NSDictionary * requestBasicInfoDict = [NSDictionary dictionaryWithObjectsAndKeys:@"GET", @"method", @"me", @"relative_url", nil];
+//    NSDictionary * requestEmailDict = [NSDictionary dictionaryWithObjectsAndKeys:@"GET", @"method", @"me/email", @"relative_url", nil];
+//    NSArray * requests = [NSArray arrayWithObjects:requestBasicInfoDict, requestEmailDict, nil];
+//    NSString * jsonString = [requests JSONRepresentation];
+//    NSMutableDictionary * requestParams = [NSMutableDictionary dictionaryWithObject:jsonString forKey:@"batch"];
+    self.currentRequest = [self.fb requestWithGraphPath:@"me" andDelegate:self];
 }
 
 - (void) getLikes {
@@ -223,6 +237,49 @@ static NSString * const FBM_REQUEST_PROFILE_PICTURE = @"FBM_REQUEST_PROFILE_PICT
             
             [[NSNotificationCenter defaultCenter] postNotificationName:FBM_FRIENDS_UPDATE_SUCCESS_KEY object:self userInfo:result];
             
+        } else if ([self.currentRequestType isEqualToString:FBM_REQUEST_GET_BASIC_INFO_AND_EMAIL]) {
+            // Previously was trying to do a batch request. See note above where the request is originating to see how/why we don't actually need to do that. Going back to processing just a single request response.
+            
+            NSLog(@"facebook request (FBM_REQUEST_GET_BASIC_INFO_AND_EMAIL) success, response: %@", result);
+            
+            NSString * fbID = [result objectForKey:@"id"];
+            NSString * email = [result objectForKey:@"email"];
+            NSString * nameFirst = [result objectForKey:@"first_name"];
+            NSString * nameLast = [result objectForKey:@"last_name"];
+            
+            NSDictionary * userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
+                                       fbID, FBM_BASIC_INFO_FACEBOOK_ID_KEY,
+                                       email, FBM_BASIC_INFO_EMAIL_KEY,
+                                       nameFirst, FBM_BASIC_INFO_NAME_FIRST_KEY,
+                                       nameLast, FBM_BASIC_INFO_NAME_LAST_KEY,
+                                       nil];
+            
+            NSLog(@"the basic user info package we care about: %@", userInfo);
+            
+//            NSArray * responses = result;
+//            NSDictionary * basicInfoResponse = [responses objectAtIndex:0];
+//            NSDictionary * emailResponse = [responses objectAtIndex:1];
+//            NSString * fbID = nil;
+//            NSString * nameFirst = nil;
+//            NSString * nameLast = nil;
+//            NSString * email = nil;
+//            if ([[basicInfoResponse objectForKey:@"code"] intValue] == 200) {
+//                NSError * error = nil;
+//                NSDictionary * basicInfoDict = [[basicInfoResponse objectForKey:@"body"] yajl_JSONWithOptions:0 error:&error];
+//                fbID = [basicInfoDict objectForKey:@"id"];
+//                nameFirst = [basicInfoDict objectForKey:@"first_name"];
+//                nameLast = [basicInfoDict objectForKey:@"last_name"];
+//            }
+//            if ([[emailResponse objectForKey:@"code"] intValue] == 200) {
+//                NSError * error = nil;
+//                NSDictionary * email = [[basicInfoResponse objectForKey:@"body"] yajl_JSONWithOptions:0 error:&error];
+//                fbID = [basicInfo objectForKey:@"id"];
+//                nameFirst = [basicInfo objectForKey:@"first_name"];
+//                nameLast = [basicInfo objectForKey:@"last_name"];
+//            }
+            
+            [[NSNotificationCenter defaultCenter] postNotificationName:FBM_GET_BASIC_INFO_AND_EMAIL_SUCCESS_KEY object:self userInfo:userInfo]; // This is how other facebook request results should be disseminated through the app. Either this, or just a delegate should be notified. We are going to stick with the global notification system for now. It seems heavyweight, though. In any case, the main point is that nowhere in the app (other than in FacebookManager.m) should anyone need to know Facebook response dictionary keys or anything of the like.
+            
         } else if ([self.currentRequestType isEqualToString:FBM_REQUEST_GET_LIKES]) {
             
             [[NSNotificationCenter defaultCenter] postNotificationName:FBM_GET_LIKES_SUCCESS_KEY object:self userInfo:result];
@@ -269,6 +326,10 @@ static NSString * const FBM_REQUEST_PROFILE_PICTURE = @"FBM_REQUEST_PROFILE_PICT
             if ([self.currentRequestType isEqualToString:FBM_REQUEST_UPDATE_FRIENDS]) {
                 
                 [[NSNotificationCenter defaultCenter] postNotificationName:FBM_FRIENDS_UPDATE_FAILURE_KEY object:self userInfo:[error userInfo]];
+                
+            } else if ([self.currentRequestType isEqualToString:FBM_REQUEST_GET_BASIC_INFO_AND_EMAIL]) {
+                
+                [[NSNotificationCenter defaultCenter] postNotificationName:FBM_GET_BASIC_INFO_AND_EMAIL_FAILURE_KEY object:self userInfo:[error userInfo]];
                 
             } else if ([self.currentRequestType isEqualToString:FBM_REQUEST_GET_LIKES]) {
                 

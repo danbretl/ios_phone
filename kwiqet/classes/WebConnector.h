@@ -52,6 +52,7 @@ typedef enum {
 - (void) getEventsListForSearchString:(NSString *)searchString startDateEarliest:(NSDate *)startDateEarliestInclusive startDateLatest:(NSDate *)startDateLatestInclusive startTimeEarliest:(NSDate *)startTimeEarliestInclusive startTimeLatest:(NSDate *)startTimeLatestInclusive locationLatitude:(NSNumber *)locationLatitude locationLongitude:(NSNumber *)locationLongitude geoQueryString:(NSString *)geoQueryString;
 - (void) sendLearnedDataAboutEvent:(NSString *)eventURI withUserAction:(NSString *)userAction;
 // ACCOUNT
+//- (void) accountConnectWithFacebookID:(NSString *)facebookID;
 - (void) accountConnectWithEmail:(NSString *)emailString password:(NSString *)passwordString;
 - (void) accountCreateWithEmail:(NSString *)emailString password:(NSString *)passwordString firstName:(NSString *)nameFirst lastName:(NSString *)nameLast image:(UIImage *)image; // Currently ignores image (Dec 7, 2011)
 - (void) forgotPasswordForAccountAssociatedWithEmail:(NSString *)emailString;

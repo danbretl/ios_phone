@@ -9,6 +9,7 @@
 #import <UIKit/UIKit.h>
 #import "WebActivityView.h"
 #import "WebConnector.h"
+#import "FacebookManager.h"
 
 @protocol AccountPromptViewControllerDelegate;
 
@@ -50,6 +51,8 @@
     BOOL initialPromptScreenVisible;
     BOOL accountCreationViewsVisible;
     BOOL confirmPasswordVisible;
+    BOOL waitingForFacebookAuthentication;
+    BOOL waitingForFacebookInfo;
     
     WebActivityView * webActivityView;
     UIAlertView * passwordIncorrectAlertView;
@@ -57,12 +60,14 @@
     UIAlertView * anotherAccountWithEmailExistsAlertView;
     
     WebConnector * webConnector;
+    FacebookManager * facebookManager;
     
     id<AccountPromptViewControllerDelegate> delegate;
     
 }
 
 @property (assign) id<AccountPromptViewControllerDelegate> delegate;
+@property (nonatomic, readonly) FacebookManager * facebookManager;
 
 @end
 

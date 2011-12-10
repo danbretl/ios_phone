@@ -11,6 +11,7 @@
 #import "UIFont+Kwiqet.h"
 #import "DefaultsModel.h"
 #import "WebUtil.h"
+#import "Facebook+Cancel.h"
 
 double const AP_NAV_BUTTONS_ANIMATION_DURATION = 0.25;
 
@@ -67,6 +68,9 @@ double const AP_NAV_BUTTONS_ANIMATION_DURATION = 0.25;
 @property (nonatomic, readonly) UIAlertView * anotherAccountWithEmailExistsAlertView;
 
 @property (nonatomic, readonly) WebConnector * webConnector;
+- (void) facebookAccountActivity:(NSNotification *)notification;
+- (void) facebookGetBasicInfoSuccess:(NSNotification *)notification;
+- (void) facebookGetBasicInfoFailure:(NSNotification *)notification;
 
 @end
 
@@ -117,6 +121,7 @@ double const AP_NAV_BUTTONS_ANIMATION_DURATION = 0.25;
     [forgotPasswordConnectionErrorAlertView release];
     [anotherAccountWithEmailExistsAlertView release];
     [webConnector release];
+    [facebookManager release];
     [confirmPasswordTextField release];
     [namePictureContainer release];
     [pictureImageView release];
@@ -195,6 +200,10 @@ double const AP_NAV_BUTTONS_ANIMATION_DURATION = 0.25;
     self.swipeDownGestureRecognizer.direction = UISwipeGestureRecognizerDirectionDown;
     [self.view addGestureRecognizer:self.swipeDownGestureRecognizer];
     
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(facebookAccountActivity:) name:FBM_ACCOUNT_ACTIVITY_KEY object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(facebookGetBasicInfoSuccess:) name:FBM_GET_BASIC_INFO_AND_EMAIL_SUCCESS_KEY object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(facebookGetBasicInfoFailure:) name:FBM_GET_BASIC_INFO_AND_EMAIL_FAILURE_KEY object:nil];
+    
 }
 
 - (void)viewDidUnload
@@ -257,8 +266,8 @@ double const AP_NAV_BUTTONS_ANIMATION_DURATION = 0.25;
 }
 
 - (void)viewWillAppear:(BOOL)animated {
-    self.facebookButton.enabled = NO;
-    self.facebookButton.alpha = 0.5;
+//    self.facebookButton.enabled = NO;
+//    self.facebookButton.alpha = 0.5;
     self.twitterButton.enabled = NO;
     self.twitterButton.alpha = 0.5;
 }
@@ -271,9 +280,31 @@ double const AP_NAV_BUTTONS_ANIMATION_DURATION = 0.25;
 
 - (IBAction)accountOptionButtonTouched:(id)accountOptionButton {
     if (accountOptionButton == self.emailButton) {
+        
         [self showContainer:self.inputContainer animated:YES];
+        
     } else if (accountOptionButton == self.facebookButton) {
-        NSLog(@"Facebook button touched");
+        
+        [self showWebActivityView];
+        [self.facebookManager pullAuthenticationInfoFromDefaults];
+        if (![self.facebookManager.fb isSessionValid]) {
+            waitingForFacebookAuthentication = YES;
+            [self.facebookManager login];
+            
+            // Wait for a notification about succeeding or failing to Facebook-authenticate.
+            
+        } else {
+            
+            // Get from Facebook, using the authenticated Facebook account:
+            // - the account ID
+            // - the email(s) associated with that account
+            waitingForFacebookInfo = YES;
+            [self.facebookManager getBasicInfoAndEmail];
+            
+            // Wait for a notification about succeeding or failing to get that info. Allow for a user cancel.
+            
+        }
+        
     } else if (accountOptionButton == self.twitterButton) {
         NSLog(@"Twitter button touched");
     } else {
@@ -281,9 +312,66 @@ double const AP_NAV_BUTTONS_ANIMATION_DURATION = 0.25;
     }
 }
 
+- (void)facebookAccountActivity:(NSNotification *)notification {
+    if (waitingForFacebookAuthentication) {
+        waitingForFacebookAuthentication = NO;
+        // Check the notification.
+        NSString * action = [notification.userInfo objectForKey:FBM_ACCOUNT_ACTIVITY_ACTION_KEY];
+        if ([action isEqualToString:FBM_ACCOUNT_ACTIVITY_ACTION_LOGIN]) {
+            [self.facebookManager pullAuthenticationInfoFromDefaults];
+            // Get from Facebook, using the authenticated Facebook account:
+            // - the account ID
+            // - the email(s) associated with that account
+            waitingForFacebookInfo = YES;
+            [self.facebookManager getBasicInfoAndEmail];
+        } else {
+            [self hideWebActivityView];
+            BOOL userCancelled = [[notification.userInfo objectForKey:FBM_ACCOUNT_ACTIVITY_ACTION_LOGOUT_IS_DUE_TO_CANCEL_KEY] boolValue];
+            if (!userCancelled) {
+                UIAlertView * alert = [[UIAlertView alloc] initWithTitle:@"Facebook Connect" message:@"Could not connect to Facebook. Please try again, or try connecting to Kwiqet another way." delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
+                [alert show];
+                [alert release];
+            }
+        }
+    }
+}
+
+- (void)facebookGetBasicInfoSuccess:(NSNotification *)notification {
+    if (waitingForFacebookInfo) {
+        waitingForFacebookInfo = NO;
+        [self hideWebActivityView];
+        // Call our server with the Facebook account ID and associated email, and wait for one of a few responses:
+        // - Kwiqet account exists that is associated either with given Facebook account ID or email ; Will receive an API key, should log in the user.
+        // - Associated Kwiqet account does not exist ; should send the user to the Kwiqet account creation screen (either with Facebook info we already grabbed, or start grabbing it then)
+        NSString * fbID = [notification.userInfo objectForKey:FBM_BASIC_INFO_FACEBOOK_ID_KEY];
+        NSString * fbEmail = [notification.userInfo objectForKey:FBM_BASIC_INFO_EMAIL_KEY];
+        UIAlertView * alert = [[UIAlertView alloc] initWithTitle:@"Not Implemented" message:[NSString stringWithFormat:@"At this point, we should call our server, with the Facebook account ID %@ and associated email %@.", fbID, fbEmail] delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
+        [alert show];
+        [alert release];
+    }
+}
+
+- (void)facebookGetBasicInfoFailure:(NSNotification *)notification {
+    if (waitingForFacebookInfo) {
+        waitingForFacebookInfo = NO;
+        [self hideWebActivityView];
+        // Report back to the user that we failed to authenticate via Facebook. Instruct to try again or choose another avenue.
+        UIAlertView * alert = [[UIAlertView alloc] initWithTitle:@"Facebook Connect" message:@"Could not connect to Facebook. Please try again, or try connecting to Kwiqet another way." delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
+        [alert show];
+        [alert release];
+    }    
+}
+
 - (IBAction)cancelButtonTouched:(id)sender {
     if (initialPromptScreenVisible) {
-        [self.delegate accountPromptViewController:self didFinishWithConnection:NO];
+        if (waitingForFacebookAuthentication || waitingForFacebookInfo) {
+            [self hideWebActivityView];
+            waitingForFacebookAuthentication = NO;
+            waitingForFacebookInfo = NO;
+            [self.facebookManager.fb cancelPendingRequest];
+        } else {
+            [self.delegate accountPromptViewController:self didFinishWithConnection:NO];
+        }
     } else {
         [self showContainer:self.accountOptionsContainer animated:YES];
     }
@@ -649,9 +737,9 @@ double const AP_NAV_BUTTONS_ANIMATION_DURATION = 0.25;
         }
         emailPasswordContainerFrame.size.height = calculatedHeight;
         self.emailPasswordContainer.frame = emailPasswordContainerFrame;
-        NSLog(@"%d", self.passwordTextField.returnKeyType);
+//        NSLog(@"%d", self.passwordTextField.returnKeyType);
         self.passwordTextField.returnKeyType = shouldExpand ? UIReturnKeyNext : UIReturnKeySend; // If passwordTextField is first responder when this call is made, the returnKeyType does not get updated until another text field becomes first responder, and then this one becomes it once again. It does not help to quickly switch to another and come back right here, either. Strange bug.
-        NSLog(@"passwordTextField.returnKeyType=%d (where 'Next'=%d & 'Send'=%d)", self.passwordTextField.returnKeyType, UIReturnKeyNext, UIReturnKeySend);
+//        NSLog(@"passwordTextField.returnKeyType=%d (where 'Next'=%d & 'Send'=%d)", self.passwordTextField.returnKeyType, UIReturnKeyNext, UIReturnKeySend);
     };
     
     void(^emailAccountAssuranceAlphaBlock)(BOOL) = ^(BOOL shouldShow){
@@ -722,7 +810,7 @@ double const AP_NAV_BUTTONS_ANIMATION_DURATION = 0.25;
         // ACTIVITY VIEWS
         [self.webActivityView showAnimated:NO];
         // USER INTERACTION
-        self.cancelButton.userInteractionEnabled = NO;
+//        self.cancelButton.userInteractionEnabled = NO;
         self.doneButton.userInteractionEnabled = NO;
     }
 }
@@ -741,6 +829,14 @@ double const AP_NAV_BUTTONS_ANIMATION_DURATION = 0.25;
         webConnector.delegate = self;
     }
     return webConnector;
+}
+
+- (FacebookManager *)facebookManager {
+    if (facebookManager == nil) {
+        facebookManager = [[FacebookManager alloc] init];
+        [facebookManager pullAuthenticationInfoFromDefaults];
+    }
+    return facebookManager;
 }
 
 - (UIAlertView *) passwordIncorrectAlertView {

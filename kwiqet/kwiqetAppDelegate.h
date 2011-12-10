@@ -26,6 +26,7 @@
     EventsViewController * eventsViewController;
     UINavigationController * settingsNavController;
     SettingsViewController * settingsViewController;
+    AccountPromptViewController * accountPromptViewController;
     
     UIImageView *splashView;
     SplashScreenViewController * splashScreenViewController;
@@ -49,6 +50,7 @@
 @property (retain) EventsViewController * eventsViewController;
 @property (retain) UINavigationController * settingsNavController;
 @property (retain) SettingsViewController * settingsViewController;
+@property (retain) AccountPromptViewController * accountPromptViewController;
 @property (nonatomic, retain) UIImageView *splashView;
 @property (retain) SplashScreenViewController * splashScreenViewController;
 @property (nonatomic, readonly) BOOL categoryTreeHasBeenRetrieved;
