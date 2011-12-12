@@ -1667,7 +1667,8 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
         if (indexOfVenueToSelect == NSNotFound) { indexOfVenueToSelect = 0; } // THIS FALLBACK PROBABLY NEEDS TO BE UPDATED ONCE WE ARE SORTING THE LIST BY PROXIMITY TO USER, ETC...
         self.eventOccurrenceCurrentVenueIndex = indexOfVenueToSelect;
         NSIndexPath * indexPathOfVenueToSelect = [NSIndexPath indexPathForRow:self.eventOccurrenceCurrentVenueIndex inSection:0];
-        [self.occurrencesControlsVenuesTableView reloadData];
+        [self.occurrencesControlsVenuesTableView reloadSections:[NSIndexSet indexSetWithIndex:0] withRowAnimation:UITableViewRowAnimationFade];
+//        [self.occurrencesControlsVenuesTableView reloadData];
         [self.occurrencesControlsVenuesTableView selectRowAtIndexPath:indexPathOfVenueToSelect animated:NO scrollPosition:UITableViewScrollPositionNone];
         [self.occurrencesControlsVenuesTableView scrollToRowAtIndexPath:indexPathOfVenueToSelect atScrollPosition:UITableViewScrollPositionMiddle animated:YES];
     }
