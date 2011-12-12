@@ -856,7 +856,7 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
     CGFloat horizontalPadding = 5;
     if (!doesContainTwoTimes) {
         self.timeStartLabel.text = timeLabelString;
-        self.timeStartLabel.frame = CGRectMake(horizontalPadding, 0, superviewSize.width - 2*horizontalPadding, self.timeStartLabel.superview.bounds.size.height);
+        self.timeStartLabel.frame = CGRectMake(horizontalPadding, 0, superviewSize.width - 2 * horizontalPadding, self.timeStartLabel.superview.bounds.size.height);
     } else {
         NSArray * stringParts = [timeLabelString componentsSeparatedByString:separatorString];
         self.timeStartLabel.text = [stringParts objectAtIndex:0];
