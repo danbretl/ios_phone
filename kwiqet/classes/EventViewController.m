@@ -816,22 +816,35 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
 
 - (void) updateOccurrencesControlsInternalViewsFromData {
     
-    // Adjust the labels in the occurrences controls
-    self.occurrencesControlsVenuesNearLocationLabel.text = self.userLocationString; // THIS IS NONFUNCTIONAL CURRENTLY. WE ARE CURRENTLY TAKING THE LOCATION FROM THE EVENTS LIST AND USING IT HERE. SOON, WE OBVIOUSLY NEED TO LET THE USER CHANGE (OR DEVICE UPDATE) THEIR LOCATION WITHIN THE EVENT CARD.
+    void (^updateLabelBlock)(UILabel *, NSString *, UIButton *, UIView *) = ^(UILabel * label, NSString * labelText, UIButton * leftButton, UIView * containerView){
+        
+        label.text = labelText;
+        
+        CGFloat containerViewPadding = leftButton.frame.origin.x;
+        CGFloat containerViewWidth = containerView.bounds.size.width;
+        CGFloat labelOriginX = label.frame.origin.x;
+        CGFloat maximumLabelWidth = containerViewWidth - labelOriginX - containerViewPadding;
+        CGSize labelTextSize = [label.text sizeWithFont:label.font constrainedToSize:CGSizeMake(maximumLabelWidth, label.bounds.size.height)];
+        CGFloat normalCenteredLabelWidth = containerViewWidth - 2 * labelOriginX;
+        
+        CGRect labelFrame = label.frame;
+        if (labelTextSize.width > normalCenteredLabelWidth) {
+            labelFrame.size.width = maximumLabelWidth;
+            label.textAlignment = UITextAlignmentLeft;
+        } else {
+            labelFrame.size.width = normalCenteredLabelWidth;
+            label.textAlignment = UITextAlignmentCenter;
+        }
+        label.frame = labelFrame;
+        
+    };
+    
+    // Venues near... (User location)
+    updateLabelBlock(self.occurrencesControlsVenuesNearLocationLabel, self.userLocationString /* THIS IS NONFUNCTIONAL CURRENTLY. WE ARE CURRENTLY TAKING THE LOCATION FROM THE EVENTS LIST AND USING IT HERE. SOON, WE OBVIOUSLY NEED TO LET THE USER CHANGE (OR DEVICE UPDATE) THEIR LOCATION WITHIN THE EVENT CARD. */, self.occurrencesControlsCancelButton, self.occurrencesControlsNavBar);
+    // Times on... (Selected date)
     self.occurrencesControlsTimesOnDateLabel.text = [NSString stringWithFormat:@"Times on %@ at", [self.occurrencesControlsNavBarDateFormatter stringFromDate:self.eventOccurrenceCurrentDateSummaryObject.date]];
-    self.occurrencesControlsTimesAtVenueLabel.text = self.eventOccurrenceCurrentVenueSummaryObject.place.title;
-    CGFloat maximumWidth = self.occurrencesControlsNavBar.bounds.size.width - self.occurrencesControlsTimesAtVenueLabel.frame.origin.x - self.occurrencesControlsBackButton.frame.origin.x;
-    CGSize venueTextSize = [self.occurrencesControlsTimesAtVenueLabel.text sizeWithFont:self.occurrencesControlsTimesAtVenueLabel.font constrainedToSize:CGSizeMake(self.occurrencesControlsNavBar.bounds.size.width - self.occurrencesControlsTimesAtVenueLabel.frame.origin.x, self.occurrencesControlsTimesAtVenueLabel.bounds.size.height)];
-    CGFloat normalCenteredWidth = self.occurrencesControlsNavBar.bounds.size.width - 2 * self.occurrencesControlsTimesAtVenueLabel.frame.origin.x;
-    CGRect occurrencesControlsTimesAtVenueLabelFrame = self.occurrencesControlsTimesAtVenueLabel.frame;
-    if (venueTextSize.width > normalCenteredWidth) {
-        occurrencesControlsTimesAtVenueLabelFrame.size.width = maximumWidth;
-        self.occurrencesControlsTimesAtVenueLabel.textAlignment = UITextAlignmentLeft;
-    } else {
-        occurrencesControlsTimesAtVenueLabelFrame.size.width = normalCenteredWidth;
-        self.occurrencesControlsTimesAtVenueLabel.textAlignment = UITextAlignmentCenter;
-    }
-    self.occurrencesControlsTimesAtVenueLabel.frame = occurrencesControlsTimesAtVenueLabelFrame;
+    // Times on date at... (Venue name)
+    updateLabelBlock(self.occurrencesControlsTimesAtVenueLabel, self.eventOccurrenceCurrentVenueSummaryObject.place.title, self.occurrencesControlsBackButton, self.occurrencesControlsNavBar);
     
 }
 
