@@ -49,9 +49,13 @@
              nil]];
 }
 
+// THIS SHOULD BE UPDATED: The bulk of the implementation of this method is repeated in OccurrenceSummaryDate.m
 - (NSArray *) occurrencesByDateVenueTimeNearUserLocation:(UserLocation *)userLocation {
+    
     if (userLocation != nil) {
+        
         CLLocation * userLocationCL = [[[CLLocation alloc] initWithLatitude:userLocation.latitude.doubleValue longitude:userLocation.longitude.doubleValue] autorelease];
+        
         NSComparator locationsComparator = ^(id a, id b){
             Place * placeA = a;
             Place * placeB = b;
@@ -76,9 +80,11 @@
                  [NSSortDescriptor sortDescriptorWithKey:@"place" ascending:YES comparator:locationsComparator],
                  [NSSortDescriptor sortDescriptorWithKey:@"startTime" ascending:YES],
                  nil]];
+        
     } else {
         return self.occurrencesByDateVenueTime;
     }
+    
 }
 
 - (NSSet *)occurrencesFilteredWithPredicate:(NSPredicate *)predicate {

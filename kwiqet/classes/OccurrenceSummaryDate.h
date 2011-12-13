@@ -8,15 +8,18 @@
 
 #import <Foundation/Foundation.h>
 #import "OccurrenceSummaryVenue.h"
+#import <CoreLocation/CoreLocation.h>
 
 @interface OccurrenceSummaryDate : NSObject {
     
     NSDate * date;
-    NSArray * venues; // Array of OccurrenceSummaryVenue objects
+    NSMutableArray * venues; // Array of OccurrenceSummaryVenue objects
     
 }
 
 @property (retain) NSDate * date;
-@property (retain) NSArray * venues;
+@property (retain) NSMutableArray * venues;
+
+- (void) resortVenuesByProximityToCoordinate:(CLLocationCoordinate2D)coordinate;
 
 @end

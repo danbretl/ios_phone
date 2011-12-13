@@ -105,6 +105,7 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
 @property (retain) NSMutableArray * eventOccurrencesSummaryArray;
 @property (retain) NSMutableDictionary * eventOccurrencesPlaceDistancesDictionary;
 @property (retain) Occurrence * eventOccurrenceCurrent;
+@property (retain) Occurrence * eventOccurrenceCurrentTemp;
 @property int eventOccurrenceCurrentDateIndex;
 @property int eventOccurrenceCurrentVenueIndex;
 @property int eventOccurrenceCurrentTimeIndex;
@@ -146,6 +147,7 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
 - (void) pushedToShareViaEmail;
 - (void) pushedToShareViaFacebook;
 - (void) processEventOccurrences:(NSArray *)arrayOfEventOccurrences;
+- (void) resortEventOccurrencesVenuesAccordingToCurrentUserLocation;
 - (void) reloadOccurrencesTableViews;
 - (void) updateOccurrenceInfoViewsFromDataAnimated:(BOOL)animated;
 - (void) updateOccurrencesControlsInternalViewsFromData;
@@ -183,6 +185,7 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
 @synthesize userLocation=userLocation_;//, userLocationString=userLocationString_;
 @synthesize event;
 @synthesize eventOccurrenceCurrent;
+@synthesize eventOccurrenceCurrentTemp;
 @synthesize eventOccurrenceCurrentDateIndex, eventOccurrenceCurrentVenueIndex, eventOccurrenceCurrentTimeIndex;
 @synthesize eventOccurrencesSummaryArray;
 @synthesize eventOccurrencesPlaceDistancesDictionary;
@@ -264,6 +267,7 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
 //    [userLocationString_ release];
     [event release];
     [eventOccurrenceCurrent release];
+    [eventOccurrenceCurrentTemp release];
     [eventOccurrencesSummaryArray release];
     [eventOccurrencesPlaceDistancesDictionary release];
     [webActivityView release];
@@ -617,10 +621,30 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
     [currentOccurrenceSummaryVenue setOccurrences:currentDevelopingOccurrencesArray makeTimesSummaryUsingTimeFormatter:self.occurrenceTimeFormatter];
     
     self.eventOccurrenceCurrent = [arrayOfEventOccurrences objectAtIndex:0]; // THIS NEEDS TO CHANGE, ACCORDING TO WHAT THE USER'S FILTERS WERE IN EventsViewController, THEIR LOCATION, AND PROBABLY OTHER THINGS. THIS NEEDS TO CHANGE, ACCORDING TO WHAT THE USER'S FILTERS WERE IN EventsViewController, THEIR LOCATION, AND PROBABLY OTHER THINGS. THIS NEEDS TO CHANGE, ACCORDING TO WHAT THE USER'S FILTERS WERE IN EventsViewController, THEIR LOCATION, AND PROBABLY OTHER THINGS. THIS NEEDS TO CHANGE, ACCORDING TO WHAT THE USER'S FILTERS WERE IN EventsViewController, THEIR LOCATION, AND PROBABLY OTHER THINGS. THIS NEEDS TO CHANGE, ACCORDING TO WHAT THE USER'S FILTERS WERE IN EventsViewController, THEIR LOCATION, AND PROBABLY OTHER THINGS. THIS NEEDS TO CHANGE, ACCORDING TO WHAT THE USER'S FILTERS WERE IN EventsViewController, THEIR LOCATION, AND PROBABLY OTHER THINGS. THIS NEEDS TO CHANGE, ACCORDING TO WHAT THE USER'S FILTERS WERE IN EventsViewController, THEIR LOCATION, AND PROBABLY OTHER THINGS. THIS NEEDS TO CHANGE, ACCORDING TO WHAT THE USER'S FILTERS WERE IN EventsViewController, THEIR LOCATION, AND PROBABLY OTHER THINGS. THIS NEEDS TO CHANGE, ACCORDING TO WHAT THE USER'S FILTERS WERE IN EventsViewController, THEIR LOCATION, AND PROBABLY OTHER THINGS. THIS NEEDS TO CHANGE, ACCORDING TO WHAT THE USER'S FILTERS WERE IN EventsViewController, THEIR LOCATION, AND PROBABLY OTHER THINGS. THIS NEEDS TO CHANGE, ACCORDING TO WHAT THE USER'S FILTERS WERE IN EventsViewController, THEIR LOCATION, AND PROBABLY OTHER THINGS. THIS NEEDS TO CHANGE, ACCORDING TO WHAT THE USER'S FILTERS WERE IN EventsViewController, THEIR LOCATION, AND PROBABLY OTHER THINGS. THIS NEEDS TO CHANGE, ACCORDING TO WHAT THE USER'S FILTERS WERE IN EventsViewController, THEIR LOCATION, AND PROBABLY OTHER THINGS. THIS NEEDS TO CHANGE, ACCORDING TO WHAT THE USER'S FILTERS WERE IN EventsViewController, THEIR LOCATION, AND PROBABLY OTHER THINGS. THIS NEEDS TO CHANGE, ACCORDING TO WHAT THE USER'S FILTERS WERE IN EventsViewController, THEIR LOCATION, AND PROBABLY OTHER THINGS.
+    self.eventOccurrenceCurrentTemp = self.eventOccurrenceCurrent;
     self.eventOccurrenceCurrentDateIndex = [self indexOfDate:self.eventOccurrenceCurrent.startDate inSummaryDates:self.eventOccurrencesSummaryArray];
     self.eventOccurrenceCurrentVenueIndex = [self indexOfPlace:self.eventOccurrenceCurrent.place inSummaryVenues:self.eventOccurrenceCurrentDateSummaryObject.venues];
     self.eventOccurrenceCurrentTimeIndex = [self indexOfTime:self.eventOccurrenceCurrent.startTime inOccurrences:self.eventOccurrenceCurrentVenueSummaryObject.occurrences settleForClosestFit:NO];
     
+}
+
+- (void) resortEventOccurrencesVenuesAccordingToCurrentUserLocation {
+    [self.eventOccurrencesPlaceDistancesDictionary removeAllObjects];
+    CLLocation * userLocationCL = [[[CLLocation alloc] initWithLatitude:self.userLocation.latitude.doubleValue longitude:self.userLocation.longitude.doubleValue] autorelease];
+    for (OccurrenceSummaryDate * osd in self.eventOccurrencesSummaryArray) {
+        [osd resortVenuesByProximityToCoordinate:CLLocationCoordinate2DMake(self.userLocation.latitude.doubleValue, self.userLocation.longitude.doubleValue)];
+        for (OccurrenceSummaryVenue * osv in osd.venues) {
+            if ([self.eventOccurrencesPlaceDistancesDictionary objectForKey:osv.place.uri] == nil) {
+                CLLocation * occurrencePlaceLocation = [[CLLocation alloc] initWithLatitude:osv.place.latitude.doubleValue longitude:osv.place.longitude.doubleValue];
+                NSNumber * distanceNumber = [NSNumber numberWithDouble:[userLocationCL distanceFromLocation:occurrencePlaceLocation]];
+                [occurrencePlaceLocation release];
+                [self.eventOccurrencesPlaceDistancesDictionary setObject:distanceNumber forKey:osv.place.uri];
+            }
+        }
+    }
+    [self.occurrencesControlsVenuesTableView reloadSections:[NSIndexSet indexSetWithIndex:0] withRowAnimation:self.view.window ? UITableViewRowAnimationFade : UITableViewRowAnimationNone];
+    self.eventOccurrenceCurrentVenueIndex = 0;
+    [self.occurrencesControlsVenuesTableView selectRowAtIndexPath:[NSIndexPath indexPathForRow:self.eventOccurrenceCurrentVenueIndex inSection:0] animated:NO scrollPosition:UITableViewScrollPositionTop];
 }
 
 - (void) webConnector:(WebConnector *)webConnector getAllOccurrencesSuccess:(ASIHTTPRequest *)request forEventURI:(NSString *)eventURI {
@@ -1026,6 +1050,7 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
     self.scrollView.scrollEnabled = !self.occurrencesControlsPulledOut;
     self.tapToPullInOccurrencesControls.enabled = !self.occurrencesControlsPulledOut;
     self.darkOverlayViewForScrollView.frame = CGRectMake(0, CGRectGetMaxY(self.titleBar.frame), self.scrollView.bounds.size.width, self.scrollView.bounds.size.height);
+    self.eventOccurrenceCurrentTemp = self.eventOccurrenceCurrent;
     [UIView animateWithDuration:0.25 delay:0.0 options:UIViewAnimationOptionBeginFromCurrentState animations:^{
         CGRect occurrencesControlsContainerFrame = self.occurrencesControlsContainer.frame;
         if (self.occurrencesControlsPulledOut) {
@@ -1669,7 +1694,7 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
     if (updateSelectedVenue) {
         updateSelectedTime = YES;
 //        self.eventOccurrenceCurrentVenueIndex = 0; // Temporary safety value...
-        NSUInteger indexOfVenueToSelect = [self indexOfPlace:self.eventOccurrenceCurrent.place inSummaryVenues:self.eventOccurrenceCurrentDateSummaryObject.venues];
+        NSUInteger indexOfVenueToSelect = [self indexOfPlace:self.eventOccurrenceCurrentTemp.place inSummaryVenues:self.eventOccurrenceCurrentDateSummaryObject.venues];
         if (indexOfVenueToSelect == NSNotFound) { indexOfVenueToSelect = 0; } // THIS FALLBACK PROBABLY NEEDS TO BE UPDATED ONCE WE ARE SORTING THE LIST BY PROXIMITY TO USER, ETC...
         self.eventOccurrenceCurrentVenueIndex = indexOfVenueToSelect;
         NSIndexPath * indexPathOfVenueToSelect = [NSIndexPath indexPathForRow:self.eventOccurrenceCurrentVenueIndex inSection:0];
@@ -1681,7 +1706,7 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
     
     if (updateSelectedTime) {
 //        self.eventOccurrenceCurrentTimeIndex = 0; // Temporary safety value...
-        NSUInteger indexOfTimeToSelect = [self indexOfTime:self.eventOccurrenceCurrent.startTime inOccurrences:self.eventOccurrenceCurrentVenueSummaryObject.occurrences settleForClosestFit:YES];
+        NSUInteger indexOfTimeToSelect = [self indexOfTime:self.eventOccurrenceCurrentTemp.startTime inOccurrences:self.eventOccurrenceCurrentVenueSummaryObject.occurrences settleForClosestFit:YES];
         self.eventOccurrenceCurrentTimeIndex = indexOfTimeToSelect;
         NSIndexPath * indexPathOfTimeToSelect = [NSIndexPath indexPathForRow:self.eventOccurrenceCurrentTimeIndex inSection:0];
         [self.occurrencesControlsTimesTableView reloadData];
@@ -1689,8 +1714,9 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
         [self.occurrencesControlsTimesTableView scrollToRowAtIndexPath:indexPathOfTimeToSelect atScrollPosition:UITableViewScrollPositionMiddle animated:YES];
     }
     
+    self.eventOccurrenceCurrentTemp = [self.eventOccurrenceCurrentVenueSummaryObject.occurrences objectAtIndex:self.eventOccurrenceCurrentTimeIndex];
     if (tableView == self.occurrencesControlsTimesTableView) {
-        self.eventOccurrenceCurrent = [self.eventOccurrenceCurrentVenueSummaryObject.occurrences objectAtIndex:self.eventOccurrenceCurrentTimeIndex];
+        self.eventOccurrenceCurrent = self.eventOccurrenceCurrentTemp;
         [self updateOccurrenceInfoViewsFromDataAnimated:YES];
         [self toggleOccurrencesControlsAndResetTableViewsWhenClosing:NO];
     } else {
@@ -1860,9 +1886,7 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
     self.userLocation = location;
 //    [self setUserLocation:location forSource:self.listMode updateViews:YES animated:NO];
     [self updateOccurrencesControlsInternalViewsFromData];
-    [self processEventOccurrences:[self.event occurrencesByDateVenueTimeNearUserLocation:self.userLocation]];
-    [self.occurrencesControlsVenuesTableView reloadData];
-    [self.occurrencesControlsVenuesTableView selectRowAtIndexPath:[NSIndexPath indexPathForRow:eventOccurrenceCurrentVenueIndex inSection:0] animated:NO scrollPosition:UITableViewScrollPositionNone];
+    [self resortEventOccurrencesVenuesAccordingToCurrentUserLocation];
     [self dismissModalViewControllerAnimated:YES];
     self.setLocationViewController = nil;
     // NEED TO UPDATE the order of the venues list according to the new location, so that the venues are still listed in order of proximity NEED TO UPDATE the order of the venues list according to the new location, so that the venues are still listed in order of proximity NEED TO UPDATE the order of the venues list according to the new location, so that the venues are still listed in order of proximity NEED TO UPDATE the order of the venues list according to the new location, so that the venues are still listed in order of proximity NEED TO UPDATE the order of the venues list according to the new location, so that the venues are still listed in order of proximity NEED TO UPDATE the order of the venues list according to the new location, so that the venues are still listed in order of proximity NEED TO UPDATE the order of the venues list according to the new location, so that the venues are still listed in order of proximity NEED TO UPDATE the order of the venues list according to the new location, so that the venues are still listed in order of proximity NEED TO UPDATE the order of the venues list according to the new location, so that the venues are still listed in order of proximity NEED TO UPDATE the order of the venues list according to the new location, so that the venues are still listed in order of proximity NEED TO UPDATE the order of the venues list according to the new location, so that the venues are still listed in order of proximity NEED TO UPDATE the order of the venues list according to the new location, so that the venues are still listed in order of proximity 

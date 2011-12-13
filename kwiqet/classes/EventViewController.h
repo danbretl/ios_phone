@@ -114,6 +114,7 @@ typedef enum {
 //    NSString * userLocationString_; // Currently, this variable is just passed on from the events list. This will obviously need to change, so that the user's location can be changed / updated while the event card is showing.
     Event * event;
     Occurrence * eventOccurrenceCurrent;
+    Occurrence * eventOccurrenceCurrentTemp;
     int eventOccurrenceCurrentDateIndex;
     int eventOccurrenceCurrentVenueIndex;
     int eventOccurrenceCurrentTimeIndex;
