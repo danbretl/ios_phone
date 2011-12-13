@@ -8,6 +8,7 @@
 
 #import <Foundation/Foundation.h>
 #import <CoreData/CoreData.h>
+#import "UserLocation.h"
 
 @class Category, CategoryBreadcrumb, EventSummary, Occurrence, Place, EventResult;
 
@@ -29,6 +30,7 @@
 
 @property (nonatomic, readonly) NSArray * occurrencesChronological;
 @property (nonatomic, readonly) NSArray * occurrencesByDateVenueTime;
+- (NSArray *) occurrencesByDateVenueTimeNearUserLocation:(UserLocation *)userLocation;
 - (NSSet *) occurrencesNotOnDate:(NSDate *)dateNotToMatch;
 - (NSSet *) occurrencesOnDate:(NSDate *)dateToMatch notAtPlace:(Place *)placeNotToMatch;
 - (NSSet *) occurrencesOnDate:(NSDate *)dateToMatch atPlace:(Place *)placeToMatch notAtTime:(NSDate *)timeNotToMatch;

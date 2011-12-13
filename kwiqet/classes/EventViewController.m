@@ -103,6 +103,7 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
 @property (retain) IBOutlet UIButton * occurrencesControlsBackButton;
 
 @property (retain) NSMutableArray * eventOccurrencesSummaryArray;
+@property (retain) NSMutableDictionary * eventOccurrencesPlaceDistancesDictionary;
 @property (retain) Occurrence * eventOccurrenceCurrent;
 @property int eventOccurrenceCurrentDateIndex;
 @property int eventOccurrenceCurrentVenueIndex;
@@ -130,6 +131,7 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
 - (IBAction) occurrencesControlsCancelButtonTouched:(id)sender;
 - (IBAction) occurrencesControlsBackButtonTouched:(id)sender;
 - (void) occurrenceInfoRetryButtonTouched;
+- (IBAction) occurrencesControlsDatesVenuesNavBarTouched:(UITapGestureRecognizer *)tapRecognizer;
 - (IBAction) occurrenceInfoButtonTouched:(UIButton *)occurrenceInfoButton;
 - (void) setOccurrencesControlsToShowGroup:(OccurrencesControlsGroup)ocGroup animated:(BOOL)animated;
 - (void) swipedToGoBack:(UISwipeGestureRecognizer *)swipeGesture;
@@ -143,7 +145,7 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
 - (void) pushedToCreateFacebookEvent;
 - (void) pushedToShareViaEmail;
 - (void) pushedToShareViaFacebook;
-- (void) processOccurrencesFromEvent:(Event *)theEvent;
+- (void) processEventOccurrences:(NSArray *)arrayOfEventOccurrences;
 - (void) reloadOccurrencesTableViews;
 - (void) updateOccurrenceInfoViewsFromDataAnimated:(BOOL)animated;
 - (void) updateOccurrencesControlsInternalViewsFromData;
@@ -163,8 +165,10 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
 - (void) facebookEventInviteFailure:(NSNotification *)notification;
 - (void) facebookAuthFailure:(NSNotification *)notification;
 
-@property (retain) CLLocation * userLocation;
-@property (retain) NSString * userLocationString;
+//@property (retain) CLLocation * userLocation;
+//@property (retain) NSString * userLocationString;
+
+@property (nonatomic, retain) SetLocationViewController * setLocationViewController;
 
 @end
 
@@ -176,17 +180,19 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
 @synthesize occurrencesControlsPulledOut;
 @synthesize occurrencesControlsContainer, occurrencesControlsHandleImageView, occurrencesControlsNavBar, occurrencesControlsTableViewContainer, occurrencesControlsTableViewOverlay, occurrencesControlsTableViewsContainer, occurrencesControlsDatesTableView, occurrencesControlsVenuesTableView, occurrencesControlsDatesVenuesSeparatorView, occurrencesControlsVenuesTimesSeparatorView, occurrencesControlsTimesTableView, occurrencesControlsNavBarsContainer, occurrencesControlsDatesVenuesNavBar, occurrencesControlsTimesNavBar, occurrencesControlsVenuesNearHeaderLabel, occurrencesControlsVenuesNearLocationLabel, occurrencesControlsTimesOnDateLabel, occurrencesControlsTimesAtVenueLabel, occurrencesControlsCancelButton, occurrencesControlsBackButton;
 
-@synthesize userLocation=userLocation_, userLocationString=userLocationString_;
+@synthesize userLocation=userLocation_;//, userLocationString=userLocationString_;
 @synthesize event;
 @synthesize eventOccurrenceCurrent;
 @synthesize eventOccurrenceCurrentDateIndex, eventOccurrenceCurrentVenueIndex, eventOccurrenceCurrentTimeIndex;
 @synthesize eventOccurrencesSummaryArray;
+@synthesize eventOccurrencesPlaceDistancesDictionary;
 @synthesize webActivityView;
 @synthesize delegate;
 @synthesize coreDataModel;
 @synthesize mapViewController;
 @synthesize facebookManager;
 @synthesize letsGoChoiceActionSheet, letsGoChoiceActionSheetSelectors, shareChoiceActionSheet, shareChoiceActionSheetSelectors;
+@synthesize setLocationViewController=setLocationViewController_;
 
 - (void)dealloc {
     [backgroundColorView release];
@@ -255,10 +261,11 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
     [swipeToPushOutOccurrencesControls release];
     [tapToPullInOccurrencesControls release];
     [userLocation_ release];
-    [userLocationString_ release];
+//    [userLocationString_ release];
     [event release];
     [eventOccurrenceCurrent release];
     [eventOccurrencesSummaryArray release];
+    [eventOccurrencesPlaceDistancesDictionary release];
     [webActivityView release];
     [connectionErrorOnUserActionRequestAlertView release];
     [mapViewController release];
@@ -271,6 +278,7 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
     [letsGoChoiceActionSheetSelectors release];
     [shareChoiceActionSheet release];
     [shareChoiceActionSheetSelectors release];
+    [setLocationViewController_ release];
     [super dealloc];
 	
 }
@@ -280,6 +288,7 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
     if (self) {
         self.eventOccurrencesSummaryArray = [NSMutableArray array];
+        self.eventOccurrencesPlaceDistancesDictionary = [NSMutableDictionary dictionary];
         debuggingOccurrencesPicker = NO;
     }
     return self;
@@ -476,10 +485,11 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
     
     [self.occurrenceInfoOverlayView setMessagesForMode:LoadingEventDetails];
     if (self.event) {
-        if (self.event.occurrencesByDateVenueTime && 
-            self.event.occurrencesByDateVenueTime.count > 0) {
+        NSArray * arrayOfEventOccurrences = [self.event occurrencesByDateVenueTimeNearUserLocation:self.userLocation];
+        if (arrayOfEventOccurrences && 
+            arrayOfEventOccurrences.count > 0) {
             NSLog(@"About to process occurrences from viewDidLoad");
-            [self processOccurrencesFromEvent:self.event];
+            [self processEventOccurrences:arrayOfEventOccurrences];
             [self reloadOccurrencesTableViews];
             [self setOccurrenceInfoContainerIsCollapsed:YES animated:NO];
         }
@@ -538,9 +548,10 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
     if (event != theEvent) {
         [event release];
         event = [theEvent retain];
-        if (self.event.occurrencesByDateVenueTime && 
-            self.event.occurrencesByDateVenueTime.count > 0) {
-            [self processOccurrencesFromEvent:self.event];
+        NSArray * arrayOfEventOccurrences = [self.event occurrencesByDateVenueTimeNearUserLocation:self.userLocation];
+        if (arrayOfEventOccurrences && 
+            arrayOfEventOccurrences.count > 0) {
+            [self processEventOccurrences:arrayOfEventOccurrences];
             [self reloadOccurrencesTableViews];
         }
         if (self.view.window) {
@@ -551,86 +562,64 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
     }
 }
 
-- (void)setUserLocation:(CLLocation *)userLocation withUserLocationString:(NSString *)userLocationString {
-    self.userLocation = userLocation;
-    self.userLocationString = userLocationString;
-}
+//- (void)setUserLocation:(CLLocation *)userLocation withUserLocationString:(NSString *)userLocationString {
+//    self.userLocation = userLocation;
+//    self.userLocationString = userLocationString;
+//}
 
-- (void)processOccurrencesFromEvent:(Event *)theEvent {
-    NSArray * occurrencesByDateVenueTime = theEvent.occurrencesByDateVenueTime;
+- (void) processEventOccurrences:(NSArray *)arrayOfEventOccurrences {
     // Sort through occurrences...
     // Get rid of any existing occurrence summary objects
     [self.eventOccurrencesSummaryArray removeAllObjects];
+    [self.eventOccurrencesPlaceDistancesDictionary removeAllObjects];
     // Set up variables
     OccurrenceSummaryDate * currentOccurrenceSummaryDate = nil;
     OccurrenceSummaryVenue * currentOccurrenceSummaryVenue = nil;
     NSMutableArray * currentDevelopingVenuesArray = nil;
     NSMutableArray * currentDevelopingOccurrencesArray = nil;
+    CLLocation * userLocationCL = [[[CLLocation alloc] initWithLatitude:self.userLocation.latitude.doubleValue longitude:self.userLocation.longitude.doubleValue] autorelease];
     // Loop through all occurrences (which are sorted by date, venue, time)
-    for (Occurrence * occurrence in occurrencesByDateVenueTime) {
+    for (Occurrence * occurrence in arrayOfEventOccurrences) {
+        if ([self.eventOccurrencesPlaceDistancesDictionary objectForKey:occurrence.place.uri] == nil) {
+            CLLocation * occurrencePlaceLocation = [[CLLocation alloc] initWithLatitude:occurrence.place.latitude.doubleValue longitude:occurrence.place.longitude.doubleValue];
+            NSNumber * distanceNumber = [NSNumber numberWithDouble:[userLocationCL distanceFromLocation:occurrencePlaceLocation]];
+            [occurrencePlaceLocation release];
+            [self.eventOccurrencesPlaceDistancesDictionary setObject:distanceNumber forKey:occurrence.place.uri];
+        }
         // Fix small bug...
         BOOL madeNewVenuesArray = NO;
-        NSLog(@"--- Dealing with new occurrence (date %@ venue %@ time %@)", occurrence.startDate, occurrence.place.title, occurrence.startTime);
         // Check if we need to start a new OccurrenceSummaryDate object
         if (![occurrence.startDate isEqualToDate:currentOccurrenceSummaryDate.date]) {
-            NSLog(@"Occurrence start date does not equal previous occurrence start date");
             if (currentOccurrenceSummaryDate != nil) {
-                NSLog(@"Setting old current occurrence summary date's venues array to old current developing venues array");
                 currentOccurrenceSummaryDate.venues = currentDevelopingVenuesArray;
             }
-            NSLog(@"Creating new occurrence summary date");
             currentOccurrenceSummaryDate = [[[OccurrenceSummaryDate alloc] init] autorelease]; 
             [self.eventOccurrencesSummaryArray addObject:currentOccurrenceSummaryDate];
-            NSLog(@"Added occurrence summary date to one and only dates array, count now %d", self.eventOccurrencesSummaryArray.count);
             currentOccurrenceSummaryDate.date = occurrence.startDate;
-            NSLog(@"Creating new developing venues array");
             currentDevelopingVenuesArray = [NSMutableArray array];
             madeNewVenuesArray = YES;
         }
         // Check if we need to start a new OccurrenceSummaryVenue object
         if (madeNewVenuesArray || occurrence.place != currentOccurrenceSummaryVenue.place) {
-            NSLog(@"Occurrence venue does not equal previous occurrence venue");
             if (currentOccurrenceSummaryVenue != nil) {
-                NSLog(@"Setting old current occurrence summary venue's occurrences to old current developing occurrences array");
                 [currentOccurrenceSummaryVenue setOccurrences:currentDevelopingOccurrencesArray makeTimesSummaryUsingTimeFormatter:self.occurrenceTimeFormatter];
             }
-            NSLog(@"Creating new occurrence summary venue");
             currentOccurrenceSummaryVenue = [[[OccurrenceSummaryVenue alloc] init] autorelease];
             [currentDevelopingVenuesArray addObject:currentOccurrenceSummaryVenue];
-            NSLog(@"Added occurrence summary venue to current venues array, count now %d", currentDevelopingVenuesArray.count);
             currentOccurrenceSummaryVenue.place = occurrence.place;
-            NSLog(@"Creating new developing occurrences array");
             currentDevelopingOccurrencesArray = [NSMutableArray array];
         }
         // Add this occurrence to the current OccurrenceSummaryVenueObject
         [currentDevelopingOccurrencesArray addObject:occurrence];
-        NSLog(@"Added occurrence to current occurrences array, count now %d", currentDevelopingOccurrencesArray.count);
     }
     // Final cleanup
-    NSLog(@"Cleanup - setting last venues array");
     currentOccurrenceSummaryDate.venues = currentDevelopingVenuesArray;
-    NSLog(@"Cleanup - setting last occurrences array");
     [currentOccurrenceSummaryVenue setOccurrences:currentDevelopingOccurrencesArray makeTimesSummaryUsingTimeFormatter:self.occurrenceTimeFormatter];
     
-    self.eventOccurrenceCurrent = [occurrencesByDateVenueTime objectAtIndex:0]; // THIS NEEDS TO CHANGE, ACCORDING TO WHAT THE USER'S FILTERS WERE IN EventsViewController, THEIR LOCATION, AND PROBABLY OTHER THINGS. THIS NEEDS TO CHANGE, ACCORDING TO WHAT THE USER'S FILTERS WERE IN EventsViewController, THEIR LOCATION, AND PROBABLY OTHER THINGS. THIS NEEDS TO CHANGE, ACCORDING TO WHAT THE USER'S FILTERS WERE IN EventsViewController, THEIR LOCATION, AND PROBABLY OTHER THINGS. THIS NEEDS TO CHANGE, ACCORDING TO WHAT THE USER'S FILTERS WERE IN EventsViewController, THEIR LOCATION, AND PROBABLY OTHER THINGS. THIS NEEDS TO CHANGE, ACCORDING TO WHAT THE USER'S FILTERS WERE IN EventsViewController, THEIR LOCATION, AND PROBABLY OTHER THINGS.
+    self.eventOccurrenceCurrent = [arrayOfEventOccurrences objectAtIndex:0]; // THIS NEEDS TO CHANGE, ACCORDING TO WHAT THE USER'S FILTERS WERE IN EventsViewController, THEIR LOCATION, AND PROBABLY OTHER THINGS. THIS NEEDS TO CHANGE, ACCORDING TO WHAT THE USER'S FILTERS WERE IN EventsViewController, THEIR LOCATION, AND PROBABLY OTHER THINGS. THIS NEEDS TO CHANGE, ACCORDING TO WHAT THE USER'S FILTERS WERE IN EventsViewController, THEIR LOCATION, AND PROBABLY OTHER THINGS. THIS NEEDS TO CHANGE, ACCORDING TO WHAT THE USER'S FILTERS WERE IN EventsViewController, THEIR LOCATION, AND PROBABLY OTHER THINGS. THIS NEEDS TO CHANGE, ACCORDING TO WHAT THE USER'S FILTERS WERE IN EventsViewController, THEIR LOCATION, AND PROBABLY OTHER THINGS. THIS NEEDS TO CHANGE, ACCORDING TO WHAT THE USER'S FILTERS WERE IN EventsViewController, THEIR LOCATION, AND PROBABLY OTHER THINGS. THIS NEEDS TO CHANGE, ACCORDING TO WHAT THE USER'S FILTERS WERE IN EventsViewController, THEIR LOCATION, AND PROBABLY OTHER THINGS. THIS NEEDS TO CHANGE, ACCORDING TO WHAT THE USER'S FILTERS WERE IN EventsViewController, THEIR LOCATION, AND PROBABLY OTHER THINGS. THIS NEEDS TO CHANGE, ACCORDING TO WHAT THE USER'S FILTERS WERE IN EventsViewController, THEIR LOCATION, AND PROBABLY OTHER THINGS. THIS NEEDS TO CHANGE, ACCORDING TO WHAT THE USER'S FILTERS WERE IN EventsViewController, THEIR LOCATION, AND PROBABLY OTHER THINGS. THIS NEEDS TO CHANGE, ACCORDING TO WHAT THE USER'S FILTERS WERE IN EventsViewController, THEIR LOCATION, AND PROBABLY OTHER THINGS. THIS NEEDS TO CHANGE, ACCORDING TO WHAT THE USER'S FILTERS WERE IN EventsViewController, THEIR LOCATION, AND PROBABLY OTHER THINGS. THIS NEEDS TO CHANGE, ACCORDING TO WHAT THE USER'S FILTERS WERE IN EventsViewController, THEIR LOCATION, AND PROBABLY OTHER THINGS. THIS NEEDS TO CHANGE, ACCORDING TO WHAT THE USER'S FILTERS WERE IN EventsViewController, THEIR LOCATION, AND PROBABLY OTHER THINGS. THIS NEEDS TO CHANGE, ACCORDING TO WHAT THE USER'S FILTERS WERE IN EventsViewController, THEIR LOCATION, AND PROBABLY OTHER THINGS.
     self.eventOccurrenceCurrentDateIndex = [self indexOfDate:self.eventOccurrenceCurrent.startDate inSummaryDates:self.eventOccurrencesSummaryArray];
     self.eventOccurrenceCurrentVenueIndex = [self indexOfPlace:self.eventOccurrenceCurrent.place inSummaryVenues:self.eventOccurrenceCurrentDateSummaryObject.venues];
     self.eventOccurrenceCurrentTimeIndex = [self indexOfTime:self.eventOccurrenceCurrent.startTime inOccurrences:self.eventOccurrenceCurrentVenueSummaryObject.occurrences settleForClosestFit:NO];
-    
-    // Debugging...
-    NSLog(@"Summarize all that processing work we just did...");
-    for (OccurrenceSummaryDate * osd in self.eventOccurrencesSummaryArray) {
-        NSLog(@"OccurrenceSummaryDate %@", osd.date);
-        for (OccurrenceSummaryVenue * osv in osd.venues) {
-            NSLog(@"OccurrenceSummaryVenue %@", osv.place.title);
-            for (Occurrence * o in osv.occurrences) {
-                NSLog(@"Occurrence at %@", [self.occurrenceTimeFormatter stringFromDate:o.startTime]);
-            }
-        }
-    }
-    NSLog(@"eventOccurrenceCurrentDateIndex=%d", self.eventOccurrenceCurrentDateIndex);
-    NSLog(@"eventOccurrenceCurrentVenueIndex=%d", self.eventOccurrenceCurrentVenueIndex);
-    NSLog(@"eventOccurrenceCurrentTimeIndex=%d", self.eventOccurrenceCurrentTimeIndex);
     
 }
 
@@ -642,10 +631,11 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
     [self.coreDataModel updateEvent:self.event withExhaustiveOccurrencesArray:[responseDictionary valueForKey:@"objects"]];
     [self.coreDataModel coreDataSave];
     
-    if (self.event.occurrencesByDateVenueTime && 
-        self.event.occurrencesByDateVenueTime.count > 0) {
+    NSArray * arrayOfEventOccurrences = [self.event occurrencesByDateVenueTimeNearUserLocation:self.userLocation];
+    if (arrayOfEventOccurrences && 
+        arrayOfEventOccurrences.count > 0) {
         NSLog(@"About to process occurrences from getAllOccurrencesSuccess");
-        [self processOccurrencesFromEvent:self.event];
+        [self processEventOccurrences:arrayOfEventOccurrences];
         [self reloadOccurrencesTableViews];
     }
     
@@ -840,7 +830,7 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
     };
     
     // Venues near... (User location)
-    updateLabelBlock(self.occurrencesControlsVenuesNearLocationLabel, self.userLocationString /* THIS IS NONFUNCTIONAL CURRENTLY. WE ARE CURRENTLY TAKING THE LOCATION FROM THE EVENTS LIST AND USING IT HERE. SOON, WE OBVIOUSLY NEED TO LET THE USER CHANGE (OR DEVICE UPDATE) THEIR LOCATION WITHIN THE EVENT CARD. */, self.occurrencesControlsCancelButton, self.occurrencesControlsNavBar);
+    updateLabelBlock(self.occurrencesControlsVenuesNearLocationLabel, self.userLocation.addressFormatted /* THIS IS NONFUNCTIONAL CURRENTLY. WE ARE CURRENTLY TAKING THE LOCATION FROM THE EVENTS LIST AND USING IT HERE. SOON, WE OBVIOUSLY NEED TO LET THE USER CHANGE (OR DEVICE UPDATE) THEIR LOCATION WITHIN THE EVENT CARD. *** UPDATE (DEC 12, 2011) THIS IS NOW BEING FIXED. */, self.occurrencesControlsCancelButton, self.occurrencesControlsNavBar);
     // Times on... (Selected date)
     self.occurrencesControlsTimesOnDateLabel.text = [NSString stringWithFormat:@"Times on %@ at", [self.occurrencesControlsNavBarDateFormatter stringFromDate:self.eventOccurrenceCurrentDateSummaryObject.date]];
     // Times on date at... (Venue name)
@@ -1577,7 +1567,10 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
             OccurrenceVenueCell * tableViewCellCast = (OccurrenceVenueCell *)tableViewCell;
             tableViewCellCast.venueLabel.text = occurrenceSummaryVenue.place.title;
             tableViewCellCast.venueLabelColor = categoryColor;
+//            tableViewCellCast.addressLabel.text = [NSString stringWithFormat:@"%f %@", [[self.eventOccurrencesPlaceDistancesDictionary objectForKey:occurrenceSummaryVenue.place.uri] doubleValue], occurrenceSummaryVenue.place.address]; // Debugging before we had a place for distance information in the venue cell
+            [tableViewCellCast setDistanceInMeters:[[self.eventOccurrencesPlaceDistancesDictionary objectForKey:occurrenceSummaryVenue.place.uri] doubleValue]];
             tableViewCellCast.addressLabel.text = occurrenceSummaryVenue.place.address;
+            
             tableViewCellCast.timesString = occurrenceSummaryVenue.timesString;
             
         } else if (tableView == self.occurrencesControlsTimesTableView) {
@@ -1830,6 +1823,50 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
 
 - (void)occurrencesControlsBackButtonTouched:(id)sender {
     [self setOccurrencesControlsToShowGroup:OCGroupDatesVenues animated:YES];
+}
+
+
+- (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldReceiveTouch:(UITouch *)touch {
+    BOOL shouldReceive = YES;
+    if ([touch.view isDescendantOfView:self.occurrencesControlsCancelButton]) {
+        shouldReceive = NO; // ignore the touch
+    }
+    return shouldReceive;
+}
+
+- (void)occurrencesControlsDatesVenuesNavBarTouched:(UITapGestureRecognizer *)tapRecognizer {
+    if (self.setLocationViewController == nil) {
+        setLocationViewController_ = [[SetLocationViewController alloc] initWithNibName:@"SetLocationViewController" bundle:[NSBundle mainBundle]];
+    }
+    self.setLocationViewController.coreDataModel = self.coreDataModel;
+    self.setLocationViewController.delegate = self;
+    [self presentModalViewController:self.setLocationViewController animated:YES];
+}
+
+- (void) setLocationViewControllerDidCancel:(SetLocationViewController *)setLocationViewController {
+    [self dismissModalViewControllerAnimated:YES];
+    self.setLocationViewController = nil;
+}
+
+- (void)setLocationViewController:(SetLocationViewController *)setLocationViewController didSelectUserLocation:(UserLocation *)location {
+    [self dismissModalViewControllerAnimated:YES];
+    
+//    LocationMode locationModeForSelectedLocation = location.isManual.boolValue ? LocationModeManual : LocationModeAuto;
+//    if (self.isSearchOn) {
+//        self.locationModeSearch = locationModeForSelectedLocation;
+//    } else {
+//        self.locationModeBrowse = locationModeForSelectedLocation;
+//    }
+    self.userLocation = location;
+//    [self setUserLocation:location forSource:self.listMode updateViews:YES animated:NO];
+    [self updateOccurrencesControlsInternalViewsFromData];
+    [self processEventOccurrences:[self.event occurrencesByDateVenueTimeNearUserLocation:self.userLocation]];
+    [self.occurrencesControlsVenuesTableView reloadData];
+    [self.occurrencesControlsVenuesTableView selectRowAtIndexPath:[NSIndexPath indexPathForRow:eventOccurrenceCurrentVenueIndex inSection:0] animated:NO scrollPosition:UITableViewScrollPositionNone];
+    [self dismissModalViewControllerAnimated:YES];
+    self.setLocationViewController = nil;
+    // NEED TO UPDATE the order of the venues list according to the new location, so that the venues are still listed in order of proximity NEED TO UPDATE the order of the venues list according to the new location, so that the venues are still listed in order of proximity NEED TO UPDATE the order of the venues list according to the new location, so that the venues are still listed in order of proximity NEED TO UPDATE the order of the venues list according to the new location, so that the venues are still listed in order of proximity NEED TO UPDATE the order of the venues list according to the new location, so that the venues are still listed in order of proximity NEED TO UPDATE the order of the venues list according to the new location, so that the venues are still listed in order of proximity NEED TO UPDATE the order of the venues list according to the new location, so that the venues are still listed in order of proximity NEED TO UPDATE the order of the venues list according to the new location, so that the venues are still listed in order of proximity NEED TO UPDATE the order of the venues list according to the new location, so that the venues are still listed in order of proximity NEED TO UPDATE the order of the venues list according to the new location, so that the venues are still listed in order of proximity NEED TO UPDATE the order of the venues list according to the new location, so that the venues are still listed in order of proximity NEED TO UPDATE the order of the venues list according to the new location, so that the venues are still listed in order of proximity 
+//    [self setShouldReloadOnDrawerClose:YES updateDrawerReloadIndicatorView:YES shouldUpdateEventsSummaryStringForCurrentSource:YES animated:YES];
 }
 
 @end

@@ -16,6 +16,7 @@
     UILabel * venueLabel_;
     UILabel * addressLabel_;
     UILabel * timesLabel_;
+    UILabel * distanceLabel_;
     
 //    NSDateFormatter * timeFormatter;
     
@@ -25,7 +26,10 @@
 @property (nonatomic, copy) NSString * timesString;
 @property (nonatomic, readonly) UILabel * venueLabel;
 @property (nonatomic, readonly) UILabel * addressLabel;
+@property (nonatomic, readonly) UILabel * distanceLabel;
 @property (retain, nonatomic) UIColor * venueLabelColor;
+
+- (void) setDistanceInMeters:(double)distanceInMeters;
 
 //+ (CGFloat) cellHeightForTimesArray:(NSArray *)timesArray timeFormatter:(NSDateFormatter *)theTimeFormatter cellWidth:(CGFloat)cellWidth;
 + (CGFloat) cellHeightForTimesString:(NSString *)timesString cellWidth:(CGFloat)cellWidth;

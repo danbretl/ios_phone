@@ -12,6 +12,7 @@
 #import "EventSummary.h"
 #import "Occurrence.h"
 #import "Place.h"
+#import <CoreLocation/CoreLocation.h>
 
 @interface Event()
 - (NSSet *) occurrencesFilteredWithPredicate:(NSPredicate *)predicate;
@@ -46,6 +47,38 @@
              [NSSortDescriptor sortDescriptorWithKey:@"place.title" ascending:YES],
              [NSSortDescriptor sortDescriptorWithKey:@"startTime" ascending:YES],
              nil]];
+}
+
+- (NSArray *) occurrencesByDateVenueTimeNearUserLocation:(UserLocation *)userLocation {
+    if (userLocation != nil) {
+        CLLocation * userLocationCL = [[[CLLocation alloc] initWithLatitude:userLocation.latitude.doubleValue longitude:userLocation.longitude.doubleValue] autorelease];
+        NSComparator locationsComparator = ^(id a, id b){
+            Place * placeA = a;
+            Place * placeB = b;
+            CLLocation * locationACL = [[CLLocation alloc] initWithLatitude:placeA.latitude.doubleValue longitude:placeA.longitude.doubleValue];
+            CLLocation * locationBCL = [[CLLocation alloc] initWithLatitude:placeB.latitude.doubleValue longitude:placeB.longitude.doubleValue];
+            CLLocationDistance distanceA = [locationACL distanceFromLocation:userLocationCL];
+            CLLocationDistance distanceB = [locationBCL distanceFromLocation:userLocationCL];
+            [locationACL release];
+            [locationBCL release];
+            NSComparisonResult result = NSOrderedSame;
+            if (distanceA < distanceB){
+                result = NSOrderedAscending;
+            } else if (distanceA > distanceB){
+                result = NSOrderedDescending;
+            }
+            return result;
+        };
+        
+        return [self.occurrences sortedArrayUsingDescriptors:
+                [NSArray arrayWithObjects:
+                 [NSSortDescriptor sortDescriptorWithKey:@"startDate" ascending:YES],
+                 [NSSortDescriptor sortDescriptorWithKey:@"place" ascending:YES comparator:locationsComparator],
+                 [NSSortDescriptor sortDescriptorWithKey:@"startTime" ascending:YES],
+                 nil]];
+    } else {
+        return self.occurrencesByDateVenueTime;
+    }
 }
 
 - (NSSet *)occurrencesFilteredWithPredicate:(NSPredicate *)predicate {

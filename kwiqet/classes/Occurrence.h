@@ -21,9 +21,9 @@
 @property (nonatomic, retain) NSString * oneOffPlace;
 @property (nonatomic, retain) NSDate * startTime;
 @property (nonatomic, retain) NSString * uri;
-@property (nonatomic, retain) NSSet *prices;
-@property (nonatomic, retain) Event *event;
-@property (nonatomic, retain) Place *place;
+@property (nonatomic, retain) NSSet * prices;
+@property (nonatomic, retain) Event * event;
+@property (nonatomic, retain) Place * place;
 
 @property (nonatomic, readonly) NSArray * pricesLowToHigh;
 @property (nonatomic, readonly) NSDate * startDatetimeComposite;

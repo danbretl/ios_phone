@@ -23,6 +23,8 @@
 #import "UIImageView+WebCache.h"
 #import "SDWebImageManager.h"
 #import "OccurrenceInfoOverlayView.h"
+#import "SetLocationViewController.h"
+#import "UserLocation.h"
 
 typedef enum {
     OCGroupDatesVenues = 1,
@@ -31,7 +33,7 @@ typedef enum {
 
 @protocol CardPageViewControllerDelegate;
 
-@interface EventViewController : UIViewController <MFMailComposeViewControllerDelegate, WebConnectorDelegate, MapViewControllerDelegate, UIScrollViewDelegate, UIActionSheetDelegate, ContactsSelectViewControllerDelegate, SDWebImageManagerDelegate, UITableViewDelegate, UITableViewDataSource> {
+@interface EventViewController : UIViewController <MFMailComposeViewControllerDelegate, WebConnectorDelegate, MapViewControllerDelegate, UIScrollViewDelegate, UIActionSheetDelegate, ContactsSelectViewControllerDelegate, SDWebImageManagerDelegate, UITableViewDelegate, UITableViewDataSource, SetLocationViewControllerDelegate, UIGestureRecognizerDelegate> {
     
     IBOutlet UIView   * backgroundColorView;
 
@@ -108,14 +110,15 @@ typedef enum {
     IBOutlet UIButton    * occurrencesControlsBackButton;
         
     WebActivityView * webActivityView;
-    CLLocation * userLocation_; // Currently, this variable is just passed on from the events list. This will obviously need to change, so that the user's location can be changed / updated while the event card is showing.
-    NSString * userLocationString_; // Currently, this variable is just passed on from the events list. This will obviously need to change, so that the user's location can be changed / updated while the event card is showing.
+//    CLLocation * userLocation_; // Currently, this variable is just passed on from the events list. This will obviously need to change, so that the user's location can be changed / updated while the event card is showing.
+//    NSString * userLocationString_; // Currently, this variable is just passed on from the events list. This will obviously need to change, so that the user's location can be changed / updated while the event card is showing.
     Event * event;
     Occurrence * eventOccurrenceCurrent;
     int eventOccurrenceCurrentDateIndex;
     int eventOccurrenceCurrentVenueIndex;
     int eventOccurrenceCurrentTimeIndex;
     NSMutableArray * eventOccurrencesSummaryArray;
+    NSMutableDictionary * eventOccurrencesPlaceDistancesDictionary;
     id<CardPageViewControllerDelegate> delegate;
     CoreDataModel * coreDataModel;
     MapViewController * mapViewController;    
@@ -127,6 +130,10 @@ typedef enum {
     BOOL deletedEventDueToGoingToEvent;
     FacebookManager * facebookManager;
     
+    // Location
+    SetLocationViewController * setLocationViewController_;
+    UserLocation * userLocation_;
+    
     UIActionSheet  * letsGoChoiceActionSheet;
     NSMutableArray * letsGoChoiceActionSheetSelectors;
     UIActionSheet  * shareChoiceActionSheet;
@@ -136,7 +143,8 @@ typedef enum {
 
 }
 
-- (void) setUserLocation:(CLLocation *)userLocation withUserLocationString:(NSString *)userLocationString;
+//- (void) setUserLocation:(CLLocation *)userLocation withUserLocationString:(NSString *)userLocationString;
+@property (nonatomic, retain) UserLocation * userLocation;
 @property (nonatomic, retain) Event * event;
 @property (assign) id<CardPageViewControllerDelegate> delegate;
 @property (nonatomic, retain) CoreDataModel * coreDataModel;

@@ -73,6 +73,8 @@ static NSString * const DM_TAB_BAR_SELECTED_INDEX_KEY = @"DM_TAB_BAR_SELECTED_IN
     NSUserDefaults * defaults = [NSUserDefaults standardUserDefaults];
     [defaults setObject:accessToken forKey:[[CryptoUtilities md5Encrypt:kwiqetIdentifier] stringByAppendingFormat:@"%@%@", DM_FACEBOOK_ACCESS_INFO_POSTFIX, DM_FACEBOOK_ACCESS_TOKEN_POSTFIX]];
     [defaults setObject:expirationDate forKey:[[CryptoUtilities md5Encrypt:kwiqetIdentifier] stringByAppendingFormat:@"%@%@", DM_FACEBOOK_ACCESS_INFO_POSTFIX, DM_FACEBOOK_EXPIRATION_DATE_POSTFIX]];
+//    NSLog(@"*** *** *** facebook accessToken %@", accessToken);
+//    NSLog(@"*** *** *** facebook expirationDate %@", expirationDate);
 }
 + (NSDictionary *) retrieveFacebookAccessInfoAttachedToKwiqetIdentifier:(NSString *)kwiqetIdentifier {
     NSString * accessToken = [[NSUserDefaults standardUserDefaults] stringForKey:[[CryptoUtilities md5Encrypt:kwiqetIdentifier] stringByAppendingFormat:@"%@%@", DM_FACEBOOK_ACCESS_INFO_POSTFIX, DM_FACEBOOK_ACCESS_TOKEN_POSTFIX]];
