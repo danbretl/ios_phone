@@ -41,8 +41,12 @@
     self.occurrencesPrivate = occurrences;
     NSMutableString * developingTimesString = [NSMutableString string];
     for (Occurrence * occurrence in self.occurrences) {
-        if (occurrence.startTime != nil) {
-            [developingTimesString appendFormat:@"%@, ", [timeFormatter stringFromDate:occurrence.startTime]];
+        if (occurrence.isAllDay.boolValue || occurrence.startTime != nil) {
+            if (occurrence.isAllDay.boolValue) {
+                [developingTimesString appendFormat:@"All Day, "];
+            } else {
+                [developingTimesString appendFormat:@"%@, ", [timeFormatter stringFromDate:occurrence.startTime]];   
+            }
         }
     }
     int endCharactersToSubtract = developingTimesString.length > 0 ? 2 : 0;

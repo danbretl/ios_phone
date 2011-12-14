@@ -511,6 +511,7 @@
         Occurrence * occurrence = [NSEntityDescription insertNewObjectForEntityForName:@"Occurrence" inManagedObjectContext:self.managedObjectContext];
         
         // Date and time - getting
+        NSNumber * isAllDay = [occurrenceDictionary objectForKey:@"is_all_day"];
         NSDate * startDate = [self.webDataTranslator dateDatetimeFromDateString:
                               [WebUtil stringOrNil:[occurrenceDictionary objectForKey:@"start_date"]]];
         NSString * startTimeString = [WebUtil stringOrNil:[occurrenceDictionary objectForKey:@"start_time"]];
@@ -523,8 +524,8 @@
                             [WebUtil stringOrNil:[occurrenceDictionary objectForKey:@"end_date"]]];
         NSDate * endTime = [self.webDataTranslator timeDatetimeFromTimeString:
                             [WebUtil stringOrNil:[occurrenceDictionary objectForKey:@"end_time"]]];
-        // NEED TO GET AND SET (and use in various places later) 'is_all_day' - NEED TO GET AND SET (and use in various places later) 'is_all_day' - NEED TO GET AND SET (and use in various places later) 'is_all_day' - NEED TO GET AND SET (and use in various places later) 'is_all_day' - NEED TO GET AND SET (and use in various places later) 'is_all_day' - NEED TO GET AND SET (and use in various places later) 'is_all_day' - NEED TO GET AND SET (and use in various places later) 'is_all_day' - NEED TO GET AND SET (and use in various places later) 'is_all_day' - NEED TO GET AND SET (and use in various places later) 'is_all_day' - NEED TO GET AND SET (and use in various places later) 'is_all_day' - NEED TO GET AND SET (and use in various places later) 'is_all_day' - NEED TO GET AND SET (and use in various places later) 'is_all_day'
         // Date and time - setting
+        occurrence.isAllDay = isAllDay;
         occurrence.startDate = startDate;
         occurrence.startTime = startTime;
         occurrence.endDate = endDate;

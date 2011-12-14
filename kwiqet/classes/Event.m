@@ -35,7 +35,8 @@
 - (NSArray *) occurrencesChronological {
     return [self.occurrences sortedArrayUsingDescriptors:
             [NSArray arrayWithObjects:
-             [NSSortDescriptor sortDescriptorWithKey:@"startDate" ascending:YES], 
+             [NSSortDescriptor sortDescriptorWithKey:@"startDate" ascending:YES],
+             [NSSortDescriptor sortDescriptorWithKey:@"isAllDay" ascending:YES], 
              [NSSortDescriptor sortDescriptorWithKey:@"startTime" ascending:YES],
              nil]];
 }
@@ -45,6 +46,7 @@
             [NSArray arrayWithObjects:
              [NSSortDescriptor sortDescriptorWithKey:@"startDate" ascending:YES],
              [NSSortDescriptor sortDescriptorWithKey:@"place.title" ascending:YES],
+             [NSSortDescriptor sortDescriptorWithKey:@"isAllDay" ascending:YES],
              [NSSortDescriptor sortDescriptorWithKey:@"startTime" ascending:YES],
              nil]];
 }
@@ -78,6 +80,7 @@
                 [NSArray arrayWithObjects:
                  [NSSortDescriptor sortDescriptorWithKey:@"startDate" ascending:YES],
                  [NSSortDescriptor sortDescriptorWithKey:@"place" ascending:YES comparator:locationsComparator],
+                 [NSSortDescriptor sortDescriptorWithKey:@"isAllDay" ascending:YES],
                  [NSSortDescriptor sortDescriptorWithKey:@"startTime" ascending:YES],
                  nil]];
         

@@ -718,10 +718,15 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
         [dateFormatter release];
         self.dayNameLabel.text = [dayName uppercaseString];
         // Time
-        NSString * timesSeparatorString = @"ARBITRARYSEPARATORNOTTODISPLAY";
-        NSString * time = [self.webDataTranslator timeSpanStringFromStartDatetime:self.eventOccurrenceCurrent.startTime endDatetime:self.eventOccurrenceCurrent.endTime separatorString:timesSeparatorString dataUnavailableString:EVENT_TIME_NOT_AVAILABLE];
-        [self setTimeLabelTextToTimeString:time containsTwoTimes:(self.eventOccurrenceCurrent.startTime && self.eventOccurrenceCurrent.endTime) usingSeparatorString:timesSeparatorString];
-        
+        if (self.eventOccurrenceCurrent.isAllDay.boolValue) {
+            self.timeStartLabel.text = @"All Day";
+            self.timeEndLabel.text = @"";
+        } else {
+            NSString * timesSeparatorString = @"ARBITRARYSEPARATORNOTTODISPLAY";
+            NSString * time = [self.webDataTranslator timeSpanStringFromStartDatetime:self.eventOccurrenceCurrent.startTime endDatetime:self.eventOccurrenceCurrent.endTime separatorString:timesSeparatorString dataUnavailableString:EVENT_TIME_NOT_AVAILABLE];
+            [self setTimeLabelTextToTimeString:time containsTwoTimes:(self.eventOccurrenceCurrent.startTime && self.eventOccurrenceCurrent.endTime) usingSeparatorString:timesSeparatorString];
+        }
+        // Price
         NSArray * prices = self.eventOccurrenceCurrent.pricesLowToHigh;
         Price * minPrice = nil;
         Price * maxPrice = nil;
@@ -1602,7 +1607,11 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
             
             Occurrence * occurrence = [occurrenceSummaryVenue.occurrences objectAtIndex:indexPath.row];
             OccurrenceTimeCell * tableViewCellCast = (OccurrenceTimeCell *)tableViewCell;
-            tableViewCellCast.timeLabel.text = [self.occurrenceTimeFormatter stringFromDate:occurrence.startTime];
+            if (occurrence.isAllDay.boolValue) {
+                tableViewCellCast.timeLabel.text = @"All Day";
+            } else {
+                tableViewCellCast.timeLabel.text = [self.occurrenceTimeFormatter stringFromDate:occurrence.startTime];
+            }
             if (tableViewCellCast.timeLabel.text.length == 0) {
                 tableViewCellCast.timeLabel.text = @"--";
             }
