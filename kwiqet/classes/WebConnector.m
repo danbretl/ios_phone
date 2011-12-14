@@ -138,7 +138,7 @@ static NSString * const WEB_CONNECTOR_ACCOUNT_USER_INFO_KEY_REQUEST_ORIGINATED_W
 - (void) getEventWithURI:(NSString *)eventURI {
     if (self.availableToMakeWebConnection) {
         NSURL * url = [self.urlBuilder buildCardURLWithID:eventURI];
-        NSLog(@"getEventWithURI - url is %@", url);
+        NSLog(@"getEventWithURI - url is %@&format=json", url);
         ASIHTTPRequest * request = [ASIHTTPRequest requestWithURL:url];
         [self.connectionsInProgress addObject:request];
         [request setTimeOutSeconds:self.timeoutLength];
@@ -182,7 +182,7 @@ static NSString * const WEB_CONNECTOR_ACCOUNT_USER_INFO_KEY_REQUEST_ORIGINATED_W
 - (void)getAllOccurrencesForEventWithURI:(NSString *)eventURI {
     if (self.availableToMakeWebConnection) {
         NSURL * url = [self.urlBuilder buildOccurrencesURLForEventID:eventURI];
-        NSLog(@"getAllOccurrencesForEventWithURI - url is %@", url);
+        NSLog(@"getAllOccurrencesForEventWithURI - url is %@&format=json", url);
         ASIHTTPRequest * request = [ASIHTTPRequest requestWithURL:url];
         [self.connectionsInProgress addObject:request];
         [request setTimeOutSeconds:self.timeoutLength];
