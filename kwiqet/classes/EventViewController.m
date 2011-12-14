@@ -734,7 +734,8 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
             minPrice = (Price *)[prices objectAtIndex:0];
             maxPrice = (Price *)[prices lastObject];
         }
-        NSString * price = [self.webDataTranslator priceRangeStringFromMinPrice:minPrice.value maxPrice:maxPrice.value separatorString:nil dataUnavailableString:@"--"];
+        NSString * priceUnavailableString = @"--";
+        NSString * price = [self.webDataTranslator priceRangeStringFromMinPrice:minPrice.value maxPrice:maxPrice.value separatorString:nil dataUnavailableString:priceUnavailableString];
         self.priceLabel.text = price;
         
         // Location & Address
@@ -808,7 +809,6 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
         self.venueLabel.text = @"";
         self.addressLabel.text = @"";
         self.cityStateZipLabel.text = @"";
-        self.priceLabel.text = @"";
         self.phoneNumberButton.enabled = NO;
         self.mapButton.enabled = NO;
         self.mapButton.alpha = 0.0;
