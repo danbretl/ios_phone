@@ -499,7 +499,7 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
         NSArray * arrayOfEventOccurrences = [self.event occurrencesByDateVenueTimeNearUserLocation:self.userLocation];
         if (arrayOfEventOccurrences && 
             arrayOfEventOccurrences.count > 0) {
-            NSLog(@"About to process occurrences from viewDidLoad");
+//            NSLog(@"About to process occurrences from viewDidLoad");
             [self processEventOccurrences:arrayOfEventOccurrences];
             [self reloadOccurrencesTableViews];
             [self setOccurrenceInfoContainerIsCollapsed:YES animated:NO];
@@ -665,7 +665,7 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
     NSArray * arrayOfEventOccurrences = [self.event occurrencesByDateVenueTimeNearUserLocation:self.userLocation];
     if (arrayOfEventOccurrences && 
         arrayOfEventOccurrences.count > 0) {
-        NSLog(@"About to process occurrences from getAllOccurrencesSuccess");
+//        NSLog(@"About to process occurrences from getAllOccurrencesSuccess");
         [self processEventOccurrences:arrayOfEventOccurrences];
         [self reloadOccurrencesTableViews];
     }
@@ -681,7 +681,7 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
 
 - (void) webConnector:(WebConnector *)webConnector getAllOccurrencesFailure:(ASIHTTPRequest *)request forEventURI:(NSString *)eventURI {
     
-    NSLog(@"getAllOccurrencesFailure - need to deal with this!");
+//    NSLog(@"getAllOccurrencesFailure - need to deal with this!");
     [self.occurrenceInfoOverlayView setMessagesForMode:FailedToLoadEventDetails];
     [self hideWebLoadingViews];
     
@@ -917,7 +917,7 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
 //    self.timeStartLabel.backgroundColor = [UIColor yellowColor];
 //    self.timeEndLabel.backgroundColor = [UIColor redColor];
     [self.timeEndLabel.superview bringSubviewToFront:self.timeEndLabel];
-    NSLog(@"EventViewController setTimeLabelToTimeString to %@", timeLabelString);
+//    NSLog(@"EventViewController setTimeLabelToTimeString to %@", timeLabelString);
 }
 
 - (void) updateViewsFromDataAnimated:(BOOL)animated {
@@ -1006,17 +1006,17 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
         CGRect shadowDescriptionContainerFrame = self.shadowDescriptionContainer.frame;
         shadowDescriptionContainerFrame.origin.y = self.descriptionContainer.frame.origin.y;
         self.shadowDescriptionContainer.frame = shadowDescriptionContainerFrame;
-        NSLog(@"self.descriptionContainer.frame = %@", NSStringFromCGRect(self.descriptionContainer.frame));
+//        NSLog(@"self.descriptionContainer.frame = %@", NSStringFromCGRect(self.descriptionContainer.frame));
 
         // Adjust scroll view content size
         self.scrollView.contentSize = CGSizeMake(self.scrollView.bounds.size.width, CGRectGetMaxY(self.descriptionContainer.frame));
-        NSLog(@"self.scrollView.contentSize = %@", NSStringFromCGSize(self.scrollView.contentSize));
+//        NSLog(@"self.scrollView.contentSize = %@", NSStringFromCGSize(self.scrollView.contentSize));
         
     };
     
     if (isCollapsed != self.occurrenceInfoContainerIsCollapsed) {
         
-        NSLog(@"Is this what is going on??? 1");
+//        NSLog(@"Is this what is going on??? 1");
         
         if (animated) {
             [UIView animateWithDuration:0.25 animations:occurrenceInfoContainerChangesBlock];
@@ -1029,7 +1029,7 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
         
         self.occurrenceInfoContainerIsCollapsed = isCollapsed;
         
-        NSLog(@"Is this what is going on??? 2");
+//        NSLog(@"Is this what is going on??? 2");
         
     }
     
@@ -1070,7 +1070,7 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
 }
 
 - (void) toggleOccurrencesControlsAndResetTableViewsWhenClosing:(BOOL)shouldResetTableViewsWhenClosing {
-    NSLog(@"toggleOccurrencesControls from %d to %d", self.occurrencesControlsPulledOut, !self.occurrencesControlsPulledOut);
+//    NSLog(@"toggleOccurrencesControls from %d to %d", self.occurrencesControlsPulledOut, !self.occurrencesControlsPulledOut);
     self.occurrencesControlsPulledOut = !self.occurrencesControlsPulledOut;
     self.scrollView.scrollEnabled = !self.occurrencesControlsPulledOut;
     self.tapToPullInOccurrencesControls.enabled = !self.occurrencesControlsPulledOut;
@@ -1098,14 +1098,14 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
 }
 
 - (void) swipedToPullInOccurrencesControls:(UISwipeGestureRecognizer *)swipeGesture {
-    NSLog(@"swipedToPullInOccurrencesControls");
+//    NSLog(@"swipedToPullInOccurrencesControls");
     [self userActionOccurredToPullInOccurrencesControls:swipeGesture horizontalForgiveness:30];
 }
 
 - (void) tappedToPullInOccurrencesControls:(UITapGestureRecognizer *)tapGesture {
-    NSLog(@"tappedToPullInOccurrencesControls");
+//    NSLog(@"tappedToPullInOccurrencesControls");
     CGRect mapButtonFrameInScrollView = [self.scrollView convertRect:self.mapButton.frame fromView:self.mapButton.superview]; // THIS ASSUMES THAT THE MAP BUTTON IS THE RIGHTMOST BUTTON IN OUR VIEW.
-    NSLog(@"%@, %f", NSStringFromCGRect(mapButtonFrameInScrollView), CGRectGetMinX(self.occurrencesControlsContainer.frame) - CGRectGetMaxX(mapButtonFrameInScrollView));
+//    NSLog(@"%@, %f", NSStringFromCGRect(mapButtonFrameInScrollView), CGRectGetMinX(self.occurrencesControlsContainer.frame) - CGRectGetMaxX(mapButtonFrameInScrollView));
     [self userActionOccurredToPullInOccurrencesControls:tapGesture horizontalForgiveness:CGRectGetMinX(self.occurrencesControlsContainer.frame) - CGRectGetMaxX(mapButtonFrameInScrollView)];
 }
 
@@ -1120,24 +1120,17 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
 }
 
 - (void) swipedToPushOutOccurrencesControls:(UISwipeGestureRecognizer *)swipeGesture {
-    NSLog(@"swipedToPushOutOccurrencesControls");
+//    NSLog(@"swipedToPushOutOccurrencesControls");
     if (self.occurrencesControlsPulledOut) {
         [self toggleOccurrencesControlsAndResetTableViewsWhenClosing:YES];
     }
 }
 
 - (void)tappedVenueName:(UITapGestureRecognizer *)tapGesture {
-    NSLog(@"tappedVenueName");
+//    NSLog(@"tappedVenueName");
     VenueViewController * venueViewController = [[VenueViewController alloc] initWithNibName:@"VenueViewController" bundle:[NSBundle mainBundle]];
     venueViewController.delegate = self;
-    venueViewController.nameBar.text = self.eventOccurrenceCurrent.place.title;
-    // For now, superficially pass from views to views. Really, we should be passing the Place object, and letting the VenueViewController set views itself.
-    venueViewController.addressLabel.text = self.addressLabel.text;
-    venueViewController.cityStateZipLabel.text = self.cityStateZipLabel.text;
-    [venueViewController.phoneNumberButton setTitle:self.phoneNumberButton.titleLabel.text forState:UIControlStateNormal];
-    [venueViewController.phoneNumberButton setTitle:self.phoneNumberButton.titleLabel.text forState:UIControlStateHighlighted];
-    venueViewController.phoneNumberButton.enabled = self.phoneNumberButton.enabled;
-    venueViewController.mapButton.enabled = self.mapButton.enabled;
+    venueViewController.venue = self.eventOccurrenceCurrent.place;
     [self.navigationController pushViewController:venueViewController animated:YES];
     [venueViewController release];
 }
@@ -1152,7 +1145,7 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
 
 - (void)displayImage:(UIImage *)image {
     //NSLog(@"image is %f by %f", image.size.width, image.size.height);
-    NSLog(@"EventViewController displayImage:%@ (%fx%f)", image, image.size.width, image.size.height);
+//    NSLog(@"EventViewController displayImage:%@ (%fx%f)", image, image.size.width, image.size.height);
 	[self.imageView setImage:image];
 //    [self.scrollView bringSubviewToFront:self.titleBar];
 }
@@ -1243,7 +1236,7 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
                         error:(NSError*)error;
 {
     if (result == MFMailComposeResultSent) {
-        NSLog(@"It's away!");
+        NSLog(@"Email sent, originally from EventViewController");
     }
     [self dismissModalViewControllerAnimated:YES];
 }
@@ -1315,7 +1308,7 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
 }
 
 - (void) pushedToShareViaFacebook {
-    NSLog(@"Pushed to share via Facebook");
+//    NSLog(@"Pushed to share via Facebook");
     [self.facebookManager pullAuthenticationInfoFromDefaults];
     if ([self.facebookManager.fb isSessionValid]) {
         /////////////////////
@@ -1347,7 +1340,7 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
 }
 
 - (void) pushedToCreateFacebookEvent {
-    NSLog(@"Pushed to create Facebook event");
+//    NSLog(@"Pushed to create Facebook event");
     [self.facebookManager pullAuthenticationInfoFromDefaults];
     if ([self.facebookManager.fb isSessionValid]) {
         /////////////////////
@@ -1451,7 +1444,7 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
 
 // make Phone number clickable..
 -(void)phoneButtonTouched {
-	NSLog(@"phone call");
+//	NSLog(@"phone call");
     [[UIApplication sharedApplication] openURL:[NSURL URLWithString:[NSString stringWithFormat:@"tel:%@", self.eventOccurrenceCurrent.place.phone]]];
 }
 

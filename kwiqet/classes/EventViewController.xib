@@ -337,7 +337,7 @@
 												<string key="NSFrameSize">{320, 104}</string>
 												<reference key="NSSuperview" ref="211302094"/>
 												<reference key="NSWindow"/>
-												<reference key="NSNextKeyView" ref="551320683"/>
+												<reference key="NSNextKeyView" ref="432896537"/>
 												<string key="NSReuseIdentifierKey">_NS:222</string>
 												<bool key="IBUIOpaque">NO</bool>
 												<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
@@ -364,7 +364,7 @@
 												<reference key="IBUIFontDescription" ref="114061867"/>
 												<reference key="IBUIFont" ref="887151078"/>
 											</object>
-											<object class="IBUIButton" id="551320683">
+											<object class="IBUIButton" id="432896537">
 												<reference key="NSNextResponder" ref="211302094"/>
 												<int key="NSvFlags">290</int>
 												<string key="NSFrameSize">{320, 42}</string>
@@ -415,6 +415,7 @@
 												<reference key="IBUITextColor" ref="204873685"/>
 												<nil key="IBUIHighlightedColor"/>
 												<int key="IBUIBaselineAdjustment">1</int>
+												<bool key="IBUIAdjustsFontSizeToFit">NO</bool>
 												<float key="IBUIMinimumFontSize">10</float>
 												<object class="IBUIFontDescription" key="IBUIFontDescription" id="557324594">
 													<string key="name">Helvetica</string>
@@ -445,6 +446,7 @@
 												<reference key="IBUITextColor" ref="204873685"/>
 												<nil key="IBUIHighlightedColor"/>
 												<int key="IBUIBaselineAdjustment">1</int>
+												<bool key="IBUIAdjustsFontSizeToFit">NO</bool>
 												<float key="IBUIMinimumFontSize">10</float>
 												<reference key="IBUIFontDescription" ref="557324594"/>
 												<reference key="IBUIFont" ref="568849772"/>
@@ -1921,7 +1923,7 @@
 					<object class="IBCocoaTouchOutletConnection" key="connection">
 						<string key="label">venueButton</string>
 						<reference key="source" ref="372490531"/>
-						<reference key="destination" ref="551320683"/>
+						<reference key="destination" ref="432896537"/>
 					</object>
 					<int key="connectionID">188</int>
 				</object>
@@ -2135,7 +2137,7 @@
 				<object class="IBConnectionRecord">
 					<object class="IBCocoaTouchEventConnection" key="connection">
 						<string key="label">tappedVenueName:</string>
-						<reference key="source" ref="551320683"/>
+						<reference key="source" ref="432896537"/>
 						<reference key="destination" ref="372490531"/>
 						<int key="IBEventType">7</int>
 					</object>
@@ -2315,7 +2317,7 @@
 							<reference ref="935372271"/>
 							<reference ref="771576094"/>
 							<reference ref="1027331171"/>
-							<reference ref="551320683"/>
+							<reference ref="432896537"/>
 						</object>
 						<reference key="parent" ref="440620987"/>
 					</object>
@@ -2586,7 +2588,7 @@
 					</object>
 					<object class="IBObjectRecord">
 						<int key="objectID">187</int>
-						<reference key="object" ref="551320683"/>
+						<reference key="object" ref="432896537"/>
 						<reference key="parent" ref="211302094"/>
 					</object>
 				</object>
