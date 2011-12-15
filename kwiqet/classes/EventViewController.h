@@ -25,6 +25,7 @@
 #import "OccurrenceInfoOverlayView.h"
 #import "SetLocationViewController.h"
 #import "UserLocation.h"
+#import "VenueViewController.h"
 
 typedef enum {
     OCGroupDatesVenues = 1,
@@ -33,7 +34,7 @@ typedef enum {
 
 @protocol CardPageViewControllerDelegate;
 
-@interface EventViewController : UIViewController <MFMailComposeViewControllerDelegate, WebConnectorDelegate, MapViewControllerDelegate, UIScrollViewDelegate, UIActionSheetDelegate, ContactsSelectViewControllerDelegate, SDWebImageManagerDelegate, UITableViewDelegate, UITableViewDataSource, SetLocationViewControllerDelegate, UIGestureRecognizerDelegate> {
+@interface EventViewController : UIViewController <MFMailComposeViewControllerDelegate, WebConnectorDelegate, MapViewControllerDelegate, UIScrollViewDelegate, UIActionSheetDelegate, ContactsSelectViewControllerDelegate, SDWebImageManagerDelegate, UITableViewDelegate, UITableViewDataSource, SetLocationViewControllerDelegate, UIGestureRecognizerDelegate, VenueViewControllerDelegate> {
     
     IBOutlet UIView   * backgroundColorView;
 
@@ -71,7 +72,7 @@ typedef enum {
     IBOutlet UILabel  * priceLabel;
     IBOutlet UIView   * locationContainer;
     IBOutlet UIButton * locationOccurrenceInfoButton;
-    IBOutlet UILabel  * venueLabel;
+    IBOutlet UIButton  * venueButton;
     IBOutlet UILabel  * addressLabel;
     IBOutlet UILabel  * cityStateZipLabel;
     IBOutlet UIButton * phoneNumberButton;
@@ -84,9 +85,12 @@ typedef enum {
 
     UIView * darkOverlayViewForMainView;
     UIView * darkOverlayViewForScrollView;
+    UITapGestureRecognizer * tapVenueGestureRecognizer;
     UISwipeGestureRecognizer * swipeToPullInOccurrencesControls;
     UISwipeGestureRecognizer * swipeToPushOutOccurrencesControls;
     UITapGestureRecognizer * tapToPullInOccurrencesControls;
+    IBOutlet UITapGestureRecognizer * tapToSetLocationGestureRecognizer;
+    
     BOOL occurrencesControlsPulledOut;
     IBOutlet UIView      * occurrencesControlsContainer;
     IBOutlet UIImageView * occurrencesControlsHandleImageView;

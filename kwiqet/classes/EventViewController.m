@@ -65,7 +65,7 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
 @property (retain) IBOutlet UILabel  * priceLabel;
 @property (retain) IBOutlet UIView   * locationContainer;
 @property (retain) IBOutlet UIButton * locationOccurrenceInfoButton;
-@property (retain) IBOutlet UILabel  * venueLabel;
+@property (retain) IBOutlet UIButton  * venueButton;
 @property (retain) IBOutlet UILabel  * addressLabel;
 @property (retain) IBOutlet UILabel  * cityStateZipLabel;
 @property (retain) IBOutlet UIButton * phoneNumberButton;
@@ -76,6 +76,8 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
 @property (retain) UIView * shadowDescriptionContainer;
 @property (retain) UIView * darkOverlayViewForMainView;
 @property (retain) UIView * darkOverlayViewForScrollView;
+@property (retain, nonatomic) IBOutlet UITapGestureRecognizer *tapToSetLocationGestureRecognizer;
+@property (retain) UITapGestureRecognizer * tapVenueGestureRecognizer;
 @property (retain) UISwipeGestureRecognizer * swipeToPullInOccurrencesControls;
 @property (retain) UISwipeGestureRecognizer * swipeToPushOutOccurrencesControls;
 @property (retain) UITapGestureRecognizer * tapToPullInOccurrencesControls;
@@ -135,6 +137,7 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
 - (IBAction) occurrencesControlsDatesVenuesNavBarTouched:(UITapGestureRecognizer *)tapRecognizer;
 - (IBAction) occurrenceInfoButtonTouched:(UIButton *)occurrenceInfoButton;
 - (void) setOccurrencesControlsToShowGroup:(OccurrencesControlsGroup)ocGroup animated:(BOOL)animated;
+- (IBAction) tappedVenueName:(UIButton *)button;
 - (void) swipedToGoBack:(UISwipeGestureRecognizer *)swipeGesture;
 - (void) swipedToPullInOccurrencesControls:(UISwipeGestureRecognizer *)swipeGesture;
 - (void) tappedToPullInOccurrencesControls:(UITapGestureRecognizer *)tapGesture;
@@ -175,10 +178,11 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
 @end
 
 @implementation EventViewController
+@synthesize tapToSetLocationGestureRecognizer;
 
-@synthesize backgroundColorView, navigationBar, backButton, logoButton, actionBar, letsGoButton, shareButton, deleteButton, scrollView, titleBar, shadowTitleBar, imageView, breadcrumbsBar, breadcrumbsLabel, occurrenceInfoContainer, occurrenceInfoContainerIsCollapsed, shadowOccurrenceInfoContainer, occurrenceInfoOverlayView, dateContainer, dateOccurrenceInfoButton, monthLabel, dayNumberLabel, dayNameLabel, timeContainer, timeOccurrenceInfoButton, timeStartLabel, timeEndLabel, priceContainer, priceOccurrenceInfoButton, priceLabel, locationContainer, locationOccurrenceInfoButton, venueLabel, addressLabel, cityStateZipLabel, phoneNumberButton, mapButton, descriptionContainer, descriptionBackgroundColorView, descriptionLabel, shadowDescriptionContainer;
+@synthesize backgroundColorView, navigationBar, backButton, logoButton, actionBar, letsGoButton, shareButton, deleteButton, scrollView, titleBar, shadowTitleBar, imageView, breadcrumbsBar, breadcrumbsLabel, occurrenceInfoContainer, occurrenceInfoContainerIsCollapsed, shadowOccurrenceInfoContainer, occurrenceInfoOverlayView, dateContainer, dateOccurrenceInfoButton, monthLabel, dayNumberLabel, dayNameLabel, timeContainer, timeOccurrenceInfoButton, timeStartLabel, timeEndLabel, priceContainer, priceOccurrenceInfoButton, priceLabel, locationContainer, locationOccurrenceInfoButton, venueButton, addressLabel, cityStateZipLabel, phoneNumberButton, mapButton, descriptionContainer, descriptionBackgroundColorView, descriptionLabel, shadowDescriptionContainer;
 @synthesize darkOverlayViewForMainView, darkOverlayViewForScrollView;
-@synthesize swipeToPullInOccurrencesControls, swipeToPushOutOccurrencesControls, tapToPullInOccurrencesControls;
+@synthesize tapVenueGestureRecognizer, swipeToPullInOccurrencesControls, swipeToPushOutOccurrencesControls, tapToPullInOccurrencesControls;
 @synthesize occurrencesControlsPulledOut;
 @synthesize occurrencesControlsContainer, occurrencesControlsHandleImageView, occurrencesControlsNavBar, occurrencesControlsTableViewContainer, occurrencesControlsTableViewOverlay, occurrencesControlsTableViewsContainer, occurrencesControlsDatesTableView, occurrencesControlsVenuesTableView, occurrencesControlsDatesVenuesSeparatorView, occurrencesControlsVenuesTimesSeparatorView, occurrencesControlsTimesTableView, occurrencesControlsNavBarsContainer, occurrencesControlsDatesVenuesNavBar, occurrencesControlsTimesNavBar, occurrencesControlsVenuesNearHeaderLabel, occurrencesControlsVenuesNearLocationLabel, occurrencesControlsTimesOnDateLabel, occurrencesControlsTimesAtVenueLabel, occurrencesControlsCancelButton, occurrencesControlsBackButton;
 
@@ -229,7 +233,7 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
     [priceLabel release];
     [locationContainer release];
     [locationOccurrenceInfoButton release];
-    [venueLabel release];
+    [venueButton release];
     [addressLabel release];
     [cityStateZipLabel release];
     [phoneNumberButton release];
@@ -260,6 +264,7 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
     [occurrencesControlsTimesAtVenueLabel release];
     [occurrencesControlsCancelButton release];
     [occurrencesControlsBackButton release];
+    [tapVenueGestureRecognizer release];
     [swipeToPullInOccurrencesControls release];
     [swipeToPushOutOccurrencesControls release];
     [tapToPullInOccurrencesControls release];
@@ -283,6 +288,7 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
     [shareChoiceActionSheet release];
     [shareChoiceActionSheetSelectors release];
     [setLocationViewController_ release];
+    [tapToSetLocationGestureRecognizer release];
     [super dealloc];
 	
 }
@@ -393,7 +399,7 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
     self.priceLabel.font = [UIFont kwiqetFontOfType:BoldCondensed size:24];
                 
     // Location views
-    self.venueLabel.font = [UIFont kwiqetFontOfType:BoldCondensed size:21];
+    self.venueButton.titleLabel.font = [UIFont kwiqetFontOfType:BoldCondensed size:21];
     self.addressLabel.font = [UIFont kwiqetFontOfType:RegularCondensed size:14];
     self.cityStateZipLabel.font = [UIFont kwiqetFontOfType:RegularCondensed size:14];
     
@@ -451,6 +457,7 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
     self.swipeToPushOutOccurrencesControls.enabled = NO; // DISABLING THIS GESTURE FOR NOW, BECAUSE IT SEEMS UNCLEAR TO THE USER THAT SWIPING THE OCCURRENCES CONTROLS AWAY WOULD RESULT IN A CANCEL, ESPECIALLY SINCE THEY COULD SWIPE AWAY AFTER HAVING SELECTED A VENUE (BUT NOT YET A TIME).
     // Tap to pull in
     tapToPullInOccurrencesControls = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(tappedToPullInOccurrencesControls:)];
+    self.tapToPullInOccurrencesControls.delegate = self;
     self.tapToPullInOccurrencesControls.cancelsTouchesInView = NO;
     [self.scrollView addGestureRecognizer:self.tapToPullInOccurrencesControls];
     
@@ -755,8 +762,11 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
                 venue = @"Location not available";
             }
         }
-        self.venueLabel.text = venue;
-        self.venueLabel.textColor = categoryColor;
+        [self.venueButton setTitle:venue forState:UIControlStateNormal];
+        [self.venueButton setTitle:venue forState:UIControlStateHighlighted];
+        [self.venueButton setTitleColor:categoryColor forState:UIControlStateNormal];
+        [self.venueButton setTitleColor:categoryColor forState:UIControlStateHighlighted];
+        self.venueButton.userInteractionEnabled = YES;
         
         // Map button
         self.mapButton.alpha = 1.0;
@@ -766,6 +776,7 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
         BOOL havePhoneNumber = self.eventOccurrenceCurrent.place.phone != nil && [self.eventOccurrenceCurrent.place.phone length] > 0;
         NSString * phone = havePhoneNumber ? self.eventOccurrenceCurrent.place.phone : EVENT_PHONE_NOT_AVAILABLE;
         [self.phoneNumberButton setTitle:phone forState:UIControlStateNormal];
+        [self.phoneNumberButton setTitle:phone forState:UIControlStateHighlighted];
         self.phoneNumberButton.enabled = havePhoneNumber;
         
         NSArray * occurrencesByDateVenueTime = self.event.occurrencesByDateVenueTime;
@@ -778,15 +789,15 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
         // Adjust labels (price & venue) according to whether occurrences controls handle is showing
         CGFloat hardCodedHackValueLabelWidthAdjustment = 13; // HARD CODED VALUE! SHOULD BE MORE FLEXIBLE THAN THIS, BASED ON THE WIDTH OF THE HANDLE, OR SOMETHING LIKE THAT.
         CGRect priceLabelFrame = self.priceLabel.frame;
-        CGRect venueLabelFrame = self.venueLabel.frame;
+        CGRect venueButtonFrame = self.venueButton.frame;
         priceLabelFrame.size.width = self.priceContainer.bounds.size.width - 2 * priceLabelFrame.origin.x;
-        venueLabelFrame.size.width = self.locationContainer.bounds.size.width - 2 * venueLabelFrame.origin.x;
+        venueButtonFrame.size.width = self.locationContainer.bounds.size.width;
         if (self.occurrencesControlsHandleIsAvailable) {
             priceLabelFrame.size.width -= hardCodedHackValueLabelWidthAdjustment;
-            venueLabelFrame.size.width -= hardCodedHackValueLabelWidthAdjustment;
+            venueButtonFrame.size.width -= hardCodedHackValueLabelWidthAdjustment;
         }
         self.priceLabel.frame = priceLabelFrame;
-        self.venueLabel.frame = venueLabelFrame;
+        self.venueButton.frame = venueButtonFrame;
         
         [self updateOccurrencesControlsInternalViewsFromData];
 
@@ -806,7 +817,9 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
         self.dayNameLabel.text = @"";
         [self setTimeLabelTextToTimeString:@"" containsTwoTimes:NO usingSeparatorString:nil];
         self.priceLabel.text = @"";
-        self.venueLabel.text = @"";
+        [self.venueButton setTitle:@"" forState:UIControlStateNormal];
+        [self.venueButton setTitle:@"" forState:UIControlStateHighlighted];
+        self.venueButton.userInteractionEnabled = NO;
         self.addressLabel.text = @"";
         self.cityStateZipLabel.text = @"";
         self.phoneNumberButton.enabled = NO;
@@ -821,8 +834,15 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
         self.swipeToPushOutOccurrencesControls.enabled = NO; // DISABLING THIS GESTURE FOR NOW, BECAUSE IT SEEMS UNCLEAR TO THE USER THAT SWIPING THE OCCURRENCES CONTROLS AWAY WOULD RESULT IN A CANCEL, ESPECIALLY SINCE THEY COULD SWIPE AWAY AFTER HAVING SELECTED A VENUE (BUT NOT YET A TIME).
         self.tapToPullInOccurrencesControls.enabled = NO;
         
-        
     }
+    
+    // Shrink the venue button width down to as small as possible
+    CGFloat venueButtonHorizontalInsets = self.venueButton.contentEdgeInsets.left + self.venueButton.contentEdgeInsets.right;
+    CGSize venueButtonTextSize = [self.venueButton.titleLabel.text sizeWithFont:self.venueButton.titleLabel.font constrainedToSize:CGSizeMake(self.venueButton.frame.size.width - venueButtonHorizontalInsets, self.venueButton.frame.size.height)];
+    CGFloat minWidth = MIN(venueButtonTextSize.width + venueButtonHorizontalInsets, self.venueButton.frame.size.width);
+    CGRect venueButtonFrame = self.venueButton.frame;
+    venueButtonFrame.size.width = minWidth;
+    self.venueButton.frame = venueButtonFrame;
     
     [self setOccurrenceInfoContainerIsCollapsed:self.eventOccurrenceCurrent == nil animated:animated];        
     
@@ -1104,6 +1124,30 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
     if (self.occurrencesControlsPulledOut) {
         [self toggleOccurrencesControlsAndResetTableViewsWhenClosing:YES];
     }
+}
+
+- (void)tappedVenueName:(UITapGestureRecognizer *)tapGesture {
+    NSLog(@"tappedVenueName");
+    VenueViewController * venueViewController = [[VenueViewController alloc] initWithNibName:@"VenueViewController" bundle:[NSBundle mainBundle]];
+    venueViewController.delegate = self;
+    venueViewController.nameBar.text = self.eventOccurrenceCurrent.place.title;
+    // For now, superficially pass from views to views. Really, we should be passing the Place object, and letting the VenueViewController set views itself.
+    venueViewController.addressLabel.text = self.addressLabel.text;
+    venueViewController.cityStateZipLabel.text = self.cityStateZipLabel.text;
+    [venueViewController.phoneNumberButton setTitle:self.phoneNumberButton.titleLabel.text forState:UIControlStateNormal];
+    [venueViewController.phoneNumberButton setTitle:self.phoneNumberButton.titleLabel.text forState:UIControlStateHighlighted];
+    venueViewController.phoneNumberButton.enabled = self.phoneNumberButton.enabled;
+    venueViewController.mapButton.enabled = self.mapButton.enabled;
+    [self.navigationController pushViewController:venueViewController animated:YES];
+    [venueViewController release];
+}
+
+- (void)venueViewControllerDidFinish:(VenueViewController *)venueViewController {
+    [self.navigationController popViewControllerAnimated:YES];
+}
+
+- (void)venueViewControllerDidRequestStackCollapse:(VenueViewController *)venueViewController {
+    [self.navigationController popViewControllerAnimated:YES];    
 }
 
 - (void)displayImage:(UIImage *)image {
@@ -1504,6 +1548,7 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
 }
 
 - (void)viewDidUnload {
+    [self setTapToSetLocationGestureRecognizer:nil];
     [super viewDidUnload];
     // Release any retained subviews of the main view.
     // e.g. self.myOutlet = nil;
@@ -1860,15 +1905,6 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
     [self setOccurrencesControlsToShowGroup:OCGroupDatesVenues animated:YES];
 }
 
-
-- (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldReceiveTouch:(UITouch *)touch {
-    BOOL shouldReceive = YES;
-    if ([touch.view isDescendantOfView:self.occurrencesControlsCancelButton]) {
-        shouldReceive = NO; // ignore the touch
-    }
-    return shouldReceive;
-}
-
 - (void)occurrencesControlsDatesVenuesNavBarTouched:(UITapGestureRecognizer *)tapRecognizer {
     if (self.setLocationViewController == nil) {
         setLocationViewController_ = [[SetLocationViewController alloc] initWithNibName:@"SetLocationViewController" bundle:[NSBundle mainBundle]];
@@ -1900,6 +1936,22 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
     self.setLocationViewController = nil;
     // NEED TO UPDATE the order of the venues list according to the new location, so that the venues are still listed in order of proximity NEED TO UPDATE the order of the venues list according to the new location, so that the venues are still listed in order of proximity NEED TO UPDATE the order of the venues list according to the new location, so that the venues are still listed in order of proximity NEED TO UPDATE the order of the venues list according to the new location, so that the venues are still listed in order of proximity NEED TO UPDATE the order of the venues list according to the new location, so that the venues are still listed in order of proximity NEED TO UPDATE the order of the venues list according to the new location, so that the venues are still listed in order of proximity NEED TO UPDATE the order of the venues list according to the new location, so that the venues are still listed in order of proximity NEED TO UPDATE the order of the venues list according to the new location, so that the venues are still listed in order of proximity NEED TO UPDATE the order of the venues list according to the new location, so that the venues are still listed in order of proximity NEED TO UPDATE the order of the venues list according to the new location, so that the venues are still listed in order of proximity NEED TO UPDATE the order of the venues list according to the new location, so that the venues are still listed in order of proximity NEED TO UPDATE the order of the venues list according to the new location, so that the venues are still listed in order of proximity 
 //    [self setShouldReloadOnDrawerClose:YES updateDrawerReloadIndicatorView:YES shouldUpdateEventsSummaryStringForCurrentSource:YES animated:YES];
+}
+
+- (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldReceiveTouch:(UITouch *)touch {
+    BOOL shouldReceive = YES;
+    if (gestureRecognizer == self.tapToSetLocationGestureRecognizer) {
+        if ([touch.view isDescendantOfView:self.occurrencesControlsCancelButton]) {
+            shouldReceive = NO;
+        } else {
+            CGPoint touchPoint = [touch locationInView:self.occurrencesControlsDatesVenuesNavBar];
+            if (touchPoint.x < self.occurrencesControlsVenuesNearLocationLabel.frame.origin.x ||
+                touchPoint.x > CGRectGetMaxX(self.occurrencesControlsVenuesNearLocationLabel.frame)) {
+                shouldReceive = NO;
+            }
+        }
+    }
+    return shouldReceive;
 }
 
 @end
