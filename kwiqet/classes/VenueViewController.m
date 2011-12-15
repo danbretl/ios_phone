@@ -155,11 +155,11 @@
 }
 
 - (void)backButtonTouched:(UIButton *)button {
-    [self.delegate venueViewControllerDidFinish:self];
+    [self.delegate viewController:self didFinishByRequestingStackCollapse:NO];
 }
 
 - (void)logoButtonTouched:(UIButton *)button {
-    [self.delegate venueViewControllerDidRequestStackCollapse:self];
+    [self.delegate viewController:self didFinishByRequestingStackCollapse:YES];
 }
 
 - (void)followButtonTouched:(UIButton *)button {
@@ -231,9 +231,9 @@
         CGRect mainContainerFrame = self.mainContainer.frame;
         mainContainerFrame.size.height = CGRectGetMaxY(self.descriptionContainer.frame);
         self.mainContainer.frame = mainContainerFrame;
-        [self.eventsTableView beginUpdates];
+        if (animated) { [self.eventsTableView beginUpdates]; }        
         self.eventsTableView.tableHeaderView = self.mainContainer;
-        [self.eventsTableView endUpdates];
+        if (animated) { [self.eventsTableView endUpdates]; }
 //        UIEdgeInsets eventsTableViewInsets = self.eventsTableView.contentInset;
 //        eventsTableViewInsets.top = CGRectGetMaxY(self.descriptionContainer.frame) - self.eventsTableView.frame.origin.y;
 //        self.eventsTableView.contentInset = eventsTableViewInsets;
@@ -248,12 +248,13 @@
         self.descriptionLabel.text = descriptionText;
         descriptionLabelSizeBlock(descriptionText);
     }
+
 }
 
-// Venue image not yet available / implemented. Need to add an imageLocation attribute the Place object, and pull in that file location from the server.
+// Venue image not yet available / implemented. Need to add an imageLocation attribute the Place object, and pull in that file location from the server. UPDATE: Done!
 - (void)updateImageFromVenue:(Place *)venue {
-    self.imageView.image = [UIImage imageNamed:@"event_img_placeholder.png"];
-//    [self.imageView setImageWithURL:[URLBuilder imageURLForImageLocation:self.event.imageLocation] placeholderImage:[UIImage imageNamed:@"event_img_placeholder.png"]];
+//    self.imageView.image = [UIImage imageNamed:@"event_img_placeholder.png"];
+    [self.imageView setImageWithURL:[URLBuilder imageURLForImageLocation:self.venue.imageLocation] placeholderImage:[UIImage imageNamed:@"event_img_placeholder.png"]];
 }
 
 - (void)scrollViewDidScroll:(UIScrollView *)scrollView {
@@ -306,6 +307,20 @@
     cell.dateAndTimeLabel.text = [NSString stringWithFormat:@"January %d, 2012 | %d:0%d AM", indexPath.row, indexPath.row, indexPath.row];
     cell.priceOriginalLabel.text = [NSString stringWithFormat:@"$10%d.00", indexPath.row];
     
+}
+
+- (void)viewController:(UIViewController *)viewController didFinishByRequestingStackCollapse:(BOOL)didRequestStackCollapse {
+    if (didRequestStackCollapse) {
+        [self.navigationController popToRootViewControllerAnimated:YES];
+    } else {
+        [self.navigationController popViewControllerAnimated:YES];
+    }   
+}
+
+- (void) eventViewController:(EventViewController *)eventViewController didFinishByRequestingEventDeletionForEventURI:(NSString *)eventURI {
+    NSLog(@"ERROR/WARNING in VenueViewController - not sure how to handle an EventViewController requesting deletion of an event. Currently, we are simply not deleting it!");
+    //    [self.coreDataModel deleteRegularEventForURI:eventURI];
+    [self.navigationController popViewControllerAnimated:YES];
 }
 
 @end

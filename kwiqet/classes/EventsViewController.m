@@ -196,7 +196,7 @@ double const EVENTS_LIST_MODE_ANIMATION_DURATION = 0.25;
 /////////////////////
 // View Controllers
 
-@property (nonatomic, retain) EventViewController * cardPageViewController;
+@property (nonatomic, retain) EventViewController * eventViewController;
 @property (nonatomic, retain) SetLocationViewController * setLocationViewController;
 
 ///////////////////
@@ -344,7 +344,7 @@ double const EVENTS_LIST_MODE_ANIMATION_DURATION = 0.25;
 @synthesize concreteParentCategoriesArray;
 @synthesize oldFilterString, categoryURI;
 @synthesize isSearchOn;
-@synthesize cardPageViewController, setLocationViewController=setLocationViewController_;
+@synthesize eventViewController, setLocationViewController=setLocationViewController_;
 @synthesize indexPathOfRowAttemptingToDelete, indexPathOfSelectedRow;
 @synthesize isDrawerOpen, shouldReloadOnDrawerClose;
 @synthesize feedbackMessageTypeBrowseRemembered, feedbackMessageTypeSearchRemembered;
@@ -352,7 +352,7 @@ double const EVENTS_LIST_MODE_ANIMATION_DURATION = 0.25;
 
 - (void)dealloc {
 //    NSLog(@"--- --- --- --- --- EventsViewController dealloc --- --- --- --- ---");
-    [cardPageViewController release];
+    [eventViewController release];
     [setLocationViewController_ release];
     [concreteParentCategoriesArray release];
     [concreteParentCategoriesDictionary release];
@@ -2759,11 +2759,11 @@ double const EVENTS_LIST_MODE_ANIMATION_DURATION = 0.25;
         
     Event * event = (Event *)[self.eventsForCurrentSource objectAtIndex:indexPath.row];
     
-    self.cardPageViewController = [[[EventViewController alloc] initWithNibName:@"EventViewController" bundle:[NSBundle mainBundle]] autorelease];
-    self.cardPageViewController.coreDataModel = self.coreDataModel;
-    self.cardPageViewController.delegate = self;
-    self.cardPageViewController.hidesBottomBarWhenPushed = YES;
-    self.cardPageViewController.userLocation = self.userLocationForCurrentSource;
+    self.eventViewController = [[[EventViewController alloc] initWithNibName:@"EventViewController" bundle:[NSBundle mainBundle]] autorelease];
+    self.eventViewController.coreDataModel = self.coreDataModel;
+    self.eventViewController.delegate = self;
+    self.eventViewController.hidesBottomBarWhenPushed = YES;
+    self.eventViewController.userLocation = self.userLocationForCurrentSource;
     
     [self.webConnector sendLearnedDataAboutEvent:event.uri withUserAction:@"V"]; // Attempt to send the learning to our server.
     [self.webConnector getEventWithURI:event.uri]; // Attempt to get the full event info
@@ -2777,7 +2777,7 @@ double const EVENTS_LIST_MODE_ANIMATION_DURATION = 0.25;
 
 - (void)webConnector:(WebConnector *)webConnector sendLearnedDataSuccess:(ASIHTTPRequest *)request aboutEvent:(NSString *)eventURI userAction:(NSString *)userAction {
     
-    if ([userAction isEqualToString:@"V"] && self.cardPageViewController) {
+    if ([userAction isEqualToString:@"V"] && self.eventViewController) {
         
         NSLog(@"EventsViewController successfully sent 'view' learning to server for event with URI %@.", eventURI);
         
@@ -2804,7 +2804,7 @@ double const EVENTS_LIST_MODE_ANIMATION_DURATION = 0.25;
 - (void)webConnector:(WebConnector *)webConnector sendLearnedDataFailure:(ASIHTTPRequest *)request aboutEvent:(NSString *)eventURI userAction:(NSString *)userAction {
     
     // Display an internet connection error message
-    if ([userAction isEqualToString:@"V"] && self.cardPageViewController) {
+    if ([userAction isEqualToString:@"V"] && self.eventViewController) {
         
         NSLog(@"EventsViewController failed to send 'view' learning to server for event with URI %@. We should be remembering this, and trying to send the learning again later! This is crucial!", eventURI);
         
@@ -2828,8 +2828,8 @@ double const EVENTS_LIST_MODE_ANIMATION_DURATION = 0.25;
     
     [self.coreDataModel updateEvent:event usingEventDictionary:eventDictionary featuredOverride:nil fromSearchOverride:nil];
     
-    self.cardPageViewController.event = event;
-    [self.navigationController pushViewController:self.cardPageViewController animated:YES];
+    self.eventViewController.event = event;
+    [self.navigationController pushViewController:self.eventViewController animated:YES];
     self.deletedFromEventCard = NO;
     
     if (!self.webConnector.connectionInProgress) {
@@ -2864,12 +2864,17 @@ double const EVENTS_LIST_MODE_ANIMATION_DURATION = 0.25;
     }
 }
 
-- (void)cardPageViewControllerDidFinish:(EventViewController *)cardPageViewController withEventDeletion:(BOOL)eventWasDeleted eventURI:(NSString *)eventURI {
-
-    self.deletedFromEventCard = eventWasDeleted;
+- (void)eventViewController:(EventViewController *)eventViewController didFinishByRequestingEventDeletionForEventURI:(NSString *)eventURI {
+    self.deletedFromEventCard = YES; // The rest has been moved to / is taken care of in view(Will/Did)Appear.
     [self.navigationController popViewControllerAnimated:YES];
-    // The rest has been moved to / is taken care of in view(Will/Did)Appear.
-    
+}
+
+- (void)viewController:(UIViewController *)viewController didFinishByRequestingStackCollapse:(BOOL)didRequestStackCollapse {
+    if (didRequestStackCollapse) {
+        [self.navigationController popToRootViewControllerAnimated:YES];
+    } else {
+        [self.navigationController popViewControllerAnimated:YES];
+    }   
 }
 
 - (BOOL)tableView:(UITableView *)tableView canEditRowAtIndexPath:(NSIndexPath *)indexPath {

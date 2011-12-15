@@ -30,7 +30,7 @@ typedef enum {
     Search = 2,
 } EventsListMode;
 
-@interface EventsViewController : UIViewController <UITableViewDelegate, UITableViewDataSource, UIAlertViewDelegate, CardPageViewControllerDelegate, WebConnectorDelegate, UIScrollViewDelegate, UITextFieldDelegate, SetLocationViewControllerDelegate, KwiqetLocationManagerDelegate> {
+@interface EventsViewController : UIViewController <UITableViewDelegate, UITableViewDataSource, UIAlertViewDelegate, StackViewControllerDelegate, WebConnectorDelegate, UIScrollViewDelegate, UITextFieldDelegate, SetLocationViewControllerDelegate, KwiqetLocationManagerDelegate> {
     
     ///////////
     // Models
@@ -194,7 +194,7 @@ typedef enum {
     /////////////////////
     // View Controllers
     
-    EventViewController * cardPageViewController;
+    EventViewController * eventViewController;
     
     ////////
     // Web

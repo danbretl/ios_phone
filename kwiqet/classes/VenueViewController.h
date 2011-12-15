@@ -10,13 +10,12 @@
 #import "ElasticUILabel.h"
 #import "Place.h"
 #import "WebDataTranslator.h"
+#import "StackViewControllerDelegate.h"
 
-@protocol VenueViewControllerDelegate;
-
-@interface VenueViewController : UIViewController <UITableViewDelegate, UITableViewDataSource> {
+@interface VenueViewController : UIViewController <UITableViewDelegate, UITableViewDataSource, StackViewControllerDelegate> {
     
     // Delegate
-    id<VenueViewControllerDelegate> delegate;
+    id<StackViewControllerDelegate> delegate;
     
     // Models
     Place * venue_;
@@ -43,14 +42,8 @@
     
 }
 
-@property (assign) id<VenueViewControllerDelegate> delegate;
+@property (assign) id<StackViewControllerDelegate> delegate;
 
 @property (retain, nonatomic) Place * venue;
 
-@end
-
-@protocol VenueViewControllerDelegate <NSObject>
-@required
-- (void) venueViewControllerDidFinish:(VenueViewController *)venueViewController;
-- (void) venueViewControllerDidRequestStackCollapse:(VenueViewController *)venueViewController;
 @end

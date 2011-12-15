@@ -1,5 +1,5 @@
 //
-//  CardPageViewController.m
+//  EventViewController.m
 //  Abextra
 //
 //  Created by John Nichols on 2/2/11.
@@ -1135,12 +1135,18 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
     [venueViewController release];
 }
 
-- (void)venueViewControllerDidFinish:(VenueViewController *)venueViewController {
-    [self.navigationController popViewControllerAnimated:YES];
+- (void)viewController:(UIViewController *)viewController didFinishByRequestingStackCollapse:(BOOL)didRequestStackCollapse {
+    if (didRequestStackCollapse) {
+        [self.navigationController popToRootViewControllerAnimated:YES];
+    } else {
+        [self.navigationController popViewControllerAnimated:YES];
+    }   
 }
 
-- (void)venueViewControllerDidRequestStackCollapse:(VenueViewController *)venueViewController {
-    [self.navigationController popViewControllerAnimated:YES];    
+- (void) eventViewController:(EventViewController *)eventViewController didFinishByRequestingEventDeletionForEventURI:(NSString *)eventURI {
+    NSLog(@"ERROR/WARNING in VenueViewController - not sure how to handle an EventViewController requesting deletion of an event. Currently, we are simply not deleting it!");
+    //    [self.coreDataModel deleteRegularEventForURI:eventURI];
+    [self.navigationController popViewControllerAnimated:YES];
 }
 
 - (void)displayImage:(UIImage *)image {
@@ -1182,7 +1188,7 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
 }
 
 - (void) swipedToGoBack:(UISwipeGestureRecognizer *)swipeGesture {
-    [self viewControllerIsFinished];
+    [self.delegate viewController:self didFinishByRequestingStackCollapse:NO];
 }
 
 //delete event from core data and revert back to table
@@ -1414,14 +1420,12 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
             
     if ([userAction isEqualToString:@"G"]) {
         
-        // Currently, we delete the event if the user "went". THIS IS CONFUSING. We are changing this functionality.
-        //deletedEventDueToGoingToEvent = YES;
-        //[self.coreDataModel deleteRegularEventForURI:[self.eventDictionary objectForKey:@"resource_uri"]]; // This makes me uneasy deleting it here... But, we're not dealing with this right now.
+        // Do nothing.
         
     } else if ([userAction isEqualToString:@"X"]) {
         
         // We're done here, let our delegate know that we are finished, and that we ended by requesting to delete the event. Leave the actual event object deletion up to the delegate though.
-        [self.delegate cardPageViewControllerDidFinish:self withEventDeletion:YES eventURI:self.event.uri];
+        [self.delegate eventViewController:self didFinishByRequestingEventDeletionForEventURI:self.event.uri];
         
     }
     
@@ -1464,15 +1468,11 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
 }
 
 - (void) backButtonTouched  {
-    [self viewControllerIsFinished];
+    [self.delegate viewController:self didFinishByRequestingStackCollapse:NO];
 }
 
 - (void) logoButtonTouched {
-    [self viewControllerIsFinished];
-}
-
-- (void) viewControllerIsFinished {
-    [self.delegate cardPageViewControllerDidFinish:self withEventDeletion:deletedEventDueToGoingToEvent eventURI:self.event.uri];
+    [self.delegate viewController:self didFinishByRequestingStackCollapse:YES];
 }
 
 - (void) occurrenceInfoRetryButtonTouched {

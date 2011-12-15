@@ -559,6 +559,8 @@
         NSString * eventPhoneString = [WebUtil stringOrNil:[[occurrenceDictionary valueForKey:@"place"] valueForKey:@"phone"]];
         // Venue
         NSString * venueString = [WebUtil stringOrNil:[[occurrenceDictionary valueForKey:@"place"] valueForKey:@"title"]];// NSLog(@"Place title is %@", venueString);
+        // Image location
+        NSString * imageLocation = [WebUtil stringOrNil:[[occurrenceDictionary valueForKey:@"place"] valueForKey:@"image"]];
         // Location - setting
         Place * place = [self getPlaceWithURI:placeURI];
         if (place == nil) {
@@ -577,6 +579,7 @@
         place.latitude = latitudeValue;
         place.longitude = longitudeValue;
         place.phone = eventPhoneString;
+        place.imageLocation = imageLocation;
         
         occurrence.place = place;
         occurrence.event = event;

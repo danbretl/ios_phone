@@ -24,6 +24,7 @@
 @dynamic city;
 @dynamic email;
 @dynamic placeDescription;
+@dynamic imageLocation;
 @dynamic occurrences;
 
 @end

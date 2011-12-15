@@ -1,5 +1,5 @@
 //
-//  CardPageViewController.h
+//  EventViewController.h
 //  Abextra
 //
 //  Created by John Nichols on 2/2/11.
@@ -26,15 +26,14 @@
 #import "SetLocationViewController.h"
 #import "UserLocation.h"
 #import "VenueViewController.h"
+#import "StackViewControllerDelegate.h"
 
 typedef enum {
     OCGroupDatesVenues = 1,
     OCGroupTimes = 2
 } OccurrencesControlsGroup;
 
-@protocol CardPageViewControllerDelegate;
-
-@interface EventViewController : UIViewController <MFMailComposeViewControllerDelegate, WebConnectorDelegate, MapViewControllerDelegate, UIScrollViewDelegate, UIActionSheetDelegate, ContactsSelectViewControllerDelegate, SDWebImageManagerDelegate, UITableViewDelegate, UITableViewDataSource, SetLocationViewControllerDelegate, UIGestureRecognizerDelegate, VenueViewControllerDelegate> {
+@interface EventViewController : UIViewController <MFMailComposeViewControllerDelegate, WebConnectorDelegate, MapViewControllerDelegate, UIScrollViewDelegate, UIActionSheetDelegate, ContactsSelectViewControllerDelegate, SDWebImageManagerDelegate, UITableViewDelegate, UITableViewDataSource, SetLocationViewControllerDelegate, UIGestureRecognizerDelegate, StackViewControllerDelegate> {
     
     IBOutlet UIView   * backgroundColorView;
 
@@ -124,7 +123,7 @@ typedef enum {
     int eventOccurrenceCurrentTimeIndex;
     NSMutableArray * eventOccurrencesSummaryArray;
     NSMutableDictionary * eventOccurrencesPlaceDistancesDictionary;
-    id<CardPageViewControllerDelegate> delegate;
+    id<StackViewControllerDelegate> delegate;
     CoreDataModel * coreDataModel;
     MapViewController * mapViewController;
     WebDataTranslator * webDataTranslator;
@@ -132,7 +131,6 @@ typedef enum {
     NSDateFormatter * occurrencesControlsNavBarDateFormatter;
     WebConnector * webConnector;
     UIAlertView * connectionErrorOnUserActionRequestAlertView;
-    BOOL deletedEventDueToGoingToEvent;
     FacebookManager * facebookManager;
     
     // Location
@@ -151,18 +149,12 @@ typedef enum {
 //- (void) setUserLocation:(CLLocation *)userLocation withUserLocationString:(NSString *)userLocationString;
 @property (nonatomic, retain) UserLocation * userLocation;
 @property (nonatomic, retain) Event * event;
-@property (assign) id<CardPageViewControllerDelegate> delegate;
+@property (assign) id<StackViewControllerDelegate> delegate;
 @property (nonatomic, retain) CoreDataModel * coreDataModel;
 @property (nonatomic, readonly) FacebookManager * facebookManager;
 
-- (void) viewControllerIsFinished;
 - (void) updateViewsFromDataAnimated:(BOOL)animated;
 - (void) showWebLoadingViews;
 - (void) hideWebLoadingViews;
 
-@end
-
-@protocol CardPageViewControllerDelegate <NSObject>
-@required
-- (void) cardPageViewControllerDidFinish:(EventViewController *)cardPageViewController withEventDeletion:(BOOL)eventWasDeleted eventURI:(NSString *)eventURI;
 @end

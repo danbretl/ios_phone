@@ -27,6 +27,7 @@
 @property (nonatomic, retain) NSString * city;
 @property (nonatomic, retain) NSString * email;
 @property (nonatomic, retain) NSString * placeDescription;
+@property (nonatomic, retain) NSString * imageLocation;
 @property (nonatomic, retain) NSSet *occurrences;
 @end
 

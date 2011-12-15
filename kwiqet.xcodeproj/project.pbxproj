@@ -1055,6 +1055,7 @@
 		32A63AC5149932920013C2E8 /* VenueViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = VenueViewController.xib; sourceTree = "<group>"; };
 		32ABA3BD141FC33B003523DA /* kwiqet 009.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "kwiqet 009.xcdatamodel"; sourceTree = "<group>"; };
 		32B36CD913B27DF1004C2068 /* kwiqet 002.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "kwiqet 002.xcdatamodel"; sourceTree = "<group>"; };
+		32B94B70149AAA9F006BBFB7 /* StackViewControllerDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = StackViewControllerDelegate.h; sourceTree = "<group>"; };
 		32BEE72913BA4720009D583E /* cardbg.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = cardbg.png; sourceTree = "<group>"; };
 		32BEE72A13BA4720009D583E /* cardbg@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "cardbg@2x.png"; sourceTree = "<group>"; };
 		32C3A61813CC005F00A12C12 /* ContactCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ContactCell.h; sourceTree = "<group>"; };
@@ -2110,6 +2111,7 @@
 		32D7FEE213B0BD40005E8406 /* view controllers */ = {
 			isa = PBXGroup;
 			children = (
+				32B94B70149AAA9F006BBFB7 /* StackViewControllerDelegate.h */,
 				32A63AC1149932660013C2E8 /* VenueViewController */,
 				325E27F5140EBF0600B5AEA9 /* EventViewController */,
 				32D13D6413DF4A5E00EBB192 /* EventsViewController */,
