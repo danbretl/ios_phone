@@ -501,7 +501,7 @@
 
 - (void)updateEvent:(Event *)event withExhaustiveOccurrencesArray:(NSArray *)exhaustiveOccurrences {
     
-    NSLog(@"Update event withExhaustiveOccurrencesArray");
+//    NSLog(@"Update event withExhaustiveOccurrencesArray");
     
     [event removeOccurrences:event.occurrences]; // Does this suffice? Do we need to delete them more directly instead? This must take care of it.
     

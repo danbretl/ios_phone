@@ -351,7 +351,7 @@ double const EVENTS_LIST_MODE_ANIMATION_DURATION = 0.25;
 @synthesize searchTermSaved=searchTermSaved_;
 
 - (void)dealloc {
-    NSLog(@"--- --- --- --- --- EventsViewController dealloc --- --- --- --- ---");
+//    NSLog(@"--- --- --- --- --- EventsViewController dealloc --- --- --- --- ---");
     [cardPageViewController release];
     [setLocationViewController_ release];
     [concreteParentCategoriesArray release];
@@ -658,19 +658,19 @@ double const EVENTS_LIST_MODE_ANIMATION_DURATION = 0.25;
 
 // Implement viewDidLoad to do additional setup after loading the view, typically from a nib.
 - (void)viewDidLoad {
-    NSLog(@"--- --- --- --- --- EventsViewController viewDidLoad --- --- --- --- ---");
+//    NSLog(@"--- --- --- --- --- EventsViewController viewDidLoad --- --- --- --- ---");
     [super viewDidLoad];
     
-    NSLog(@"EventsViewController setCoreDataModel");
+//    NSLog(@"EventsViewController setCoreDataModel");
     EventsFilter * categoryFilter = [self filterForFilterCode:EVENTS_FILTER_CATEGORIES inFiltersArray:self.filters];
     if (categoryFilter.options.count < 9) {
-        NSLog(@"categoryFilter options count is less than 9");
-        NSLog(@"going to loop through self.concreteParentCategoriesArray %@ (count %d)", self.concreteParentCategoriesArray, self.concreteParentCategoriesArray.count);
+//        NSLog(@"categoryFilter options count is less than 9");
+//        NSLog(@"going to loop through self.concreteParentCategoriesArray %@ (count %d)", self.concreteParentCategoriesArray, self.concreteParentCategoriesArray.count);
         for (Category * category in self.concreteParentCategoriesArray) {
-            NSLog(@"adding category filter option for category with uri %@", category.uri);
+//            NSLog(@"adding category filter option for category with uri %@", category.uri);
             NSString * efoCode = [EventsFilterOption eventsFilterOptionCategoryCodeForCategoryURI:category.uri];
             [categoryFilter.options addObject:[EventsFilterOption eventsFilterOptionWithCode:efoCode readableString:nil buttonText:nil]];
-            NSLog(@"Setting up category EFOs, efoCode=%@", efoCode);
+//            NSLog(@"Setting up category EFOs, efoCode=%@", efoCode);
         }
     }
     
@@ -851,9 +851,9 @@ double const EVENTS_LIST_MODE_ANIMATION_DURATION = 0.25;
     UIView * categoryButtonsContainer = [[UIView alloc] initWithFrame:CGRectMake(categoryButtonsContainerLeftEdge, categoryButtonsContainerTopEdge, categoryButtonContainerSize.width * 3, categoryButtonContainerSize.height * 3)];
     [self.drawerViewCategories addSubview:categoryButtonsContainer];
     int x = 0; int y = 0;
-    NSLog(@"EventsViewController viewDidLoad categoryOptions loop");
+//    NSLog(@"EventsViewController viewDidLoad categoryOptions loop");
     for (int i=0; i<categoryOptionsCount; i++) {
-        NSLog(@"loop %d", i);
+//        NSLog(@"loop %d", i);
         x = i % 3; y = i / 3;
         // Container
         UIView * categoryButtonContainer = [[[UIView alloc] initWithFrame:CGRectMake(x * categoryButtonContainerSize.width, y * categoryButtonContainerSize.height, categoryButtonContainerSize.width, categoryButtonContainerSize.height)] autorelease];
@@ -885,7 +885,7 @@ double const EVENTS_LIST_MODE_ANIMATION_DURATION = 0.25;
         // EventsFilterOption object
         NSString * efoCategoryURI = (y == 0 && x == 0) ? nil : category.uri;
 //        [categoryFilterOptions addObject:[EventsFilterOption eventsFilterOptionWithCode:[EventsFilterOption eventsFilterOptionCategoryCodeForCategoryURI:efoCategoryURI] readableString:nil buttonText:nil buttonView:categoryButton]];
-        NSLog(@"Here is the problem?");
+//        NSLog(@"Here is the problem?");
         [self filterOptionForFilterOptionCode:[EventsFilterOption eventsFilterOptionCategoryCodeForCategoryURI:efoCategoryURI] filterCode:EVENTS_FILTER_CATEGORIES source:Browse].buttonView = categoryButton;
     }
     
@@ -1032,7 +1032,7 @@ double const EVENTS_LIST_MODE_ANIMATION_DURATION = 0.25;
         
     // Block with which to find the index of a given filter option in a filter's options array, given ann array of filters and the desired filter code
     NSUInteger(^indexOfEventsFilterOptionBlock)(NSString *, NSArray *, NSString *)=^(NSString * filterCode, NSArray * filtersArray, NSString * filterOptionCode){
-        NSLog(@"indexOfEventsFilterOptionBlock with filterCode=%@, filtersArray=%@, filterOptionCode=%@", filterCode, filtersArray, filterOptionCode);
+//        NSLog(@"indexOfEventsFilterOptionBlock with filterCode=%@, filtersArray=%@, filterOptionCode=%@", filterCode, filtersArray, filterOptionCode);
         EventsFilter * filter = [self filterForFilterCode:filterCode inFiltersArray:filtersArray];
         NSArray * filterOptionsFound = [filter.options filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"SELF.code == %@", filterOptionCode]];
         EventsFilterOption * foundFO = nil;
@@ -1115,7 +1115,7 @@ double const EVENTS_LIST_MODE_ANIMATION_DURATION = 0.25;
     // Seed the feedback view as being visible
     self.feedbackViewIsVisible = YES; // THIS IS A TOTAL HACK, TO GET THE BALL ROLLING ON THE FEEDBACK VIEW BEING VISIBLE. REALLY, THIS VALUE SHOULD BE COMING FROM SOMEWHERE ELSE, PERHAPS A PREFERENCE, OR IT SHOULD JUST BE SET TO YES ALWAYS IN A MORE INTELLIGENT WAY.
     
-    NSLog(@"About to updateViews for first time in viewDidLoad");
+//    NSLog(@"About to updateViews for first time in viewDidLoad");
     [self updateViewsFromCurrentSourceDataWhichShouldBePopulated:self.events.count > 0 reasonIfNot:EVENTS_NO_RESULTS_REASON_NO_RESULTS animated:NO];
     
     ///////////////////////////////////////
@@ -1302,14 +1302,14 @@ double const EVENTS_LIST_MODE_ANIMATION_DURATION = 0.25;
 }
 
 - (void)didReceiveMemoryWarning {
-    NSLog(@"--- --- --- --- --- EventsViewController didReceiveMemoryWarning --- --- --- --- ---");
+//    NSLog(@"--- --- --- --- --- EventsViewController didReceiveMemoryWarning --- --- --- --- ---");
 	// Releases the view if it doesn't have a superview.
     [super didReceiveMemoryWarning];
 	// Release any cached data, images, etc that aren't in use.
 }
 
 - (void)viewDidUnload {
-    NSLog(@"--- --- --- --- --- EventsViewController viewDidUnload --- --- --- --- ---");
+//    NSLog(@"--- --- --- --- --- EventsViewController viewDidUnload --- --- --- --- ---");
     [super viewDidUnload];
     [self releaseReconstructableViews];
 	// Release any retained subviews of the main view.
@@ -1317,7 +1317,7 @@ double const EVENTS_LIST_MODE_ANIMATION_DURATION = 0.25;
 }
 
 - (void)viewWillAppear:(BOOL)animated {
-    NSLog(@"--- --- --- --- --- EventsViewController viewWillAppear --- --- --- --- ---");
+//    NSLog(@"--- --- --- --- --- EventsViewController viewWillAppear --- --- --- --- ---");
     [super viewWillAppear:animated];
     if (self.eventsForCurrentSource.count == 0) {
         if (self.isSearchOn) {
@@ -1374,7 +1374,7 @@ double const EVENTS_LIST_MODE_ANIMATION_DURATION = 0.25;
 // On viewDidAppear, we should deselect the highlighted row (if there is one).
 - (void)viewDidAppear:(BOOL)animated
 {
-    NSLog(@"--- --- --- --- --- EventsViewController viewDidAppear --- --- --- --- ---");
+//    NSLog(@"--- --- --- --- --- EventsViewController viewDidAppear --- --- --- --- ---");
     
 //    NSLog(@"FIGURING THIS OUT, in viewDidAppear 0 self.tableView.contentOffset is %@", NSStringFromCGPoint(self.tableView.contentOffset));
     
@@ -1889,11 +1889,11 @@ double const EVENTS_LIST_MODE_ANIMATION_DURATION = 0.25;
         [self.tableView scrollRectToVisible:CGRectMake(0, 0, 1, 1) animated:animated];
     }
     
-    NSLog(@"haveEvents in updateViews is %d", haveEvents);
+//    NSLog(@"haveEvents in updateViews is %d", haveEvents);
     BOOL showTableFooterView = /*!self.isSearchOn && */haveEvents;
     self.tableView.tableFooterView.alpha = showTableFooterView ? 1.0 : 0.0;
     self.tableView.tableFooterView.userInteractionEnabled = showTableFooterView;
-    NSLog(@"setTableViewScrollable from updateViews, could be sending NO");
+//    NSLog(@"setTableViewScrollable from updateViews, could be sending NO");
     [self setTableViewScrollable:haveEvents selectable:haveEvents];
     if (haveEvents) {
         // Events were retrieved... They will be displayed.
@@ -2007,7 +2007,7 @@ double const EVENTS_LIST_MODE_ANIMATION_DURATION = 0.25;
 }
 
 - (void) setTableViewScrollable:(BOOL)scrollable selectable:(BOOL)selectable {
-    NSLog(@"setTableViewScrollable:(BOOL)scrollable=%d selectable:(BOOL)selectable=%d", scrollable, selectable);
+//    NSLog(@"setTableViewScrollable:(BOOL)scrollable=%d selectable:(BOOL)selectable=%d", scrollable, selectable);
     self.tableView.scrollEnabled = scrollable;
     self.tableView.allowsSelection = selectable;
 }
@@ -3099,7 +3099,7 @@ double const EVENTS_LIST_MODE_ANIMATION_DURATION = 0.25;
 }
 
 - (EventsFilterOption *) filterOptionForFilterOptionCode:(NSString *)filterOptionCode inFilterOptionsArray:(NSArray *)filterOptions {
-    NSLog(@"EventsViewController filterOptionForFilterOptionCode:%@ inFilterOptionsArray:%@", filterOptionCode, filterOptions);
+//    NSLog(@"EventsViewController filterOptionForFilterOptionCode:%@ inFilterOptionsArray:%@", filterOptionCode, filterOptions);
     EventsFilterOption * filterOption = nil;
     NSArray * resultsArray = [filterOptions filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"code == %@", filterOptionCode]];
     if (resultsArray && [resultsArray count] > 0) {
@@ -3640,7 +3640,7 @@ double const EVENTS_LIST_MODE_ANIMATION_DURATION = 0.25;
         givenUserTime = [calender dateFromComponents:givenUserTimeComponents];
         NSComparisonResult timesComparisonResult = [latestTimeForFilterOption compare:givenUserTime];
         timeFilterOption.buttonView.enabled = allEnabled || timeFilterOption.isMostGeneralOption || (timesComparisonResult == NSOrderedDescending);
-        NSLog(@"Compared bucket latest %@ with user's time %@, got %d (where descending is %d)", latestTimeForFilterOption, givenUserTime, timesComparisonResult, NSOrderedDescending);
+//        NSLog(@"Compared bucket latest %@ with user's time %@, got %d (where descending is %d)", latestTimeForFilterOption, givenUserTime, timesComparisonResult, NSOrderedDescending);
     }
 //    if (shouldBumpUnavailableTimes) {
 //        // ...
@@ -3654,7 +3654,7 @@ double const EVENTS_LIST_MODE_ANIMATION_DURATION = 0.25;
     SEL selectedLocationEFOGetter = browseMode ? @selector(selectedLocationFilterOption) : @selector(selectedLocationSearchFilterOption);
     SEL selectedLocationEFOSetter = browseMode ? @selector(setSelectedLocationFilterOption:) : @selector(setSelectedLocationSearchFilterOption:);
     EventsFilterOption * oldSelectedLocationEFO = [self performSelector:selectedLocationEFOGetter];
-    NSLog(@"oldSelectedLocationEFO = %@", oldSelectedLocationEFO.code);
+//    NSLog(@"oldSelectedLocationEFO = %@", oldSelectedLocationEFO.code);
 
     NSArray * filtersForSource = browseMode ? self.filters : self.filtersSearch;
     EventsFilter * filterForSource = [self filterForFilterCode:EVENTS_FILTER_LOCATION inFiltersArray:filtersForSource];
@@ -3670,14 +3670,14 @@ double const EVENTS_LIST_MODE_ANIMATION_DURATION = 0.25;
         if (enable) {
             if (shouldSelectNext) {
                 nextMostSpecificEnabledFilterOption = filterOption;
-                NSLog(@"nextMostSpecificEnabledFilterOption set to %@", nextMostSpecificEnabledFilterOption.code);
+//                NSLog(@"nextMostSpecificEnabledFilterOption set to %@", nextMostSpecificEnabledFilterOption.code);
                 shouldSelectNext = NO;
             }
         } else {
             BOOL wasSelected = oldSelectedLocationEFO == filterOption;
             shouldSelectNext = shouldSelectNext || wasSelected;
             if (shouldSelectNext) {
-                NSLog(@"shouldSelectNext set to YES when looping with filterOption=%@", filterOption.code);
+//                NSLog(@"shouldSelectNext set to YES when looping with filterOption=%@", filterOption.code);
             }
             selectedFilterOptionWasDisabled = selectedFilterOptionWasDisabled || wasSelected;
         }
@@ -3685,8 +3685,8 @@ double const EVENTS_LIST_MODE_ANIMATION_DURATION = 0.25;
     
     if (selectedFilterOptionWasDisabled) {
         
-        NSLog(@"selectedFilterOptionWasDisabled=YES");
-        NSLog(@"selectedFilterOption to switch from %@ to %@", oldSelectedLocationEFO, nextMostSpecificEnabledFilterOption);
+//        NSLog(@"selectedFilterOptionWasDisabled=YES");
+//        NSLog(@"selectedFilterOption to switch from %@ to %@", oldSelectedLocationEFO, nextMostSpecificEnabledFilterOption);
         
         [self performSelector:selectedLocationEFOSetter withObject:nextMostSpecificEnabledFilterOption];
         [self updateFilterOptionButtonStatesOldSelected:oldSelectedLocationEFO newSelected:nextMostSpecificEnabledFilterOption];
@@ -3699,10 +3699,10 @@ double const EVENTS_LIST_MODE_ANIMATION_DURATION = 0.25;
 
     EventsFilterOption * newSelectedLocationEFO = [self performSelector:selectedLocationEFOGetter];
     if (oldSelectedLocationEFO != newSelectedLocationEFO) {
-        NSLog(@"Changes happened in current source (from %@ to %@)! Should reload drawer on close.", oldSelectedLocationEFO.code, newSelectedLocationEFO.code);
+//        NSLog(@"Changes happened in current source (from %@ to %@)! Should reload drawer on close.", oldSelectedLocationEFO.code, newSelectedLocationEFO.code);
         [self setShouldReloadOnDrawerClose:YES updateDrawerReloadIndicatorView:YES shouldUpdateEventsSummaryStringForCurrentSource:YES animated:animated];
     }
-    NSLog(@"newSelectedLocationEFO = %@", newSelectedLocationEFO.code);
+//    NSLog(@"newSelectedLocationEFO = %@", newSelectedLocationEFO.code);
     
 }
 

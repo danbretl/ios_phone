@@ -139,7 +139,7 @@ static NSString * const EFO_ICON_EXT = @".png";
         }
         [gregorianCalendar release];
     }
-    NSLog(@"Translated %@ to %@ (when looking for earliest? %d)", dateCode, filterDate, lookingForEarliest);
+//    NSLog(@"Translated %@ to %@ (when looking for earliest? %d)", dateCode, filterDate, lookingForEarliest);
     return filterDate;
     
 }
@@ -151,7 +151,7 @@ static NSString * const EFO_ICON_EXT = @".png";
         NSInteger hour = 0;
         NSInteger minute = 0;
         if ([timeCode isEqualToString:EFO_CODE_TIME_ANY]) {
-            NSLog(@"%@", EFO_CODE_TIME_ANY);
+//            NSLog(@"%@", EFO_CODE_TIME_ANY);
             // ...do nothing...
         } else if ([timeCode isEqualToString:EFO_CODE_TIME_MORNING]) {
             hour = lookingForEarliest ? 9 : 11;
@@ -179,7 +179,7 @@ static NSString * const EFO_ICON_EXT = @".png";
             [dateComponents release];
         }
     }
-    NSLog(@"Translated %@ to %@", timeCode, filterTime);
+//    NSLog(@"Translated %@ to %@", timeCode, filterTime);
     return filterTime;
     
 }

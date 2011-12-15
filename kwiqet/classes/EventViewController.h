@@ -126,7 +126,7 @@ typedef enum {
     NSMutableDictionary * eventOccurrencesPlaceDistancesDictionary;
     id<CardPageViewControllerDelegate> delegate;
     CoreDataModel * coreDataModel;
-    MapViewController * mapViewController;    
+    MapViewController * mapViewController;
     WebDataTranslator * webDataTranslator;
     NSDateFormatter * occurrenceTimeFormatter;
     NSDateFormatter * occurrencesControlsNavBarDateFormatter;

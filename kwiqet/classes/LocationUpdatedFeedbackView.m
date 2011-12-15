@@ -113,12 +113,12 @@ CGFloat const LUFV_LABEL_PADDING_RIGHT = 5.0;
     void(^resizeBlockForText)(NSString *) = ^(NSString * text){ // resizeBlockForText changes the entire view's frame, which is a bit nonstandard. While it does this, it also maintains the view's rightmost x coordinate.
         CGSize textSize = [text sizeWithFont:self.label.font];
         CGFloat oldSelfWidth = self.frame.size.width;
-        NSLog(@"LocationUpdatedFeedbackView frame change, original:%@", NSStringFromCGRect(self.frame));
+//        NSLog(@"LocationUpdatedFeedbackView frame change, original:%@", NSStringFromCGRect(self.frame));
         CGRect selfFrame = self.frame;
         selfFrame.size.width = textSize.width + LUFV_LABEL_PADDING_LEFT + LUFV_LABEL_PADDING_RIGHT;
         selfFrame.origin.x = selfFrame.origin.x + oldSelfWidth - selfFrame.size.width;
         self.frame = selfFrame;
-        NSLog(@"LocationUpdatedFeedbackView frame change, modified:%@", NSStringFromCGRect(self.frame));
+//        NSLog(@"LocationUpdatedFeedbackView frame change, modified:%@", NSStringFromCGRect(self.frame));
     };
     if (animated) {
         if (fadeTextIfAnimated) {
@@ -189,7 +189,7 @@ CGFloat const LUFV_LABEL_PADDING_RIGHT = 5.0;
     NSString * valueText = qualitative ? valueUnit : [NSString stringWithFormat:@"%d %@", value, valueUnit];
     NSString * labelText = [NSString stringWithFormat:@"updated %@ ago", valueText];
     [self setLabelText:labelText animated:animated fadeTextIfAnimated:self.messageType != Updated];
-    NSLog(@"LocationUpdatedFeedbackView labelText set to %@", labelText);
+//    NSLog(@"LocationUpdatedFeedbackView labelText set to %@", labelText);
     self.messageType = Updated;
 }
 

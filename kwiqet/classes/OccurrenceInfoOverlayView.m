@@ -98,7 +98,7 @@ CGFloat const OIOV_SECONDARY_PROMPT_HORIZONTAL_SPACING = 5.0;
     [self.messagePrompt sizeToFit];
     CGFloat secondaryPromptSpacing = self.messageSecondary.text.length > 0 && self.messagePrompt.text.length > 0 ? OIOV_SECONDARY_PROMPT_HORIZONTAL_SPACING : 0;
     CGFloat secondaryAndPromptCombinedWidth = self.messageSecondary.bounds.size.width + secondaryPromptSpacing + self.messagePrompt.bounds.size.width;
-    NSLog(@"combined width we'll need is %f", secondaryAndPromptCombinedWidth);
+//    NSLog(@"combined width we'll need is %f", secondaryAndPromptCombinedWidth);
     CGRect messageSecondaryFrame = self.messageSecondary.frame;
     messageSecondaryFrame.origin.x = floorf((self.bounds.size.width - secondaryAndPromptCombinedWidth) / 2.0);
     self.messageSecondary.frame = messageSecondaryFrame;
