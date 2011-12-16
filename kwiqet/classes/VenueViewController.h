@@ -13,8 +13,9 @@
 #import "StackViewControllerDelegate.h"
 #import <MapKit/MapKit.h>
 #import "MapViewController.h"
+#import "SDWebImageManager.h"
 
-@interface VenueViewController : UIViewController <UITableViewDelegate, UITableViewDataSource, StackViewControllerDelegate, MapViewControllerDelegate, MKMapViewDelegate> {
+@interface VenueViewController : UIViewController <UITableViewDelegate, UITableViewDataSource, StackViewControllerDelegate, MapViewControllerDelegate, MKMapViewDelegate, SDWebImageManagerDelegate> {
     
     // Delegate
     id<StackViewControllerDelegate> delegate;
@@ -32,6 +33,7 @@
     UIView * mainContainer_;
     ElasticUILabel * nameBar_;
     UIImageView * imageView_;
+    CGFloat imageViewNormalHeight;
     UIView * infoContainer_;
     UILabel * addressLabel_;
     UILabel * cityStateZipLabel_;

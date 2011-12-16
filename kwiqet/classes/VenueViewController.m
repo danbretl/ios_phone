@@ -7,7 +7,6 @@
 //
 
 #import "VenueViewController.h"
-#import "UIImageView+WebCache.h"
 #import "URLBuilder.h"
 #import "UIFont+Kwiqet.h"
 #import "EventTableViewCell.h"
@@ -48,7 +47,11 @@
 
 - (void) updateInfoViewsFromVenue:(Place *)venue animated:(BOOL)animated;
 - (void) updateMapViewToCenterOnCoordinate:(CLLocationCoordinate2D)coordinate animated:(BOOL)animated;
-- (void) updateImageFromVenue:(Place *)venue;
+- (void) updateImageFromVenue:(Place *)venue animated:(BOOL)animated;
+- (void) showImageViewWithImage:(UIImage *)image animated:(BOOL)animated;
+- (void) setImageViewIsVisible:(BOOL)visible animated:(BOOL)animated;
+- (void) updateViewsVerticalPositionsAll;
+- (void) updateViewsVerticalPositionsForScroll;
 - (void) configureCell:(EventTableViewCell *)cell forRowAtIndexPath:(NSIndexPath *)indexPath;
 
 @end
@@ -102,6 +105,10 @@
     // Nav bar views
     self.navBarContainer.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"navbar.png"]];
     
+    // Image view
+//    [self setImageViewIsVisible:NO animated:NO]; // STILL WORKING ON BUGS
+    imageViewNormalHeight = self.imageView.frame.size.height;
+    
     // Venue info views
     self.infoContainer.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"btn_venue_location_info.png"]];
     self.addressLabel.font = [UIFont kwiqetFontOfType:BoldCondensed size:18];
@@ -111,7 +118,7 @@
     // Table header views
     self.eventsHeaderContainer.backgroundColor = [UIColor colorWithWhite:53.0/255.0 alpha:0.8];
     self.eventsHeaderLabel.backgroundColor = [UIColor clearColor];
-    self.eventsHeaderLabel.font = [UIFont kwiqetFontOfType:BoldCondensed size:18.0];
+    self.eventsHeaderLabel.font = [UIFont kwiqetFontOfType:BoldCondensed size:16.0];
     self.eventsHeaderLabel.textColor = [UIColor colorWithWhite:241.0/255.0 alpha:1.0];
     self.eventsTableView.backgroundColor = [UIColor clearColor];
     self.eventsTableView.tableHeaderView = self.mainContainer;
@@ -122,7 +129,7 @@
         if (self.venue.coordinateAvailable) {
             [self updateMapViewToCenterOnCoordinate:self.venue.coordinate animated:NO];
         }
-        [self updateImageFromVenue:self.venue];
+        [self updateImageFromVenue:self.venue animated:NO];
     }
     
     BOOL debuggingFrames = NO;
@@ -227,7 +234,7 @@
             if (self.venue.coordinateAvailable) {
                 [self updateMapViewToCenterOnCoordinate:self.venue.coordinate animated:YES];
             }
-            [self updateImageFromVenue:self.venue];
+            [self updateImageFromVenue:self.venue animated:YES];
         }
     }
 }
@@ -345,31 +352,98 @@
 }
 
 // Venue image not yet available / implemented. Need to add an imageLocation attribute the Place object, and pull in that file location from the server. UPDATE: Done!
-- (void)updateImageFromVenue:(Place *)venue {
+- (void) updateImageFromVenue:(Place *)venue animated:(BOOL)animated {
+    NSLog(@"updateImageFromVenue:");
 //    self.imageView.image = [UIImage imageNamed:@"event_img_placeholder.png"];
-    [self.imageView setImageWithURL:[URLBuilder imageURLForImageLocation:self.venue.imageLocation] placeholderImage:[UIImage imageNamed:@"event_img_placeholder.png"]];
+//    [self.imageView setImageWithURL:[URLBuilder imageURLForImageLocation:self.venue.imageLocation] placeholderImage:[UIImage imageNamed:@"event_img_placeholder.png"]];
+    NSURL * imageURL = [URLBuilder imageURLForImageLocation:self.venue.imageLocation];
+    SDWebImageManager * webImageManager = [SDWebImageManager sharedManager];
+    UIImage * cachedImage = [webImageManager imageWithURL:imageURL];
+    if (cachedImage) {
+        [self showImageViewWithImage:cachedImage animated:animated];
+    } else {
+        [webImageManager downloadWithURL:imageURL delegate:self];
+    }
+}
+
+- (void) webImageManager:(SDWebImageManager *)imageManager didFinishWithImage:(UIImage *)image {
+    NSLog(@"webImageManager:didFinishWithImage:");
+    [self showImageViewWithImage:image animated:(self.view.window != nil)];
+}
+
+- (void) webImageManager:(SDWebImageManager *)imageManager didFailWithError:(NSError *)error {
+    NSLog(@"webImageManager:didFailWithError:");
+    // Do nothing, really... Just chill, sans image in the venue card. Maybe ensure that the image view is hidden.
+//    [self setImageViewIsVisible:NO animated:(self.view.window != nil)];
+}
+
+- (void) showImageViewWithImage:(UIImage *)image animated:(BOOL)animated {
+    NSLog(@"showImageViewWithImage:");
+    self.imageView.image = image;
+//    [self setImageViewIsVisible:YES animated:animated];
+}
+
+- (void)setImageViewIsVisible:(BOOL)visible animated:(BOOL)animated {
+    NSLog(@"setImageViewIsVisible:%d", visible);
+    void(^imageViewSizeBlock)(BOOL)=^(BOOL makeVisible){
+        CGRect imageViewFrame = self.imageView.frame;
+        imageViewFrame.size.height = makeVisible ? imageViewNormalHeight : 0;
+        self.imageView.frame = imageViewFrame;
+    };
+    if (animated) {
+        [UIView animateWithDuration:0.25 animations:^{
+            imageViewSizeBlock(visible);
+            [self updateViewsVerticalPositionsAll];
+        }];
+    } else {
+        imageViewSizeBlock(visible);
+        [self updateViewsVerticalPositionsAll];
+    }
+}
+
+- (void) updateViewsVerticalPositionsAll {
+    CGRect nameBarFrame = self.nameBar.frame;
+    nameBarFrame.origin.y = 0;
+    self.nameBar.frame = nameBarFrame;
+    CGRect imageViewFrame = self.imageView.frame;
+    imageViewFrame.origin.y = CGRectGetMaxY(nameBarFrame);
+    self.imageView.frame = imageViewFrame;
+    CGRect infoContainerFrame = self.infoContainer.frame;
+    infoContainerFrame.origin.y = CGRectGetMaxY(imageViewFrame);
+    self.infoContainer.frame = infoContainerFrame;
+    CGRect descriptionContainerFrame = self.descriptionContainer.frame;
+    descriptionContainerFrame.origin.y = CGRectGetMaxY(infoContainerFrame);
+    self.descriptionContainer.frame = descriptionContainerFrame;
+    CGRect eventsHeaderContainerFrame = self.eventsHeaderContainer.frame;
+    eventsHeaderContainerFrame.origin.y = CGRectGetMaxY(descriptionContainerFrame);
+    self.eventsHeaderContainer.frame = eventsHeaderContainerFrame;
+    [self updateViewsVerticalPositionsForScroll];
+}
+
+- (void) updateViewsVerticalPositionsForScroll {
+    CGRect nameBarFrame = self.nameBar.frame;
+    if (self.eventsTableView.contentOffset.y >= 0) {
+        nameBarFrame.origin.y = self.eventsTableView.contentOffset.y;
+        CGFloat infoContainerOriginalOriginY = self.nameBar.frame.size.height + self.imageView.frame.size.height;
+        CGRect infoContainerFrame = self.infoContainer.frame;
+        CGFloat infoContainerAdjustedOriginY = infoContainerOriginalOriginY;
+        if (self.eventsTableView.contentOffset.y + self.nameBar.frame.size.height >= infoContainerOriginalOriginY) {
+            infoContainerAdjustedOriginY = nameBarFrame.origin.y + nameBarFrame.size.height;
+        }
+        infoContainerFrame.origin.y = infoContainerAdjustedOriginY;
+        self.infoContainer.frame = infoContainerFrame;
+        CGRect eventsHeaderContainerFrame = self.eventsHeaderContainer.frame;
+        eventsHeaderContainerFrame.origin.y = MAX(CGRectGetMaxY(self.descriptionContainer.frame), CGRectGetMaxY(self.infoContainer.frame));
+        self.eventsHeaderContainer.frame = eventsHeaderContainerFrame;
+    } else {
+        nameBarFrame.origin.y = 0;
+    }
+    self.nameBar.frame = nameBarFrame;
 }
 
 - (void)scrollViewDidScroll:(UIScrollView *)scrollView {
     if (scrollView == self.eventsTableView) {
-        CGRect nameBarFrame = self.nameBar.frame;
-        if (self.eventsTableView.contentOffset.y >= 0) {
-            nameBarFrame.origin.y = self.eventsTableView.contentOffset.y;
-            CGFloat infoContainerOriginalOriginY = self.nameBar.frame.size.height + self.imageView.frame.size.height;
-            CGRect infoContainerFrame = self.infoContainer.frame;
-            CGFloat infoContainerAdjustedOriginY = infoContainerOriginalOriginY;
-            if (self.eventsTableView.contentOffset.y + self.nameBar.frame.size.height >= infoContainerOriginalOriginY) {
-                infoContainerAdjustedOriginY = nameBarFrame.origin.y + nameBarFrame.size.height;
-            }
-            infoContainerFrame.origin.y = infoContainerAdjustedOriginY;
-            self.infoContainer.frame = infoContainerFrame;
-            CGRect eventsHeaderContainerFrame = self.eventsHeaderContainer.frame;
-            eventsHeaderContainerFrame.origin.y = MAX(CGRectGetMaxY(self.descriptionContainer.frame), CGRectGetMaxY(self.infoContainer.frame));
-            self.eventsHeaderContainer.frame = eventsHeaderContainerFrame;
-        } else {
-            nameBarFrame.origin.y = 0;
-        }
-        self.nameBar.frame = nameBarFrame;
+        [self updateViewsVerticalPositionsForScroll];
     }
 }
 
