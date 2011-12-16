@@ -11,6 +11,7 @@
 #import "URLBuilder.h"
 #import "UIFont+Kwiqet.h"
 #import "EventTableViewCell.h"
+#import "EventLocationAnnotation.h"
 
 @interface VenueViewController()
 
@@ -29,10 +30,15 @@
 @property (retain, nonatomic) IBOutlet UILabel * cityStateZipLabel;
 @property (retain, nonatomic) IBOutlet UIButton * phoneNumberButton;
 @property (retain, nonatomic) IBOutlet UIButton * mapButton;
+@property (retain, nonatomic) IBOutlet MKMapView * mapView;
 @property (retain, nonatomic) IBOutlet UIView * descriptionContainer;
 @property (retain, nonatomic) IBOutlet UILabel * descriptionLabel;
 
+@property (retain, nonatomic) IBOutlet UIView * eventsHeaderContainer;
+@property (retain, nonatomic) IBOutlet UILabel * eventsHeaderLabel;
 @property (retain, nonatomic) IBOutlet UITableView * eventsTableView;
+
+@property (retain) MapViewController * mapViewController;
 
 - (IBAction)backButtonTouched:(UIButton *)button;
 - (IBAction)logoButtonTouched:(UIButton *)button;
@@ -40,14 +46,18 @@
 - (IBAction)phoneNumberButtonTouched:(UIButton *)button;
 - (IBAction)mapButtonTouched:(UIButton *)button;
 
-- (void) updateImageFromVenue:(Place *)venue;
 - (void) updateInfoViewsFromVenue:(Place *)venue animated:(BOOL)animated;
+- (void) updateMapViewToCenterOnCoordinate:(CLLocationCoordinate2D)coordinate animated:(BOOL)animated;
+- (void) updateImageFromVenue:(Place *)venue;
 - (void) configureCell:(EventTableViewCell *)cell forRowAtIndexPath:(NSIndexPath *)indexPath;
 
 @end
 
 @implementation VenueViewController
 @synthesize mainContainer;
+@synthesize mapView=mapView_;
+@synthesize eventsHeaderContainer=eventsHeaderContainer_;
+@synthesize eventsHeaderLabel=eventsHeaderLabel_;
 @synthesize delegate;
 @synthesize venue=venue_;
 @synthesize navBarContainer=navBarContainer_;
@@ -64,6 +74,7 @@
 @synthesize mapButton=mapButton_;
 @synthesize descriptionContainer=descriptionContainer_;
 @synthesize descriptionLabel=descriptionLabel_;
+@synthesize mapViewController=mapViewController_;
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil {
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
@@ -87,23 +98,38 @@
     
     // Main view
     self.view.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"bg_dark_gray.jpg"]];
-    
-    // Table header view
-    self.eventsTableView.backgroundColor = [UIColor clearColor];
-    self.eventsTableView.tableHeaderView = self.mainContainer;
-    
+        
     // Nav bar views
     self.navBarContainer.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"navbar.png"]];
     
     // Venue info views
-    self.addressLabel.font = [UIFont kwiqetFontOfType:RegularCondensed size:14];
+    self.infoContainer.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"btn_venue_location_info.png"]];
+    self.addressLabel.font = [UIFont kwiqetFontOfType:BoldCondensed size:18];
     self.cityStateZipLabel.font = [UIFont kwiqetFontOfType:RegularCondensed size:14];
     self.phoneNumberButton.titleLabel.font = [UIFont kwiqetFontOfType:BoldCondensed size:12];
     
+    // Table header views
+    self.eventsHeaderContainer.backgroundColor = [UIColor colorWithWhite:53.0/255.0 alpha:0.8];
+    self.eventsHeaderLabel.backgroundColor = [UIColor clearColor];
+    self.eventsHeaderLabel.font = [UIFont kwiqetFontOfType:BoldCondensed size:18.0];
+    self.eventsHeaderLabel.textColor = [UIColor colorWithWhite:241.0/255.0 alpha:1.0];
+    self.eventsTableView.backgroundColor = [UIColor clearColor];
+    self.eventsTableView.tableHeaderView = self.mainContainer;
     
+    // Update views from data
     if (self.venue) {
         [self updateInfoViewsFromVenue:self.venue animated:NO];
+        if (self.venue.coordinateAvailable) {
+            [self updateMapViewToCenterOnCoordinate:self.venue.coordinate animated:NO];
+        }
         [self updateImageFromVenue:self.venue];
+    }
+    
+    BOOL debuggingFrames = NO;
+    if (debuggingFrames) {
+        self.addressLabel.backgroundColor = [UIColor redColor];
+        self.cityStateZipLabel.backgroundColor = [UIColor orangeColor];
+        self.phoneNumberButton.backgroundColor = [UIColor yellowColor];
     }
 }
 
@@ -123,6 +149,9 @@
     [self setDescriptionLabel:nil];
     [self setEventsTableView:nil];
     [self setMainContainer:nil];
+    [self setMapView:nil];
+    [self setEventsHeaderContainer:nil];
+    [self setEventsHeaderLabel:nil];
     [super viewDidUnload];
     // Release any retained subviews of the main view.
     // e.g. self.myOutlet = nil;
@@ -151,6 +180,10 @@
     [descriptionLabel_ release];
     [eventsTableView_ release];
     [mainContainer release];
+    [mapView_ release];
+    [mapViewController_ release];
+    [eventsHeaderContainer_ release];
+    [eventsHeaderLabel_ release];
     [super dealloc];
 }
 
@@ -171,7 +204,18 @@
 }
 
 - (void)mapButtonTouched:(UIButton *)button {
-    NSLog(@"mapButtonTouched");
+    self.mapViewController = [[[MapViewController alloc] initWithNibName:@"MapViewController" bundle:[NSBundle mainBundle]] autorelease];
+    self.mapViewController.delegate = self;
+    self.mapViewController.locationLatitude = self.venue.latitude;
+    self.mapViewController.locationLongitude = self.venue.longitude;
+    self.mapViewController.locationName = self.venue.title;
+    self.mapViewController.locationAddress = self.venue.address;
+    [self presentModalViewController:self.mapViewController animated:YES];
+}
+
+- (void)mapViewControllerDidPushBackButton:(MapViewController *)mapViewController {
+    [self dismissModalViewControllerAnimated:YES];
+    self.mapViewController = nil;
 }
 
 - (void) setVenue:(Place *)venue {
@@ -180,6 +224,9 @@
         venue_ = [venue retain];
         if (self.view.window) {
             [self updateInfoViewsFromVenue:self.venue animated:YES];
+            if (self.venue.coordinateAvailable) {
+                [self updateMapViewToCenterOnCoordinate:self.venue.coordinate animated:YES];
+            }
             [self updateImageFromVenue:self.venue];
         }
     }
@@ -193,27 +240,41 @@
 }
 
 - (void)updateInfoViewsFromVenue:(Place *)venue animated:(BOOL)animated {
-    NSString * descriptionText = @"";
-    if (!venue) {
-        self.nameBar.text = @"";
-        self.addressLabel.text = @"";
-        self.cityStateZipLabel.text = @"";
-        [self.phoneNumberButton setTitle:@"" forState:UIControlStateNormal];
-        [self.phoneNumberButton setTitle:@"" forState:UIControlStateHighlighted];
-        self.phoneNumberButton.enabled = venue.phone && venue.phone.length > 0;
-        self.mapButton.enabled = venue.latitude && venue.longitude;
-    } else {
-        self.nameBar.text = venue.title;
-        self.addressLabel.text = venue.address;
-        self.cityStateZipLabel.text = [self.webDataTranslator addressSecondLineStringFromCity:venue.city state:venue.state zip:venue.zip];
-        BOOL phoneNumberAvailable = venue.phone && venue.phone.length > 0;
-        NSString * phoneString = phoneNumberAvailable ? venue.phone : @"Phone number not available";
-        [self.phoneNumberButton setTitle:phoneString forState:UIControlStateNormal];
-        [self.phoneNumberButton setTitle:phoneString forState:UIControlStateHighlighted];
-        self.phoneNumberButton.enabled = phoneNumberAvailable;
-        self.mapButton.enabled = venue.latitude && venue.longitude;
-        descriptionText = venue.placeDescription;
-    }
+    
+    void(^infoViewsWidthsBlock)(NSString *, NSString *, NSString *) = ^(NSString * addressText, NSString * cityStateZipText, NSString * phoneText){
+        // Set up
+        CGFloat mapViewMaxAllowableOriginX = 207; // HARD-CODED VALUE
+        CGFloat mapViewPaddingLeft = 10; // HARD-CODED MAP VIEW PADDING VALUE
+        CGFloat mapViewPaddingRight = 5; // HARD-CODED MAP VIEW PADDING VALUE
+        CGFloat labelsRightmostAllowableX = mapViewMaxAllowableOriginX - mapViewPaddingLeft;
+        CGFloat phoneTouchPaddingRight = mapViewPaddingLeft;
+        // Calculating text sizes
+        CGSize addressTextSize = [addressText sizeWithFont:self.addressLabel.font];
+        CGSize cityStateZipTextSize = [addressText sizeWithFont:self.cityStateZipLabel.font];
+        CGSize phoneTextSize = [phoneText sizeWithFont:self.phoneNumberButton.titleLabel.font];
+        // Address lines
+        CGRect addressLabelFrame = self.addressLabel.frame;
+        CGRect cityStateZipLabelFrame = self.cityStateZipLabel.frame;
+        CGFloat addressLabelWidth = MIN(addressTextSize.width, labelsRightmostAllowableX - addressLabelFrame.origin.x);
+        CGFloat cityStateZipLabelWidth = MIN(cityStateZipTextSize.width, labelsRightmostAllowableX - cityStateZipLabelFrame.origin.x);
+        CGFloat maxAddressLinesWidth = MAX(addressLabelWidth, cityStateZipLabelWidth);
+        addressLabelWidth = maxAddressLinesWidth;
+        cityStateZipLabelWidth = maxAddressLinesWidth;
+        addressLabelFrame.size.width = addressLabelWidth;
+        cityStateZipLabelFrame.size.width = cityStateZipLabelWidth;
+        self.addressLabel.frame = addressLabelFrame;
+        self.cityStateZipLabel.frame = cityStateZipLabelFrame;
+        // Phone
+        CGRect phoneNumberButtonFrame = self.phoneNumberButton.frame;
+        phoneNumberButtonFrame.size.width = MIN(phoneTextSize.width + self.phoneNumberButton.contentEdgeInsets.left, labelsRightmostAllowableX - phoneNumberButtonFrame.origin.x) + phoneTouchPaddingRight;
+        self.phoneNumberButton.frame = phoneNumberButtonFrame;
+        // Map view
+        CGRect mapViewFrame = self.mapView.frame;
+        mapViewFrame.origin.x = MAX(MAX(CGRectGetMaxX(addressLabelFrame), CGRectGetMaxX(cityStateZipLabelFrame)), CGRectGetMaxX(phoneNumberButtonFrame) - phoneTouchPaddingRight) + mapViewPaddingLeft;
+        mapViewFrame.size.width = self.infoContainer.frame.size.width - mapViewPaddingRight - mapViewFrame.origin.x;
+        self.mapView.frame = mapViewFrame;
+    };
+    
     void(^descriptionLabelSizeBlock)(NSString *) = ^(NSString * descriptionText){
         if (descriptionText && descriptionText.length > 0) {
             CGSize descriptionLabelSize = [descriptionText sizeWithFont:self.descriptionLabel.font constrainedToSize:CGSizeMake(self.descriptionLabel.frame.size.width, 3000) lineBreakMode:self.descriptionLabel.lineBreakMode];
@@ -228,27 +289,59 @@
             descriptionContainerFrame.size.height = 0;
             self.descriptionContainer.frame = descriptionContainerFrame;
         }
+        CGRect eventsHeaderContainerFrame = self.eventsHeaderContainer.frame;
+        eventsHeaderContainerFrame.origin.y = CGRectGetMaxY(self.descriptionContainer.frame);
+        self.eventsHeaderContainer.frame = eventsHeaderContainerFrame;
         CGRect mainContainerFrame = self.mainContainer.frame;
-        mainContainerFrame.size.height = CGRectGetMaxY(self.descriptionContainer.frame);
+        mainContainerFrame.size.height = CGRectGetMaxY(self.eventsHeaderContainer.frame);
         self.mainContainer.frame = mainContainerFrame;
-        if (animated) { [self.eventsTableView beginUpdates]; }        
+        if (animated) { [self.eventsTableView beginUpdates]; }
         self.eventsTableView.tableHeaderView = self.mainContainer;
         if (animated) { [self.eventsTableView endUpdates]; }
-//        UIEdgeInsets eventsTableViewInsets = self.eventsTableView.contentInset;
-//        eventsTableViewInsets.top = CGRectGetMaxY(self.descriptionContainer.frame) - self.eventsTableView.frame.origin.y;
-//        self.eventsTableView.contentInset = eventsTableViewInsets;
-//        self.eventsTableView.scrollIndicatorInsets = eventsTableViewInsets;
     };
+    
+    NSString * nameText = @"";
+    NSString * addressText = @"";
+    NSString * cityStateZipText = @"";
+    NSString * phoneText = @"";
+    NSString * descriptionText = @"";
+    BOOL phoneAvailable = venue && venue.phone && venue.phone.length > 0;
+    BOOL locationAvailable = venue && venue.latitude && venue.longitude;
+    if (venue != nil) {
+        nameText = venue.title;
+        addressText = venue.address;
+        cityStateZipText = [self.webDataTranslator addressSecondLineStringFromCity:venue.city state:venue.state zip:venue.zip];
+        phoneText = phoneAvailable ? venue.phone : @"Phone number not available";
+        descriptionText = venue.placeDescription;
+    }
+    
+    self.nameBar.text = nameText;
+    self.addressLabel.text = addressText;
+    self.cityStateZipLabel.text = cityStateZipText;
+    [self.phoneNumberButton setTitle:phoneText forState:UIControlStateNormal];
+    [self.phoneNumberButton setTitle:phoneText forState:UIControlStateHighlighted];
     self.descriptionLabel.text = descriptionText;
+    self.phoneNumberButton.enabled = phoneAvailable;
+    self.mapButton.enabled = locationAvailable;
+    
     if (animated) {
         [UIView animateWithDuration:0.25 animations:^{
+            infoViewsWidthsBlock(addressText, cityStateZipText, phoneText);
             descriptionLabelSizeBlock(descriptionText);
         }];
     } else {
-        self.descriptionLabel.text = descriptionText;
+        infoViewsWidthsBlock(addressText, cityStateZipText, phoneText);
         descriptionLabelSizeBlock(descriptionText);
     }
 
+}
+
+- (void) updateMapViewToCenterOnCoordinate:(CLLocationCoordinate2D)coordinate animated:(BOOL)animated {
+    [self.mapView removeAnnotations:self.mapView.annotations];
+    [self.mapView setRegion:MKCoordinateRegionMakeWithDistance(CLLocationCoordinate2DMake(coordinate.latitude + .00055, coordinate.longitude), 200, 200) animated:animated];
+    EventLocationAnnotation * venueLocationAnnotation = [[EventLocationAnnotation alloc] initWithName:@"" address:@"" coordinate:coordinate];
+    [self.mapView addAnnotation:venueLocationAnnotation];
+    [venueLocationAnnotation release];
 }
 
 // Venue image not yet available / implemented. Need to add an imageLocation attribute the Place object, and pull in that file location from the server. UPDATE: Done!
@@ -270,6 +363,9 @@
             }
             infoContainerFrame.origin.y = infoContainerAdjustedOriginY;
             self.infoContainer.frame = infoContainerFrame;
+            CGRect eventsHeaderContainerFrame = self.eventsHeaderContainer.frame;
+            eventsHeaderContainerFrame.origin.y = MAX(CGRectGetMaxY(self.descriptionContainer.frame), CGRectGetMaxY(self.infoContainer.frame));
+            self.eventsHeaderContainer.frame = eventsHeaderContainerFrame;
         } else {
             nameBarFrame.origin.y = 0;
         }

@@ -27,4 +27,16 @@
 @dynamic imageLocation;
 @dynamic occurrences;
 
+- (BOOL)coordinateAvailable {
+    return (self.latitude && self.longitude);
+}
+
+- (CLLocationCoordinate2D)coordinate {
+    CLLocationCoordinate2D coordinate;
+    if (self.coordinateAvailable) {
+        coordinate = CLLocationCoordinate2DMake(self.latitude.doubleValue, self.longitude.doubleValue);
+    }
+    return coordinate;
+}
+
 @end

@@ -337,6 +337,8 @@
 		3278EFE513D88C1700948EE6 /* kwiqetText_120width@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 3278EFE313D88C1700948EE6 /* kwiqetText_120width@2x.png */; };
 		327C4DB113DA270B00DAAD51 /* BugSense-iOS.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 327C4DB013DA270B00DAAD51 /* BugSense-iOS.framework */; };
 		327C4DB613DA301D00DAAD51 /* Analytics.m in Sources */ = {isa = PBXBuildFile; fileRef = 327C4DB513DA301D00DAAD51 /* Analytics.m */; };
+		32853AC6149BDACB00DE6B34 /* btn_venue_location_info.png in Resources */ = {isa = PBXBuildFile; fileRef = 32853AC4149BDACB00DE6B34 /* btn_venue_location_info.png */; };
+		32853AC7149BDACB00DE6B34 /* btn_venue_location_info@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 32853AC5149BDACB00DE6B34 /* btn_venue_location_info@2x.png */; };
 		3288360E13DDE7320090AFE0 /* EventsViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 3288360D13DDE7320090AFE0 /* EventsViewController.xib */; };
 		3288427E13F07DC900C06DDE /* EventViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 3288427D13F07DC900C06DDE /* EventViewController.xib */; };
 		32929C4213E9C02E001D0FE7 /* UIButtonWithOverlayView.m in Sources */ = {isa = PBXBuildFile; fileRef = 32929C4113E9C02E001D0FE7 /* UIButtonWithOverlayView.m */; };
@@ -995,6 +997,8 @@
 		327C4DB013DA270B00DAAD51 /* BugSense-iOS.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = "BugSense-iOS.framework"; sourceTree = "<group>"; };
 		327C4DB413DA301D00DAAD51 /* Analytics.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Analytics.h; sourceTree = "<group>"; };
 		327C4DB513DA301D00DAAD51 /* Analytics.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Analytics.m; sourceTree = "<group>"; };
+		32853AC4149BDACB00DE6B34 /* btn_venue_location_info.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = btn_venue_location_info.png; sourceTree = "<group>"; };
+		32853AC5149BDACB00DE6B34 /* btn_venue_location_info@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "btn_venue_location_info@2x.png"; sourceTree = "<group>"; };
 		3288360D13DDE7320090AFE0 /* EventsViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = EventsViewController.xib; sourceTree = "<group>"; };
 		3288427D13F07DC900C06DDE /* EventViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = EventViewController.xib; sourceTree = "<group>"; };
 		328CD6CF1475C23600F9F5B3 /* kwiqet 014.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "kwiqet 014.xcdatamodel"; sourceTree = "<group>"; };
@@ -1362,6 +1366,7 @@
 		32041A3613AFFC700072F95C /* images */ = {
 			isa = PBXGroup;
 			children = (
+				32853AC2149BDAB600DE6B34 /* VenueViewController */,
 				325033DE13D5C405006E872B /* EventsViewController */,
 				320556FC14572B4500847D77 /* SetLocationViewController */,
 				32164D57140D918700CAD71F /* EventViewController */,
@@ -1897,6 +1902,15 @@
 				32253F4313C36884004FBDD6 /* FacebookViewController.xib */,
 			);
 			name = Account;
+			sourceTree = "<group>";
+		};
+		32853AC2149BDAB600DE6B34 /* VenueViewController */ = {
+			isa = PBXGroup;
+			children = (
+				32853AC4149BDACB00DE6B34 /* btn_venue_location_info.png */,
+				32853AC5149BDACB00DE6B34 /* btn_venue_location_info@2x.png */,
+			);
+			name = VenueViewController;
 			sourceTree = "<group>";
 		};
 		32929C4713EA00E7001D0FE7 /* Filter option buttons */ = {
@@ -2996,6 +3010,8 @@
 				32668608147B049C00216F48 /* ico_larger_metro@2x.png in Resources */,
 				325A0945148406EF00CA5538 /* AccountPromptViewController.xib in Resources */,
 				32A63AC7149932920013C2E8 /* VenueViewController.xib in Resources */,
+				32853AC6149BDACB00DE6B34 /* btn_venue_location_info.png in Resources */,
+				32853AC7149BDACB00DE6B34 /* btn_venue_location_info@2x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

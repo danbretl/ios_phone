@@ -11,8 +11,10 @@
 #import "Place.h"
 #import "WebDataTranslator.h"
 #import "StackViewControllerDelegate.h"
+#import <MapKit/MapKit.h>
+#import "MapViewController.h"
 
-@interface VenueViewController : UIViewController <UITableViewDelegate, UITableViewDataSource, StackViewControllerDelegate> {
+@interface VenueViewController : UIViewController <UITableViewDelegate, UITableViewDataSource, StackViewControllerDelegate, MapViewControllerDelegate, MKMapViewDelegate> {
     
     // Delegate
     id<StackViewControllerDelegate> delegate;
@@ -35,10 +37,16 @@
     UILabel * cityStateZipLabel_;
     UIButton * phoneNumberButton_;
     UIButton * mapButton_;
+    MKMapView * mapView_;
     UIView * descriptionContainer_;
     UILabel * descriptionLabel_;
     
+    UIView * eventsHeaderContainer_;
+    UILabel * eventsHeaderLabel_;
     UITableView * eventsTableView_;
+    
+    // View Controllers
+    MapViewController * mapViewController_;
     
 }
 

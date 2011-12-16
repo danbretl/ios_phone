@@ -8,6 +8,7 @@
 
 #import <Foundation/Foundation.h>
 #import <CoreData/CoreData.h>
+#import <CoreLocation/CoreLocation.h>
 
 @class Occurrence;
 
@@ -28,7 +29,12 @@
 @property (nonatomic, retain) NSString * email;
 @property (nonatomic, retain) NSString * placeDescription;
 @property (nonatomic, retain) NSString * imageLocation;
-@property (nonatomic, retain) NSSet *occurrences;
+@property (nonatomic, retain) NSSet * occurrences;
+@end
+
+@interface Place (Convenience)
+@property (nonatomic, readonly) BOOL coordinateAvailable;
+@property (nonatomic, readonly) CLLocationCoordinate2D coordinate;
 @end
 
 @interface Place (CoreDataGeneratedAccessors)
