@@ -257,18 +257,13 @@
         CGFloat phoneTouchPaddingRight = mapViewPaddingLeft;
         // Calculating text sizes
         CGSize addressTextSize = [addressText sizeWithFont:self.addressLabel.font];
-        CGSize cityStateZipTextSize = [addressText sizeWithFont:self.cityStateZipLabel.font];
+        CGSize cityStateZipTextSize = [cityStateZipText sizeWithFont:self.cityStateZipLabel.font];
         CGSize phoneTextSize = [phoneText sizeWithFont:self.phoneNumberButton.titleLabel.font];
         // Address lines
         CGRect addressLabelFrame = self.addressLabel.frame;
         CGRect cityStateZipLabelFrame = self.cityStateZipLabel.frame;
-        CGFloat addressLabelWidth = MIN(addressTextSize.width, labelsRightmostAllowableX - addressLabelFrame.origin.x);
-        CGFloat cityStateZipLabelWidth = MIN(cityStateZipTextSize.width, labelsRightmostAllowableX - cityStateZipLabelFrame.origin.x);
-        CGFloat maxAddressLinesWidth = MAX(addressLabelWidth, cityStateZipLabelWidth);
-        addressLabelWidth = maxAddressLinesWidth;
-        cityStateZipLabelWidth = maxAddressLinesWidth;
-        addressLabelFrame.size.width = addressLabelWidth;
-        cityStateZipLabelFrame.size.width = cityStateZipLabelWidth;
+        addressLabelFrame.size.width = MIN(addressTextSize.width, labelsRightmostAllowableX - addressLabelFrame.origin.x);
+        cityStateZipLabelFrame.size.width = MIN(cityStateZipTextSize.width, labelsRightmostAllowableX - cityStateZipLabelFrame.origin.x);
         self.addressLabel.frame = addressLabelFrame;
         self.cityStateZipLabel.frame = cityStateZipLabelFrame;
         // Phone
