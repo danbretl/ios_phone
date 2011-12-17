@@ -12,6 +12,8 @@
 #import "EventTableViewCell.h"
 #import "EventLocationAnnotation.h"
 
+double const VVC_ANIMATION_DURATION = 0.25;
+
 @interface VenueViewController()
 
 @property (readonly, nonatomic) WebDataTranslator * webDataTranslator;
@@ -39,19 +41,23 @@
 
 @property (retain) MapViewController * mapViewController;
 
+@property (retain) UISwipeGestureRecognizer * swipeToGoBack;
+
 - (IBAction)backButtonTouched:(UIButton *)button;
 - (IBAction)logoButtonTouched:(UIButton *)button;
 - (IBAction)followButtonTouched:(UIButton *)button;
 - (IBAction)phoneNumberButtonTouched:(UIButton *)button;
 - (IBAction)mapButtonTouched:(UIButton *)button;
+- (void)swipedToGoBack:(UISwipeGestureRecognizer *)swipeGesture;
 
 - (void) updateInfoViewsFromVenue:(Place *)venue animated:(BOOL)animated;
 - (void) updateMapViewToCenterOnCoordinate:(CLLocationCoordinate2D)coordinate animated:(BOOL)animated;
 - (void) updateImageFromVenue:(Place *)venue animated:(BOOL)animated;
 - (void) showImageViewWithImage:(UIImage *)image animated:(BOOL)animated;
 - (void) setImageViewIsVisible:(BOOL)visible animated:(BOOL)animated;
-- (void) updateViewsVerticalPositionsAll;
-- (void) updateViewsVerticalPositionsForScroll;
+- (void)updateViewsVerticalPositionsIncludingDescriptionContainer:(BOOL)shouldUpdateDescriptionContainer animated:(BOOL)animated;
+//- (void) updateViewsVerticalPositionsAll;
+//- (void) updateViewsVerticalPositionsForScroll;
 - (void) configureCell:(EventTableViewCell *)cell forRowAtIndexPath:(NSIndexPath *)indexPath;
 
 @end
@@ -78,6 +84,7 @@
 @synthesize descriptionContainer=descriptionContainer_;
 @synthesize descriptionLabel=descriptionLabel_;
 @synthesize mapViewController=mapViewController_;
+@synthesize swipeToGoBack=swipeToGoBack_;
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil {
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
@@ -116,12 +123,18 @@
     self.phoneNumberButton.titleLabel.font = [UIFont kwiqetFontOfType:BoldCondensed size:12];
     
     // Table header views
-    self.eventsHeaderContainer.backgroundColor = [UIColor colorWithWhite:53.0/255.0 alpha:0.8];
+    self.eventsHeaderContainer.backgroundColor = [UIColor colorWithWhite:53.0/255.0 alpha:0.9];
     self.eventsHeaderLabel.backgroundColor = [UIColor clearColor];
     self.eventsHeaderLabel.font = [UIFont kwiqetFontOfType:BoldCondensed size:16.0];
     self.eventsHeaderLabel.textColor = [UIColor colorWithWhite:241.0/255.0 alpha:1.0];
     self.eventsTableView.backgroundColor = [UIColor clearColor];
     self.eventsTableView.tableHeaderView = self.mainContainer;
+    
+    // Gesture recognizers
+    swipeToGoBack_ = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(swipedToGoBack:)];
+    self.swipeToGoBack.direction = UISwipeGestureRecognizerDirectionRight;
+    self.swipeToGoBack.delegate = self;
+    [self.mainContainer addGestureRecognizer:self.swipeToGoBack];
     
     // Update views from data
     if (self.venue) {
@@ -159,6 +172,7 @@
     [self setMapView:nil];
     [self setEventsHeaderContainer:nil];
     [self setEventsHeaderLabel:nil];
+    [self setSwipeToGoBack:nil];
     [super viewDidUnload];
     // Release any retained subviews of the main view.
     // e.g. self.myOutlet = nil;
@@ -191,6 +205,7 @@
     [mapViewController_ release];
     [eventsHeaderContainer_ release];
     [eventsHeaderLabel_ release];
+    [swipeToGoBack_ release];
     [super dealloc];
 }
 
@@ -291,15 +306,6 @@
             descriptionContainerFrame.size.height = 0;
             self.descriptionContainer.frame = descriptionContainerFrame;
         }
-        CGRect eventsHeaderContainerFrame = self.eventsHeaderContainer.frame;
-        eventsHeaderContainerFrame.origin.y = CGRectGetMaxY(self.descriptionContainer.frame);
-        self.eventsHeaderContainer.frame = eventsHeaderContainerFrame;
-        CGRect mainContainerFrame = self.mainContainer.frame;
-        mainContainerFrame.size.height = CGRectGetMaxY(self.eventsHeaderContainer.frame);
-        self.mainContainer.frame = mainContainerFrame;
-        if (animated) { [self.eventsTableView beginUpdates]; }
-        self.eventsTableView.tableHeaderView = self.mainContainer;
-        if (animated) { [self.eventsTableView endUpdates]; }
     };
     
     NSString * nameText = @"";
@@ -327,13 +333,15 @@
     self.mapButton.enabled = locationAvailable;
     
     if (animated) {
-        [UIView animateWithDuration:0.25 animations:^{
+        [UIView animateWithDuration:VVC_ANIMATION_DURATION animations:^{
             infoViewsWidthsBlock(addressText, cityStateZipText, phoneText);
             descriptionLabelSizeBlock(descriptionText);
         }];
+        [self updateViewsVerticalPositionsIncludingDescriptionContainer:NO animated:YES];
     } else {
         infoViewsWidthsBlock(addressText, cityStateZipText, phoneText);
         descriptionLabelSizeBlock(descriptionText);
+        [self updateViewsVerticalPositionsIncludingDescriptionContainer:NO animated:NO];
     }
 
 }
@@ -386,59 +394,103 @@
         self.imageView.frame = imageViewFrame;
     };
     if (animated) {
-        [UIView animateWithDuration:0.25 animations:^{
+        [UIView animateWithDuration:VVC_ANIMATION_DURATION animations:^{
             imageViewSizeBlock(visible);
-            [self updateViewsVerticalPositionsAll];
         }];
+        [self updateViewsVerticalPositionsIncludingDescriptionContainer:YES animated:animated];
     } else {
         imageViewSizeBlock(visible);
-        [self updateViewsVerticalPositionsAll];
+        [self updateViewsVerticalPositionsIncludingDescriptionContainer:YES animated:NO];
     }
 }
 
-- (void) updateViewsVerticalPositionsAll {
-    CGRect nameBarFrame = self.nameBar.frame;
-    nameBarFrame.origin.y = 0;
-    self.nameBar.frame = nameBarFrame;
-    CGRect imageViewFrame = self.imageView.frame;
-    imageViewFrame.origin.y = CGRectGetMaxY(nameBarFrame);
-    self.imageView.frame = imageViewFrame;
-    CGRect infoContainerFrame = self.infoContainer.frame;
-    infoContainerFrame.origin.y = CGRectGetMaxY(imageViewFrame);
-    self.infoContainer.frame = infoContainerFrame;
-    CGRect descriptionContainerFrame = self.descriptionContainer.frame;
-    descriptionContainerFrame.origin.y = CGRectGetMaxY(infoContainerFrame);
-    self.descriptionContainer.frame = descriptionContainerFrame;
-    CGRect eventsHeaderContainerFrame = self.eventsHeaderContainer.frame;
-    eventsHeaderContainerFrame.origin.y = CGRectGetMaxY(descriptionContainerFrame);
-    self.eventsHeaderContainer.frame = eventsHeaderContainerFrame;
-    [self updateViewsVerticalPositionsForScroll];
-}
-
-- (void) updateViewsVerticalPositionsForScroll {
-    CGRect nameBarFrame = self.nameBar.frame;
-    if (self.eventsTableView.contentOffset.y >= 0) {
-        nameBarFrame.origin.y = self.eventsTableView.contentOffset.y;
-        CGFloat infoContainerOriginalOriginY = self.nameBar.frame.size.height + self.imageView.frame.size.height;
+- (void)updateViewsVerticalPositionsIncludingDescriptionContainer:(BOOL)shouldUpdateDescriptionContainer animated:(BOOL)animated {
+    
+    void(^adjustmentsBlock)(void) = ^{
+        CGRect nameBarFrame = self.nameBar.frame;
+        nameBarFrame.origin.y = MAX(0, self.eventsTableView.contentOffset.y);
+        self.nameBar.frame = nameBarFrame;
         CGRect infoContainerFrame = self.infoContainer.frame;
-        CGFloat infoContainerAdjustedOriginY = infoContainerOriginalOriginY;
-        if (self.eventsTableView.contentOffset.y + self.nameBar.frame.size.height >= infoContainerOriginalOriginY) {
-            infoContainerAdjustedOriginY = nameBarFrame.origin.y + nameBarFrame.size.height;
-        }
-        infoContainerFrame.origin.y = infoContainerAdjustedOriginY;
+        infoContainerFrame.origin.y = MAX(CGRectGetMaxY(nameBarFrame), CGRectGetMaxY(self.imageView.frame));
         self.infoContainer.frame = infoContainerFrame;
+        if (shouldUpdateDescriptionContainer) {
+            CGRect descriptionContainerFrame = self.descriptionContainer.frame;
+            descriptionContainerFrame.origin.y = CGRectGetMaxY(self.imageView.frame) + self.infoContainer.frame.size.height;
+            self.descriptionContainer.frame = descriptionContainerFrame;
+        }
         CGRect eventsHeaderContainerFrame = self.eventsHeaderContainer.frame;
-        eventsHeaderContainerFrame.origin.y = MAX(CGRectGetMaxY(self.descriptionContainer.frame), CGRectGetMaxY(self.infoContainer.frame));
+        eventsHeaderContainerFrame.origin.y = MAX(CGRectGetMaxY(self.descriptionContainer.frame), CGRectGetMaxY(infoContainerFrame));
         self.eventsHeaderContainer.frame = eventsHeaderContainerFrame;
+    };
+    
+    void(^totalSizeChangeCheckBlock)(CGFloat) = ^(CGFloat originalHeight){
+        CGFloat mainContainerShouldBeHeight = CGRectGetMaxY(self.descriptionContainer.frame) + self.eventsHeaderContainer.frame.size.height;
+        if (originalHeight != mainContainerShouldBeHeight) {
+            CGRect mainContainerFrame = self.mainContainer.frame;
+            mainContainerFrame.size.height = mainContainerShouldBeHeight;
+            self.mainContainer.frame = mainContainerFrame;
+            if (animated) { [self.eventsTableView beginUpdates]; }
+            self.eventsTableView.tableHeaderView = self.mainContainer;
+            if (animated) { [self.eventsTableView endUpdates]; }
+        }
+    };
+    
+    CGFloat originalHeight = self.eventsTableView.tableHeaderView.frame.size.height;
+    if (animated) {
+        [UIView animateWithDuration:VVC_ANIMATION_DURATION animations:^{
+            adjustmentsBlock();
+            totalSizeChangeCheckBlock(originalHeight);
+        }];
     } else {
-        nameBarFrame.origin.y = 0;
+        adjustmentsBlock();
+        totalSizeChangeCheckBlock(originalHeight);
     }
-    self.nameBar.frame = nameBarFrame;
+    
 }
+
+//- (void) updateViewsVerticalPositionsAll {
+//    CGRect nameBarFrame = self.nameBar.frame;
+//    nameBarFrame.origin.y = 0;
+//    self.nameBar.frame = nameBarFrame;
+//    CGRect imageViewFrame = self.imageView.frame;
+//    imageViewFrame.origin.y = CGRectGetMaxY(nameBarFrame);
+//    self.imageView.frame = imageViewFrame;
+//    CGRect infoContainerFrame = self.infoContainer.frame;
+//    infoContainerFrame.origin.y = CGRectGetMaxY(imageViewFrame);
+//    self.infoContainer.frame = infoContainerFrame;
+//    CGRect descriptionContainerFrame = self.descriptionContainer.frame;
+//    descriptionContainerFrame.origin.y = CGRectGetMaxY(infoContainerFrame);
+//    self.descriptionContainer.frame = descriptionContainerFrame;
+//    CGRect eventsHeaderContainerFrame = self.eventsHeaderContainer.frame;
+//    eventsHeaderContainerFrame.origin.y = CGRectGetMaxY(descriptionContainerFrame);
+//    self.eventsHeaderContainer.frame = eventsHeaderContainerFrame;
+//    [self updateViewsVerticalPositionsForScroll];
+//}
+
+//- (void) updateViewsVerticalPositionsForScroll {
+//    CGRect nameBarFrame = self.nameBar.frame;
+//    if (self.eventsTableView.contentOffset.y >= 0) {
+//        nameBarFrame.origin.y = self.eventsTableView.contentOffset.y;
+//        CGFloat infoContainerOriginalOriginY = self.nameBar.frame.size.height + self.imageView.frame.size.height;
+//        CGRect infoContainerFrame = self.infoContainer.frame;
+//        CGFloat infoContainerAdjustedOriginY = infoContainerOriginalOriginY;
+//        if (self.eventsTableView.contentOffset.y + self.nameBar.frame.size.height >= infoContainerOriginalOriginY) {
+//            infoContainerAdjustedOriginY = nameBarFrame.origin.y + nameBarFrame.size.height;
+//        }
+//        infoContainerFrame.origin.y = infoContainerAdjustedOriginY;
+//        self.infoContainer.frame = infoContainerFrame;
+//        CGRect eventsHeaderContainerFrame = self.eventsHeaderContainer.frame;
+//        eventsHeaderContainerFrame.origin.y = MAX(CGRectGetMaxY(self.descriptionContainer.frame), CGRectGetMaxY(self.infoContainer.frame));
+//        self.eventsHeaderContainer.frame = eventsHeaderContainerFrame;
+//    } else {
+//        nameBarFrame.origin.y = 0;
+//    }
+//    self.nameBar.frame = nameBarFrame;
+//}
 
 - (void)scrollViewDidScroll:(UIScrollView *)scrollView {
     if (scrollView == self.eventsTableView) {
-        [self updateViewsVerticalPositionsForScroll];
+        [self updateViewsVerticalPositionsIncludingDescriptionContainer:NO animated:NO];
     }
 }
 
@@ -486,6 +538,20 @@
     NSLog(@"ERROR/WARNING in VenueViewController - not sure how to handle an EventViewController requesting deletion of an event. Currently, we are simply not deleting it!");
     //    [self.coreDataModel deleteRegularEventForURI:eventURI];
     [self.navigationController popViewControllerAnimated:YES];
+}
+
+- (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldReceiveTouch:(UITouch *)touch {
+    BOOL shouldReceive = YES;
+    if (gestureRecognizer == self.swipeToGoBack) {
+        if ([touch.view isDescendantOfView:self.nameBar]) {
+            shouldReceive = NO;
+        }
+    }
+    return shouldReceive;
+}
+
+- (void)swipedToGoBack:(UISwipeGestureRecognizer *)swipeGesture {
+    [self.delegate viewController:self didFinishByRequestingStackCollapse:NO];
 }
 
 @end

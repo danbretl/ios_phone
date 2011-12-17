@@ -15,7 +15,7 @@
 #import "MapViewController.h"
 #import "SDWebImageManager.h"
 
-@interface VenueViewController : UIViewController <UITableViewDelegate, UITableViewDataSource, StackViewControllerDelegate, MapViewControllerDelegate, MKMapViewDelegate, SDWebImageManagerDelegate> {
+@interface VenueViewController : UIViewController <UITableViewDelegate, UITableViewDataSource, StackViewControllerDelegate, MapViewControllerDelegate, MKMapViewDelegate, SDWebImageManagerDelegate, UIGestureRecognizerDelegate> {
     
     // Delegate
     id<StackViewControllerDelegate> delegate;
@@ -49,6 +49,9 @@
     
     // View Controllers
     MapViewController * mapViewController_;
+    
+    // Gesture Recognizers
+    UISwipeGestureRecognizer * swipeToGoBack_;
     
 }
 
