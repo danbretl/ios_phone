@@ -58,6 +58,9 @@ double const VVC_ANIMATION_DURATION = 0.25;
 
 
 - (void) updateInfoViewsFromVenue:(Place *)venue animated:(BOOL)animated;
+- (void) updateDescriptionTextFromVenue:(Place *)venue animated:(BOOL)animated;
+- (void) updateDescriptionContainerSizeToFitLabelAfterExpansion:(BOOL)shouldExpandLabel animated:(BOOL)animated;
+- (void) setDescriptionReadMoreIsVisible:(BOOL)isVisible animated:(BOOL)animated;
 - (void) updateMapViewToCenterOnCoordinate:(CLLocationCoordinate2D)coordinate animated:(BOOL)animated;
 - (void) updateImageFromVenue:(Place *)venue animated:(BOOL)animated;
 - (void) showImageViewWithImage:(UIImage *)image animated:(BOOL)animated;
@@ -163,6 +166,7 @@ double const VVC_ANIMATION_DURATION = 0.25;
     // Update views from data
     if (self.venue) {
         [self updateInfoViewsFromVenue:self.venue animated:NO];
+        [self updateDescriptionTextFromVenue:self.venue animated:NO];
         if (self.venue.coordinateAvailable) {
             [self updateMapViewToCenterOnCoordinate:self.venue.coordinate animated:NO];
         }
@@ -174,6 +178,7 @@ double const VVC_ANIMATION_DURATION = 0.25;
         self.addressLabel.backgroundColor = [UIColor redColor];
         self.cityStateZipLabel.backgroundColor = [UIColor orangeColor];
         self.phoneNumberButton.backgroundColor = [UIColor yellowColor];
+        self.descriptionLabel.backgroundColor = [UIColor greenColor];
     }
 }
 
@@ -278,6 +283,7 @@ double const VVC_ANIMATION_DURATION = 0.25;
         venue_ = [venue retain];
         if (self.view.window) {
             [self updateInfoViewsFromVenue:self.venue animated:YES];
+            [self updateDescriptionTextFromVenue:self.venue animated:YES];
             if (self.venue.coordinateAvailable) {
                 [self updateMapViewToCenterOnCoordinate:self.venue.coordinate animated:YES];
             }
@@ -324,27 +330,11 @@ double const VVC_ANIMATION_DURATION = 0.25;
         self.mapView.frame = mapViewFrame;
     };
     
-    void(^descriptionLabelSizeBlock)(NSString *) = ^(NSString * descriptionText){
-        if (descriptionText && descriptionText.length > 0) {
-            CGSize descriptionLabelSize = [descriptionText sizeWithFont:self.descriptionLabel.font constrainedToSize:CGSizeMake(self.descriptionLabel.frame.size.width, 3000) lineBreakMode:self.descriptionLabel.lineBreakMode];
-            CGRect descriptionLabelFrame = self.descriptionLabel.frame;
-            descriptionLabelFrame.size = descriptionLabelSize;
-            self.descriptionLabel.frame = descriptionLabelFrame;
-            CGRect descriptionContainerFrame = self.descriptionContainer.frame;
-            descriptionContainerFrame.size.height = self.descriptionLabel.frame.size.height + 2 * self.descriptionLabel.frame.origin.y;
-            self.descriptionContainer.frame = descriptionContainerFrame;
-        } else {
-            CGRect descriptionContainerFrame = self.descriptionContainer.frame;
-            descriptionContainerFrame.size.height = 0;
-            self.descriptionContainer.frame = descriptionContainerFrame;
-        }
-    };
-    
     NSString * nameText = @"";
     NSString * addressText = @"";
     NSString * cityStateZipText = @"";
     NSString * phoneText = @"";
-    NSString * descriptionText = @"";
+
     BOOL phoneAvailable = venue && venue.phone && venue.phone.length > 0;
     BOOL locationAvailable = venue && venue.latitude && venue.longitude;
     if (venue != nil) {
@@ -352,7 +342,6 @@ double const VVC_ANIMATION_DURATION = 0.25;
         addressText = venue.address;
         cityStateZipText = [self.webDataTranslator addressSecondLineStringFromCity:venue.city state:venue.state zip:venue.zip];
         phoneText = phoneAvailable ? venue.phone : @"Phone number not available";
-        descriptionText = venue.placeDescription;
     }
     
     self.nameBar.text = nameText;
@@ -360,23 +349,129 @@ double const VVC_ANIMATION_DURATION = 0.25;
     self.cityStateZipLabel.text = cityStateZipText;
     [self.phoneNumberButton setTitle:phoneText forState:UIControlStateNormal];
     [self.phoneNumberButton setTitle:phoneText forState:UIControlStateHighlighted];
-//    self.descriptionLabel.text = descriptionText;
-    descriptionText = self.descriptionLabel.text;
     self.phoneNumberButton.enabled = phoneAvailable;
     self.mapButton.enabled = locationAvailable;
     
     if (animated) {
         [UIView animateWithDuration:VVC_ANIMATION_DURATION animations:^{
             infoViewsWidthsBlock(addressText, cityStateZipText, phoneText);
-            descriptionLabelSizeBlock(descriptionText);
         }];
         [self updateViewsVerticalPositionsIncludingDescriptionContainer:NO animated:YES];
     } else {
         infoViewsWidthsBlock(addressText, cityStateZipText, phoneText);
-        descriptionLabelSizeBlock(descriptionText);
         [self updateViewsVerticalPositionsIncludingDescriptionContainer:NO animated:NO];
     }
 
+}
+
+
+- (void) updateDescriptionTextFromVenue:(Place *)venue animated:(BOOL)animated {
+    
+    NSString * descriptionText = @"";
+    if (venue != nil) {
+        descriptionText = venue.placeDescription;
+    }
+    self.descriptionLabel.text = descriptionText;
+    
+    CGFloat descriptionContainerCurrentHeight = self.descriptionContainer.frame.size.height;
+    CGFloat descriptionContainerNeededHeight = 0;
+    CGSize descriptionLabelTextSize = CGSizeMake(self.descriptionLabel.frame.size.width, 0);
+    CGFloat descriptionLabelVerticalPadding = self.descriptionLabel.frame.origin.y;
+    if (self.descriptionLabel.text.length > 0) {
+        descriptionLabelTextSize = [self.descriptionLabel.text sizeWithFont:self.descriptionLabel.font constrainedToSize:CGSizeMake(self.descriptionLabel.frame.size.width, 3000) lineBreakMode:self.descriptionLabel.lineBreakMode];
+        descriptionContainerNeededHeight = descriptionLabelTextSize.height + 2 * descriptionLabelVerticalPadding;
+    }
+    
+    void(^descriptionLabelHeightAdjustmentBlock)(CGFloat) = ^(CGFloat givenHeight){
+        CGRect descriptionLabelFrame = self.descriptionLabel.frame;
+        descriptionLabelFrame.size.height = givenHeight;
+        self.descriptionLabel.frame = descriptionLabelFrame;
+    };
+    
+    if (descriptionContainerNeededHeight <= descriptionContainerCurrentHeight) {
+        
+        [self updateDescriptionContainerSizeToFitLabelAfterExpansion:YES animated:animated];
+        
+    } else {
+        
+        NSLog(@"Description label text is longer than the description container can currently handle.");
+        NSLog(@"Description label text needs container of %f pixels, description container is currently %f pixels.", descriptionContainerNeededHeight, descriptionContainerCurrentHeight);
+        
+        void(^roundedDescriptionLabelHeightAdjustmentBlock)(void) = ^{
+            CGFloat lineHeight = self.descriptionLabel.font.lineHeight;
+            CGFloat numberOfLinesThatFit = floorf((descriptionContainerCurrentHeight - 2 * descriptionLabelVerticalPadding) / lineHeight);
+            NSLog(@"Line height is %f, and the number of lines that fit in the current container is %f.", lineHeight, numberOfLinesThatFit);
+            descriptionLabelHeightAdjustmentBlock(numberOfLinesThatFit * lineHeight);
+        };
+        
+        if (animated) {
+            [UIView animateWithDuration:VVC_ANIMATION_DURATION animations:^{
+                roundedDescriptionLabelHeightAdjustmentBlock();
+            }];
+        } else {
+            roundedDescriptionLabelHeightAdjustmentBlock();
+        }
+        [self updateDescriptionContainerSizeToFitLabelAfterExpansion:NO animated:animated];
+        
+    }
+
+}
+
+- (void) updateDescriptionContainerSizeToFitLabelAfterExpansion:(BOOL)shouldExpandLabel animated:(BOOL)animated {
+    
+    void(^descriptionLabelExpandBlock)(void) = ^{
+        NSLog(@"descriptionLabelExpandBlock");
+        NSLog(@"%@", self.descriptionLabel.text);
+        [self.descriptionLabel setNeedsDisplay];
+        CGSize descriptionLabelSize = [self.descriptionLabel.text sizeWithFont:self.descriptionLabel.font constrainedToSize:CGSizeMake(self.descriptionLabel.frame.size.width, 3000) lineBreakMode:self.descriptionLabel.lineBreakMode];
+        CGRect descriptionLabelFrame = self.descriptionLabel.frame;
+        descriptionLabelFrame.size = descriptionLabelSize;
+        self.descriptionLabel.frame = descriptionLabelFrame;
+        NSLog(@"%@", NSStringFromCGRect(self.descriptionLabel.frame));
+    };
+    
+    void(^descriptionContainerFitBlock)(void) = ^{
+        NSLog(@"descriptionContainerFitBlock");
+        CGFloat descriptionContainerHeight = 0;
+        if (self.descriptionLabel.frame.size.height > 0) {
+            CGFloat descriptionLabelVerticalPadding = self.descriptionLabel.frame.origin.y;
+            descriptionContainerHeight = CGRectGetMaxY(self.descriptionLabel.frame) + descriptionLabelVerticalPadding;            
+        }
+        CGRect descriptionContainerFrame = self.descriptionContainer.frame;
+        descriptionContainerFrame.size.height = descriptionContainerHeight;
+        self.descriptionContainer.frame = descriptionContainerFrame;
+        NSLog(@"%@", NSStringFromCGRect(self.descriptionContainer.frame));
+    };
+    
+    if (animated) {
+        [UIView animateWithDuration:VVC_ANIMATION_DURATION animations:^{
+            if (shouldExpandLabel) { descriptionLabelExpandBlock(); }
+            descriptionContainerFitBlock();
+        }];
+    } else {
+        if (shouldExpandLabel) { descriptionLabelExpandBlock(); }
+        descriptionContainerFitBlock();
+    }
+    [self setDescriptionReadMoreIsVisible:!shouldExpandLabel animated:animated];
+    [self updateViewsVerticalPositionsIncludingDescriptionContainer:NO animated:animated];
+    
+}
+
+- (void) setDescriptionReadMoreIsVisible:(BOOL)isVisible animated:(BOOL)animated {
+    CGFloat alpha = isVisible ? 1.0 : 0.0;
+    void(^alphaBlock)(CGFloat) = ^(CGFloat alpha){
+        self.descriptionReadMoreButton.alpha = alpha;
+        self.descriptionReadMoreCoverView.alpha = alpha;
+    };
+    if (animated) {
+        [UIView animateWithDuration:VVC_ANIMATION_DURATION animations:^{
+            alphaBlock(alpha);
+            self.descriptionReadMoreButton.userInteractionEnabled = isVisible;
+        }];
+    } else {
+        alphaBlock(alpha);
+        self.descriptionReadMoreButton.userInteractionEnabled = isVisible;        
+    }
 }
 
 - (void) updateMapViewToCenterOnCoordinate:(CLLocationCoordinate2D)coordinate animated:(BOOL)animated {
@@ -593,6 +688,7 @@ double const VVC_ANIMATION_DURATION = 0.25;
 }
 
 - (IBAction)descriptionReadMoreButtonTouched:(UIButton *)button {
-    
+    [self updateDescriptionContainerSizeToFitLabelAfterExpansion:YES animated:YES];
 }
+
 @end

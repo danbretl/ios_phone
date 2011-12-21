@@ -50,7 +50,7 @@
     UIView * eventsHeaderContainer_;
     UILabel * eventsHeaderLabel_;
     UITableView * eventsTableView_;
-    
+        
     // View Controllers
     MapViewController * mapViewController_;
     
