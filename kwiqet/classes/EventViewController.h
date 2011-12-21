@@ -20,20 +20,20 @@
 #import "WebActivityView.h"
 #import "FacebookManager.h"
 #import "ContactsSelectViewController.h"
-#import "UIImageView+WebCache.h"
 #import "SDWebImageManager.h"
 #import "OccurrenceInfoOverlayView.h"
 #import "SetLocationViewController.h"
 #import "UserLocation.h"
 #import "VenueViewController.h"
 #import "StackViewControllerDelegate.h"
+#import "SDWebImageManager.h"
 
 typedef enum {
     OCGroupDatesVenues = 1,
     OCGroupTimes = 2
 } OccurrencesControlsGroup;
 
-@interface EventViewController : UIViewController <MFMailComposeViewControllerDelegate, WebConnectorDelegate, MapViewControllerDelegate, UIScrollViewDelegate, UIActionSheetDelegate, ContactsSelectViewControllerDelegate, SDWebImageManagerDelegate, UITableViewDelegate, UITableViewDataSource, SetLocationViewControllerDelegate, UIGestureRecognizerDelegate, StackViewControllerDelegate> {
+@interface EventViewController : UIViewController <MFMailComposeViewControllerDelegate, WebConnectorDelegate, MapViewControllerDelegate, UIScrollViewDelegate, UIActionSheetDelegate, ContactsSelectViewControllerDelegate, SDWebImageManagerDelegate, UITableViewDelegate, UITableViewDataSource, SetLocationViewControllerDelegate, UIGestureRecognizerDelegate, StackViewControllerDelegate, SDWebImageManagerDelegate> {
     
     IBOutlet UIView   * backgroundColorView;
 

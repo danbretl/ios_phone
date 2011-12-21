@@ -974,8 +974,29 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
     self.breadcrumbsLabel.text = breadcrumbsString;
     self.breadcrumbsBar.backgroundColor = [concreteParentCategoryColor colorWithAlphaComponent:0.6];
     
-    [self.imageView setImageWithURL:[URLBuilder imageURLForImageLocation:self.event.imageLocation] placeholderImage:[UIImage imageNamed:@"event_img_placeholder.png"]];
+    NSURL * imageURL = [URLBuilder imageURLForImageLocation:self.event.imageLocation];
+    SDWebImageManager * webImageManager = [SDWebImageManager sharedManager];
+    UIImage * cachedImage = [webImageManager imageWithURL:imageURL];
+    if (cachedImage) {
+        self.imageView.image = cachedImage;
+    } else {
+        [UIApplication sharedApplication].networkActivityIndicatorVisible = YES;
+        [webImageManager downloadWithURL:imageURL delegate:self];
+    }
     
+}
+
+- (void)webImageManager:(SDWebImageManager *)imageManager didFinishWithImage:(UIImage *)image {
+    NSLog(@"EventViewController webImageManager:didFinishWithImage:");
+    [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
+    self.imageView.image = image;
+    
+}
+
+- (void)webImageManager:(SDWebImageManager *)imageManager didFailWithError:(NSError *)error {
+    NSLog(@"EventViewController webImageManager:didFailWithError:");
+    // Do nothing, really... Just leave the placeholder image.
+    [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
 }
 
 - (void) setOccurrenceInfoContainerIsCollapsed:(BOOL)isCollapsed animated:(BOOL)animated {
