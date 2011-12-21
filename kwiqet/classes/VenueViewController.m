@@ -11,6 +11,7 @@
 #import "UIFont+Kwiqet.h"
 #import "EventTableViewCell.h"
 #import "EventLocationAnnotation.h"
+#import <QuartzCore/QuartzCore.h>
 
 double const VVC_ANIMATION_DURATION = 0.25;
 
@@ -27,6 +28,8 @@ double const VVC_ANIMATION_DURATION = 0.25;
 @property (retain, nonatomic) IBOutlet ElasticUILabel * nameBar;
 @property (retain, nonatomic) IBOutlet UIImageView * imageView;
 @property (retain, nonatomic) IBOutlet UIView * infoContainer;
+@property (retain, nonatomic) IBOutlet UIView * infoContainerShadowView;
+@property (retain, nonatomic) IBOutlet UIView * infoContainerBackgroundView;
 @property (retain, nonatomic) IBOutlet UILabel * addressLabel;
 @property (retain, nonatomic) IBOutlet UILabel * cityStateZipLabel;
 @property (retain, nonatomic) IBOutlet UIButton * phoneNumberButton;
@@ -34,6 +37,8 @@ double const VVC_ANIMATION_DURATION = 0.25;
 @property (retain, nonatomic) IBOutlet MKMapView * mapView;
 @property (retain, nonatomic) IBOutlet UIView * descriptionContainer;
 @property (retain, nonatomic) IBOutlet UILabel * descriptionLabel;
+@property (retain, nonatomic) IBOutlet UIButton * descriptionReadMoreButton;
+@property (retain, nonatomic) IBOutlet GradientView * descriptionReadMoreCoverView;
 
 @property (retain, nonatomic) IBOutlet UIView * eventsHeaderContainer;
 @property (retain, nonatomic) IBOutlet UILabel * eventsHeaderLabel;
@@ -49,6 +54,8 @@ double const VVC_ANIMATION_DURATION = 0.25;
 - (IBAction)phoneNumberButtonTouched:(UIButton *)button;
 - (IBAction)mapButtonTouched:(UIButton *)button;
 - (void)swipedToGoBack:(UISwipeGestureRecognizer *)swipeGesture;
+- (IBAction)descriptionReadMoreButtonTouched:(id)sender;
+
 
 - (void) updateInfoViewsFromVenue:(Place *)venue animated:(BOOL)animated;
 - (void) updateMapViewToCenterOnCoordinate:(CLLocationCoordinate2D)coordinate animated:(BOOL)animated;
@@ -67,6 +74,10 @@ double const VVC_ANIMATION_DURATION = 0.25;
 @synthesize mapView=mapView_;
 @synthesize eventsHeaderContainer=eventsHeaderContainer_;
 @synthesize eventsHeaderLabel=eventsHeaderLabel_;
+@synthesize descriptionReadMoreCoverView=descriptionReadMoreCoverView_;
+@synthesize descriptionReadMoreButton=descriptionReadMoreButton_;
+@synthesize infoContainerShadowView=infoContainerShadowView_;
+@synthesize infoContainerBackgroundView=infoContainerBackgroundView_;
 @synthesize delegate;
 @synthesize venue=venue_;
 @synthesize navBarContainer=navBarContainer_;
@@ -113,17 +124,30 @@ double const VVC_ANIMATION_DURATION = 0.25;
     self.navBarContainer.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"navbar.png"]];
     
     // Image view
-//    [self setImageViewIsVisible:NO animated:NO]; // STILL WORKING ON BUGS
     imageViewNormalHeight = self.imageView.frame.size.height;
+    [self setImageViewIsVisible:NO animated:NO];
     
     // Venue info views
-    self.infoContainer.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"btn_venue_location_info.png"]];
+    // Background
+    self.infoContainerBackgroundView.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"btn_venue_location_info.png"]];
+    // Shadow
+    self.infoContainerShadowView.layer.shadowColor = [UIColor blackColor].CGColor;
+    self.infoContainerShadowView.layer.shadowOffset = CGSizeMake(0, 0);
+    self.infoContainerShadowView.layer.shadowOpacity = 0.55;
+    self.infoContainerShadowView.layer.shouldRasterize = YES;
+    // Subviews
     self.addressLabel.font = [UIFont kwiqetFontOfType:BoldCondensed size:18];
     self.cityStateZipLabel.font = [UIFont kwiqetFontOfType:RegularCondensed size:14];
     self.phoneNumberButton.titleLabel.font = [UIFont kwiqetFontOfType:BoldCondensed size:12];
     
+    // Description view
+    self.descriptionLabel.font = [UIFont kwiqetFontOfType:LightNormal size:14];
+    self.descriptionReadMoreButton.titleLabel.font = /*[UIFont kwiqetFontOfType:RegularNormal size:self.descriptionLabel.font.pointSize];*/self.descriptionLabel.font;
+    self.descriptionReadMoreCoverView.colorEnd = self.descriptionContainer.backgroundColor;
+    self.descriptionReadMoreCoverView.endX = 20;
+    
     // Table header views
-    self.eventsHeaderContainer.backgroundColor = [UIColor colorWithWhite:53.0/255.0 alpha:0.9];
+    self.eventsHeaderContainer.backgroundColor = [UIColor colorWithWhite:53.0/255.0 alpha:1.0];
     self.eventsHeaderLabel.backgroundColor = [UIColor clearColor];
     self.eventsHeaderLabel.font = [UIFont kwiqetFontOfType:BoldCondensed size:16.0];
     self.eventsHeaderLabel.textColor = [UIColor colorWithWhite:241.0/255.0 alpha:1.0];
@@ -173,6 +197,10 @@ double const VVC_ANIMATION_DURATION = 0.25;
     [self setEventsHeaderContainer:nil];
     [self setEventsHeaderLabel:nil];
     [self setSwipeToGoBack:nil];
+    [self setDescriptionReadMoreCoverView:nil];
+    [self setDescriptionReadMoreButton:nil];
+    [self setInfoContainerBackgroundView:nil];
+    [self setInfoContainerShadowView:nil];
     [super viewDidUnload];
     // Release any retained subviews of the main view.
     // e.g. self.myOutlet = nil;
@@ -206,6 +234,10 @@ double const VVC_ANIMATION_DURATION = 0.25;
     [eventsHeaderContainer_ release];
     [eventsHeaderLabel_ release];
     [swipeToGoBack_ release];
+    [descriptionReadMoreCoverView_ release];
+    [descriptionReadMoreButton_ release];
+    [infoContainerBackgroundView_ release];
+    [infoContainerShadowView_ release];
     [super dealloc];
 }
 
@@ -328,7 +360,8 @@ double const VVC_ANIMATION_DURATION = 0.25;
     self.cityStateZipLabel.text = cityStateZipText;
     [self.phoneNumberButton setTitle:phoneText forState:UIControlStateNormal];
     [self.phoneNumberButton setTitle:phoneText forState:UIControlStateHighlighted];
-    self.descriptionLabel.text = descriptionText;
+//    self.descriptionLabel.text = descriptionText;
+    descriptionText = self.descriptionLabel.text;
     self.phoneNumberButton.enabled = phoneAvailable;
     self.mapButton.enabled = locationAvailable;
     
@@ -359,31 +392,36 @@ double const VVC_ANIMATION_DURATION = 0.25;
     NSLog(@"updateImageFromVenue:");
 //    self.imageView.image = [UIImage imageNamed:@"event_img_placeholder.png"];
 //    [self.imageView setImageWithURL:[URLBuilder imageURLForImageLocation:self.venue.imageLocation] placeholderImage:[UIImage imageNamed:@"event_img_placeholder.png"]];
-    NSURL * imageURL = [URLBuilder imageURLForImageLocation:self.venue.imageLocation];
-    SDWebImageManager * webImageManager = [SDWebImageManager sharedManager];
-    UIImage * cachedImage = [webImageManager imageWithURL:imageURL];
-    if (cachedImage) {
-        [self showImageViewWithImage:cachedImage animated:animated];
-    } else {
-        [webImageManager downloadWithURL:imageURL delegate:self];
+    if (self.venue.imageLocation) {
+        NSURL * imageURL = [URLBuilder imageURLForImageLocation:self.venue.imageLocation];
+        SDWebImageManager * webImageManager = [SDWebImageManager sharedManager];
+        UIImage * cachedImage = [webImageManager imageWithURL:imageURL];
+        if (cachedImage) {
+            [self showImageViewWithImage:cachedImage animated:animated];
+        } else {
+            [UIApplication sharedApplication].networkActivityIndicatorVisible = YES;
+            [webImageManager downloadWithURL:imageURL delegate:self];
+        }
     }
 }
 
 - (void) webImageManager:(SDWebImageManager *)imageManager didFinishWithImage:(UIImage *)image {
     NSLog(@"webImageManager:didFinishWithImage:");
+    [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
     [self showImageViewWithImage:image animated:(self.view.window != nil)];
 }
 
 - (void) webImageManager:(SDWebImageManager *)imageManager didFailWithError:(NSError *)error {
     NSLog(@"webImageManager:didFailWithError:");
     // Do nothing, really... Just chill, sans image in the venue card. Maybe ensure that the image view is hidden.
-//    [self setImageViewIsVisible:NO animated:(self.view.window != nil)];
+    [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
+    [self setImageViewIsVisible:NO animated:(self.view.window != nil)];
 }
 
 - (void) showImageViewWithImage:(UIImage *)image animated:(BOOL)animated {
     NSLog(@"showImageViewWithImage:");
     self.imageView.image = image;
-//    [self setImageViewIsVisible:YES animated:animated];
+    [self setImageViewIsVisible:YES animated:animated];
 }
 
 - (void)setImageViewIsVisible:(BOOL)visible animated:(BOOL)animated {
@@ -554,4 +592,7 @@ double const VVC_ANIMATION_DURATION = 0.25;
     [self.delegate viewController:self didFinishByRequestingStackCollapse:NO];
 }
 
+- (IBAction)descriptionReadMoreButtonTouched:(UIButton *)button {
+    
+}
 @end

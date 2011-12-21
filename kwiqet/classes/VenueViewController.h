@@ -35,6 +35,8 @@
     UIImageView * imageView_;
     CGFloat imageViewNormalHeight;
     UIView * infoContainer_;
+    UIView * infoContainerShadowView_;
+    UIView * infoContainerBackgroundView_;
     UILabel * addressLabel_;
     UILabel * cityStateZipLabel_;
     UIButton * phoneNumberButton_;
@@ -42,6 +44,8 @@
     MKMapView * mapView_;
     UIView * descriptionContainer_;
     UILabel * descriptionLabel_;
+    UIButton * descriptionReadMoreButton_;
+    GradientView * descriptionReadMoreCoverView_;
     
     UIView * eventsHeaderContainer_;
     UILabel * eventsHeaderLabel_;
