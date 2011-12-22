@@ -341,6 +341,10 @@
     return [self getMostRecentEventsWebQueryWithPredicate:[NSPredicate predicateWithFormat:@"queryType == %@ && searchTerm == %@", [NSNumber numberWithInt:SearchQuery], searchTerm]];
 }
 
+- (EventsWebQuery *)getMostRecentEventsWebQueryForVenue:(Place *)venue {
+    return [self getMostRecentEventsWebQueryWithPredicate:[NSPredicate predicateWithFormat:@"queryType == %@ && filterVenue == %@", [NSNumber numberWithInt:VenueQuery], venue]];    
+}
+
 //////////////////////
 // EVENTS - GENERAL //
 //////////////////////

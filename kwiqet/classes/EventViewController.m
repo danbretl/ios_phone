@@ -289,6 +289,7 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
     [shareChoiceActionSheetSelectors release];
     [setLocationViewController_ release];
     [tapToSetLocationGestureRecognizer release];
+    [coreDataModel release];
     [super dealloc];
 	
 }

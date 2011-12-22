@@ -14,6 +14,8 @@
 #import <MapKit/MapKit.h>
 #import "MapViewController.h"
 #import "SDWebImageManager.h"
+#import "EventsWebQuery.h"
+#import "CoreDataModel.h"
 
 @interface VenueViewController : UIViewController <UITableViewDelegate, UITableViewDataSource, StackViewControllerDelegate, MapViewControllerDelegate, MKMapViewDelegate, SDWebImageManagerDelegate, UIGestureRecognizerDelegate> {
     
@@ -23,6 +25,8 @@
     // Models
     Place * venue_;
     WebDataTranslator * webDataTranslator_;
+    EventsWebQuery * eventsWebQuery_;
+    CoreDataModel * coreDataModel_;
     
     // Views
     UIView * navBarContainer_;
@@ -62,5 +66,6 @@
 @property (assign) id<StackViewControllerDelegate> delegate;
 
 @property (retain, nonatomic) Place * venue;
+@property (nonatomic, retain) CoreDataModel * coreDataModel;
 
 @end

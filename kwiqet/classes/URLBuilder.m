@@ -457,6 +457,29 @@ static NSString * const URL_BUILDER_GET_EVENTS_LIST_FILTER_POPULAR = @"popular";
 
 }
 
+- (NSURL *)buildGetEventsListForVenueURI:(NSString *)venueURI {
+    
+    NSString * urlPList = [[NSBundle mainBundle] pathForResource:@"urls" ofType:@"plist"];
+    NSDictionary * urlDictionary = [NSDictionary dictionaryWithContentsOfFile:urlPList];
+    
+    NSString * baseURL = [urlDictionary valueForKey:self.baseURLKey];
+    NSString * searchURI = [urlDictionary valueForKey:@"event_summary_uri"];
+    
+    NSMutableString * urlString = [NSMutableString stringWithFormat:@"%@%@", baseURL, searchURI];
+    
+    // Credentials
+    NSString * credentials = [self buildCredentialString];
+    [urlString appendString:credentials];
+    
+    [urlString appendFormat:@"&place=%@", venueURI];
+    
+    NSURL * url = [NSURL URLWithString:urlString];
+    NSLog(@"%@", url);
+    
+    return url;
+    
+}
+
 //- (NSURL *) buildGetEventsListSearchURLWithSearchString:(NSString *)searchString {
 //    
 //    NSString * urlPList = [[NSBundle mainBundle] pathForResource:@"urls" ofType:@"plist"];

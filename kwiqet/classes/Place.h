@@ -30,7 +30,7 @@
 @property (nonatomic, retain) NSString * placeDescription;
 @property (nonatomic, retain) NSString * imageLocation;
 @property (nonatomic, retain) NSSet * occurrences;
-@property (nonatomic, retain) NSSet *queries;
+@property (nonatomic, retain) NSSet * queries;
 @end
 
 @interface Place (Convenience)

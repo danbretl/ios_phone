@@ -26,6 +26,7 @@ static NSString * const WEB_CONNECTOR_GET_EVENTS_LIST_USER_INFO_KEY_FILTER_TIME_
 static NSString * const WEB_CONNECTOR_GET_EVENTS_LIST_USER_INFO_KEY_FILTER_LOCATION_LAT = @"filterLocationLat";
 static NSString * const WEB_CONNECTOR_GET_EVENTS_LIST_USER_INFO_KEY_FILTER_LOCATION_LON = @"filterLocationLon";
 static NSString * const WEB_CONNECTOR_GET_EVENTS_LIST_USER_INFO_KEY_FILTER_LOCATION_GEO_QUERY = @"filterLocationGeoQuery";
+static NSString * const WEB_CONNECTOR_GET_EVENTS_LIST_USER_INFO_KEY_VENUE_URI = @"WEB_CONNECTOR_GET_EVENTS_LIST_USER_INFO_KEY_VENUE_URI";
 static NSString * const WEB_CONNECTOR_SEND_LEARNED_DATA_ABOUT_EVENT_USER_INFO_KEY_EVENT_URI = @"eventURI";
 static NSString * const WEB_CONNECTOR_SEND_LEARNED_DATA_ABOUT_EVENT_USER_INFO_KEY_ACTION = @"action";
 static NSString * const WEB_CONNECTOR_ACCOUNT_DOES_NOT_EXIST_STRING = @"NOT REGISTERED";
@@ -49,6 +50,8 @@ static NSString * const WEB_CONNECTOR_ACCOUNT_USER_INFO_KEY_REQUEST_ORIGINATED_W
 - (void) getRecommendedEventsFailure:(ASIHTTPRequest *)request;
 - (void) getEventsListForSearchStringSuccess:(ASIHTTPRequest *)request;
 - (void) getEventsListForSearchStringFailure:(ASIHTTPRequest *)request;
+- (void) getEventsListForVenueSuccess:(ASIHTTPRequest *)request;
+- (void) getEventsListForVenueFailure:(ASIHTTPRequest *)request;
 - (void) sendLearnedDataAboutEventSuccess:(ASIHTTPRequest *)request;
 - (void) sendLearnedDataAboutEventFailure:(ASIHTTPRequest *)request;
 - (void) accountConnectEmailPasswordSuccess:(ASIHTTPRequest *)request;
@@ -455,6 +458,36 @@ static NSString * const WEB_CONNECTOR_ACCOUNT_USER_INFO_KEY_REQUEST_ORIGINATED_W
     /* THE PREVIOUS CODE IS DUPLICATED IN FAILURE CALLBACK METHOD, AND (IN PART) IN SEARCH SUCCESS & FAILURE METHODS */
     
     [self.delegate webConnector:self getEventsListFailure:request forSearchString:searchString startDateEarliest:startDateEarliestInclusive startDateLatest:startDateLatestInclusive startTimeEarliest:startTimeEarliestInclusive startTimeLatest:startTimeLatestInclusive locationLatitude:locationLatitude locationLongitude:locationLongitude geoQueryString:geoQueryString];
+}
+
+- (void) getEventsListForVenueURI:(NSString *)venueURI {
+    if (self.availableToMakeWebConnection) {
+        ASIHTTPRequest * request = [ASIHTTPRequest requestWithURL:[self.urlBuilder buildGetEventsListForVenueURI:venueURI]];
+        [self.connectionsInProgress addObject:request];
+        request.delegate = self;
+        request.timeOutSeconds = self.timeoutLength;
+        request.requestMethod = @"GET";
+        request.didFinishSelector = @selector(getEventsListForVenueSuccess:);
+        request.didFailSelector = @selector(getEventsListForVenueFailure:);
+        request.userInfo = [NSDictionary dictionaryWithObjectsAndKeys:venueURI, WEB_CONNECTOR_GET_EVENTS_LIST_USER_INFO_KEY_VENUE_URI, nil];
+        [request startAsynchronous];
+    }
+}
+
+- (void) getEventsListForVenueSuccess:(ASIHTTPRequest *)request {
+    [self.connectionsInProgress removeObject:request];
+    NSString * venueURI = [request.userInfo objectForKey:WEB_CONNECTOR_GET_EVENTS_LIST_USER_INFO_KEY_VENUE_URI];
+    if (request && request.responseStatusCode < 400) {
+        [self.delegate webConnector:self getEventsListSuccess:request forVenueURI:venueURI];
+    } else {
+        [self.delegate webConnector:self getEventsListFailure:request forVenueURI:venueURI];
+    }
+}
+
+- (void) getEventsListForVenueFailure:(ASIHTTPRequest *)request {
+    [self.connectionsInProgress removeObject:request];
+    NSString * venueURI = [request.userInfo objectForKey:WEB_CONNECTOR_GET_EVENTS_LIST_USER_INFO_KEY_VENUE_URI];
+    [self.delegate webConnector:self getEventsListFailure:request forVenueURI:venueURI];
 }
 
 //////////////

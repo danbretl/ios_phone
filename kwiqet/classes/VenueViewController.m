@@ -17,6 +17,7 @@ double const VVC_ANIMATION_DURATION = 0.25;
 
 @interface VenueViewController()
 
+@property (retain, nonatomic) EventsWebQuery * eventsWebQuery;
 @property (readonly, nonatomic) WebDataTranslator * webDataTranslator;
 
 @property (retain, nonatomic) IBOutlet UIView * navBarContainer;
@@ -82,6 +83,8 @@ double const VVC_ANIMATION_DURATION = 0.25;
 @synthesize infoContainerShadowView=infoContainerShadowView_;
 @synthesize infoContainerBackgroundView=infoContainerBackgroundView_;
 @synthesize delegate;
+@synthesize eventsWebQuery=eventsWebQuery_;
+@synthesize coreDataModel=coreDataModel_;
 @synthesize venue=venue_;
 @synthesize navBarContainer=navBarContainer_;
 @synthesize backButton=backButton_;
@@ -211,6 +214,17 @@ double const VVC_ANIMATION_DURATION = 0.25;
     // e.g. self.myOutlet = nil;
 }
 
+//- (void)viewWillAppear:(BOOL)animated {
+//    [super viewWillAppear:animated];
+//    EventsWebQuery * existingWebQuery = self.eventsWebQuery;
+//    if (existingWebQuery == nil) {
+//        existingWebQuery = [self.coreDataModel getMostRecentEventsWebQueryForVenue:self.venue];
+//    }
+//    if (existingWebQuery.datetimeQueryExecuted && abs([existingWebQuery.datetimeQueryExecuted timeIntervalSinceNow]) < 5 * 60) {
+//        
+//    }
+//}
+
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
     // Return YES for supported orientations
     return (interfaceOrientation == UIInterfaceOrientationPortrait);
@@ -243,6 +257,8 @@ double const VVC_ANIMATION_DURATION = 0.25;
     [descriptionReadMoreButton_ release];
     [infoContainerBackgroundView_ release];
     [infoContainerShadowView_ release];
+    [eventsWebQuery_ release];
+    [coreDataModel_ release];
     [super dealloc];
 }
 
@@ -654,7 +670,7 @@ double const VVC_ANIMATION_DURATION = 0.25;
     
     cell.titleLabel.text = [NSString stringWithFormat:@"Fake Event %d", indexPath.row];
     cell.categoryColor = indexPath.row % 2 == 1 ? [UIColor yellowColor] : [UIColor greenColor];
-    cell.locationLabel.text = @"Redundantly Displayed Venue Name";
+//    cell.locationLabel.text = @"Redundantly Displayed Venue Name";
     cell.dateAndTimeLabel.text = [NSString stringWithFormat:@"January %d, 2012 | %d:0%d AM", indexPath.row, indexPath.row, indexPath.row];
     cell.priceOriginalLabel.text = [NSString stringWithFormat:@"$10%d.00", indexPath.row];
     

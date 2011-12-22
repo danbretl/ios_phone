@@ -51,6 +51,7 @@
 //- (NSURL *) buildGetEventsListFreeURL;
 //- (NSURL *) buildGetEventsListPopularURL;
 - (NSURL *) buildGetEventsListSearchURLWithSearchString:(NSString *)searchString startDateEarliest:(NSDate *)startDateEarliestInclusive startDateLatest:(NSDate *)startDateLatestInclusive startTimeEarliest:(NSDate *)startTimeEarliestInclusive startTimeLatest:(NSDate *)startTimeLatestInclusive locationLatitude:(NSNumber *)locationLatitude locationLongitude:(NSNumber *)locationLongitude geoQueryString:(NSString *)geoQueryString;
+- (NSURL *) buildGetEventsListForVenueURI:(NSString *)venueURI;
 //- (NSURL *) buildGetEventsListSearchURLWithSearchString:(NSString *)searchString;
 
 // Event

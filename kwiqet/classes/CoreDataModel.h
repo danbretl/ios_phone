@@ -70,6 +70,7 @@
 - (EventsWebQuery *) getMostRecentEventsRecommendedWebQuery;
 - (EventsWebQuery *) getMostRecentEventsSearchWebQuery;
 - (EventsWebQuery *) getMostRecentEventsSearchWebQueryWithSearchTerm:(NSString *)searchTerm;
+- (EventsWebQuery *) getMostRecentEventsWebQueryForVenue:(Place *)venue;
 //- (void) updateEventsWebQuery:(EventsWebQuery *)eventsWebQuery
 //               WithSearchTerm:(NSSet *)searchTerm
 //             filterCategories:(NSSet *)filterCategories
