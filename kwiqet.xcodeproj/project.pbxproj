@@ -827,6 +827,7 @@
 		3249FCBE1411501F000A0575 /* navbar@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "navbar@2x.png"; sourceTree = "<group>"; };
 		3249FCC1141153AF000A0575 /* occurrence_tables_separator_shadow.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = occurrence_tables_separator_shadow.png; sourceTree = "<group>"; };
 		3249FCC2141153AF000A0575 /* occurrence_tables_separator_shadow@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "occurrence_tables_separator_shadow@2x.png"; sourceTree = "<group>"; };
+		324A459C14A3A9050021B80D /* kwiqet 016.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "kwiqet 016.xcdatamodel"; sourceTree = "<group>"; };
 		324AC06114929E8F00128C87 /* kwiqet 015.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "kwiqet 015.xcdatamodel"; sourceTree = "<group>"; };
 		324AC0631492BFC700128C87 /* FBRequest+Cancel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "FBRequest+Cancel.h"; path = "kwiqet/classes/FBRequest+Cancel.h"; sourceTree = SOURCE_ROOT; };
 		324AC0641492BFC700128C87 /* FBRequest+Cancel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "FBRequest+Cancel.m"; path = "kwiqet/classes/FBRequest+Cancel.m"; sourceTree = SOURCE_ROOT; };
@@ -3317,6 +3318,7 @@
 		32FD364D13AFF3B6007549B6 /* kwiqet.xcdatamodeld */ = {
 			isa = XCVersionGroup;
 			children = (
+				324A459C14A3A9050021B80D /* kwiqet 016.xcdatamodel */,
 				328CD6CF1475C23600F9F5B3 /* kwiqet 014.xcdatamodel */,
 				324AC06114929E8F00128C87 /* kwiqet 015.xcdatamodel */,
 				32066259147488AA00FB74DB /* kwiqet 013.xcdatamodel */,
@@ -3333,7 +3335,7 @@
 				326E20151468798C0056623C /* kwiqet 011.xcdatamodel */,
 				32FD364E13AFF3B6007549B6 /* kwiqet 001.xcdatamodel */,
 			);
-			currentVersion = 324AC06114929E8F00128C87 /* kwiqet 015.xcdatamodel */;
+			currentVersion = 324A459C14A3A9050021B80D /* kwiqet 016.xcdatamodel */;
 			path = kwiqet.xcdatamodeld;
 			sourceTree = "<group>";
 			versionGroupType = wrapper.xcdatamodel;

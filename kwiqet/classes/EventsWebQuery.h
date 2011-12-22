@@ -9,7 +9,13 @@
 #import <Foundation/Foundation.h>
 #import <CoreData/CoreData.h>
 
-@class Category, EventResult, UserLocation;
+typedef enum {
+    RecommendedQuery = 1,
+    SearchQuery = 2,
+    VenueQuery = 3,
+} QueryType;
+
+@class Category, EventResult, UserLocation, Place;
 
 @interface EventsWebQuery : NSManagedObject {
 @private
@@ -25,7 +31,9 @@
 @property (nonatomic, retain) NSSet * eventResults;
 @property (nonatomic, retain) NSSet * filterCategories;
 @property (nonatomic, retain) UserLocation * filterLocation;
-@property (nonatomic, retain) NSNumber * isSearchQuery;
+@property (nonatomic, retain) NSNumber * queryType;
+@property (nonatomic, retain) Place * filterVenue;
+
 @end
 
 @interface EventsWebQuery (CoreDataGeneratedAccessors)
@@ -42,6 +50,7 @@
 @interface EventsWebQuery (ConvenienceMethods)
 @property (nonatomic, readonly) NSArray * eventResultsInOrder;
 @property (nonatomic, readonly) NSArray * eventResultsEventsInOrder;
+@property (nonatomic, readonly) QueryType queryTypeScalar;
 @end
 
 @interface EventsWebQuery (Translations)

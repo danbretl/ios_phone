@@ -643,6 +643,7 @@ double const VVC_ANIMATION_DURATION = 0.25;
     EventTableViewCell * cell = (EventTableViewCell*)[tableView dequeueReusableCellWithIdentifier:CellIdentifier];
     if (cell == nil) {
         cell = [[[EventTableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier] autorelease];
+        cell.shouldShowVenue = NO;
     }
     [self configureCell:cell forRowAtIndexPath:indexPath];
     

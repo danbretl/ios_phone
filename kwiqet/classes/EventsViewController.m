@@ -1633,7 +1633,7 @@ double const EVENTS_LIST_MODE_ANIMATION_DURATION = 0.25;
     if (self.eventsWebQuery == nil || 
         self.eventsWebQuery.datetimeQueryExecuted != nil) {
         self.eventsWebQuery = [NSEntityDescription insertNewObjectForEntityForName:@"EventsWebQuery" inManagedObjectContext:self.coreDataModel.managedObjectContext];
-        self.eventsWebQuery.isSearchQuery = [NSNumber numberWithBool:NO];
+        self.eventsWebQuery.queryType = [NSNumber numberWithInt:RecommendedQuery];
         self.eventsWebQuery.datetimeQueryCreated = [NSDate date];
     }
     self.eventsWebQuery.filterDateBucketString = self.selectedDateFilterOption.code;
@@ -1763,7 +1763,7 @@ double const EVENTS_LIST_MODE_ANIMATION_DURATION = 0.25;
         if (self.eventsWebQueryFromSearch == nil ||
             self.eventsWebQueryFromSearch.datetimeQueryExecuted != nil) {
             self.eventsWebQueryFromSearch = [NSEntityDescription insertNewObjectForEntityForName:@"EventsWebQuery" inManagedObjectContext:self.coreDataModel.managedObjectContext];
-            self.eventsWebQueryFromSearch.isSearchQuery = [NSNumber numberWithBool:YES];
+            self.eventsWebQueryFromSearch.queryType = [NSNumber numberWithInt:SearchQuery];
             self.eventsWebQueryFromSearch.datetimeQueryCreated = [NSDate date];
         }
         /* THE FOLLOWING CODE IS DUPLICATED IN ...viewDidLoad..., ...toggleSearchMode..., and ...searchExecutionRequestedByUser... */

@@ -23,7 +23,8 @@
 @dynamic eventResults;
 @dynamic filterCategories;
 @dynamic filterLocation;
-@dynamic isSearchQuery;
+@dynamic queryType;
+@dynamic filterVenue;
 
 - (NSArray *)eventResultsInOrder {
     return [self.eventResults sortedArrayUsingDescriptors:[NSArray arrayWithObject:[NSSortDescriptor sortDescriptorWithKey:@"order" ascending:YES]]];
@@ -63,6 +64,10 @@
 
 - (NSString *)geoQueryString {
     return [EventsFilterOption locationGeoQueryStringForCode:self.filterDistanceBucketString];
+}
+
+- (QueryType)queryTypeScalar {
+    return self.queryType.intValue;
 }
 
 @end

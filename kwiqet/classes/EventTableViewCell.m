@@ -18,6 +18,9 @@
 float const EC_CONTENT_VIEW_PADDING_RIGHT = 10;
 float const EC_LABELS_LEFTMOST_MARGIN_LEFT = 5;
 float const EC_LABELS_INDENTED_MARGIN_LEFT = 10;
+CGFloat const EC_VENUE_LABEL_ORIGIN_Y = 40;
+CGFloat const EC_PRICE_LABEL_ORIGIN_Y_VENUE_SHOWING = 61;
+CGFloat const EC_PRICE_LABEL_ORIGIN_Y_VENUE_NOT_SHOWING = 41;
 
 @interface EventTableViewCell()
 @property (retain) UINeverClearView * backgroundColorView;
@@ -35,6 +38,7 @@ float const EC_LABELS_INDENTED_MARGIN_LEFT = 10;
 @synthesize backgroundColorView;
 @synthesize categoryBarContainer, categoryBarColorView, categoryBarIconImageView;
 @synthesize categoryColor=categoryColor_, categoryIcon=categoryIcon_, categoryIconHorizontalOffset=categoryIconHorizontalOffset_;
+@synthesize shouldShowVenue = isVenueShowing_;
 
 - (void)dealloc
 {
@@ -59,6 +63,7 @@ float const EC_LABELS_INDENTED_MARGIN_LEFT = 10;
     if (self) {
         
         BOOL debuggingFrames = NO;
+        isVenueShowing_ = YES;
         
         UIView * backgroundTextureView = [[UIView alloc] initWithFrame:self.bounds];
         backgroundTextureView.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"event_cell_bg.png"]];
@@ -147,14 +152,14 @@ float const EC_LABELS_INDENTED_MARGIN_LEFT = 10;
         [self.contentView addSubview:self.titleLabel];
         
         // Location label
-        locationLabel = [[UILabel alloc]initWithFrame:CGRectMake(labelsIndentedOriginX, 40, labelsIndentedWidth, 22)];
+        locationLabel = [[UILabel alloc]initWithFrame:CGRectMake(labelsIndentedOriginX, EC_VENUE_LABEL_ORIGIN_Y, labelsIndentedWidth, 22)];
 //        self.locationLabel.autoresizingMask = UIViewAutoresizingFlexibleWidth;
         self.locationLabel.backgroundColor = debuggingFrames ? [UIColor colorWithWhite:0.0 alpha:0.2] : [UIColor clearColor]; // This will hurt performance
         self.locationLabel.font = [UIFont kwiqetFontOfType:LightCondensed size:17.0];
         [self.contentView addSubview:self.locationLabel];
         
         // Price label
-        priceOriginalLabel = [[UILabel alloc]initWithFrame:CGRectMake(labelsIndentedOriginX, 61, labelsIndentedWidth, 18)];
+        priceOriginalLabel = [[UILabel alloc]initWithFrame:CGRectMake(labelsIndentedOriginX, EC_PRICE_LABEL_ORIGIN_Y_VENUE_SHOWING, labelsIndentedWidth, 18)];
         self.priceOriginalLabel.backgroundColor = debuggingFrames ? [UIColor colorWithWhite:0.0 alpha:0.2] : [UIColor clearColor]; // This will hurt performance
         self.priceOriginalLabel.font = [UIFont kwiqetFontOfType:LightCondensed size:14.0];
         [self.contentView addSubview:self.priceOriginalLabel];
@@ -181,6 +186,7 @@ float const EC_LABELS_INDENTED_MARGIN_LEFT = 10;
     self.locationLabel.frame = locationLabelFrame;
     
     CGRect priceOriginalLabelFrame = self.priceOriginalLabel.frame;
+    priceOriginalLabelFrame.origin.y = self.isVenueShowing ? EC_PRICE_LABEL_ORIGIN_Y_VENUE_SHOWING : EC_PRICE_LABEL_ORIGIN_Y_VENUE_NOT_SHOWING;
     priceOriginalLabelFrame.size.width = self.contentView.bounds.size.width - contentViewConditionalRightPadding - priceOriginalLabelFrame.origin.x;
     self.priceOriginalLabel.frame = priceOriginalLabelFrame;
 
@@ -228,5 +234,13 @@ float const EC_LABELS_INDENTED_MARGIN_LEFT = 10;
 //- (void)setSelected:(BOOL)selected animated:(BOOL)animated {
 //    [super setSelected:selected animated:animated];
 //}
+
+- (void)setShouldShowVenue:(BOOL)shouldShowVenue {
+    if (isVenueShowing_ != shouldShowVenue) {
+        isVenueShowing_ = shouldShowVenue;
+        self.locationLabel.hidden = !self.isVenueShowing;
+        [self setNeedsLayout];
+    }
+}
 
 @end

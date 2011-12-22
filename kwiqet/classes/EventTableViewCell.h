@@ -29,6 +29,8 @@
     UIImage * categoryIcon_;
     CGFloat categoryIconHorizontalOffset_;
     
+    BOOL isVenueShowing_;
+    
 }
 
 //@property (readonly) EventCellContentView * eventContentView;
@@ -43,5 +45,7 @@
 @property (nonatomic, retain) UIColor * categoryColor;
 @property (nonatomic, retain) UIImage * categoryIcon;
 @property (nonatomic) CGFloat categoryIconHorizontalOffset;
+
+@property (nonatomic, getter = isVenueShowing) BOOL shouldShowVenue;
 
 @end
