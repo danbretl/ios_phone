@@ -653,7 +653,7 @@ double const VVC_ANIMATION_DURATION = 0.25;
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
-    return 5;
+    return 10;
 }
 
 // Customize the appearance of table view cells.
