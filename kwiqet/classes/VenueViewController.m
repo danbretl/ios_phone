@@ -225,6 +225,11 @@ double const VVC_ANIMATION_DURATION = 0.25;
 //    }
 //}
 
+- (void) viewDidDisappear:(BOOL)animated {
+    [super viewDidDisappear:animated];
+    [self.nameBar invalidateTimerAndScrollTextToOriginAnimated:NO];
+}
+
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
     // Return YES for supported orientations
     return (interfaceOrientation == UIInterfaceOrientationPortrait);
