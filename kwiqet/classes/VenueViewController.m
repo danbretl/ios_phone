@@ -43,7 +43,7 @@ double const VVC_ANIMATION_DURATION = 0.25;
 
 @property (retain, nonatomic) IBOutlet UIView * eventsHeaderContainer;
 @property (retain, nonatomic) IBOutlet UILabel * eventsHeaderLabel;
-@property (retain, nonatomic) IBOutlet UITableView * eventsTableView;
+@property (retain, nonatomic) IBOutlet VenueTableView * eventsTableView;
 
 @property (retain) MapViewController * mapViewController;
 
@@ -175,6 +175,11 @@ double const VVC_ANIMATION_DURATION = 0.25;
         }
         [self updateImageFromVenue:self.venue animated:NO];
     }
+    
+    // Venue table view hit test stuff
+    self.eventsTableView.titleBarForHitTest = self.nameBar;
+    self.eventsTableView.infoContainerForHitTest = self.infoContainer;
+    self.eventsTableView.eventsHeaderContainerForHitTest = self.eventsHeaderContainer;
     
     BOOL debuggingFrames = NO;
     if (debuggingFrames) {
@@ -579,9 +584,10 @@ double const VVC_ANIMATION_DURATION = 0.25;
     
     void(^totalSizeChangeCheckBlock)(CGFloat) = ^(CGFloat originalHeight){
         CGFloat mainContainerShouldBeHeight = CGRectGetMaxY(self.descriptionContainer.frame) + self.eventsHeaderContainer.frame.size.height;
+//        CGFloat hackAdjustment = -1;
         if (originalHeight != mainContainerShouldBeHeight) {
             CGRect mainContainerFrame = self.mainContainer.frame;
-            mainContainerFrame.size.height = mainContainerShouldBeHeight;
+            mainContainerFrame.size.height = mainContainerShouldBeHeight;// + hackAdjustment;
             self.mainContainer.frame = mainContainerFrame;
             if (animated) { [self.eventsTableView beginUpdates]; }
             self.eventsTableView.tableHeaderView = self.mainContainer;
@@ -678,6 +684,7 @@ double const VVC_ANIMATION_DURATION = 0.25;
 //    cell.locationLabel.text = @"Redundantly Displayed Venue Name";
     cell.dateAndTimeLabel.text = [NSString stringWithFormat:@"January %d, 2012 | %d:0%d AM", indexPath.row, indexPath.row, indexPath.row];
     cell.priceOriginalLabel.text = [NSString stringWithFormat:@"$10%d.00", indexPath.row];
+    [self.eventsTableView sendSubviewToBack:cell];
     
 }
 
@@ -712,5 +719,22 @@ double const VVC_ANIMATION_DURATION = 0.25;
 - (IBAction)descriptionReadMoreButtonTouched:(UIButton *)button {
     [self updateDescriptionContainerSizeToFitLabelAfterExpansion:YES animated:YES];
 }
+
+//- (UIView *)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section {
+//    UIView * fooView = [[UIView alloc] init];
+//    UIView * fooSubview = [[UIView alloc] initWithFrame:CGRectMake(0, 1, fooView.bounds.size.width, self.nameBar.frame.size.height + self.infoContainer.frame.size.height + self.eventsHeaderContainer.frame.size.height - 1)];
+//    fooSubview.autoresizingMask = UIViewAutoresizingFlexibleWidth;
+//    fooSubview.backgroundColor = [[UIColor redColor] colorWithAlphaComponent:0.33];
+//    [fooView addSubview:fooSubview];
+//    UIButton * fooButton = [UIButton buttonWithType:UIButtonTypeRoundedRect];
+//    fooButton.frame = CGRectMake(5, 5, 310, 30);
+//    [fooSubview addSubview:fooButton];
+//    [fooSubview release];
+//    return [fooView autorelease];
+//}
+//
+//- (CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section {
+//    return 30;
+//}
 
 @end

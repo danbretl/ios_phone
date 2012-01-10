@@ -16,6 +16,7 @@
 #import "SDWebImageManager.h"
 #import "EventsWebQuery.h"
 #import "CoreDataModel.h"
+#import "VenueTableView.h"
 
 @interface VenueViewController : UIViewController <UITableViewDelegate, UITableViewDataSource, StackViewControllerDelegate, MapViewControllerDelegate, MKMapViewDelegate, SDWebImageManagerDelegate, UIGestureRecognizerDelegate> {
     
@@ -53,7 +54,7 @@
     
     UIView * eventsHeaderContainer_;
     UILabel * eventsHeaderLabel_;
-    UITableView * eventsTableView_;
+    VenueTableView * eventsTableView_;
         
     // View Controllers
     MapViewController * mapViewController_;
