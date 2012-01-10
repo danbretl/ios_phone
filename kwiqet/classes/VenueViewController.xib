@@ -1057,7 +1057,6 @@
 				<string key="23.IBPluginDependency">com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 				<real value="0.0" key="23.IBUIButtonInspectorSelectedEdgeInsetMetadataKey"/>
 				<real value="0.0" key="23.IBUIButtonInspectorSelectedStateConfigurationMetadataKey"/>
-				<string key="24.CustomClassName">VenueTableView</string>
 				<string key="24.IBPluginDependency">com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 				<string key="25.IBPluginDependency">com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 				<string key="27.IBPluginDependency">com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
@@ -1158,7 +1157,7 @@
 						<string key="descriptionReadMoreCoverView">GradientView</string>
 						<string key="eventsHeaderContainer">UIView</string>
 						<string key="eventsHeaderLabel">UILabel</string>
-						<string key="eventsTableView">UITableView</string>
+						<string key="eventsTableView">VenueTableView</string>
 						<string key="followButton">UIButton</string>
 						<string key="imageView">UIImageView</string>
 						<string key="infoContainer">UIView</string>
@@ -1211,7 +1210,7 @@
 						</object>
 						<object class="IBToOneOutletInfo" key="eventsTableView">
 							<string key="name">eventsTableView</string>
-							<string key="candidateClassName">UITableView</string>
+							<string key="candidateClassName">VenueTableView</string>
 						</object>
 						<object class="IBToOneOutletInfo" key="followButton">
 							<string key="name">followButton</string>

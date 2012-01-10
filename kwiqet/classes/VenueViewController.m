@@ -43,7 +43,7 @@ double const VVC_ANIMATION_DURATION = 0.25;
 
 @property (retain, nonatomic) IBOutlet UIView * eventsHeaderContainer;
 @property (retain, nonatomic) IBOutlet UILabel * eventsHeaderLabel;
-@property (retain, nonatomic) IBOutlet VenueTableView * eventsTableView;
+@property (retain, nonatomic) IBOutlet UITableView * eventsTableView;
 
 @property (retain) MapViewController * mapViewController;
 
@@ -57,7 +57,7 @@ double const VVC_ANIMATION_DURATION = 0.25;
 - (void)swipedToGoBack:(UISwipeGestureRecognizer *)swipeGesture;
 - (IBAction)descriptionReadMoreButtonTouched:(id)sender;
 
-
+- (void) pullOutEventsTableHeaderSubview:(UIView *)subview;
 - (void) updateInfoViewsFromVenue:(Place *)venue animated:(BOOL)animated;
 - (void) updateDescriptionTextFromVenue:(Place *)venue animated:(BOOL)animated;
 - (void) updateDescriptionContainerSizeToFitLabelAfterExpansion:(BOOL)shouldExpandLabel animated:(BOOL)animated;
@@ -166,6 +166,12 @@ double const VVC_ANIMATION_DURATION = 0.25;
     self.swipeToGoBack.delegate = self;
     [self.mainContainer addGestureRecognizer:self.swipeToGoBack];
     
+    // Pull views out of header view
+    [self pullOutEventsTableHeaderSubview:self.nameBar];
+    [self pullOutEventsTableHeaderSubview:self.infoContainer];
+    [self pullOutEventsTableHeaderSubview:self.eventsHeaderContainer];
+    [self updateViewsVerticalPositionsIncludingDescriptionContainer:NO animated:NO];
+    
     // Update views from data
     if (self.venue) {
         [self updateInfoViewsFromVenue:self.venue animated:NO];
@@ -176,11 +182,6 @@ double const VVC_ANIMATION_DURATION = 0.25;
         [self updateImageFromVenue:self.venue animated:NO];
     }
     
-    // Venue table view hit test stuff
-    self.eventsTableView.titleBarForHitTest = self.nameBar;
-    self.eventsTableView.infoContainerForHitTest = self.infoContainer;
-    self.eventsTableView.eventsHeaderContainerForHitTest = self.eventsHeaderContainer;
-    
     BOOL debuggingFrames = NO;
     if (debuggingFrames) {
         self.addressLabel.backgroundColor = [UIColor redColor];
@@ -188,6 +189,14 @@ double const VVC_ANIMATION_DURATION = 0.25;
         self.phoneNumberButton.backgroundColor = [UIColor yellowColor];
         self.descriptionLabel.backgroundColor = [UIColor greenColor];
     }
+}
+
+- (void) pullOutEventsTableHeaderSubview:(UIView *)subview {
+    CGPoint subviewOriginInMainView = [self.view convertPoint:subview.frame.origin fromView:subview.superview];
+    [self.view insertSubview:subview aboveSubview:self.eventsTableView];
+    CGRect subviewFrame = subview.frame;
+    subviewFrame.origin = subviewOriginInMainView;
+    subview.frame = subviewFrame;
 }
 
 - (void)viewDidUnload {
@@ -567,7 +576,7 @@ double const VVC_ANIMATION_DURATION = 0.25;
     
     void(^adjustmentsBlock)(void) = ^{
         CGRect nameBarFrame = self.nameBar.frame;
-        nameBarFrame.origin.y = MAX(0, self.eventsTableView.contentOffset.y);
+        nameBarFrame.origin.y = [self.view convertPoint:CGPointMake(0, MAX(0, self.eventsTableView.contentOffset.y)) fromView:self.mainContainer].y;
         self.nameBar.frame = nameBarFrame;
         CGRect infoContainerFrame = self.infoContainer.frame;
         infoContainerFrame.origin.y = MAX(CGRectGetMaxY(nameBarFrame), CGRectGetMaxY(self.imageView.frame));
@@ -578,7 +587,8 @@ double const VVC_ANIMATION_DURATION = 0.25;
             self.descriptionContainer.frame = descriptionContainerFrame;
         }
         CGRect eventsHeaderContainerFrame = self.eventsHeaderContainer.frame;
-        eventsHeaderContainerFrame.origin.y = MAX(CGRectGetMaxY(self.descriptionContainer.frame), CGRectGetMaxY(infoContainerFrame));
+        CGPoint infoContainerOriginInHeader = [self.mainContainer convertPoint:self.infoContainer.frame.origin fromView:self.view];
+        eventsHeaderContainerFrame.origin.y = [self.view convertPoint:CGPointMake(0, MAX(CGRectGetMaxY(self.descriptionContainer.frame), infoContainerOriginInHeader.y + infoContainerFrame.size.height)) fromView:self.mainContainer].y;
         self.eventsHeaderContainer.frame = eventsHeaderContainerFrame;
     };
     

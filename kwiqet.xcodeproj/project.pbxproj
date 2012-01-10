@@ -341,7 +341,6 @@
 		32853AC7149BDACB00DE6B34 /* btn_venue_location_info@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 32853AC5149BDACB00DE6B34 /* btn_venue_location_info@2x.png */; };
 		3288360E13DDE7320090AFE0 /* EventsViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 3288360D13DDE7320090AFE0 /* EventsViewController.xib */; };
 		3288427E13F07DC900C06DDE /* EventViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 3288427D13F07DC900C06DDE /* EventViewController.xib */; };
-		3290B34C14BCBF7F0042F830 /* VenueTableView.m in Sources */ = {isa = PBXBuildFile; fileRef = 3290B34B14BCBF7F0042F830 /* VenueTableView.m */; };
 		32929C4213E9C02E001D0FE7 /* UIButtonWithOverlayView.m in Sources */ = {isa = PBXBuildFile; fileRef = 32929C4113E9C02E001D0FE7 /* UIButtonWithOverlayView.m */; };
 		32929C5013EA0103001D0FE7 /* btn_filter_option_selected_touch.png in Resources */ = {isa = PBXBuildFile; fileRef = 32929C4813EA0103001D0FE7 /* btn_filter_option_selected_touch.png */; };
 		32929C5113EA0103001D0FE7 /* btn_filter_option_selected_touch@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 32929C4913EA0103001D0FE7 /* btn_filter_option_selected_touch@2x.png */; };
@@ -1004,8 +1003,6 @@
 		3288360D13DDE7320090AFE0 /* EventsViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = EventsViewController.xib; sourceTree = "<group>"; };
 		3288427D13F07DC900C06DDE /* EventViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = EventViewController.xib; sourceTree = "<group>"; };
 		328CD6CF1475C23600F9F5B3 /* kwiqet 014.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "kwiqet 014.xcdatamodel"; sourceTree = "<group>"; };
-		3290B34A14BCBF7F0042F830 /* VenueTableView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VenueTableView.h; sourceTree = "<group>"; };
-		3290B34B14BCBF7F0042F830 /* VenueTableView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = VenueTableView.m; sourceTree = "<group>"; };
 		32929C4013E9C02E001D0FE7 /* UIButtonWithOverlayView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UIButtonWithOverlayView.h; sourceTree = "<group>"; };
 		32929C4113E9C02E001D0FE7 /* UIButtonWithOverlayView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UIButtonWithOverlayView.m; sourceTree = "<group>"; };
 		32929C4813EA0103001D0FE7 /* btn_filter_option_selected_touch.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = btn_filter_option_selected_touch.png; path = ../btn_filter_option_selected_touch.png; sourceTree = "<group>"; };
@@ -2090,8 +2087,6 @@
 				32A63AC3149932920013C2E8 /* VenueViewController.h */,
 				32A63AC4149932920013C2E8 /* VenueViewController.m */,
 				32A63AC5149932920013C2E8 /* VenueViewController.xib */,
-				3290B34A14BCBF7F0042F830 /* VenueTableView.h */,
-				3290B34B14BCBF7F0042F830 /* VenueTableView.m */,
 			);
 			name = VenueViewController;
 			sourceTree = "<group>";
@@ -3128,7 +3123,6 @@
 				324AC0651492BFC700128C87 /* FBRequest+Cancel.m in Sources */,
 				324AC0681492C00700128C87 /* Facebook+Cancel.m in Sources */,
 				32A63AC6149932920013C2E8 /* VenueViewController.m in Sources */,
-				3290B34C14BCBF7F0042F830 /* VenueTableView.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

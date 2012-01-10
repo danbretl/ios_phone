@@ -211,14 +211,14 @@ double const ELASTICUILABEL_ELASTIC_DELAY_LENGTH = 1.0;
 }
  */
 
-- (UIView *)hitTest:(CGPoint)point withEvent:(UIEvent *)event {
-    NSLog(@"ElasticUILabel hitTest:%@ withEvent:%@", NSStringFromCGPoint(point), event);
-    return [super hitTest:point withEvent:event];
-}
-
-- (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
-    NSLog(@"ElasticUILabel touchesBegan:%@ withEvent:%@", touches, event);
-    [super touchesBegan:touches withEvent:event];
-}
+//- (UIView *)hitTest:(CGPoint)point withEvent:(UIEvent *)event {
+//    NSLog(@"ElasticUILabel hitTest:%@ withEvent:%@", NSStringFromCGPoint(point), event);
+//    return [super hitTest:point withEvent:event];
+//}
+//
+//- (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
+//    NSLog(@"ElasticUILabel touchesBegan:%@ withEvent:%@", touches, event);
+//    [super touchesBegan:touches withEvent:event];
+//}
 
 @end
