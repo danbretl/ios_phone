@@ -9,7 +9,7 @@
 #import <Foundation/Foundation.h>
 #import <CoreData/CoreData.h>
 
-@class Event;
+@class Event, Place;
 
 @interface EventSummary : NSManagedObject {
 @private
@@ -26,6 +26,8 @@
 @property (nonatomic, retain) NSString * placeTitle;
 @property (nonatomic, retain) NSNumber * startTimeCount;
 @property (nonatomic, retain) NSNumber * priceMaximum;
-@property (nonatomic, retain) Event *event;
+@property (nonatomic, retain) Event *eventGeneral;
+@property (nonatomic, retain) Event *eventRelativeToVenue;
+@property (nonatomic, retain) Place *venueContext;
 
 @end

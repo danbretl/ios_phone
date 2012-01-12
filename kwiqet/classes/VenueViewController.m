@@ -12,20 +12,37 @@
 #import "EventTableViewCell.h"
 #import "EventLocationAnnotation.h"
 #import <QuartzCore/QuartzCore.h>
+#import "Event.h"
+#import "EventResult.h"
+#import "WebUtil.h"
 
 double const VVC_ANIMATION_DURATION = 0.25;
+NSInteger const VVC_MAXIMUM_NUMBER_OF_ROWS_FOR_UPCOMING_EVENTS = 5;
 
 @interface VenueViewController()
 
 @property (retain, nonatomic) EventsWebQuery * eventsWebQuery;
+@property (retain, nonatomic) NSMutableArray * events;
 @property (readonly, nonatomic) WebDataTranslator * webDataTranslator;
+@property (readonly, nonatomic) WebConnector * webConnector;
+@property (nonatomic) BOOL isGettingEvents;
+@property (nonatomic) BOOL isGettingImage;
+@property (nonatomic, readonly) BOOL isGettingWebData;
+@property (nonatomic, readonly) BOOL isEventsTableVisible;
+@property (nonatomic) UpcomingEventsHeaderViewMessageType appropriateMessageType;
+@property (nonatomic) BOOL deletedFromEventCard;
+
+@property (retain, nonatomic) NSIndexPath * eventsTableViewIndexPathOfSelectedRowPreserved;
+@property (nonatomic) CGPoint scrollViewContentOffsetPreserved;
 
 @property (retain, nonatomic) IBOutlet UIView * navBarContainer;
 @property (retain, nonatomic) IBOutlet UIButton * backButton;
 @property (retain, nonatomic) IBOutlet UIButton * logoButton;
 @property (retain, nonatomic) IBOutlet UIButton * followButton;
 
+@property (retain, nonatomic) IBOutlet UIScrollView * scrollView;
 @property (retain, nonatomic) IBOutlet UIView * mainContainer;
+@property (retain, nonatomic) NSArray * mainContainerChainOfDependentlyPositionedViews;
 @property (retain, nonatomic) IBOutlet ElasticUILabel * nameBar;
 @property (retain, nonatomic) IBOutlet UIImageView * imageView;
 @property (retain, nonatomic) IBOutlet UIView * infoContainer;
@@ -41,11 +58,15 @@ double const VVC_ANIMATION_DURATION = 0.25;
 @property (retain, nonatomic) IBOutlet UIButton * descriptionReadMoreButton;
 @property (retain, nonatomic) IBOutlet GradientView * descriptionReadMoreCoverView;
 
-@property (retain, nonatomic) IBOutlet UIView * eventsHeaderContainer;
-@property (retain, nonatomic) IBOutlet UILabel * eventsHeaderLabel;
+@property (retain, nonatomic) IBOutlet UpcomingEventsHeaderView * eventsHeaderView;
+@property (retain, nonatomic) IBOutlet UIView * eventsHeaderViewShadow;
 @property (retain, nonatomic) IBOutlet UITableView * eventsTableView;
 
-@property (retain) MapViewController * mapViewController;
+@property (retain, nonatomic) WebActivityView * webActivityView;
+@property (nonatomic, readonly) UIAlertView * connectionErrorStandardAlertView;
+
+@property (nonatomic, retain) MapViewController * mapViewController;
+@property (nonatomic, retain) EventViewController * eventViewController;
 
 @property (retain) UISwipeGestureRecognizer * swipeToGoBack;
 
@@ -56,8 +77,10 @@ double const VVC_ANIMATION_DURATION = 0.25;
 - (IBAction)mapButtonTouched:(UIButton *)button;
 - (void)swipedToGoBack:(UISwipeGestureRecognizer *)swipeGesture;
 - (IBAction)descriptionReadMoreButtonTouched:(id)sender;
-
-- (void) pullOutEventsTableHeaderSubview:(UIView *)subview;
+- (void)eventsHeaderViewButtonTouched:(UIButton *)button;
+- (void)showMoreUpcomingEventsButtonTouched:(UIButton *)button;
+- (void) showWebLoadingViews;
+- (void) hideWebLoadingViews;
 - (void) updateInfoViewsFromVenue:(Place *)venue animated:(BOOL)animated;
 - (void) updateDescriptionTextFromVenue:(Place *)venue animated:(BOOL)animated;
 - (void) updateDescriptionContainerSizeToFitLabelAfterExpansion:(BOOL)shouldExpandLabel animated:(BOOL)animated;
@@ -66,26 +89,41 @@ double const VVC_ANIMATION_DURATION = 0.25;
 - (void) updateImageFromVenue:(Place *)venue animated:(BOOL)animated;
 - (void) showImageViewWithImage:(UIImage *)image animated:(BOOL)animated;
 - (void) setImageViewIsVisible:(BOOL)visible animated:(BOOL)animated;
-- (void)updateViewsVerticalPositionsIncludingDescriptionContainer:(BOOL)shouldUpdateDescriptionContainer animated:(BOOL)animated;
-//- (void) updateViewsVerticalPositionsAll;
-//- (void) updateViewsVerticalPositionsForScroll;
+- (void) updateMainContainerAndScrollViewSize;
+- (void) updateViewOrigin:(UIView *)theView;
+- (void) updateViewsOriginsDependentlyPositionedOnView:(UIView *)rootView;
+- (void) updateViewOrigin:(UIView *)theView andUpdateDependentlyPositionedViews:(BOOL)shouldUpdateDependentlyPositionedViews;
 - (void) configureCell:(EventTableViewCell *)cell forRowAtIndexPath:(NSIndexPath *)indexPath;
+- (void) updateNetworkActivityIndicator;
+- (void) updateUpcomingEventsAnimated:(BOOL)animated;
+- (void) updateEventsWebQueryFromVenue:(Place *)venue;
+- (BOOL) shouldShowMoreEventsButtonForEvents:(NSArray *)events;
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsDisplayedInSection:(NSInteger)section;
 
 @end
 
 @implementation VenueViewController
-@synthesize mainContainer;
+@synthesize eventViewControllerSourceOfReferral=eventViewControllerSourceOfReferral_;
+@synthesize isGettingEvents=isGettingEvents_;
+@synthesize isGettingImage=isGettingImage_;
+@synthesize scrollView=scrollView_;
+@synthesize mainContainer=mainContainer_;
+@synthesize mainContainerChainOfDependentlyPositionedViews=mainContainerChainOfDependentlyPositionedViews_;
 @synthesize mapView=mapView_;
-@synthesize eventsHeaderContainer=eventsHeaderContainer_;
-@synthesize eventsHeaderLabel=eventsHeaderLabel_;
+@synthesize eventsHeaderView=eventsHeaderView_;
+@synthesize eventsHeaderViewShadow=eventsHeaderViewShadow_;
 @synthesize descriptionReadMoreCoverView=descriptionReadMoreCoverView_;
 @synthesize descriptionReadMoreButton=descriptionReadMoreButton_;
 @synthesize infoContainerShadowView=infoContainerShadowView_;
 @synthesize infoContainerBackgroundView=infoContainerBackgroundView_;
 @synthesize delegate;
+@synthesize userLocation=userLocation_;
 @synthesize eventsWebQuery=eventsWebQuery_;
+@synthesize events=events_;
 @synthesize coreDataModel=coreDataModel_;
 @synthesize venue=venue_;
+@synthesize eventsTableViewIndexPathOfSelectedRowPreserved=eventsTableViewIndexPathOfSelectedRowPreserved_;
+@synthesize scrollViewContentOffsetPreserved=scrollViewContentOffsetPreserved_;
 @synthesize navBarContainer=navBarContainer_;
 @synthesize backButton=backButton_;
 @synthesize logoButton=logoButton_;
@@ -101,12 +139,16 @@ double const VVC_ANIMATION_DURATION = 0.25;
 @synthesize descriptionContainer=descriptionContainer_;
 @synthesize descriptionLabel=descriptionLabel_;
 @synthesize mapViewController=mapViewController_;
+@synthesize eventViewController=eventViewController_;
 @synthesize swipeToGoBack=swipeToGoBack_;
+@synthesize appropriateMessageType;
+@synthesize webActivityView=webActivityView_;
+@synthesize deletedFromEventCard=deletedFromEventCard_;
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil {
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
     if (self) {
-        // Custom initialization
+        self.appropriateMessageType = UpcomingEventsLoading;
     }
     return self;
 }
@@ -123,8 +165,14 @@ double const VVC_ANIMATION_DURATION = 0.25;
 - (void) viewDidLoad {
     [super viewDidLoad];
     
-    // Main view
+    // Main view / scroll view
     self.view.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"bg_dark_gray.jpg"]];
+    self.scrollView.backgroundColor = [UIColor clearColor];
+    [self.scrollView addSubview:self.mainContainer];
+    self.scrollView.contentSize = self.mainContainer.frame.size;
+    
+    // Main container positional dependencies
+    self.mainContainerChainOfDependentlyPositionedViews = [NSArray arrayWithObjects:self.nameBar, self.imageView, self.infoContainer, self.descriptionContainer, self.eventsHeaderView, self.eventsTableView, nil];
         
     // Nav bar views
     self.navBarContainer.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"navbar.png"]];
@@ -153,12 +201,11 @@ double const VVC_ANIMATION_DURATION = 0.25;
     self.descriptionReadMoreCoverView.endX = 20;
     
     // Table header views
-    self.eventsHeaderContainer.backgroundColor = [UIColor colorWithWhite:53.0/255.0 alpha:1.0];
-    self.eventsHeaderLabel.backgroundColor = [UIColor clearColor];
-    self.eventsHeaderLabel.font = [UIFont kwiqetFontOfType:BoldCondensed size:16.0];
-    self.eventsHeaderLabel.textColor = [UIColor colorWithWhite:241.0/255.0 alpha:1.0];
-    self.eventsTableView.backgroundColor = [UIColor clearColor];
-    self.eventsTableView.tableHeaderView = self.mainContainer;
+    [self.eventsHeaderView.button addTarget:self action:@selector(eventsHeaderViewButtonTouched:) forControlEvents:UIControlEventTouchUpInside];
+    self.eventsHeaderViewShadow.layer.shadowColor = [UIColor blackColor].CGColor;
+    self.eventsHeaderViewShadow.layer.shadowOffset = CGSizeMake(0, 0);
+    self.eventsHeaderViewShadow.layer.shadowOpacity = 0.55;
+    self.eventsHeaderViewShadow.layer.shouldRasterize = YES;
     
     // Gesture recognizers
     swipeToGoBack_ = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(swipedToGoBack:)];
@@ -166,11 +213,11 @@ double const VVC_ANIMATION_DURATION = 0.25;
     self.swipeToGoBack.delegate = self;
     [self.mainContainer addGestureRecognizer:self.swipeToGoBack];
     
-    // Pull views out of header view
-    [self pullOutEventsTableHeaderSubview:self.nameBar];
-    [self pullOutEventsTableHeaderSubview:self.infoContainer];
-    [self pullOutEventsTableHeaderSubview:self.eventsHeaderContainer];
-    [self updateViewsVerticalPositionsIncludingDescriptionContainer:NO animated:NO];
+    // Web activity view
+    CGFloat webActivityViewSize = 60.0;
+    webActivityView_ = [[WebActivityView alloc] initWithSize:CGSizeMake(webActivityViewSize, webActivityViewSize) centeredInFrame:self.view.bounds];
+    [self.view addSubview:self.webActivityView];
+    [self.view bringSubviewToFront:self.webActivityView];
     
     // Update views from data
     if (self.venue) {
@@ -180,7 +227,10 @@ double const VVC_ANIMATION_DURATION = 0.25;
             [self updateMapViewToCenterOnCoordinate:self.venue.coordinate animated:NO];
         }
         [self updateImageFromVenue:self.venue animated:NO];
+        [self updateUpcomingEventsAnimated:NO];
     }
+    
+    NSLog(@"self.eventsTableView.frame = %@", NSStringFromCGRect(self.eventsTableView.frame));
     
     BOOL debuggingFrames = NO;
     if (debuggingFrames) {
@@ -191,12 +241,41 @@ double const VVC_ANIMATION_DURATION = 0.25;
     }
 }
 
-- (void) pullOutEventsTableHeaderSubview:(UIView *)subview {
-    CGPoint subviewOriginInMainView = [self.view convertPoint:subview.frame.origin fromView:subview.superview];
-    [self.view insertSubview:subview aboveSubview:self.eventsTableView];
-    CGRect subviewFrame = subview.frame;
-    subviewFrame.origin = subviewOriginInMainView;
-    subview.frame = subviewFrame;
+- (void)viewWillAppear:(BOOL)animated {
+    [super viewWillAppear:animated];
+    BOOL shouldTrustContentOffset = self.scrollViewContentOffsetPreserved.y + self.scrollView.frame.size.height <= self.scrollView.contentSize.height;
+    if (self.eventsTableViewIndexPathOfSelectedRowPreserved != nil) {
+        [self.eventsTableView selectRowAtIndexPath:self.eventsTableViewIndexPathOfSelectedRowPreserved animated:NO scrollPosition:shouldTrustContentOffset ? UITableViewScrollPositionNone : UITableViewScrollPositionMiddle];
+    }
+    if (shouldTrustContentOffset) {
+        [self.scrollView setContentOffset:self.scrollViewContentOffsetPreserved animated:NO];
+    }
+    self.scrollViewContentOffsetPreserved = CGPointZero;
+}
+
+- (void) viewDidAppear:(BOOL)animated {
+    [super viewDidAppear:animated];
+    if (self.deletedFromEventCard) {
+        NSLog(@"VenueViewController - The learned behavior of the delete was sent to the server, but the deletion is not going to be observed in this view controller.");
+//        Event * eventToDelete = [self.events objectAtIndex:self.eventsTableViewIndexPathOfSelectedRowPreserved.row];
+//        [self.coreDataModel deleteRegularEventForURI:eventToDelete.uri];
+//        [self.events removeObjectAtIndex:self.eventsTableViewIndexPathOfSelectedRowPreserved.row];
+//        [self.eventsTableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:self.eventsTableViewIndexPathOfSelectedRowPreserved] withRowAnimation:UITableViewRowAnimationTop];
+    }
+    [self.eventsTableView deselectRowAtIndexPath:self.eventsTableViewIndexPathOfSelectedRowPreserved animated:YES];
+    self.eventsTableViewIndexPathOfSelectedRowPreserved = nil;
+    self.deletedFromEventCard = NO;
+}
+
+- (void)viewWillDisappear:(BOOL)animated {
+    [super viewWillDisappear:animated];
+    self.scrollViewContentOffsetPreserved = self.scrollView.contentOffset;
+    [[SDWebImageManager sharedManager] cancelForDelegate:self];
+}
+
+- (void) viewDidDisappear:(BOOL)animated {
+    [super viewDidDisappear:animated];
+    [self.nameBar invalidateTimerAndScrollTextToOriginAnimated:NO];
 }
 
 - (void)viewDidUnload {
@@ -214,34 +293,21 @@ double const VVC_ANIMATION_DURATION = 0.25;
     [self setMapButton:nil];
     [self setDescriptionLabel:nil];
     [self setEventsTableView:nil];
+    [self setScrollView:nil];
     [self setMainContainer:nil];
+    [self setMainContainerChainOfDependentlyPositionedViews:nil];
     [self setMapView:nil];
-    [self setEventsHeaderContainer:nil];
-    [self setEventsHeaderLabel:nil];
+    [self setEventsHeaderView:nil];
+    [self setEventsHeaderViewShadow:nil];
     [self setSwipeToGoBack:nil];
     [self setDescriptionReadMoreCoverView:nil];
     [self setDescriptionReadMoreButton:nil];
     [self setInfoContainerBackgroundView:nil];
     [self setInfoContainerShadowView:nil];
+    [self setWebActivityView:nil];
+    [connectionErrorStandardAlertView_ release];
+    connectionErrorStandardAlertView_ = nil;
     [super viewDidUnload];
-    // Release any retained subviews of the main view.
-    // e.g. self.myOutlet = nil;
-}
-
-//- (void)viewWillAppear:(BOOL)animated {
-//    [super viewWillAppear:animated];
-//    EventsWebQuery * existingWebQuery = self.eventsWebQuery;
-//    if (existingWebQuery == nil) {
-//        existingWebQuery = [self.coreDataModel getMostRecentEventsWebQueryForVenue:self.venue];
-//    }
-//    if (existingWebQuery.datetimeQueryExecuted && abs([existingWebQuery.datetimeQueryExecuted timeIntervalSinceNow]) < 5 * 60) {
-//        
-//    }
-//}
-
-- (void) viewDidDisappear:(BOOL)animated {
-    [super viewDidDisappear:animated];
-    [self.nameBar invalidateTimerAndScrollTextToOriginAnimated:NO];
 }
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
@@ -251,7 +317,10 @@ double const VVC_ANIMATION_DURATION = 0.25;
 
 - (void)dealloc {
     [venue_ release];
+    [userLocation_ release];
+    [eventsTableViewIndexPathOfSelectedRowPreserved_ release];
     [webDataTranslator_ release];
+    [webConnector_ release];
     [backButton_ release];
     [logoButton_ release];
     [followButton_ release];
@@ -266,18 +335,24 @@ double const VVC_ANIMATION_DURATION = 0.25;
     [mapButton_ release];
     [descriptionLabel_ release];
     [eventsTableView_ release];
-    [mainContainer release];
+    [scrollView_ release];
+    [mainContainer_ release];
+    [mainContainerChainOfDependentlyPositionedViews_ release];
     [mapView_ release];
     [mapViewController_ release];
-    [eventsHeaderContainer_ release];
-    [eventsHeaderLabel_ release];
+    [eventViewController_ release];
+    [eventsHeaderView_ release];
+    [eventsHeaderViewShadow_ release];
     [swipeToGoBack_ release];
     [descriptionReadMoreCoverView_ release];
     [descriptionReadMoreButton_ release];
     [infoContainerBackgroundView_ release];
     [infoContainerShadowView_ release];
     [eventsWebQuery_ release];
+    [events_ release];
     [coreDataModel_ release];
+    [webActivityView_ release];
+    [connectionErrorStandardAlertView_ release];
     [super dealloc];
 }
 
@@ -294,7 +369,15 @@ double const VVC_ANIMATION_DURATION = 0.25;
 }
 
 - (void)phoneNumberButtonTouched:(UIButton *)button {
-    NSLog(@"phoneNumberButtonTouched");
+    [[UIApplication sharedApplication] openURL:[NSURL URLWithString:[NSString stringWithFormat:@"tel:%@", self.venue.phone]]];
+}
+
+- (void)showMoreUpcomingEventsButtonTouched:(UIButton *)button {
+    NSLog(@"showMoreUpcomingEventsButtonTouched");
+}
+
+- (void)eventsHeaderViewButtonTouched:(UIButton *)button {
+    [self updateEventsWebQueryFromVenue:self.venue];
 }
 
 - (void)mapButtonTouched:(UIButton *)button {
@@ -312,17 +395,171 @@ double const VVC_ANIMATION_DURATION = 0.25;
     self.mapViewController = nil;
 }
 
+- (BOOL) eventsWebQueryIsExecutedSuccessfullyRecentlyEnough:(EventsWebQuery *)eventsWebQuery {
+    return (eventsWebQuery != nil &&
+            eventsWebQuery.datetimeQueryExecuted &&
+            abs(eventsWebQuery.datetimeQueryExecuted.timeIntervalSinceNow) < 5 * 60 &&
+            eventsWebQuery.eventResults.count > 0);
+}
+
+- (void) updateEventsWebQueryFromVenue:(Place *)venue {
+    EventsWebQuery * webQueryForVenue = [self.coreDataModel getMostRecentEventsWebQueryForVenue:self.venue];
+    if ([self eventsWebQueryIsExecutedSuccessfullyRecentlyEnough:webQueryForVenue]) {
+        self.appropriateMessageType = UpcomingEventsLoaded;
+        self.eventsWebQuery = webQueryForVenue;
+        self.events = [self.eventsWebQuery.eventResultsEventsInOrder.mutableCopy autorelease];
+    } else {
+        self.appropriateMessageType = UpcomingEventsLoading;
+        self.events = nil;
+        self.isGettingEvents = YES;
+        [self updateNetworkActivityIndicator];
+        EventsWebQuery * eventsWebQuery = [NSEntityDescription insertNewObjectForEntityForName:@"EventsWebQuery" inManagedObjectContext:self.coreDataModel.managedObjectContext];
+        self.eventsWebQuery = eventsWebQuery;
+        self.eventsWebQuery.queryType = [NSNumber numberWithInt:VenueQuery];
+        self.eventsWebQuery.datetimeQueryCreated = [NSDate date];
+        self.eventsWebQuery.filterVenue = self.venue;
+        [self.coreDataModel coreDataSave];
+        [self.webConnector getEventsListForVenueURI:self.venue.uri];
+    }
+}
+
+- (void) updateUpcomingEventsAnimated:(BOOL)animated {
+    
+    [self.eventsHeaderView setMessageToShowMessageType:self.appropriateMessageType animated:animated];
+    
+    BOOL showEventsTable = self.events && self.events.count > 0;
+    NSUInteger eventsCount = self.events == nil ? 0 : [self tableView:self.eventsTableView numberOfRowsDisplayedInSection:0];
+    
+    void(^eventsTableHeightBlock)(int, BOOL) = ^(int eventsCount, BOOL shouldMaintainMaxY){
+        CGRect eventsTableViewFrame = self.eventsTableView.frame;
+        CGFloat eventsTableViewPreviousHeight = eventsTableViewFrame.size.height;
+        eventsTableViewFrame.size.height = eventsCount * self.eventsTableView.rowHeight + [self tableView:self.eventsTableView heightForFooterInSection:0];
+        if (shouldMaintainMaxY) {
+            eventsTableViewFrame.origin.y -= eventsTableViewFrame.size.height - eventsTableViewPreviousHeight;
+        }
+        self.eventsTableView.frame = eventsTableViewFrame;
+    };
+    
+    void(^eventsTableOriginBlock)(BOOL) = ^(BOOL showTable){
+        CGRect eventsTableViewFrame = self.eventsTableView.frame;
+        eventsTableViewFrame.origin.y = CGRectGetMaxY(self.eventsHeaderView.frame) - (showTable ? 0 : self.eventsTableView.frame.size.height);
+        self.eventsTableView.frame = eventsTableViewFrame;
+    };
+    
+    if (animated) {
+        if (self.isEventsTableVisible) {
+            if (showEventsTable) {
+                [self.eventsTableView reloadSections:[NSIndexSet indexSetWithIndex:0] withRowAnimation:UITableViewRowAnimationFade];
+                [UIView animateWithDuration:VVC_ANIMATION_DURATION animations:^{
+                    eventsTableHeightBlock(eventsCount, NO);
+                    [self updateMainContainerAndScrollViewSize];
+                }];
+            } else {
+                eventsTableOriginBlock(showEventsTable);
+                [self updateMainContainerAndScrollViewSize];
+            }
+        } else {
+            eventsTableHeightBlock(eventsCount, YES);
+            [self.eventsTableView reloadData];
+            [UIView animateWithDuration:VVC_ANIMATION_DURATION animations:^{
+                eventsTableOriginBlock(showEventsTable);
+                [self updateMainContainerAndScrollViewSize];
+            }];
+        }
+    } else {
+        [self.eventsTableView reloadData];
+        eventsTableHeightBlock(eventsCount, NO);
+        eventsTableOriginBlock(showEventsTable);
+        [self updateMainContainerAndScrollViewSize];
+    }
+    
+}
+
+//- (void) updateUpcomingEventsFromVenue:(Place *)venue animated:(BOOL)animated {
+//    EventsWebQuery * webQuery = [self.coreDataModel getMostRecentEventsWebQueryForVenue:self.venue];
+//    if (webQuery != nil && webQuery.datetimeQueryCreated != nil) {
+//        if (webQuery.datetimeQueryExecuted && abs(webQuery.datetimeQueryExecuted.timeIntervalSinceNow) < 5 * 60) {
+//            self.eventsWebQuery = webQuery;
+//            // show/update the table
+//        } else {
+//            // wait for the 
+//        }
+//    } else {
+//        // Make a new query
+//        // Attempt the query
+//    }
+//}
+
+- (void)webConnector:(WebConnector *)webConnector getEventsListSuccess:(ASIHTTPRequest *)request forVenueURI:(NSString *)venueURI {
+    
+    self.isGettingEvents = NO;
+    [self updateNetworkActivityIndicator];
+    
+    self.eventsWebQuery.datetimeQueryExecuted = [NSDate date];
+    
+    NSError * error = nil;
+    NSDictionary * dictionaryFromJSON = [request.responseString yajl_JSONWithOptions:YAJLParserOptionsAllowComments error:&error];
+    NSArray * eventSummaryDictionaries = [dictionaryFromJSON valueForKey:@"objects"];
+    
+    if (eventSummaryDictionaries && eventSummaryDictionaries.count > 0) {
+        int order = 0;
+        for (NSDictionary * eventSummaryDictionary in eventSummaryDictionaries) {
+            Event * eventToUpdate = [self.coreDataModel getEventWithURI:[eventSummaryDictionary valueForKey:@"event"]];
+            if (eventToUpdate == nil) {
+                eventToUpdate = [NSEntityDescription insertNewObjectForEntityForName:@"Event" inManagedObjectContext:self.coreDataModel.managedObjectContext];
+            }
+            [self.coreDataModel updateEvent:eventToUpdate usingEventSummaryDictionary:eventSummaryDictionary relativeToVenue:self.venue featuredOverride:nil fromSearchOverride:nil];
+            EventResult * eventResult = [NSEntityDescription insertNewObjectForEntityForName:@"EventResult" inManagedObjectContext:self.coreDataModel.managedObjectContext];
+            eventResult.order = [NSNumber numberWithInt:order];
+            order++;
+            eventResult.event = eventToUpdate;
+            eventResult.query = self.eventsWebQuery;
+        }
+    }
+    self.events = [self.eventsWebQuery.eventResultsEventsInOrder.mutableCopy autorelease];
+    
+    self.appropriateMessageType = self.events.count > 0 ? UpcomingEventsLoaded : UpcomingEventsNoEvents;
+    
+    if (self.view.window) {
+        [self updateUpcomingEventsAnimated:YES];
+    }
+    
+}
+
+- (void)webConnector:(WebConnector *)webConnector getEventsListFailure:(ASIHTTPRequest *)request forVenueURI:(NSString *)venueURI {
+
+    self.isGettingEvents = NO;
+    [self updateNetworkActivityIndicator];
+    
+    self.eventsWebQuery.datetimeQueryExecuted = [NSDate date];
+    self.events = nil;
+    
+    self.appropriateMessageType = UpcomingEventsConnectionError;
+    
+    if (self.view.window) {
+        [self updateUpcomingEventsAnimated:YES];
+    }
+    
+}
+
 - (void) setVenue:(Place *)venue {
     if (venue_ != venue) {
+        // Set the venue variable
         [venue_ release];
         venue_ = [venue retain];
+        // Get and check out the associated web query
+        [self updateEventsWebQueryFromVenue:self.venue]; // This also updates the property self.events, so we can use that later in this method if we want (which we do).
         if (self.view.window) {
+            // Info & Description
             [self updateInfoViewsFromVenue:self.venue animated:YES];
             [self updateDescriptionTextFromVenue:self.venue animated:YES];
             if (self.venue.coordinateAvailable) {
                 [self updateMapViewToCenterOnCoordinate:self.venue.coordinate animated:YES];
             }
+            // Image
             [self updateImageFromVenue:self.venue animated:YES];
+            // Upcoming events
+            [self updateUpcomingEventsAnimated:YES];
         }
     }
 }
@@ -333,6 +570,15 @@ double const VVC_ANIMATION_DURATION = 0.25;
     }
     return webDataTranslator_;
 }
+
+- (WebConnector *) webConnector {
+    if (webConnector_ == nil) {
+        webConnector_ = [[WebConnector alloc] init];
+        webConnector_.delegate = self;
+    }
+    return webConnector_;
+}
+
 
 - (void)updateInfoViewsFromVenue:(Place *)venue animated:(BOOL)animated {
     
@@ -391,10 +637,8 @@ double const VVC_ANIMATION_DURATION = 0.25;
         [UIView animateWithDuration:VVC_ANIMATION_DURATION animations:^{
             infoViewsWidthsBlock(addressText, cityStateZipText, phoneText);
         }];
-        [self updateViewsVerticalPositionsIncludingDescriptionContainer:NO animated:YES];
     } else {
         infoViewsWidthsBlock(addressText, cityStateZipText, phoneText);
-        [self updateViewsVerticalPositionsIncludingDescriptionContainer:NO animated:NO];
     }
 
 }
@@ -482,13 +726,14 @@ double const VVC_ANIMATION_DURATION = 0.25;
         [UIView animateWithDuration:VVC_ANIMATION_DURATION animations:^{
             if (shouldExpandLabel) { descriptionLabelExpandBlock(); }
             descriptionContainerFitBlock();
+            [self updateViewsOriginsDependentlyPositionedOnView:self.infoContainer];
         }];
     } else {
         if (shouldExpandLabel) { descriptionLabelExpandBlock(); }
         descriptionContainerFitBlock();
+        [self updateViewsOriginsDependentlyPositionedOnView:self.infoContainer];
     }
     [self setDescriptionReadMoreIsVisible:!shouldExpandLabel animated:animated];
-    [self updateViewsVerticalPositionsIncludingDescriptionContainer:NO animated:animated];
     
 }
 
@@ -517,6 +762,12 @@ double const VVC_ANIMATION_DURATION = 0.25;
     [venueLocationAnnotation release];
 }
 
+- (void) updateNetworkActivityIndicator {
+    NSLog(@"updateNetworkActivityIndicator start");
+    [UIApplication sharedApplication].networkActivityIndicatorVisible = self.isGettingWebData || self.webConnector.connectionInProgress;
+    NSLog(@"updateNetworkActivityIndicator end");
+}
+
 // Venue image not yet available / implemented. Need to add an imageLocation attribute the Place object, and pull in that file location from the server. UPDATE: Done!
 - (void) updateImageFromVenue:(Place *)venue animated:(BOOL)animated {
     NSLog(@"updateImageFromVenue:");
@@ -529,7 +780,8 @@ double const VVC_ANIMATION_DURATION = 0.25;
         if (cachedImage) {
             [self showImageViewWithImage:cachedImage animated:animated];
         } else {
-            [UIApplication sharedApplication].networkActivityIndicatorVisible = YES;
+            self.isGettingImage = YES;
+            [self updateNetworkActivityIndicator];
             [webImageManager downloadWithURL:imageURL delegate:self];
         }
     }
@@ -537,14 +789,16 @@ double const VVC_ANIMATION_DURATION = 0.25;
 
 - (void) webImageManager:(SDWebImageManager *)imageManager didFinishWithImage:(UIImage *)image {
     NSLog(@"webImageManager:didFinishWithImage:");
-    [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
+    self.isGettingImage = NO;
+    [self updateNetworkActivityIndicator];
     [self showImageViewWithImage:image animated:(self.view.window != nil)];
 }
 
 - (void) webImageManager:(SDWebImageManager *)imageManager didFailWithError:(NSError *)error {
     NSLog(@"webImageManager:didFailWithError:");
     // Do nothing, really... Just chill, sans image in the venue card. Maybe ensure that the image view is hidden.
-    [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
+    self.isGettingImage = NO;
+    [self updateNetworkActivityIndicator];
     [self setImageViewIsVisible:NO animated:(self.view.window != nil)];
 }
 
@@ -564,103 +818,88 @@ double const VVC_ANIMATION_DURATION = 0.25;
     if (animated) {
         [UIView animateWithDuration:VVC_ANIMATION_DURATION animations:^{
             imageViewSizeBlock(visible);
+            [self updateViewsOriginsDependentlyPositionedOnView:self.imageView];
         }];
-        [self updateViewsVerticalPositionsIncludingDescriptionContainer:YES animated:animated];
     } else {
         imageViewSizeBlock(visible);
-        [self updateViewsVerticalPositionsIncludingDescriptionContainer:YES animated:NO];
+        [self updateViewsOriginsDependentlyPositionedOnView:self.imageView];
     }
 }
 
-- (void)updateViewsVerticalPositionsIncludingDescriptionContainer:(BOOL)shouldUpdateDescriptionContainer animated:(BOOL)animated {
-    
-    void(^adjustmentsBlock)(void) = ^{
+- (void) updateViewOrigin:(UIView *)theView {
+    if (theView == self.nameBar) {
         CGRect nameBarFrame = self.nameBar.frame;
-        nameBarFrame.origin.y = [self.view convertPoint:CGPointMake(0, MAX(0, self.eventsTableView.contentOffset.y)) fromView:self.mainContainer].y;
+        nameBarFrame.origin.y = MAX(0, self.scrollView.contentOffset.y);
         self.nameBar.frame = nameBarFrame;
+    } else if (theView == self.imageView) {
+        // No action necessary
+    } else if (theView == self.infoContainer) {
         CGRect infoContainerFrame = self.infoContainer.frame;
-        infoContainerFrame.origin.y = MAX(CGRectGetMaxY(nameBarFrame), CGRectGetMaxY(self.imageView.frame));
+        infoContainerFrame.origin.y = MAX(CGRectGetMaxY(self.nameBar.frame), CGRectGetMaxY(self.imageView.frame));
         self.infoContainer.frame = infoContainerFrame;
-        if (shouldUpdateDescriptionContainer) {
-            CGRect descriptionContainerFrame = self.descriptionContainer.frame;
-            descriptionContainerFrame.origin.y = CGRectGetMaxY(self.imageView.frame) + self.infoContainer.frame.size.height;
-            self.descriptionContainer.frame = descriptionContainerFrame;
-        }
-        CGRect eventsHeaderContainerFrame = self.eventsHeaderContainer.frame;
-        CGPoint infoContainerOriginInHeader = [self.mainContainer convertPoint:self.infoContainer.frame.origin fromView:self.view];
-        eventsHeaderContainerFrame.origin.y = [self.view convertPoint:CGPointMake(0, MAX(CGRectGetMaxY(self.descriptionContainer.frame), infoContainerOriginInHeader.y + infoContainerFrame.size.height)) fromView:self.mainContainer].y;
-        self.eventsHeaderContainer.frame = eventsHeaderContainerFrame;
-    };
-    
-    void(^totalSizeChangeCheckBlock)(CGFloat) = ^(CGFloat originalHeight){
-        CGFloat mainContainerShouldBeHeight = CGRectGetMaxY(self.descriptionContainer.frame) + self.eventsHeaderContainer.frame.size.height;
-//        CGFloat hackAdjustment = -1;
-        if (originalHeight != mainContainerShouldBeHeight) {
-            CGRect mainContainerFrame = self.mainContainer.frame;
-            mainContainerFrame.size.height = mainContainerShouldBeHeight;// + hackAdjustment;
-            self.mainContainer.frame = mainContainerFrame;
-            if (animated) { [self.eventsTableView beginUpdates]; }
-            self.eventsTableView.tableHeaderView = self.mainContainer;
-            if (animated) { [self.eventsTableView endUpdates]; }
-        }
-    };
-    
-    CGFloat originalHeight = self.eventsTableView.tableHeaderView.frame.size.height;
-    if (animated) {
-        [UIView animateWithDuration:VVC_ANIMATION_DURATION animations:^{
-            adjustmentsBlock();
-            totalSizeChangeCheckBlock(originalHeight);
-        }];
+    } else if (theView == self.descriptionContainer) {
+        CGRect descriptionContainerFrame = self.descriptionContainer.frame;
+        descriptionContainerFrame.origin.y = CGRectGetMaxY(self.imageView.frame) + self.infoContainer.frame.size.height;
+        self.descriptionContainer.frame = descriptionContainerFrame;
+    } else if (theView == self.eventsHeaderView) {
+        CGRect eventsHeaderViewFrame = self.eventsHeaderView.frame;
+        eventsHeaderViewFrame.origin.y = MAX(CGRectGetMaxY(self.descriptionContainer.frame), CGRectGetMaxY(self.infoContainer.frame));
+        self.eventsHeaderView.frame = eventsHeaderViewFrame;
+        CGRect eventsHeaderViewShadowFrame = self.eventsHeaderViewShadow.frame;
+        eventsHeaderViewShadowFrame.origin.y = self.eventsHeaderView.frame.origin.y + 1;
+        self.eventsHeaderViewShadow.frame = eventsHeaderViewShadowFrame;
+    } else if (theView == self.eventsTableView) {
+        CGRect eventsTableViewFrame = self.eventsTableView.frame;
+        eventsTableViewFrame.origin.y = CGRectGetMaxY(self.descriptionContainer.frame) + self.eventsHeaderView.frame.size.height;
+        self.eventsTableView.frame = eventsTableViewFrame;
     } else {
-        adjustmentsBlock();
-        totalSizeChangeCheckBlock(originalHeight);
+        NSLog(@"ERROR in VenueViewController updateViewOrigin - unrecognized / unsupported view %@", theView);
+    }
+}
+
+- (void) updateMainContainerAndScrollViewSize {
+    CGRect mainContainerFrame = self.mainContainer.frame;
+    mainContainerFrame.size.height = CGRectGetMaxY(self.eventsTableView.frame);
+    self.mainContainer.frame = mainContainerFrame;
+    self.scrollView.contentSize = self.mainContainer.frame.size;
+    // The following results in more realistic / tactile / physical behavior, but perhaps more annoying behavior as well. (It makes it so that if the content of the scroll view is smaller than the size of the scroll view itself, you can only scroll that content if you actually touch it with your finger, rather than touch anywhere on the screen.) Leaving it out for now...
+    /*
+    self.scrollView.clipsToBounds = NO;
+    CGFloat fullPossibleScrollViewHeight = self.view.frame.size.height - self.navBarContainer.frame.size.height;
+    CGRect scrollViewFrame = self.scrollView.frame;
+    if (self.scrollView.contentSize.height < fullPossibleScrollViewHeight) {
+        scrollViewFrame.size = self.scrollView.contentSize;
+    } else {
+        scrollViewFrame.size = CGSizeMake(self.scrollView.frame.size.width, fullPossibleScrollViewHeight);
+    }
+    self.scrollView.frame = scrollViewFrame;
+     */
+}
+
+- (void) updateViewOrigin:(UIView *)theView andUpdateDependentlyPositionedViews:(BOOL)shouldUpdateDependentlyPositionedViews {
+    
+    [self updateViewOrigin:theView];
+    if (shouldUpdateDependentlyPositionedViews) {
+        [self updateViewsOriginsDependentlyPositionedOnView:theView];
     }
     
 }
 
-//- (void) updateViewsVerticalPositionsAll {
-//    CGRect nameBarFrame = self.nameBar.frame;
-//    nameBarFrame.origin.y = 0;
-//    self.nameBar.frame = nameBarFrame;
-//    CGRect imageViewFrame = self.imageView.frame;
-//    imageViewFrame.origin.y = CGRectGetMaxY(nameBarFrame);
-//    self.imageView.frame = imageViewFrame;
-//    CGRect infoContainerFrame = self.infoContainer.frame;
-//    infoContainerFrame.origin.y = CGRectGetMaxY(imageViewFrame);
-//    self.infoContainer.frame = infoContainerFrame;
-//    CGRect descriptionContainerFrame = self.descriptionContainer.frame;
-//    descriptionContainerFrame.origin.y = CGRectGetMaxY(infoContainerFrame);
-//    self.descriptionContainer.frame = descriptionContainerFrame;
-//    CGRect eventsHeaderContainerFrame = self.eventsHeaderContainer.frame;
-//    eventsHeaderContainerFrame.origin.y = CGRectGetMaxY(descriptionContainerFrame);
-//    self.eventsHeaderContainer.frame = eventsHeaderContainerFrame;
-//    [self updateViewsVerticalPositionsForScroll];
-//}
-
-//- (void) updateViewsVerticalPositionsForScroll {
-//    CGRect nameBarFrame = self.nameBar.frame;
-//    if (self.eventsTableView.contentOffset.y >= 0) {
-//        nameBarFrame.origin.y = self.eventsTableView.contentOffset.y;
-//        CGFloat infoContainerOriginalOriginY = self.nameBar.frame.size.height + self.imageView.frame.size.height;
-//        CGRect infoContainerFrame = self.infoContainer.frame;
-//        CGFloat infoContainerAdjustedOriginY = infoContainerOriginalOriginY;
-//        if (self.eventsTableView.contentOffset.y + self.nameBar.frame.size.height >= infoContainerOriginalOriginY) {
-//            infoContainerAdjustedOriginY = nameBarFrame.origin.y + nameBarFrame.size.height;
-//        }
-//        infoContainerFrame.origin.y = infoContainerAdjustedOriginY;
-//        self.infoContainer.frame = infoContainerFrame;
-//        CGRect eventsHeaderContainerFrame = self.eventsHeaderContainer.frame;
-//        eventsHeaderContainerFrame.origin.y = MAX(CGRectGetMaxY(self.descriptionContainer.frame), CGRectGetMaxY(self.infoContainer.frame));
-//        self.eventsHeaderContainer.frame = eventsHeaderContainerFrame;
-//    } else {
-//        nameBarFrame.origin.y = 0;
-//    }
-//    self.nameBar.frame = nameBarFrame;
-//}
+- (void)updateViewsOriginsDependentlyPositionedOnView:(UIView *)rootView {
+    NSUInteger index = [self.mainContainerChainOfDependentlyPositionedViews indexOfObject:rootView];
+    if (index == self.mainContainerChainOfDependentlyPositionedViews.count - 1) {
+        [self updateMainContainerAndScrollViewSize];
+    } else {
+        UIView * nextView = [self.mainContainerChainOfDependentlyPositionedViews objectAtIndex:(index + 1)];
+        [self updateViewOrigin:nextView andUpdateDependentlyPositionedViews:YES];
+    }
+}
 
 - (void)scrollViewDidScroll:(UIScrollView *)scrollView {
-    if (scrollView == self.eventsTableView) {
-        [self updateViewsVerticalPositionsIncludingDescriptionContainer:NO animated:NO];
+    if (scrollView == self.scrollView) {
+        [self updateViewOrigin:self.nameBar andUpdateDependentlyPositionedViews:NO];
+        [self updateViewOrigin:self.infoContainer andUpdateDependentlyPositionedViews:NO];
+        [self updateViewOrigin:self.eventsHeaderView andUpdateDependentlyPositionedViews:NO];
     }
 }
 
@@ -668,12 +907,39 @@ double const VVC_ANIMATION_DURATION = 0.25;
     return 1;
 }
 
+- (UIView *)tableView:(UITableView *)tableView viewForFooterInSection:(NSInteger)section {
+    UIButton * showMoreButton = [UIButton buttonWithType:UIButtonTypeCustom];
+    [showMoreButton addTarget:self action:@selector(showMoreUpcomingEventsButtonTouched:) forControlEvents:UIControlEventTouchUpInside];
+    showMoreButton.titleLabel.font = [UIFont kwiqetFontOfType:BoldCondensed size:18];
+    [showMoreButton setTitle:@"More Upcoming Events" forState:UIControlStateNormal];
+    [showMoreButton setTitle:@"More Upcoming Events" forState:UIControlStateHighlighted];
+    [showMoreButton setTitleColor:[UIColor colorWithWhite:53.0/255.0 alpha:1.0] forState:UIControlStateNormal];
+    [showMoreButton setTitleColor:[UIColor colorWithWhite:53.0/255.0 alpha:1.0] forState:UIControlStateHighlighted];
+    showMoreButton.backgroundColor = [UIColor colorWithWhite:241.0/255.0 alpha:1.0];
+    return showMoreButton;
+}
+
+- (CGFloat)tableView:(UITableView *)tableView heightForFooterInSection:(NSInteger)section {
+    return [self shouldShowMoreEventsButtonForEvents:self.events] ? 40 : 0;
+}
+
+- (BOOL) shouldShowMoreEventsButtonForEvents:(NSArray *)events {
+    return events.count > VVC_MAXIMUM_NUMBER_OF_ROWS_FOR_UPCOMING_EVENTS;
+}
+
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
-    return 10;
+    return self.events.count;
+//    return MIN(VVC_MAXIMUM_NUMBER_OF_ROWS_FOR_UPCOMING_EVENTS, self.events.count);
+}
+
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsDisplayedInSection:(NSInteger)section {
+    return MIN(VVC_MAXIMUM_NUMBER_OF_ROWS_FOR_UPCOMING_EVENTS, [self tableView:tableView numberOfRowsInSection:section]);
 }
 
 // Customize the appearance of table view cells.
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
+    
+    NSLog(@"VenueViewController cellForRowAtIndexPath:%@", indexPath);
     
     static NSString * CellIdentifier = @"EventCellGeneral";
     
@@ -689,12 +955,113 @@ double const VVC_ANIMATION_DURATION = 0.25;
 
 - (void) configureCell:(EventTableViewCell *)cell forRowAtIndexPath:(NSIndexPath *)indexPath {
     
-    cell.titleLabel.text = [NSString stringWithFormat:@"Fake Event %d", indexPath.row];
-    cell.categoryColor = indexPath.row % 2 == 1 ? [UIColor yellowColor] : [UIColor greenColor];
-//    cell.locationLabel.text = @"Redundantly Displayed Venue Name";
-    cell.dateAndTimeLabel.text = [NSString stringWithFormat:@"January %d, 2012 | %d:0%d AM", indexPath.row, indexPath.row, indexPath.row];
-    cell.priceOriginalLabel.text = [NSString stringWithFormat:@"$10%d.00", indexPath.row];
-    [self.eventsTableView sendSubviewToBack:cell];
+    Event * event = (Event *)[self.events objectAtIndex:indexPath.row];
+    
+    // Title
+    cell.titleLabel.text = event.title;
+    // Category color & icon
+    Category * concreteParentCategory = event.concreteParentCategory;
+    cell.categoryColor = [WebUtil colorFromHexString:concreteParentCategory.colorHex];
+    cell.categoryIcon = [UIImage imageNamed:[concreteParentCategory.iconThumb stringByReplacingOccurrencesOfString:@".png" withString:@"_big.png"]];
+    cell.categoryIconHorizontalOffset = concreteParentCategory.iconBigHorizontalOffset.floatValue;
+    // Event summary
+    EventSummary * eventSummary = [event eventSummaryRelativeToVenue:self.venue];
+    // Date & Time
+    NSString * dateToDisplay = [self.webDataTranslator eventsListDateRangeStringFromEventDateEarliest:eventSummary.startDateEarliest eventDateLatest:eventSummary.startDateLatest eventDateCount:eventSummary.startDateCount relativeDates:YES dataUnavailableString:nil];
+    NSString * timeToDisplay = [self.webDataTranslator eventsListTimeRangeStringFromEventTimeEarliest:eventSummary.startTimeEarliest eventTimeLatest:eventSummary.startTimeLatest eventTimeCount:eventSummary.startTimeCount dataUnavailableString:nil];
+    NSString * divider = eventSummary.startDateEarliest && eventSummary.startTimeEarliest ? @" | " : @"";
+    NSString * finalDatetimeString = [NSString stringWithFormat:@"%@%@%@", dateToDisplay, divider, timeToDisplay];
+    cell.dateAndTimeLabel.text = finalDatetimeString;
+    // Price
+    NSString * priceRange = [self.webDataTranslator priceRangeStringFromMinPrice:eventSummary.priceMinimum maxPrice:eventSummary.priceMaximum separatorString:nil dataUnavailableString:nil];
+    cell.priceOriginalLabel.text = priceRange;
+    
+}
+
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
+    
+    Event * event = (Event *)[self.events objectAtIndex:indexPath.row];
+    
+    BOOL movingBackwards = self.eventViewControllerSourceOfReferral != nil && self.eventViewControllerSourceOfReferral.event == event;
+    
+    if (!movingBackwards) {
+        
+        self.eventsTableViewIndexPathOfSelectedRowPreserved = indexPath;
+        
+        self.eventViewController = [[[EventViewController alloc] initWithNibName:@"EventViewController" bundle:[NSBundle mainBundle]] autorelease];
+        self.eventViewController.coreDataModel = self.coreDataModel;
+        self.eventViewController.delegate = self;
+        self.eventViewController.userLocation = self.userLocation;
+        self.eventViewController.venueViewControllerSourceOfReferral = self;
+        
+    }
+
+    [self.webConnector sendLearnedDataAboutEvent:event.uri withUserAction:@"V"]; // Attempt to send the learning to our server.
+    
+    if (!movingBackwards) {
+        [self.webConnector getEventWithURI:event.uri]; // Attempt to get the full event info
+        [self showWebLoadingViews];
+    } else {
+        [self.delegate viewController:self didFinishByRequestingJumpBackToViewController:self.eventViewControllerSourceOfReferral];
+    }
+    
+}
+
+- (void)webConnector:(WebConnector *)webConnector sendLearnedDataSuccess:(ASIHTTPRequest *)request aboutEvent:(NSString *)eventURI userAction:(NSString *)userAction {
+    
+    if ([userAction isEqualToString:@"V"] && self.eventViewController) {
+        
+        NSLog(@"VenueViewController successfully sent 'view' learning to server for event with URI %@.", eventURI);
+        
+    }
+    
+    if (!self.webConnector.connectionInProgress) {
+        [self hideWebLoadingViews];
+    }
+    
+}
+
+- (void)webConnector:(WebConnector *)webConnector sendLearnedDataFailure:(ASIHTTPRequest *)request aboutEvent:(NSString *)eventURI userAction:(NSString *)userAction {
+    
+    // Display an internet connection error message
+    if ([userAction isEqualToString:@"V"] && self.eventViewController) {
+        
+        NSLog(@"EventsViewController failed to send 'view' learning to server for event with URI %@. We should be remembering this, and trying to send the learning again later! This is crucial!", eventURI);
+        
+    }
+    
+    if (!self.webConnector.connectionInProgress) {
+        [self hideWebLoadingViews];
+    }
+    
+}
+
+- (void)webConnector:(WebConnector *)webConnector getEventSuccess:(ASIHTTPRequest *)request forEventURI:(NSString *)eventURI {
+    
+    NSString * responseString = [request responseString];
+    NSError *error = nil;
+    NSDictionary * eventDictionary = [responseString yajl_JSONWithOptions:YAJLParserOptionsAllowComments error:&error];
+    
+    Event * event = [self.events objectAtIndex:self.eventsTableViewIndexPathOfSelectedRowPreserved.row];
+    
+    [self.coreDataModel updateEvent:event usingEventDictionary:eventDictionary featuredOverride:nil fromSearchOverride:nil];
+    
+    self.eventViewController.event = event;
+    [self.navigationController pushViewController:self.eventViewController animated:YES];
+    self.deletedFromEventCard = NO;
+    
+    if (!self.webConnector.connectionInProgress) {
+        [self hideWebLoadingViews];
+    }
+    
+}
+
+- (void)webConnector:(WebConnector *)webConnector getEventFailure:(ASIHTTPRequest *)request forEventURI:(NSString *)eventURI {
+    
+    [self.connectionErrorStandardAlertView show];
+    if (!self.webConnector.connectionInProgress) {
+        [self hideWebLoadingViews];
+    }
     
 }
 
@@ -706,9 +1073,12 @@ double const VVC_ANIMATION_DURATION = 0.25;
     }   
 }
 
+- (void)viewController:(UIViewController *)viewController didFinishByRequestingJumpBackToViewController:(UIViewController *)viewControllerToJumpTo {
+        [self.navigationController popToViewController:viewControllerToJumpTo animated:YES]; // No safety checks... Trusting.
+}
+
 - (void) eventViewController:(EventViewController *)eventViewController didFinishByRequestingEventDeletionForEventURI:(NSString *)eventURI {
-    NSLog(@"ERROR/WARNING in VenueViewController - not sure how to handle an EventViewController requesting deletion of an event. Currently, we are simply not deleting it!");
-    //    [self.coreDataModel deleteRegularEventForURI:eventURI];
+    self.deletedFromEventCard = YES;
     [self.navigationController popViewControllerAnimated:YES];
 }
 
@@ -730,21 +1100,38 @@ double const VVC_ANIMATION_DURATION = 0.25;
     [self updateDescriptionContainerSizeToFitLabelAfterExpansion:YES animated:YES];
 }
 
-//- (UIView *)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section {
-//    UIView * fooView = [[UIView alloc] init];
-//    UIView * fooSubview = [[UIView alloc] initWithFrame:CGRectMake(0, 1, fooView.bounds.size.width, self.nameBar.frame.size.height + self.infoContainer.frame.size.height + self.eventsHeaderContainer.frame.size.height - 1)];
-//    fooSubview.autoresizingMask = UIViewAutoresizingFlexibleWidth;
-//    fooSubview.backgroundColor = [[UIColor redColor] colorWithAlphaComponent:0.33];
-//    [fooView addSubview:fooSubview];
-//    UIButton * fooButton = [UIButton buttonWithType:UIButtonTypeRoundedRect];
-//    fooButton.frame = CGRectMake(5, 5, 310, 30);
-//    [fooSubview addSubview:fooButton];
-//    [fooSubview release];
-//    return [fooView autorelease];
-//}
-//
-//- (CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section {
-//    return 30;
-//}
+- (BOOL)isGettingWebData {
+    return self.isGettingEvents || self.isGettingImage;
+}
+
+- (BOOL)isEventsTableVisible {
+    return self.eventsTableView.frame.origin.y > CGRectGetMaxY(self.eventsHeaderView.frame) && self.eventsTableView.frame.size.height > 0;
+}
+
+-(void) showWebLoadingViews  {
+    // ACTIVITY VIEWS
+    [self.view bringSubviewToFront:self.webActivityView];
+    [self.webActivityView showAnimated:YES];
+    [self updateNetworkActivityIndicator];
+    // USER INTERACTION
+    self.scrollView.userInteractionEnabled = NO;
+    self.followButton.userInteractionEnabled = NO;
+}
+
+-(void)hideWebLoadingViews  {
+    // ACTIVITY VIEWS
+    [self.webActivityView hideAnimated:NO];
+    [self updateNetworkActivityIndicator];
+    // USER INTERACTION
+    self.scrollView.userInteractionEnabled = YES;
+    self.followButton.userInteractionEnabled = YES;
+}
+
+- (UIAlertView *)connectionErrorStandardAlertView {
+    if (connectionErrorStandardAlertView_ == nil) {
+        connectionErrorStandardAlertView_ = [[UIAlertView alloc] initWithTitle:@"Connection Error" message:WEB_CONNECTION_ERROR_MESSAGE_STANDARD delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil];
+    }
+    return connectionErrorStandardAlertView_;
+}
 
 @end

@@ -13,6 +13,7 @@
 
 @protocol StackViewControllerDelegate <NSObject>
 @required
+- (void) viewController:(UIViewController *)viewController didFinishByRequestingJumpBackToViewController:(UIViewController *)viewControllerToJumpTo;
 - (void) viewController:(UIViewController *)viewController didFinishByRequestingStackCollapse:(BOOL)didRequestStackCollapse;
 - (void) eventViewController:(EventViewController *)eventViewController didFinishByRequestingEventDeletionForEventURI:(NSString *)eventURI;
 @end

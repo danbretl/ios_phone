@@ -16,17 +16,32 @@
 #import "SDWebImageManager.h"
 #import "EventsWebQuery.h"
 #import "CoreDataModel.h"
+#import "UpcomingEventsHeaderView.h"
+#import "WebConnector.h"
+#import "EventViewController.h"
 
-@interface VenueViewController : UIViewController <UITableViewDelegate, UITableViewDataSource, StackViewControllerDelegate, MapViewControllerDelegate, MKMapViewDelegate, SDWebImageManagerDelegate, UIGestureRecognizerDelegate> {
+@interface VenueViewController : UIViewController <UITableViewDelegate, UITableViewDataSource, StackViewControllerDelegate, MapViewControllerDelegate, MKMapViewDelegate, SDWebImageManagerDelegate, UIGestureRecognizerDelegate, WebConnectorDelegate> {
     
     // Delegate
     id<StackViewControllerDelegate> delegate;
     
     // Models
     Place * venue_;
+    EventViewController * eventViewControllerSourceOfReferral_;
     WebDataTranslator * webDataTranslator_;
     EventsWebQuery * eventsWebQuery_;
+    NSMutableArray * events_;
     CoreDataModel * coreDataModel_;
+    WebConnector * webConnector_;
+    BOOL isGettingEvents_;
+    BOOL isGettingImage_;
+    UpcomingEventsHeaderViewMessageType appropriateMessageType_;
+    UserLocation * userLocation_;
+    BOOL deletedFromEventCard_;
+    
+    // View models
+    NSIndexPath * eventsTableViewIndexPathOfSelectedRowPreserved_;
+    CGPoint scrollViewContentOffsetPreserved_;
     
     // Views
     UIView * navBarContainer_;
@@ -34,7 +49,9 @@
     UIButton * logoButton_;
     UIButton * followButton_;
     
+    UIScrollView * scrollView_;
     UIView * mainContainer_;
+    NSArray * mainContainerChainOfDependentlyPositionedViews_;
     ElasticUILabel * nameBar_;
     UIImageView * imageView_;
     CGFloat imageViewNormalHeight;
@@ -51,12 +68,16 @@
     UIButton * descriptionReadMoreButton_;
     GradientView * descriptionReadMoreCoverView_;
     
-    UIView * eventsHeaderContainer_;
-    UILabel * eventsHeaderLabel_;
+    UpcomingEventsHeaderView * eventsHeaderView_;
+    UIView * eventsHeaderViewShadow_;
     UITableView * eventsTableView_;
+    
+    WebActivityView * webActivityView_;
+    UIAlertView * connectionErrorStandardAlertView_;
         
     // View Controllers
     MapViewController * mapViewController_;
+    EventViewController * eventViewController_;
     
     // Gesture Recognizers
     UISwipeGestureRecognizer * swipeToGoBack_;
@@ -67,5 +88,7 @@
 
 @property (retain, nonatomic) Place * venue;
 @property (nonatomic, retain) CoreDataModel * coreDataModel;
+@property (nonatomic, retain) UserLocation * userLocation;
+@property (assign, nonatomic) EventViewController * eventViewControllerSourceOfReferral;
 
 @end

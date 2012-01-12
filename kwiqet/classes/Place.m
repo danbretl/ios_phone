@@ -27,6 +27,7 @@
 @dynamic imageLocation;
 @dynamic occurrences;
 @dynamic queries;
+@dynamic eventSummaries;
 
 - (BOOL)coordinateAvailable {
     return (self.latitude && self.longitude);

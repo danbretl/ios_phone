@@ -1699,7 +1699,7 @@ double const EVENTS_LIST_MODE_ANIMATION_DURATION = 0.25;
                 eventToUpdate = (Event *)[NSEntityDescription insertNewObjectForEntityForName:@"Event" inManagedObjectContext:self.coreDataModel.managedObjectContext];
             }
 
-            [self.coreDataModel updateEvent:eventToUpdate usingEventSummaryDictionary:eventSummaryDictionary featuredOverride:nil fromSearchOverride:nil];
+            [self.coreDataModel updateEvent:eventToUpdate usingEventSummaryDictionary:eventSummaryDictionary relativeToVenue:nil featuredOverride:nil fromSearchOverride:nil];
             
             EventResult * newEventResult = [NSEntityDescription insertNewObjectForEntityForName:@"EventResult" inManagedObjectContext:self.coreDataModel.managedObjectContext];
             newEventResult.order = [NSNumber numberWithInt:order];
@@ -1820,7 +1820,7 @@ double const EVENTS_LIST_MODE_ANIMATION_DURATION = 0.25;
                 eventToUpdate = (Event *)[NSEntityDescription insertNewObjectForEntityForName:@"Event" inManagedObjectContext:self.coreDataModel.managedObjectContext];
             }
             
-            [self.coreDataModel updateEvent:eventToUpdate usingEventSummaryDictionary:eventSummaryDictionary featuredOverride:nil fromSearchOverride:[NSNumber numberWithBool:YES]];
+            [self.coreDataModel updateEvent:eventToUpdate usingEventSummaryDictionary:eventSummaryDictionary relativeToVenue:nil featuredOverride:nil fromSearchOverride:[NSNumber numberWithBool:YES]];
             
             EventResult * newEventResult = [NSEntityDescription insertNewObjectForEntityForName:@"EventResult" inManagedObjectContext:self.coreDataModel.managedObjectContext];
             newEventResult.order = [NSNumber numberWithInt:order];
@@ -2666,19 +2666,19 @@ double const EVENTS_LIST_MODE_ANIMATION_DURATION = 0.25;
     
     Event * event = (Event *)[self.eventsForCurrentSource objectAtIndex:indexPath.row];
     
-    NSString * title = event.summary.title;
+    NSString * title = event.summaryGeneral.title;
     Category * concreteParentCategory = event.concreteParentCategory;
-    NSString * location = event.summary.placeTitle;
-    NSString * address = event.summary.placeAddressEtc;
-    NSDate * startDateEarliest = event.summary.startDateEarliest;
-    NSDate * startDateLatest = event.summary.startDateLatest;
-    NSNumber * startDateCount = event.summary.startDateCount;
-    NSDate * startTimeEarliest = event.summary.startTimeEarliest;
-    NSDate * startTimeLatest = event.summary.startTimeLatest;
-    NSNumber * startTimeCount = event.summary.startTimeCount;
-    NSNumber * placeCount = event.summary.placeCount;
-    NSNumber * priceMin = event.summary.priceMinimum;
-    NSNumber * priceMax = event.summary.priceMaximum;
+    NSString * location = event.summaryGeneral.placeTitle;
+    NSString * address = event.summaryGeneral.placeAddressEtc;
+    NSDate * startDateEarliest = event.summaryGeneral.startDateEarliest;
+    NSDate * startDateLatest = event.summaryGeneral.startDateLatest;
+    NSNumber * startDateCount = event.summaryGeneral.startDateCount;
+    NSDate * startTimeEarliest = event.summaryGeneral.startTimeEarliest;
+    NSDate * startTimeLatest = event.summaryGeneral.startTimeLatest;
+    NSNumber * startTimeCount = event.summaryGeneral.startTimeCount;
+    NSNumber * placeCount = event.summaryGeneral.placeCount;
+    NSNumber * priceMin = event.summaryGeneral.priceMinimum;
+    NSNumber * priceMax = event.summaryGeneral.priceMaximum;
     
     if (debuggingFramesAndFonts) {
         title = @"Hal Willner's Freedom Rides";        
@@ -2875,6 +2875,14 @@ double const EVENTS_LIST_MODE_ANIMATION_DURATION = 0.25;
     } else {
         [self.navigationController popViewControllerAnimated:YES];
     }   
+}
+
+- (void)viewController:(UIViewController *)viewController didFinishByRequestingJumpBackToViewController:(UIViewController *)viewControllerToJumpTo {
+//    if ([self.navigationController.viewControllers containsObject:viewControllerToJumpTo]) {
+//        [self.navigationController popToViewController:viewControllerToJumpTo animated:YES]; // Doesn't really make sense with our current implementation, but, doesn't hurt. Might make things more sophisticated in the future so that this would make sense?
+//    } else {
+        [self.navigationController popToRootViewControllerAnimated:YES];
+//    }
 }
 
 - (BOOL)tableView:(UITableView *)tableView canEditRowAtIndexPath:(NSIndexPath *)indexPath {

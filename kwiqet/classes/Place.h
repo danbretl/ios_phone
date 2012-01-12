@@ -10,7 +10,7 @@
 #import <CoreData/CoreData.h>
 #import <CoreLocation/CoreLocation.h>
 
-@class Occurrence, EventsWebQuery;
+@class Occurrence, EventsWebQuery, EventSummary;
 
 @interface Place : NSManagedObject {
 @private
@@ -31,6 +31,7 @@
 @property (nonatomic, retain) NSString * imageLocation;
 @property (nonatomic, retain) NSSet * occurrences;
 @property (nonatomic, retain) NSSet * queries;
+@property (nonatomic, retain) NSSet *eventSummaries;
 @end
 
 @interface Place (Convenience)
@@ -47,4 +48,8 @@
 - (void)removeQueriesObject:(EventsWebQuery *)value;
 - (void)addQueries:(NSSet *)values;
 - (void)removeQueries:(NSSet *)values;
+- (void)addEventSummariesObject:(EventSummary *)value;
+- (void)removeEventSummariesObject:(EventSummary *)value;
+- (void)addEventSummaries:(NSSet *)values;
+- (void)removeEventSummaries:(NSSet *)values;
 @end

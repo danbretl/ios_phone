@@ -202,6 +202,7 @@
 		324759B013BBB2B1002A9199 /* event_card@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 324759AE13BBB2B1002A9199 /* event_card@2x.png */; };
 		324759B413BBF780002A9199 /* event_img_placeholder.png in Resources */ = {isa = PBXBuildFile; fileRef = 324759B213BBF77F002A9199 /* event_img_placeholder.png */; };
 		324759B513BBF780002A9199 /* event_img_placeholder@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 324759B313BBF77F002A9199 /* event_img_placeholder@2x.png */; };
+		3247BDC814BDF5DD0027A821 /* UpcomingEventsHeaderView.m in Sources */ = {isa = PBXBuildFile; fileRef = 3247BDC714BDF5DD0027A821 /* UpcomingEventsHeaderView.m */; };
 		3249FCAF141149E3000A0575 /* ptn_venue.png in Resources */ = {isa = PBXBuildFile; fileRef = 3249FCAD141149E3000A0575 /* ptn_venue.png */; };
 		3249FCB0141149E3000A0575 /* ptn_venue@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 3249FCAE141149E3000A0575 /* ptn_venue@2x.png */; };
 		3249FCB5141149EC000A0575 /* btn_date_highlight.png in Resources */ = {isa = PBXBuildFile; fileRef = 3249FCB1141149EC000A0575 /* btn_date_highlight.png */; };
@@ -815,6 +816,9 @@
 		324759B113BBD54A002A9199 /* kwiqet 004.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "kwiqet 004.xcdatamodel"; sourceTree = "<group>"; };
 		324759B213BBF77F002A9199 /* event_img_placeholder.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = event_img_placeholder.png; sourceTree = "<group>"; };
 		324759B313BBF77F002A9199 /* event_img_placeholder@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "event_img_placeholder@2x.png"; sourceTree = "<group>"; };
+		3247BDC614BDF5DD0027A821 /* UpcomingEventsHeaderView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UpcomingEventsHeaderView.h; sourceTree = "<group>"; };
+		3247BDC714BDF5DD0027A821 /* UpcomingEventsHeaderView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UpcomingEventsHeaderView.m; sourceTree = "<group>"; };
+		3247BDCA14BE66690027A821 /* kwiqet 017.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "kwiqet 017.xcdatamodel"; sourceTree = "<group>"; };
 		3249FCAD141149E3000A0575 /* ptn_venue.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = ptn_venue.png; sourceTree = "<group>"; };
 		3249FCAE141149E3000A0575 /* ptn_venue@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "ptn_venue@2x.png"; sourceTree = "<group>"; };
 		3249FCB1141149EC000A0575 /* btn_date_highlight.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = btn_date_highlight.png; sourceTree = "<group>"; };
@@ -2087,6 +2091,8 @@
 				32A63AC3149932920013C2E8 /* VenueViewController.h */,
 				32A63AC4149932920013C2E8 /* VenueViewController.m */,
 				32A63AC5149932920013C2E8 /* VenueViewController.xib */,
+				3247BDC614BDF5DD0027A821 /* UpcomingEventsHeaderView.h */,
+				3247BDC714BDF5DD0027A821 /* UpcomingEventsHeaderView.m */,
 			);
 			name = VenueViewController;
 			sourceTree = "<group>";
@@ -3123,6 +3129,7 @@
 				324AC0651492BFC700128C87 /* FBRequest+Cancel.m in Sources */,
 				324AC0681492C00700128C87 /* Facebook+Cancel.m in Sources */,
 				32A63AC6149932920013C2E8 /* VenueViewController.m in Sources */,
+				3247BDC814BDF5DD0027A821 /* UpcomingEventsHeaderView.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3318,6 +3325,7 @@
 		32FD364D13AFF3B6007549B6 /* kwiqet.xcdatamodeld */ = {
 			isa = XCVersionGroup;
 			children = (
+				3247BDCA14BE66690027A821 /* kwiqet 017.xcdatamodel */,
 				324A459C14A3A9050021B80D /* kwiqet 016.xcdatamodel */,
 				328CD6CF1475C23600F9F5B3 /* kwiqet 014.xcdatamodel */,
 				324AC06114929E8F00128C87 /* kwiqet 015.xcdatamodel */,
@@ -3335,7 +3343,7 @@
 				326E20151468798C0056623C /* kwiqet 011.xcdatamodel */,
 				32FD364E13AFF3B6007549B6 /* kwiqet 001.xcdatamodel */,
 			);
-			currentVersion = 324A459C14A3A9050021B80D /* kwiqet 016.xcdatamodel */;
+			currentVersion = 3247BDCA14BE66690027A821 /* kwiqet 017.xcdatamodel */;
 			path = kwiqet.xcdatamodeld;
 			sourceTree = "<group>";
 			versionGroupType = wrapper.xcdatamodel;

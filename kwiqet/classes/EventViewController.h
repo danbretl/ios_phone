@@ -116,6 +116,7 @@ typedef enum {
 //    CLLocation * userLocation_; // Currently, this variable is just passed on from the events list. This will obviously need to change, so that the user's location can be changed / updated while the event card is showing.
 //    NSString * userLocationString_; // Currently, this variable is just passed on from the events list. This will obviously need to change, so that the user's location can be changed / updated while the event card is showing.
     Event * event;
+    VenueViewController * venueViewControllerSourceOfReferral_;
     Occurrence * eventOccurrenceCurrent;
     Occurrence * eventOccurrenceCurrentTemp;
     int eventOccurrenceCurrentDateIndex;
@@ -149,6 +150,7 @@ typedef enum {
 //- (void) setUserLocation:(CLLocation *)userLocation withUserLocationString:(NSString *)userLocationString;
 @property (nonatomic, retain) UserLocation * userLocation;
 @property (nonatomic, retain) Event * event;
+@property (nonatomic, assign) VenueViewController * venueViewControllerSourceOfReferral;
 @property (assign) id<StackViewControllerDelegate> delegate;
 @property (nonatomic, retain) CoreDataModel * coreDataModel;
 @property (nonatomic, readonly) FacebookManager * facebookManager;

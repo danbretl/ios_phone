@@ -188,6 +188,7 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
 
 @synthesize userLocation=userLocation_;//, userLocationString=userLocationString_;
 @synthesize event;
+@synthesize venueViewControllerSourceOfReferral=venueViewControllerSourceOfReferral_;
 @synthesize eventOccurrenceCurrent;
 @synthesize eventOccurrenceCurrentTemp;
 @synthesize eventOccurrenceCurrentDateIndex, eventOccurrenceCurrentVenueIndex, eventOccurrenceCurrentTimeIndex;
@@ -1150,11 +1151,19 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
 
 - (void)tappedVenueName:(UITapGestureRecognizer *)tapGesture {
 //    NSLog(@"tappedVenueName");
-    VenueViewController * venueViewController = [[VenueViewController alloc] initWithNibName:@"VenueViewController" bundle:[NSBundle mainBundle]];
-    venueViewController.delegate = self;
-    venueViewController.venue = self.eventOccurrenceCurrent.place;
-    [self.navigationController pushViewController:venueViewController animated:YES];
-    [venueViewController release];
+    if (self.venueViewControllerSourceOfReferral != nil && 
+        self.venueViewControllerSourceOfReferral.venue == self.eventOccurrenceCurrent.place) {
+        [self.delegate viewController:self didFinishByRequestingJumpBackToViewController:self.venueViewControllerSourceOfReferral];
+    } else {
+        VenueViewController * venueViewController = [[VenueViewController alloc] initWithNibName:@"VenueViewController" bundle:[NSBundle mainBundle]];
+        venueViewController.coreDataModel = self.coreDataModel;
+        venueViewController.delegate = self;
+        venueViewController.venue = self.eventOccurrenceCurrent.place;
+        venueViewController.userLocation = self.userLocation;
+        venueViewController.eventViewControllerSourceOfReferral = self;
+        [self.navigationController pushViewController:venueViewController animated:YES];
+        [venueViewController release];
+    }
 }
 
 - (void)viewController:(UIViewController *)viewController didFinishByRequestingStackCollapse:(BOOL)didRequestStackCollapse {
@@ -1163,6 +1172,10 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
     } else {
         [self.navigationController popViewControllerAnimated:YES];
     }   
+}
+
+- (void)viewController:(UIViewController *)viewController didFinishByRequestingJumpBackToViewController:(UIViewController *)viewControllerToJumpTo {
+    [self.navigationController popToViewController:viewControllerToJumpTo animated:YES]; // No safety checks... Trusting.
 }
 
 - (void) eventViewController:(EventViewController *)eventViewController didFinishByRequestingEventDeletionForEventURI:(NSString *)eventURI {

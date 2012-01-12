@@ -387,7 +387,7 @@
 // REGULAR EVENTS //
 ////////////////////
 
-- (void) updateEvent:(Event *)event usingEventSummaryDictionary:(NSDictionary *)eventSummaryDictionary featuredOverride:(NSNumber *)featuredOverride fromSearchOverride:(NSNumber *)fromSearchOverride {
+- (void) updateEvent:(Event *)event usingEventSummaryDictionary:(NSDictionary *)eventSummaryDictionary relativeToVenue:(Place *)venue featuredOverride:(NSNumber *)featuredOverride fromSearchOverride:(NSNumber *)fromSearchOverride {
     
     // Basic info
     NSString * uri = [WebUtil stringOrNil:[eventSummaryDictionary valueForKey:@"event"]];
@@ -421,28 +421,41 @@
 
     // Set the URI
     event.uri = uri ? uri : event.uri;
+    // Set the title
+    event.title = title;
     // Set the category
     if (concreteParentCategoryURI) {
         Category * concreteParentCategory = [self getCategoryWithURI:concreteParentCategoryURI];
         event.concreteParentCategory = concreteParentCategory;
     }
     // Create the summary if necessary
-    if (event.summary == nil) {
-        event.summary = [NSEntityDescription insertNewObjectForEntityForName:@"EventSummary" inManagedObjectContext:self.managedObjectContext];
+    EventSummary * eventSummary = nil;
+    if (venue == nil) {
+        if (event.summaryGeneral == nil) {
+            event.summaryGeneral = [NSEntityDescription insertNewObjectForEntityForName:@"EventSummary" inManagedObjectContext:self.managedObjectContext];
+        }
+        eventSummary = event.summaryGeneral;
+    } else {
+        eventSummary = [event eventSummaryRelativeToVenue:venue];
+        if (eventSummary == nil) {
+            eventSummary = [NSEntityDescription insertNewObjectForEntityForName:@"EventSummary" inManagedObjectContext:self.managedObjectContext];
+            eventSummary.venueContext = venue;
+            [event addSummariesRelativeToVenueObject:eventSummary];
+        }
     }
     // Set summary info
-    event.summary.title = title;
-    event.summary.placeTitle = placeTitle;
-    event.summary.placeAddressEtc = placeAddressEtc;
-    event.summary.placeCount = placeCount;
-    event.summary.priceMinimum = priceMinimum;
-    event.summary.priceMaximum = priceMaximum;
-    event.summary.startDateCount = startDateCount;
-    event.summary.startDateEarliest = startDateEarliest;
-    event.summary.startDateLatest = startDateLatest;
-    event.summary.startTimeCount = startTimeCount;
-    event.summary.startTimeEarliest = startTimeEarliest;
-    event.summary.startTimeLatest = startTimeLatest;
+    eventSummary.title = title;
+    eventSummary.placeTitle = placeTitle;
+    eventSummary.placeAddressEtc = placeAddressEtc;
+    eventSummary.placeCount = placeCount;
+    eventSummary.priceMinimum = priceMinimum;
+    eventSummary.priceMaximum = priceMaximum;
+    eventSummary.startDateCount = startDateCount;
+    eventSummary.startDateEarliest = startDateEarliest;
+    eventSummary.startDateLatest = startDateLatest;
+    eventSummary.startTimeCount = startTimeCount;
+    eventSummary.startTimeEarliest = startTimeEarliest;
+    eventSummary.startTimeLatest = startTimeLatest;
     // Internal stuff
     if (featuredOverride)   { event.featured = featuredOverride; }
     if (fromSearchOverride) { event.fromSearch = fromSearchOverride; }

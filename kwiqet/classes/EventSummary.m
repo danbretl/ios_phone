@@ -23,6 +23,8 @@
 @dynamic placeTitle;
 @dynamic startTimeCount;
 @dynamic priceMaximum;
-@dynamic event;
+@dynamic eventGeneral;
+@dynamic eventRelativeToVenue;
+@dynamic venueContext;
 
 @end

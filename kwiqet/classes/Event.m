@@ -26,11 +26,13 @@
 @dynamic imageLocation;
 @dynamic uri;
 @dynamic title;
-@dynamic summary;
+@dynamic summaryGeneral;
+@dynamic summaryVenue;
 @dynamic concreteParentCategory;
 @dynamic occurrences;
 @dynamic concreteCategoryBreadcrumbs;
 @dynamic queryResultInclusions;
+@dynamic summariesRelativeToVenue;
 
 - (NSArray *) occurrencesChronological {
     return [self.occurrences sortedArrayUsingDescriptors:
@@ -108,6 +110,10 @@
 - (NSSet *) occurrencesOnDate:(NSDate *)dateToMatch atPlace:(Place *)placeToMatch notAtTime:(NSDate *)timeNotToMatch {
     return [self occurrencesFilteredWithPredicate:
             [NSPredicate predicateWithFormat:@"startDate == %@ && place == %@ && startTime != %@", dateToMatch, placeToMatch, timeNotToMatch]];
+}
+
+- (EventSummary *)eventSummaryRelativeToVenue:(Place *)venue {
+    return [[self.summariesRelativeToVenue filteredSetUsingPredicate:[NSPredicate predicateWithFormat:@"venueContext == %@", venue]] anyObject]; // Shouldn't matter that we're returning anyObject, as there should only be (at most) one result.
 }
 
 @end
