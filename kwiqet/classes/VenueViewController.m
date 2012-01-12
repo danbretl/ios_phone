@@ -33,7 +33,8 @@ NSInteger const VVC_MAXIMUM_NUMBER_OF_ROWS_FOR_UPCOMING_EVENTS = 5;
 @property (nonatomic) BOOL deletedFromEventCard;
 
 @property (retain, nonatomic) NSIndexPath * eventsTableViewIndexPathOfSelectedRowPreserved;
-@property (nonatomic) CGPoint scrollViewContentOffsetPreserved;
+@property (nonatomic) CGFloat scrollViewContentOffsetHeightLeftUntilEndPreserved;
+@property (nonatomic) BOOL scrollViewContentOffsetInfoIsPreserved;
 
 @property (retain, nonatomic) IBOutlet UIView * navBarContainer;
 @property (retain, nonatomic) IBOutlet UIButton * backButton;
@@ -123,7 +124,8 @@ NSInteger const VVC_MAXIMUM_NUMBER_OF_ROWS_FOR_UPCOMING_EVENTS = 5;
 @synthesize coreDataModel=coreDataModel_;
 @synthesize venue=venue_;
 @synthesize eventsTableViewIndexPathOfSelectedRowPreserved=eventsTableViewIndexPathOfSelectedRowPreserved_;
-@synthesize scrollViewContentOffsetPreserved=scrollViewContentOffsetPreserved_;
+@synthesize scrollViewContentOffsetHeightLeftUntilEndPreserved=scrollViewContentOffsetHeightLeftUntilEndPreserved_;
+@synthesize scrollViewContentOffsetInfoIsPreserved=scrollViewContentOffsetInfoIsPreserved_;
 @synthesize navBarContainer=navBarContainer_;
 @synthesize backButton=backButton_;
 @synthesize logoButton=logoButton_;
@@ -243,14 +245,18 @@ NSInteger const VVC_MAXIMUM_NUMBER_OF_ROWS_FOR_UPCOMING_EVENTS = 5;
 
 - (void)viewWillAppear:(BOOL)animated {
     [super viewWillAppear:animated];
-    BOOL shouldTrustContentOffset = self.scrollViewContentOffsetPreserved.y + self.scrollView.frame.size.height <= self.scrollView.contentSize.height;
     if (self.eventsTableViewIndexPathOfSelectedRowPreserved != nil) {
-        [self.eventsTableView selectRowAtIndexPath:self.eventsTableViewIndexPathOfSelectedRowPreserved animated:NO scrollPosition:shouldTrustContentOffset ? UITableViewScrollPositionNone : UITableViewScrollPositionMiddle];
+        [self.eventsTableView selectRowAtIndexPath:self.eventsTableViewIndexPathOfSelectedRowPreserved animated:NO scrollPosition:UITableViewScrollPositionNone];
     }
-    if (shouldTrustContentOffset) {
-        [self.scrollView setContentOffset:self.scrollViewContentOffsetPreserved animated:NO];
+    if (self.scrollViewContentOffsetInfoIsPreserved) {
+        CGFloat contentOffsetY = self.scrollView.contentSize.height - self.scrollView.frame.size.height - self.scrollViewContentOffsetHeightLeftUntilEndPreserved;
+        contentOffsetY = MAX(contentOffsetY, 0);
+        [self.scrollView setContentOffset:CGPointMake(0, contentOffsetY)];
     }
-    self.scrollViewContentOffsetPreserved = CGPointZero;
+    self.scrollViewContentOffsetInfoIsPreserved = NO;
+//    if (self.venue && self.imageView.image == nil && !self.isGettingImage) {
+//        [self updateImageFromVenue:self.venue animated:YES];
+//    }
 }
 
 - (void) viewDidAppear:(BOOL)animated {
@@ -269,7 +275,9 @@ NSInteger const VVC_MAXIMUM_NUMBER_OF_ROWS_FOR_UPCOMING_EVENTS = 5;
 
 - (void)viewWillDisappear:(BOOL)animated {
     [super viewWillDisappear:animated];
-    self.scrollViewContentOffsetPreserved = self.scrollView.contentOffset;
+    CGFloat scrollViewContentOffsetHeightLeftUntilEnd = self.scrollView.contentSize.height - (self.scrollView.contentOffset.y + self.scrollView.frame.size.height);
+    self.scrollViewContentOffsetHeightLeftUntilEndPreserved = scrollViewContentOffsetHeightLeftUntilEnd;
+    self.scrollViewContentOffsetInfoIsPreserved = YES;
     [[SDWebImageManager sharedManager] cancelForDelegate:self];
 }
 

@@ -41,7 +41,8 @@
     
     // View models
     NSIndexPath * eventsTableViewIndexPathOfSelectedRowPreserved_;
-    CGPoint scrollViewContentOffsetPreserved_;
+    CGFloat scrollViewContentOffsetHeightLeftUntilEndPreserved_;
+    BOOL scrollViewContentOffsetInfoIsPreserved_;
     
     // Views
     UIView * navBarContainer_;
