@@ -1582,6 +1582,15 @@
 			name = Square;
 			sourceTree = "<group>";
 		};
+		3239DA4614BF9F9100472DC1 /* FeaturedEventViewController */ = {
+			isa = PBXGroup;
+			children = (
+				32FD384213AFF52F007549B6 /* FeaturedEventViewController.h */,
+				32FD384313AFF52F007549B6 /* FeaturedEventViewController.m */,
+			);
+			name = FeaturedEventViewController;
+			sourceTree = "<group>";
+		};
 		32484EF9144CD392006A4366 /* location */ = {
 			isa = PBXGroup;
 			children = (
@@ -2136,8 +2145,7 @@
 				32A63AC1149932660013C2E8 /* VenueViewController */,
 				325E27F5140EBF0600B5AEA9 /* EventViewController */,
 				32D13D6413DF4A5E00EBB192 /* EventsViewController */,
-				32FD384213AFF52F007549B6 /* FeaturedEventViewController.h */,
-				32FD384313AFF52F007549B6 /* FeaturedEventViewController.m */,
+				3239DA4614BF9F9100472DC1 /* FeaturedEventViewController */,
 				32FD384A13AFF52F007549B6 /* MapViewController.h */,
 				32FD384B13AFF52F007549B6 /* MapViewController.m */,
 				32FD384C13AFF52F007549B6 /* MapViewController.xib */,
