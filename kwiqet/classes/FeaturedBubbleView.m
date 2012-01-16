@@ -69,7 +69,7 @@
         self.priceLabel.backgroundColor = [UIColor clearColor];
         [self.infoContainer addSubview:self.priceLabel];
         // Color bar
-        colorBarLayer_ = [CALayer layer];
+        self.colorBarLayer = [CALayer layer];
         [self.infoContainer.layer addSublayer:self.colorBarLayer];
         
         self.dateTimeLabel.hidden = YES;
