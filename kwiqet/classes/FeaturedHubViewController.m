@@ -108,6 +108,8 @@
     self.tableView.allowsSelection = NO;
     self.tableView.directionalLockEnabled = YES;
     self.tableView.alwaysBounceVertical = YES;
+    self.tableView.showsVerticalScrollIndicator = NO;
+    self.tableView.showsHorizontalScrollIndicator = NO;
     [self.view addSubview:self.tableView];
     [self.tableView reloadData];
     
