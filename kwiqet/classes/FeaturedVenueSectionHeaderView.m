@@ -62,6 +62,20 @@
         self.highlightColor = [UIColor whiteColor];
         self.selectedHighlightIndex = 0;
         
+//        CGRect shadowFrame = CGRectMake(0, frame.size.height / 2.0, frame.size.width, frame.size.height / 2.0);
+//        CALayer * shadowLayer = [CALayer layer];
+//        shadowLayer.frame = shadowFrame;
+//        shadowLayer.shadowColor = [UIColor blackColor].CGColor;
+//        shadowLayer.shadowOffset = CGSizeMake(0, 0);
+//        shadowLayer.shadowOpacity = 0.5;
+//        shadowLayer.shadowPath = [UIBezierPath bezierPathWithRect:shadowLayer.bounds].CGPath;
+//        shadowLayer.shouldRasterize = YES;
+//        [self.layer insertSublayer:shadowLayer below:self.button.layer];
+//        CALayer * backgroundColorLayer = [CALayer layer];
+//        backgroundColorLayer.frame = self.bounds;
+//        backgroundColorLayer.backgroundColor = [UIColor colorWithWhite:140.0/255.0 alpha:1.0].CGColor;
+//        [self.layer insertSublayer:backgroundColorLayer above:shadowLayer];
+        
     }
     return self;
 }

@@ -11,6 +11,8 @@
 @interface FeaturedEventsSectionHeaderView : UIView {
     
     UILabel * titleLabel_;
+//    CALayer * shadowLayer_;
+//    CALayer * backgroundLayer_;
     
 }
 
