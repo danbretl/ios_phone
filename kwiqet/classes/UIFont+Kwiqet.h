@@ -11,7 +11,8 @@
 typedef enum {
     LightCondensed = 101,
     RegularCondensed = 102,
-    BoldCondensed = 103,
+    SemiBoldCondensed = 103,
+    BoldCondensed = 104,
     LightNormal = 201,
     RegularNormal = 202,
     BoldNormal = 203,

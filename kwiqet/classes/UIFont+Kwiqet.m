@@ -16,6 +16,9 @@
         case BoldCondensed:
             fontName = @"HelveticaLT-Condensed-Bold";
             break;
+        case SemiBoldCondensed:
+            fontName = @"HelveticaNeueLTCom-MdCn";
+            break;
         case RegularCondensed:
             fontName = @"HelveticaLT-Condensed";
             break;
@@ -37,6 +40,7 @@
             break;
     }
     return [UIFont fontWithName:fontName size:fontSize];
+    
 }
 
 + (void) logListOfAllAvailableFonts {

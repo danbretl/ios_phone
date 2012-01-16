@@ -46,7 +46,8 @@
 	<string>MainWindow</string>
 	<key>UIAppFonts</key>
 	<array>
-		<string>HelveticaNeueLTStd-MdCn.otf</string>
+		<string>HelveticaNeueLTStd-MdCn.ttf</string>
+		<string>HelveticaNeueLTCom-MdCn.ttf</string>
 		<string>HelveticaNeueLTStd-CnO.otf</string>
 		<string>HelveticaNeueLTStd-Cn.otf</string>
 		<string>HelveticaNeueLTStd-BdCn.otf</string>

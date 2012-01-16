@@ -14,6 +14,7 @@
 #import "ContactsSelectViewController.h"
 #import "LocalyticsSession.h"
 #import <BugSense-iOS/BugSenseCrashController.h>
+#import "UIFont+Kwiqet.h"
 
 @interface kwiqetAppDelegate()
 - (void) facebookAuthError:(NSNotification *)notification;
@@ -27,7 +28,7 @@
 @synthesize window;
 @synthesize splashView, splashScreenViewController;
 @synthesize tabBarController;
-@synthesize featuredEventViewController, eventsNavController, eventsViewController, settingsNavController, settingsViewController, accountPromptViewController;
+@synthesize featuredHubViewController, eventsNavController, eventsViewController, settingsNavController, settingsViewController, accountPromptViewController;
 
 #pragma mark -
 #pragma mark Application lifecycle
@@ -100,12 +101,12 @@
         self.tabBarController.delegate = self;
         
         // Featured Event View Controller
-        self.featuredEventViewController = [[[FeaturedEventViewController alloc] init] autorelease];
-        self.featuredEventViewController.coreDataModel = self.coreDataModel;
+        self.featuredHubViewController = [[[FeaturedHubViewController alloc] init] autorelease];
+        self.featuredHubViewController.coreDataModel = self.coreDataModel;
         UITabBarItem * featuredEventTabBarItem = [[[UITabBarItem alloc] initWithTabBarSystemItem:UITabBarSystemItemFeatured tag:0] autorelease];
-        self.featuredEventViewController.tabBarItem = featuredEventTabBarItem;
+        self.featuredHubViewController.tabBarItem = featuredEventTabBarItem;
 //        self.featuredEventViewController.facebookManager = self.facebookManager;
-        [self.featuredEventViewController suggestToGetNewFeaturedEvent];
+//        [self.featuredEventViewController suggestToGetNewFeaturedEvent];
         
         // Events List View Controller
         self.eventsViewController = [[[EventsViewController alloc] initWithNibName:@"EventsViewController" bundle:[NSBundle mainBundle]] autorelease];
@@ -129,7 +130,7 @@
         self.settingsNavController.navigationBarHidden = YES;
         
         // Setting it all up
-        self.tabBarController.viewControllers = [NSArray arrayWithObjects:self.featuredEventViewController, self.eventsNavController, self.settingsNavController, nil];
+        self.tabBarController.viewControllers = [NSArray arrayWithObjects:self.featuredHubViewController, self.eventsNavController, self.settingsNavController, nil];
         [self.window addSubview:tabBarController.view];
         [self.window bringSubviewToFront:self.splashScreenViewController.view]; // Make sure the splash screen stays in front
 
@@ -381,8 +382,8 @@
         [self.splashScreenViewController showConnectionErrorTextView:NO animated:NO];
     }
     
-    [self.featuredEventViewController tempSolutionResetAndEnableLetsGoButton];
-    [self.featuredEventViewController suggestToGetNewFeaturedEvent]; NSLog(@"FROM THE APP DELEGATE LINE 189");
+//    [self.featuredEventViewController tempSolutionResetAndEnableLetsGoButton];
+//    [self.featuredEventViewController suggestToGetNewFeaturedEvent]; NSLog(@"FROM THE APP DELEGATE LINE 189");
     [self.eventsViewController suggestToRedrawEventsList];
     
 //    self.tabBarController.selectedIndex = [DefaultsModel loadTabBarSelectedIndex]; // Duh - we get this for free with multitasking.
@@ -586,7 +587,7 @@
     [splashScreenViewController release];
 	
     [tabBarController release];
-    [featuredEventViewController release];
+    [featuredHubViewController release];
     [eventsNavController release];
     [eventsViewController release];
     [settingsNavController release];

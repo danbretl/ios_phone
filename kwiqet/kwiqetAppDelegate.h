@@ -8,7 +8,7 @@
 
 #import <UIKit/UIKit.h>
 #import "SplashScreenViewController.h"
-#import "FeaturedEventViewController.h"
+#import "FeaturedHubViewController.h"
 #import "EventsViewController.h"
 #import "SettingsViewController.h"
 #import "WebConnector.h"
@@ -21,7 +21,7 @@
     UIWindow * window;
     
 	UITabBarController * tabBarController;
-    FeaturedEventViewController * featuredEventViewController;
+    FeaturedHubViewController * featuredHubViewController;
     UINavigationController * eventsNavController;
     EventsViewController * eventsViewController;
     UINavigationController * settingsNavController;
@@ -43,9 +43,9 @@
     NSPersistentStoreCoordinator *persistentStoreCoordinator_;
 }
 
-@property (nonatomic, retain) IBOutlet UIWindow *window;
-@property (nonatomic, retain) IBOutlet UITabBarController *tabBarController;
-@property (retain) FeaturedEventViewController * featuredEventViewController;
+@property (nonatomic, retain) IBOutlet UIWindow * window;
+@property (nonatomic, retain) IBOutlet UITabBarController * tabBarController;
+@property (nonatomic, retain) FeaturedHubViewController * featuredHubViewController;
 @property (retain) UINavigationController * eventsNavController;
 @property (retain) EventsViewController * eventsViewController;
 @property (retain) UINavigationController * settingsNavController;
