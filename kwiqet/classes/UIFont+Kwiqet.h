@@ -16,6 +16,7 @@ typedef enum {
     LightNormal = 201,
     RegularNormal = 202,
     BoldNormal = 203,
+    ObliqueNormal = 204,
     HelveticaNeue = 9991
 } KwiqetFontType;
 

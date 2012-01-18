@@ -41,7 +41,7 @@
     if (self) {
         debugging = YES;
         if (debugging) {
-            self.featuredEvents = [NSArray arrayWithObjects:@"Event1", @"Event2", @"Event3", @"Event4", nil];
+            self.featuredEvents = [NSArray arrayWithObjects:@"Event1", @"Event2", @"Event3", @"Event4", @"Event5", nil];
             self.featuredVenues = [NSArray arrayWithObjects:@"Venue1", @"Venue2", @"Venue3", @"Venue4", @"Venue5", @"Venue6", nil];
             self.featuredEventsForVenues = [NSDictionary dictionaryWithObjectsAndKeys:
                                             [NSArray arrayWithObjects:@"Venue1-Event1", @"Venue1-Event2", @"Venue1-Event3", @"Venue1-Event4", @"Venue1-Event5", @"Venue1-Event6", nil], @"Venue1",
@@ -113,34 +113,6 @@
     [self.view addSubview:self.tableView];
     [self.tableView reloadData];
     
-    if (debugging) {
-                
-//        CGFloat vebTestWidth = 150;
-//        CGFloat vebTestHeight = 116;
-//        CGFloat vebHorizontalSpacingPerBubble = 5;
-//        CGFloat vebTestOriginY = self.view.frame.size.height - 10 - vebTestHeight;
-//        
-//        FeaturedBubbleView * bubbleTestVenueEventViewLeft = [[FeaturedVenueEventBubbleView alloc] initWithFrame:CGRectMake(vebHorizontalSpacingPerBubble, vebTestOriginY, vebTestWidth, vebTestHeight)];
-//        bubbleTestVenueEventViewLeft.imageView.image = [UIImage imageNamed:@"fakeFeaturedEvent_1.jpg"];
-//        bubbleTestVenueEventViewLeft.colorBarColor = [UIColor colorWithRed:.22 green:.68 blue:.77 alpha:1.0];
-//        bubbleTestVenueEventViewLeft.dateTimeLabel.text = @"Friday at 5:30 PM";
-//        bubbleTestVenueEventViewLeft.titleLabel.text = @"Coeur de Pirate Concert";
-//        bubbleTestVenueEventViewLeft.autoresizingMask = UIViewAutoresizingFlexibleTopMargin;
-//        [self.view addSubview:bubbleTestVenueEventViewLeft];
-//        
-//        FeaturedBubbleView * bubbleTestVenueEventViewRight = [[FeaturedVenueEventBubbleView alloc] initWithFrame:CGRectMake(CGRectGetMaxX(bubbleTestVenueEventViewLeft.frame) + 2 * vebHorizontalSpacingPerBubble, vebTestOriginY, vebTestWidth, vebTestHeight)];
-//        bubbleTestVenueEventViewRight.imageView.image = [UIImage imageNamed:@"fakeFeaturedEvent_3.jpg"];
-//        bubbleTestVenueEventViewRight.colorBarColor = [UIColor colorWithRed:.34 green:.73 blue:.28 alpha:1.0];
-//        bubbleTestVenueEventViewRight.dateTimeLabel.text = @"Jan 20 at 9:30 PM";
-//        bubbleTestVenueEventViewRight.titleLabel.text = @"Kanye West Concert";
-//        bubbleTestVenueEventViewRight.autoresizingMask = UIViewAutoresizingFlexibleTopMargin;
-//        [self.view addSubview:bubbleTestVenueEventViewRight];
-
-    } else {
-        
-        
-    }
-    
 }
 
 - (void)viewDidUnload
@@ -189,7 +161,11 @@
         } else {
             FeaturedVenueSectionHeaderView * featuredSectionView = [[[FeaturedVenueSectionHeaderView alloc] initWithFrame:helperStartingFrame] autorelease];
             if (debugging) {
-                featuredSectionView.venueNameString = [self.featuredVenues objectAtIndex:section - 1];
+                if (section - 1 == 0) {
+                    featuredSectionView.venueNameString = @"Sullivan Hall";
+                } else {
+                    featuredSectionView.venueNameString = [self.featuredVenues objectAtIndex:section - 1];                    
+                }
                 featuredSectionView.selectedHighlightIndex = [[self.tableViewVenueEventsGroupIndexes objectForKey:[NSNumber numberWithInt:section]] intValue];
                 featuredSectionView.button.tag = section; // Kind of a hack. But an acceptable one, I think.
                 [featuredSectionView.button addTarget:self action:@selector(venueButtonTouched:) forControlEvents:UIControlEventTouchUpInside];
@@ -259,35 +235,72 @@
                 cell = [[[FeaturedEventCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:FeaturedEventCellID] autorelease];
             }
             
-            if (indexPath.row % 4 == 0) {
-                cell.bubbleView.imageView.image = [UIImage imageNamed:@"fakeFeaturedEvent_1.jpg"];
+            if (indexPath.row == 0) {
+                cell.bubbleView.imageView.image = [UIImage imageNamed:@"1_steaksmain.jpg"];
                 cell.bubbleView.colorBarColor = [UIColor colorWithRed:.22 green:.68 blue:.77 alpha:1.0];
-                cell.bubbleView.dateTimeLabel.text = @"Friday, January 13 at 5:30 PM";
-                cell.bubbleView.titleLabel.text = @"Coeur de Pirate Concert";
-                cell.bubbleView.venueLabel.text = @"Highline Ballroom";
+                cell.bubbleView.dateTimeLabel.text = @"Friday, January 20 at 7:30 PM";
+                cell.bubbleView.titleLabel.text = @"Prisoners of 2nd Avenue";
+                cell.bubbleView.venueLabel.text = @"Hiro Ballroom";
+                cell.bubbleView.priceLabel.text = @"$25";
+            } else if (indexPath.row == 1) {
+                cell.bubbleView.imageView.image = [UIImage imageNamed:@"2_dbd_cameo_12.jpg"];
+                cell.bubbleView.colorBarColor = [UIColor colorWithRed:.22 green:.68 blue:.77 alpha:1.0];
+                cell.bubbleView.dateTimeLabel.text = @"January 26 at 8:00 PM";
+                cell.bubbleView.titleLabel.text = @"Deadbeat Darling";
+                cell.bubbleView.venueLabel.text = @"Hiro Ballroom";
                 cell.bubbleView.priceLabel.text = @"$15";
-            } else if (indexPath.row % 4 == 1) {
-                cell.bubbleView.imageView.image = [UIImage imageNamed:@"fakeFeaturedEvent_2.jpg"];
-                cell.bubbleView.colorBarColor = [UIColor colorWithRed:.87 green:.66 blue:.13 alpha:1.0];
-                cell.bubbleView.dateTimeLabel.text = @"Saturday, December 17 at 6:00 PM";
-                cell.bubbleView.titleLabel.text = @"Never There Opening Reception by Kaws";
-                cell.bubbleView.venueLabel.text = @"Animazing Gallery";
-                cell.bubbleView.priceLabel.text = @"Free";
-            } else if (indexPath.row % 4 == 2) {
-                cell.bubbleView.imageView.image = [UIImage imageNamed:@"fakeFeaturedEvent_3.jpg"];
+            } else if (indexPath.row == 2) {
+                cell.bubbleView.imageView.image = [UIImage imageNamed:@"3_dj_vector.jpg"];
                 cell.bubbleView.colorBarColor = [UIColor colorWithRed:.22 green:.68 blue:.77 alpha:1.0];
-                cell.bubbleView.dateTimeLabel.text = @"Saturday, January 20 at 9:30 PM";
-                cell.bubbleView.titleLabel.text = @"Kanye West Concert";
-                cell.bubbleView.venueLabel.text = @"Madison Square Garden";
-                cell.bubbleView.priceLabel.text = @"$179";
-            } else if (indexPath.row % 4 == 3) {
-                cell.bubbleView.imageView.image = [UIImage imageNamed:@"fakeFeaturedEvent_4.jpg"];
-                cell.bubbleView.colorBarColor = [UIColor colorWithRed:.34 green:.73 blue:.28 alpha:1.0];
-                cell.bubbleView.dateTimeLabel.text = @"Sunday, January 15 at 4:30 PM";
-                cell.bubbleView.titleLabel.text = @"NY Giants vs. Green Bay Packers";
-                cell.bubbleView.venueLabel.text = @"MetLife Stadium";
-                cell.bubbleView.priceLabel.text = @"$150 - $800";
+                cell.bubbleView.dateTimeLabel.text = @"February 10 at 11:00 PM";
+                cell.bubbleView.titleLabel.text = @"The Prince & Michael Experience";
+                cell.bubbleView.venueLabel.text = @"Brooklyn Bowl";
+                cell.bubbleView.priceLabel.text = @"$10";
+            } else if (indexPath.row == 3) {
+                cell.bubbleView.imageView.image = [UIImage imageNamed:@"4_boss1.jpg"];
+                cell.bubbleView.colorBarColor = [UIColor colorWithRed:.22 green:.68 blue:.77 alpha:1.0];
+                cell.bubbleView.dateTimeLabel.text = @"February 11 at 7:30 PM";
+                cell.bubbleView.titleLabel.text = @"Tramps Like Us: Bruce Springstein Tribute";
+                cell.bubbleView.venueLabel.text = @"B.B. King Blues Club & Grill";
+                cell.bubbleView.priceLabel.text = @"$30";
+            } else if (indexPath.row == 4) {
+                cell.bubbleView.imageView.image = [UIImage imageNamed:@"5_rom.jpg"];
+                cell.bubbleView.colorBarColor = [UIColor colorWithRed:.22 green:.68 blue:.77 alpha:1.0];
+                cell.bubbleView.dateTimeLabel.text = @"February 11 at 11:00 PM";
+                cell.bubbleView.titleLabel.text = @"Rebirth Brass Band";
+                cell.bubbleView.venueLabel.text = @"Hiro Ballroom";
+                cell.bubbleView.priceLabel.text = @"$35";
             }
+            
+//            if (indexPath.row % 4 == 0) {
+//                cell.bubbleView.imageView.image = [UIImage imageNamed:@"fakeFeaturedEvent_1.jpg"];
+//                cell.bubbleView.colorBarColor = [UIColor colorWithRed:.22 green:.68 blue:.77 alpha:1.0];
+//                cell.bubbleView.dateTimeLabel.text = @"Friday, January 13 at 5:30 PM";
+//                cell.bubbleView.titleLabel.text = @"Coeur de Pirate Concert";
+//                cell.bubbleView.venueLabel.text = @"Highline Ballroom";
+//                cell.bubbleView.priceLabel.text = @"$15";
+//            } else if (indexPath.row % 4 == 1) {
+//                cell.bubbleView.imageView.image = [UIImage imageNamed:@"fakeFeaturedEvent_2.jpg"];
+//                cell.bubbleView.colorBarColor = [UIColor colorWithRed:.87 green:.66 blue:.13 alpha:1.0];
+//                cell.bubbleView.dateTimeLabel.text = @"Saturday, December 17 at 6:00 PM";
+//                cell.bubbleView.titleLabel.text = @"Never There Opening Reception by Kaws";
+//                cell.bubbleView.venueLabel.text = @"Animazing Gallery";
+//                cell.bubbleView.priceLabel.text = @"Free";
+//            } else if (indexPath.row % 4 == 2) {
+//                cell.bubbleView.imageView.image = [UIImage imageNamed:@"fakeFeaturedEvent_3.jpg"];
+//                cell.bubbleView.colorBarColor = [UIColor colorWithRed:.22 green:.68 blue:.77 alpha:1.0];
+//                cell.bubbleView.dateTimeLabel.text = @"Saturday, January 20 at 9:30 PM";
+//                cell.bubbleView.titleLabel.text = @"Kanye West Concert";
+//                cell.bubbleView.venueLabel.text = @"Madison Square Garden";
+//                cell.bubbleView.priceLabel.text = @"$179";
+//            } else if (indexPath.row % 4 == 3) {
+//                cell.bubbleView.imageView.image = [UIImage imageNamed:@"fakeFeaturedEvent_4.jpg"];
+//                cell.bubbleView.colorBarColor = [UIColor colorWithRed:.34 green:.73 blue:.28 alpha:1.0];
+//                cell.bubbleView.dateTimeLabel.text = @"Sunday, January 15 at 4:30 PM";
+//                cell.bubbleView.titleLabel.text = @"NY Giants vs. Green Bay Packers";
+//                cell.bubbleView.venueLabel.text = @"MetLife Stadium";
+//                cell.bubbleView.priceLabel.text = @"$150 - $800";
+//            }
             
             return cell;
 
@@ -301,26 +314,73 @@
                 cell = [[[FeaturedVenueEventCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:FeaturedVenueEventCellID] autorelease];
             }
             
-            if ((indexPath.row + tableView.tag) % 4 == 0) {
-                cell.bubbleView.imageView.image = [UIImage imageNamed:@"fakeFeaturedEvent_1.jpg"];
-                cell.bubbleView.colorBarColor = [UIColor colorWithRed:.22 green:.68 blue:.77 alpha:1.0];
-                cell.bubbleView.dateTimeLabel.text = @"Jan 13 at 5:30 PM";
-                cell.bubbleView.titleLabel.text = @"Coeur de Pirate Concert";
-            } else if ((indexPath.row + tableView.tag) % 4 == 1) {
-                cell.bubbleView.imageView.image = [UIImage imageNamed:@"fakeFeaturedEvent_2.jpg"];
-                cell.bubbleView.colorBarColor = [UIColor colorWithRed:.87 green:.66 blue:.13 alpha:1.0];
-                cell.bubbleView.dateTimeLabel.text = @"Dec 17 at 6:00 PM";
-                cell.bubbleView.titleLabel.text = @"Never There Opening Reception by Kaws";
-            } else if ((indexPath.row + tableView.tag) % 4 == 2) {
-                cell.bubbleView.imageView.image = [UIImage imageNamed:@"fakeFeaturedEvent_3.jpg"];
-                cell.bubbleView.colorBarColor = [UIColor colorWithRed:.22 green:.68 blue:.77 alpha:1.0];
-                cell.bubbleView.dateTimeLabel.text = @"Jan 20 at 9:30 PM";
-                cell.bubbleView.titleLabel.text = @"Kanye West Concert";
-            } else if ((indexPath.row + tableView.tag) % 4 == 3) {
-                cell.bubbleView.imageView.image = [UIImage imageNamed:@"fakeFeaturedEvent_4.jpg"];
-                cell.bubbleView.colorBarColor = [UIColor colorWithRed:.34 green:.73 blue:.28 alpha:1.0];
-                cell.bubbleView.dateTimeLabel.text = @"Jan 15 at 4:30 PM";
-                cell.bubbleView.titleLabel.text = @"NY Giants vs. Green Bay Packers";
+            if (tableView.tag - 1 == 0) {
+                
+                switch (indexPath.row) {
+                    case 0:
+                        cell.bubbleView.imageView.image = [UIImage imageNamed:@"1_69_Edp.jpg"];
+                        cell.bubbleView.colorBarColor = [UIColor colorWithRed:.22 green:.68 blue:.77 alpha:1.0];
+                        cell.bubbleView.dateTimeLabel.text = @"Jan 19 at 8:30 PM";
+                        cell.bubbleView.titleLabel.text = @"Greensky Bluegrass";
+                        break;
+                    case 1:
+                        cell.bubbleView.imageView.image = [UIImage imageNamed:@"2_49_Edp.jpg"];
+                        cell.bubbleView.colorBarColor = [UIColor colorWithRed:.22 green:.68 blue:.77 alpha:1.0];
+                        cell.bubbleView.dateTimeLabel.text = @"Jan 20 at 7:30 PM";
+                        cell.bubbleView.titleLabel.text = @"Small Mountain Bear: CD Release Party";
+                        break;
+                    case 2:
+                        cell.bubbleView.imageView.image = [UIImage imageNamed:@"3_49_Edp-1.jpg"];
+                        cell.bubbleView.colorBarColor = [UIColor colorWithRed:.22 green:.68 blue:.77 alpha:1.0];
+                        cell.bubbleView.dateTimeLabel.text = @"Feb 17 at 7:30 PM";
+                        cell.bubbleView.titleLabel.text = @"The Big Mean Sound Machine";
+                        break;
+                    case 3:
+                        cell.bubbleView.imageView.image = [UIImage imageNamed:@"4_29_Edp.jpg"];
+                        cell.bubbleView.colorBarColor = [UIColor colorWithRed:.22 green:.68 blue:.77 alpha:1.0];
+                        cell.bubbleView.dateTimeLabel.text = @"Feb 25 at 7:30 PM";
+                        cell.bubbleView.titleLabel.text = @"Dopapod / Turbine";
+                        break;
+                    case 4:
+                        cell.bubbleView.imageView.image = [UIImage imageNamed:@"5_89_Edp.jpg"];
+                        cell.bubbleView.colorBarColor = [UIColor colorWithRed:.22 green:.68 blue:.77 alpha:1.0];
+                        cell.bubbleView.dateTimeLabel.text = @"Mar 24 at 7:30 PM";
+                        cell.bubbleView.titleLabel.text = @"Joe Krown Trio";
+                        break;
+                    case 5:
+                        cell.bubbleView.imageView.image = [UIImage imageNamed:@"6_89_Edp-1.jpg"];
+                        cell.bubbleView.colorBarColor = [UIColor colorWithRed:.22 green:.68 blue:.77 alpha:1.0];
+                        cell.bubbleView.dateTimeLabel.text = @"Mar 29 at 7:30 PM";
+                        cell.bubbleView.titleLabel.text = @"Work Hard, Play Harder!";
+                        break;                        
+                    default:
+                        break;
+                }
+                
+            } else {
+            
+                if ((indexPath.row + tableView.tag) % 4 == 0) {
+                    cell.bubbleView.imageView.image = [UIImage imageNamed:@"fakeFeaturedEvent_1.jpg"];
+                    cell.bubbleView.colorBarColor = [UIColor colorWithRed:.22 green:.68 blue:.77 alpha:1.0];
+                    cell.bubbleView.dateTimeLabel.text = @"Jan 13 at 5:30 PM";
+                    cell.bubbleView.titleLabel.text = @"Coeur de Pirate Concert";
+                } else if ((indexPath.row + tableView.tag) % 4 == 1) {
+                    cell.bubbleView.imageView.image = [UIImage imageNamed:@"fakeFeaturedEvent_2.jpg"];
+                    cell.bubbleView.colorBarColor = [UIColor colorWithRed:.87 green:.66 blue:.13 alpha:1.0];
+                    cell.bubbleView.dateTimeLabel.text = @"Dec 17 at 6:00 PM";
+                    cell.bubbleView.titleLabel.text = @"Never There Opening Reception by Kaws";
+                } else if ((indexPath.row + tableView.tag) % 4 == 2) {
+                    cell.bubbleView.imageView.image = [UIImage imageNamed:@"fakeFeaturedEvent_3.jpg"];
+                    cell.bubbleView.colorBarColor = [UIColor colorWithRed:.22 green:.68 blue:.77 alpha:1.0];
+                    cell.bubbleView.dateTimeLabel.text = @"Jan 20 at 9:30 PM";
+                    cell.bubbleView.titleLabel.text = @"Kanye West Concert";
+                } else if ((indexPath.row + tableView.tag) % 4 == 3) {
+                    cell.bubbleView.imageView.image = [UIImage imageNamed:@"fakeFeaturedEvent_4.jpg"];
+                    cell.bubbleView.colorBarColor = [UIColor colorWithRed:.34 green:.73 blue:.28 alpha:1.0];
+                    cell.bubbleView.dateTimeLabel.text = @"Jan 15 at 4:30 PM";
+                    cell.bubbleView.titleLabel.text = @"NY Giants vs. Green Bay Packers";
+                }
+                
             }
             
             return cell;

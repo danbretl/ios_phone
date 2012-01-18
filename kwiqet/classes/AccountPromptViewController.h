@@ -33,6 +33,7 @@
     IBOutlet UIView * inputContainer;
     IBOutlet UILabel * accountCreationPromptLabel;
     IBOutlet UIView * namePictureContainer;
+    IBOutlet UIImageView * namePictureContainerImageView;
     IBOutlet UIView * pictureContainer;
     IBOutlet UIButton * pictureButton;
     IBOutlet UIImageView * pictureImageView;
@@ -41,6 +42,7 @@
     CGFloat emailPasswordOriginYMainStage;
     CGFloat emailPasswordOriginYPartOfForm;
     IBOutlet UIView * emailPasswordContainer;
+    IBOutlet UIImageView * emailPasswordContainerImageView;
     IBOutlet UITextField * emailTextField;
     IBOutlet UITextField * passwordTextField;
     IBOutlet UITextField *confirmPasswordTextField;

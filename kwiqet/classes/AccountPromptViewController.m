@@ -35,12 +35,14 @@ double const AP_NAV_BUTTONS_ANIMATION_DURATION = 0.25;
 @property (retain) UIView * inputContainer;
 @property (retain) UILabel * accountCreationPromptLabel;
 @property (retain) UIView * namePictureContainer;
+@property (nonatomic, retain) UIImageView * namePictureContainerImageView;
 @property (retain) UIView * pictureContainer;
 @property (retain) UIButton * pictureButton;
 @property (retain) UIImageView * pictureImageView;
 @property (retain)  UITextField * firstNameTextField;
 @property (retain)  UITextField * lastNameTextField;
 @property (retain) UIView * emailPasswordContainer;
+@property (nonatomic, retain) UIImageView * emailPasswordContainerImageView;
 @property (retain) UITextField * emailTextField;
 @property (retain) UITextField * passwordTextField;
 @property (retain) UITextField * confirmPasswordTextField;
@@ -82,8 +84,8 @@ double const AP_NAV_BUTTONS_ANIMATION_DURATION = 0.25;
 @synthesize accountOptionsContainer, blurbLabel, loginCreateLabel, emailButton, facebookButton, twitterButton;
 @synthesize inputContainer;
 @synthesize accountCreationPromptLabel;
-@synthesize namePictureContainer, pictureContainer, pictureButton, pictureImageView, firstNameTextField, lastNameTextField;
-@synthesize emailPasswordContainer, emailTextField, passwordTextField, confirmPasswordTextField;
+@synthesize namePictureContainer, namePictureContainerImageView, pictureContainer, pictureButton, pictureImageView, firstNameTextField, lastNameTextField;
+@synthesize emailPasswordContainer, emailPasswordContainerImageView, emailTextField, passwordTextField, confirmPasswordTextField;
 @synthesize emailAccountAssuranceLabel;
 @synthesize swipeDownGestureRecognizer;
 @synthesize webActivityView;
@@ -131,6 +133,8 @@ double const AP_NAV_BUTTONS_ANIMATION_DURATION = 0.25;
     [pictureButton release];
     [accountCreationPromptLabel release];
     [swipeDownGestureRecognizer release];
+    [namePictureContainerImageView release];
+    [emailPasswordContainerImageView release];
     [super dealloc];
 }
 
@@ -148,17 +152,63 @@ double const AP_NAV_BUTTONS_ANIMATION_DURATION = 0.25;
 {
     [super viewDidLoad];
     
+    CALayer * backgroundImageLayer = [CALayer layer];
+    CGRect viewFrameInWindow = [self.view convertRect:self.view.frame toView:nil];
+    backgroundImageLayer.frame = CGRectMake(0, -viewFrameInWindow.origin.y, viewFrameInWindow.size.width, viewFrameInWindow.size.height);
+    backgroundImageLayer.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"bg_patch_light.png"]].CGColor;
+    backgroundImageLayer.transform = CATransform3DMakeScale(1.0, -1.0, 1.0);
+    [self.view.layer insertSublayer:backgroundImageLayer below:self.navBar.layer];
+    
+    UILabel * orLine = [[UILabel alloc] initWithFrame:CGRectMake(self.emailButton.frame.origin.x, CGRectGetMaxY(self.emailButton.frame), self.emailButton.frame.size.width, CGRectGetMinY(self.facebookButton.frame) - CGRectGetMaxY(self.emailButton.frame))];
+    orLine.font = [UIFont kwiqetFontOfType:ObliqueNormal size:17];
+    orLine.textColor = [WebUtil colorFromHexString:@"898989"];
+    orLine.autoresizingMask = self.emailButton.autoresizingMask;
+    orLine.backgroundColor = [UIColor clearColor];
+    orLine.text = @"or";
+    orLine.textAlignment = UITextAlignmentCenter;
+    CGSize orSize = [orLine.text sizeWithFont:orLine.font];
+    CGFloat orStartXPadding = 3;
+    CGFloat orEndXPadding = 4;
+    CGFloat orStartX = (orLine.frame.size.width - orSize.width) / 2.0 - orStartXPadding;
+    CGFloat orEndX = orStartX + + orStartXPadding + orSize.width + orEndXPadding;
+    CAShapeLayer * maskLayer = [CAShapeLayer layer];
+    maskLayer.frame = orLine.bounds;
+    maskLayer.fillColor = [UIColor blackColor].CGColor;
+    CGMutablePathRef maskPath = CGPathCreateMutable();
+    CGPathAddRect(maskPath, nil, CGRectMake(0, 0, orStartX, maskLayer.frame.size.height));
+    CGPathAddRect(maskPath, nil, CGRectMake(orEndX, 0, maskLayer.frame.size.width - orEndX, maskLayer.frame.size.height));
+    maskLayer.path = maskPath;
+    CGPathRelease(maskPath);
+    CALayer * dividerGrayLayer = [CALayer layer];
+    dividerGrayLayer.frame = CGRectMake(0, floorf(orLine.frame.size.height / 2.0) + 1, orLine.frame.size.width, 1);
+    dividerGrayLayer.backgroundColor = [WebUtil colorFromHexString:@"9f9f9f"].CGColor;
+    dividerGrayLayer.mask = maskLayer;
+    CALayer * dividerWhiteLayer = [CALayer layer];
+    dividerWhiteLayer.frame = CGRectOffset(dividerGrayLayer.frame, 0, 1);
+    dividerWhiteLayer.backgroundColor = [WebUtil colorFromHexString:@"f7f7f7"].CGColor;
+    CAShapeLayer * maskLayerCopy = [CAShapeLayer layer];
+    maskLayerCopy.frame = maskLayer.frame;
+    maskLayerCopy.fillColor = maskLayer.fillColor;
+    maskLayerCopy.path = [UIBezierPath bezierPathWithCGPath:maskLayer.path].CGPath;
+    maskLayerCopy.backgroundColor = maskLayer.backgroundColor;
+    dividerWhiteLayer.mask = maskLayerCopy;
+    [orLine.layer addSublayer:dividerGrayLayer];
+    [orLine.layer addSublayer:dividerWhiteLayer];
+    [self.accountOptionsContainer addSubview:orLine];
+    
     accountCreationViewsVisible = YES;
     emailPasswordOriginYPartOfForm = self.emailPasswordContainer.frame.origin.y; // Just making dev easier. Otherwise would probably just be hard coded. We could be smarter here, but this is OK for now.
     emailPasswordOriginYMainStage = 74; // HARD CODED VALUE
-    
     
     self.navBar.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"navbar.png"]];
     self.mainViewsContainer.backgroundColor = [UIColor clearColor];
     self.accountOptionsContainer.backgroundColor = [UIColor clearColor];
     self.inputContainer.backgroundColor = [UIColor clearColor];
     
-    self.blurbLabel.font = [UIFont kwiqetFontOfType:LightNormal size:16];
+    self.blurbLabel.font = [UIFont kwiqetFontOfType:RegularCondensed size:18];
+    self.blurbLabel.textColor = [UIColor colorWithRed:.33 green:.35 blue:.36 alpha:1.0];
+    self.blurbLabel.shadowColor = [UIColor whiteColor];
+    self.blurbLabel.shadowOffset = CGSizeMake(0, 1);
     self.loginCreateLabel.font = [UIFont kwiqetFontOfType:BoldCondensed size:16];
     UIFont * inputFont = [UIFont kwiqetFontOfType:RegularNormal size:16];
     self.firstNameTextField.font = inputFont;
@@ -168,13 +218,30 @@ double const AP_NAV_BUTTONS_ANIMATION_DURATION = 0.25;
     self.confirmPasswordTextField.font = inputFont;
     self.accountCreationPromptLabel.font = [UIFont kwiqetFontOfType:RegularCondensed size:14];
     self.emailAccountAssuranceLabel.font = [UIFont kwiqetFontOfType:RegularCondensed size:14];
+        
+//    UIImage * inputSectionBackgroundImage = [UIImage imageNamed:@"input_section_stretch.png"];
+//    if ([inputSectionBackgroundImage respondsToSelector:@selector(resizableImageWithCapInsets:)]) {
+//        inputSectionBackgroundImage = [inputSectionBackgroundImage resizableImageWithCapInsets:UIEdgeInsetsMake(5, 5, 5, 5)];
+//    } else {
+//        inputSectionBackgroundImage = [inputSectionBackgroundImage stretchableImageWithLeftCapWidth:5 topCapHeight:5];
+//    }
+//    self.namePictureContainerImageView.contentMode = UIViewContentModeScaleToFill;
+//    self.emailPasswordContainerImageView.contentMode = UIViewContentModeScaleToFill;
+//    self.namePictureContainerImageView.image = inputSectionBackgroundImage;
+//    self.emailPasswordContainerImageView.image = inputSectionBackgroundImage;
     
-    self.namePictureContainer.layer.cornerRadius = 10;
+    self.namePictureContainer.backgroundColor = [UIColor whiteColor];
+    self.emailPasswordContainer.backgroundColor = [UIColor whiteColor];
+    self.emailTextField.backgroundColor = self.emailPasswordContainer.backgroundColor;
+    self.passwordTextField.backgroundColor = self.emailPasswordContainer.backgroundColor;
+    self.confirmPasswordTextField.backgroundColor = self.emailPasswordContainer.backgroundColor;
+    
+    self.namePictureContainer.layer.cornerRadius = 5;
     self.namePictureContainer.layer.masksToBounds = YES;
     self.namePictureContainer.layer.borderColor = [[UIColor colorWithWhite:0.65 alpha:1.0] CGColor];
     self.namePictureContainer.layer.borderWidth = 1.0;
     
-    self.emailPasswordContainer.layer.cornerRadius = 10;
+    self.emailPasswordContainer.layer.cornerRadius = 5;
     self.emailPasswordContainer.layer.masksToBounds = YES;
     self.emailPasswordContainer.layer.borderColor = [[UIColor colorWithWhite:0.65 alpha:1.0] CGColor];
     self.emailPasswordContainer.layer.borderWidth = 1.0;
@@ -260,14 +327,18 @@ double const AP_NAV_BUTTONS_ANIMATION_DURATION = 0.25;
     pictureButton = nil;
     [accountCreationPromptLabel release];
     accountCreationPromptLabel = nil;
+    [emailPasswordContainerImageView release];
+    emailPasswordContainerImageView = nil;
+    [namePictureContainerImageView release];
+    namePictureContainerImageView = nil;
     [super viewDidUnload];
     // Release any retained subviews of the main view.
     // e.g. self.myOutlet = nil;
 }
 
 - (void)viewWillAppear:(BOOL)animated {
-//    self.facebookButton.enabled = NO;
-//    self.facebookButton.alpha = 0.5;
+    self.facebookButton.enabled = NO;
+    self.facebookButton.alpha = 0.5;    
     self.twitterButton.enabled = NO;
     self.twitterButton.alpha = 0.5;
 }

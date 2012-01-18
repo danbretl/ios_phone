@@ -28,6 +28,9 @@
         case BoldNormal:
             fontName = @"HelveticaLT-Bold";
             break;
+        case ObliqueNormal:
+            fontName = @"HelveticaLT-Oblique";
+            break;
         case RegularNormal:
             fontName = @"HelveticaLT";
             break;
