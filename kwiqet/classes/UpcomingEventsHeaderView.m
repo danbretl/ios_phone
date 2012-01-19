@@ -142,13 +142,4 @@ NSTimeInterval const UEHV_TEXT_CHANGE_ANIMATION_DURATION = 0.25;
     return messageType != UpcomingEventsLoaded;
 }
 
-/*
-// Only override drawRect: if you perform custom drawing.
-// An empty implementation adversely affects performance during animation.
-- (void)drawRect:(CGRect)rect
-{
-    // Drawing code
-}
-*/
-
 @end

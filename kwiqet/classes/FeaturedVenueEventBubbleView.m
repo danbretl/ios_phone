@@ -41,13 +41,4 @@ const CGFloat FVEBV_INFO_CONTAINER_HEIGHT = 34.0;
     self.dateTimeLabel.frame = CGRectMake(extraHorizontalPadding, CGRectGetMaxY(self.colorBarLayer.frame) + 1, availableWidth, 15);
 }
 
-/*
-// Only override drawRect: if you perform custom drawing.
-// An empty implementation adversely affects performance during animation.
-- (void)drawRect:(CGRect)rect
-{
-    // Drawing code
-}
-*/
-
 @end
