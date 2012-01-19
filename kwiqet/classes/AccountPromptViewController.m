@@ -219,16 +219,16 @@ double const AP_NAV_BUTTONS_ANIMATION_DURATION = 0.25;
     self.accountCreationPromptLabel.font = [UIFont kwiqetFontOfType:RegularCondensed size:14];
     self.emailAccountAssuranceLabel.font = [UIFont kwiqetFontOfType:RegularCondensed size:14];
         
-//    UIImage * inputSectionBackgroundImage = [UIImage imageNamed:@"input_section_stretch.png"];
-//    if ([inputSectionBackgroundImage respondsToSelector:@selector(resizableImageWithCapInsets:)]) {
-//        inputSectionBackgroundImage = [inputSectionBackgroundImage resizableImageWithCapInsets:UIEdgeInsetsMake(5, 5, 5, 5)];
-//    } else {
-//        inputSectionBackgroundImage = [inputSectionBackgroundImage stretchableImageWithLeftCapWidth:5 topCapHeight:5];
-//    }
-//    self.namePictureContainerImageView.contentMode = UIViewContentModeScaleToFill;
-//    self.emailPasswordContainerImageView.contentMode = UIViewContentModeScaleToFill;
-//    self.namePictureContainerImageView.image = inputSectionBackgroundImage;
-//    self.emailPasswordContainerImageView.image = inputSectionBackgroundImage;
+    UIImage * inputSectionBackgroundImage = [UIImage imageNamed:@"input_section_stretch_transparent.png"];
+    if ([inputSectionBackgroundImage respondsToSelector:@selector(resizableImageWithCapInsets:)]) {
+        inputSectionBackgroundImage = [inputSectionBackgroundImage resizableImageWithCapInsets:UIEdgeInsetsMake(6, 6, 6, 6)];
+    } else {
+        inputSectionBackgroundImage = [inputSectionBackgroundImage stretchableImageWithLeftCapWidth:6 topCapHeight:6];
+    }
+    self.namePictureContainerImageView.contentMode = UIViewContentModeScaleToFill;
+    self.emailPasswordContainerImageView.contentMode = UIViewContentModeScaleToFill;
+    self.namePictureContainerImageView.image = inputSectionBackgroundImage;
+    self.emailPasswordContainerImageView.image = inputSectionBackgroundImage;
     
     self.namePictureContainer.backgroundColor = [UIColor whiteColor];
     self.emailPasswordContainer.backgroundColor = [UIColor whiteColor];
@@ -237,14 +237,9 @@ double const AP_NAV_BUTTONS_ANIMATION_DURATION = 0.25;
     self.confirmPasswordTextField.backgroundColor = self.emailPasswordContainer.backgroundColor;
     
     self.namePictureContainer.layer.cornerRadius = 5;
-    self.namePictureContainer.layer.masksToBounds = YES;
-    self.namePictureContainer.layer.borderColor = [[UIColor colorWithWhite:0.65 alpha:1.0] CGColor];
-    self.namePictureContainer.layer.borderWidth = 1.0;
-    
+    self.namePictureContainer.layer.masksToBounds = YES;    
     self.emailPasswordContainer.layer.cornerRadius = 5;
     self.emailPasswordContainer.layer.masksToBounds = YES;
-    self.emailPasswordContainer.layer.borderColor = [[UIColor colorWithWhite:0.65 alpha:1.0] CGColor];
-    self.emailPasswordContainer.layer.borderWidth = 1.0;
     
     self.pictureContainer.layer.cornerRadius = 5;
     self.pictureContainer.layer.masksToBounds = YES;
