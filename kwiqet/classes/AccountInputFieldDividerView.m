@@ -10,22 +10,17 @@
 
 @implementation AccountInputFieldDividerView
 
-- (id)initWithFrame:(CGRect)frame
-{
-    self = [super initWithFrame:frame];
-    if (self) {
-        // Initialization code
-    }
-    return self;
+- (void)drawRect:(CGRect)rect {
+	CGContextRef context = UIGraphicsGetCurrentContext();
+    CGFloat halfHeightFloored = floorf(rect.size.height / 2.0);
+    CGFloat theRest = rect.size.height - halfHeightFloored;
+    CGContextAddRect(context, CGRectMake(0, 0, rect.size.width, halfHeightFloored));
+    CGContextSetFillColorWithColor(context, [UIColor colorWithWhite:186.0/255.0 alpha:1.0].CGColor);
+    CGContextDrawPath(context, kCGPathFill);
+    CGContextBeginPath(context);
+    CGContextAddRect(context, CGRectMake(0, halfHeightFloored, rect.size.width, theRest));
+    CGContextSetFillColorWithColor(context, [UIColor colorWithWhite:252.0/255.0 alpha:1.0].CGColor);
+    CGContextDrawPath(context, kCGPathFill);
 }
-
-/*
-// Only override drawRect: if you perform custom drawing.
-// An empty implementation adversely affects performance during animation.
-- (void)drawRect:(CGRect)rect
-{
-    // Drawing code
-}
-*/
 
 @end

@@ -25,18 +25,15 @@
     
     IBOutlet UIView *accountOptionsContainer;
     IBOutlet UILabel * blurbLabel;
-    IBOutlet UILabel * loginCreateLabel;
     IBOutlet UIButton * emailButton;
     IBOutlet UIButton * facebookButton;
     IBOutlet UIButton * twitterButton;
     
-    IBOutlet UIView * inputContainer;
+    IBOutlet UIScrollView * inputContainer;
     IBOutlet UILabel * accountCreationPromptLabel;
     IBOutlet UIView * namePictureContainer;
     IBOutlet UIImageView * namePictureContainerImageView;
-    IBOutlet UIView * pictureContainer;
     IBOutlet UIButton * pictureButton;
-    IBOutlet UIImageView * pictureImageView;
     IBOutlet UITextField * firstNameTextField;
     IBOutlet UITextField * lastNameTextField;
     CGFloat emailPasswordOriginYMainStage;

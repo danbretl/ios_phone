@@ -27,18 +27,15 @@ double const AP_NAV_BUTTONS_ANIMATION_DURATION = 0.25;
 
 @property (retain) UIView *accountOptionsContainer;
 @property (retain) UILabel * blurbLabel;
-@property (retain) UILabel * loginCreateLabel;
 @property (retain) UIButton * emailButton;
 @property (retain) UIButton * facebookButton;
 @property (retain) UIButton * twitterButton;
 
-@property (retain) UIView * inputContainer;
+@property (retain) UIScrollView * inputContainer;
 @property (retain) UILabel * accountCreationPromptLabel;
 @property (retain) UIView * namePictureContainer;
 @property (nonatomic, retain) UIImageView * namePictureContainerImageView;
-@property (retain) UIView * pictureContainer;
 @property (retain) UIButton * pictureButton;
-@property (retain) UIImageView * pictureImageView;
 @property (retain)  UITextField * firstNameTextField;
 @property (retain)  UITextField * lastNameTextField;
 @property (retain) UIView * emailPasswordContainer;
@@ -69,6 +66,10 @@ double const AP_NAV_BUTTONS_ANIMATION_DURATION = 0.25;
 @property (nonatomic, readonly) UIAlertView * forgotPasswordConnectionErrorAlertView;
 @property (nonatomic, readonly) UIAlertView * anotherAccountWithEmailExistsAlertView;
 
+- (void) keyboardWillHide:(NSNotification *)notification;
+- (void) keyboardWillShow:(NSNotification *)notification;
+- (void)setBottomInset:(CGFloat)bottomInset forScrollView:(UIScrollView *)scrollView;
+
 @property (nonatomic, readonly) WebConnector * webConnector;
 - (void) facebookAccountActivity:(NSNotification *)notification;
 - (void) facebookGetBasicInfoSuccess:(NSNotification *)notification;
@@ -81,10 +82,10 @@ double const AP_NAV_BUTTONS_ANIMATION_DURATION = 0.25;
 @synthesize navBar, logoButton, cancelButton, doneButton;
 @synthesize titleImageView;
 @synthesize mainViewsContainer;
-@synthesize accountOptionsContainer, blurbLabel, loginCreateLabel, emailButton, facebookButton, twitterButton;
+@synthesize accountOptionsContainer, blurbLabel, emailButton, facebookButton, twitterButton;
 @synthesize inputContainer;
 @synthesize accountCreationPromptLabel;
-@synthesize namePictureContainer, namePictureContainerImageView, pictureContainer, pictureButton, pictureImageView, firstNameTextField, lastNameTextField;
+@synthesize namePictureContainer, namePictureContainerImageView, pictureButton, firstNameTextField, lastNameTextField;
 @synthesize emailPasswordContainer, emailPasswordContainerImageView, emailTextField, passwordTextField, confirmPasswordTextField;
 @synthesize emailAccountAssuranceLabel;
 @synthesize swipeDownGestureRecognizer;
@@ -107,7 +108,6 @@ double const AP_NAV_BUTTONS_ANIMATION_DURATION = 0.25;
     [emailButton release];
     [facebookButton release];
     [twitterButton release];
-    [loginCreateLabel release];
     [cancelButton release];
     [doneButton release];
     [logoButton release];
@@ -126,10 +126,8 @@ double const AP_NAV_BUTTONS_ANIMATION_DURATION = 0.25;
     [facebookManager release];
     [confirmPasswordTextField release];
     [namePictureContainer release];
-    [pictureImageView release];
     [firstNameTextField release];
     [lastNameTextField release];
-    [pictureContainer release];
     [pictureButton release];
     [accountCreationPromptLabel release];
     [swipeDownGestureRecognizer release];
@@ -198,26 +196,47 @@ double const AP_NAV_BUTTONS_ANIMATION_DURATION = 0.25;
     
     accountCreationViewsVisible = YES;
     emailPasswordOriginYPartOfForm = self.emailPasswordContainer.frame.origin.y; // Just making dev easier. Otherwise would probably just be hard coded. We could be smarter here, but this is OK for now.
-    emailPasswordOriginYMainStage = 74; // HARD CODED VALUE
+    emailPasswordOriginYMainStage = 64; // HARD CODED VALUE
     
     self.navBar.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"navbar.png"]];
     self.mainViewsContainer.backgroundColor = [UIColor clearColor];
     self.accountOptionsContainer.backgroundColor = [UIColor clearColor];
     self.inputContainer.backgroundColor = [UIColor clearColor];
     
+    UIColor * grayBlueColor = [UIColor colorWithRed:82.0/255.0 green:89.0/255.0 blue:91.0/255.0 alpha:1.0];
     self.blurbLabel.font = [UIFont kwiqetFontOfType:RegularCondensed size:18];
-    self.blurbLabel.textColor = [UIColor colorWithRed:.33 green:.35 blue:.36 alpha:1.0];
+    self.blurbLabel.textColor = grayBlueColor;
     self.blurbLabel.shadowColor = [UIColor whiteColor];
     self.blurbLabel.shadowOffset = CGSizeMake(0, 1);
-    self.loginCreateLabel.font = [UIFont kwiqetFontOfType:BoldCondensed size:16];
-    UIFont * inputFont = [UIFont kwiqetFontOfType:RegularNormal size:16];
+    self.emailAccountAssuranceLabel.font = [UIFont kwiqetFontOfType:RegularCondensed size:16];
+    self.emailAccountAssuranceLabel.textColor = grayBlueColor;
+    self.emailAccountAssuranceLabel.shadowColor = [UIColor whiteColor];
+    self.emailAccountAssuranceLabel.shadowOffset = CGSizeMake(0, 1);
+    self.emailAccountAssuranceLabel.numberOfLines = 0;
+    self.emailAccountAssuranceLabel.text = @"If you don't have an account yet,\nwe'll make one for you!";
+    CGSize emailAccountAssuranceLabelTextSize = [self.emailAccountAssuranceLabel.text  sizeWithFont:self.emailAccountAssuranceLabel.font constrainedToSize:CGSizeMake(self.inputContainer.frame.size.width, 1000)];
+    NSLog(@"emailAccountAssuranceLabelTextSize=%@", NSStringFromCGSize(emailAccountAssuranceLabelTextSize));
+    CGRect emailAccountAssuranceLabelFrame = self.emailAccountAssuranceLabel.frame;
+    emailAccountAssuranceLabelFrame.size.width = emailAccountAssuranceLabelTextSize.width;
+    emailAccountAssuranceLabelFrame.origin.x = (self.emailAccountAssuranceLabel.superview.frame.size.width - emailAccountAssuranceLabelFrame.size.width) / 2.0;
+    self.emailAccountAssuranceLabel.frame = emailAccountAssuranceLabelFrame;
+    self.emailAccountAssuranceLabel.textAlignment = UITextAlignmentLeft;
+    self.accountCreationPromptLabel.font = [UIFont kwiqetFontOfType:RegularCondensed size:18];
+    self.accountCreationPromptLabel.textColor = grayBlueColor;
+    self.accountCreationPromptLabel.shadowColor = [UIColor whiteColor];
+    self.accountCreationPromptLabel.shadowOffset = CGSizeMake(0, 1);
+    
+    UIFont * inputFont = [UIFont kwiqetFontOfType:RegularNormal size:17];
     self.firstNameTextField.font = inputFont;
+    self.firstNameTextField.textColor = grayBlueColor;
     self.lastNameTextField.font = inputFont;
+    self.lastNameTextField.textColor = grayBlueColor;
     self.emailTextField.font = inputFont;
+    self.emailTextField.textColor = grayBlueColor;
     self.passwordTextField.font = inputFont;
+    self.passwordTextField.textColor = grayBlueColor;
     self.confirmPasswordTextField.font = inputFont;
-    self.accountCreationPromptLabel.font = [UIFont kwiqetFontOfType:RegularCondensed size:14];
-    self.emailAccountAssuranceLabel.font = [UIFont kwiqetFontOfType:RegularCondensed size:14];
+    self.confirmPasswordTextField.textColor = grayBlueColor;
         
     UIImage * inputSectionBackgroundImage = [UIImage imageNamed:@"input_section_stretch_transparent.png"];
     if ([inputSectionBackgroundImage respondsToSelector:@selector(resizableImageWithCapInsets:)]) {
@@ -230,20 +249,26 @@ double const AP_NAV_BUTTONS_ANIMATION_DURATION = 0.25;
     self.namePictureContainerImageView.image = inputSectionBackgroundImage;
     self.emailPasswordContainerImageView.image = inputSectionBackgroundImage;
     
-    self.namePictureContainer.backgroundColor = [UIColor whiteColor];
-    self.emailPasswordContainer.backgroundColor = [UIColor whiteColor];
-    self.emailTextField.backgroundColor = self.emailPasswordContainer.backgroundColor;
-    self.passwordTextField.backgroundColor = self.emailPasswordContainer.backgroundColor;
-    self.confirmPasswordTextField.backgroundColor = self.emailPasswordContainer.backgroundColor;
+    UIColor * inputBackgroundColor = [UIColor colorWithWhite:245.0/255.0 alpha:1.0];
+    self.namePictureContainer.backgroundColor = inputBackgroundColor;
+    self.emailPasswordContainer.backgroundColor = inputBackgroundColor;
+    self.firstNameTextField.backgroundColor = inputBackgroundColor;
+    self.lastNameTextField.backgroundColor = inputBackgroundColor;
+    self.emailTextField.backgroundColor = inputBackgroundColor;
+    self.passwordTextField.backgroundColor = inputBackgroundColor;
+    self.confirmPasswordTextField.backgroundColor = inputBackgroundColor;
+    
+    self.pictureButton.layer.shadowOffset = CGSizeMake(0.5, 1.0);
+    self.pictureButton.layer.shadowColor = [UIColor blackColor].CGColor;
+    self.pictureButton.layer.shadowOpacity = 0.4;
+    self.pictureButton.layer.shadowRadius = 1.0;
+    self.pictureButton.layer.shadowPath = [UIBezierPath bezierPathWithRect:self.pictureButton.bounds/*CGRectMake(0, 0, self.pictureButton.frame.size.width - .5, self.pictureButton.frame.size.height)*/].CGPath;
     
     self.namePictureContainer.layer.cornerRadius = 5;
-    self.namePictureContainer.layer.masksToBounds = YES;    
+    self.namePictureContainer.layer.masksToBounds = YES;
     self.emailPasswordContainer.layer.cornerRadius = 5;
     self.emailPasswordContainer.layer.masksToBounds = YES;
-    
-    self.pictureContainer.layer.cornerRadius = 5;
-    self.pictureContainer.layer.masksToBounds = YES;
-    
+        
     CGFloat webActivityViewSize = 60.0;
     webActivityView = [[WebActivityView alloc] initWithSize:CGSizeMake(webActivityViewSize, webActivityViewSize) centeredInFrame:self.view.bounds];
     [self.view addSubview:self.webActivityView];
@@ -262,9 +287,13 @@ double const AP_NAV_BUTTONS_ANIMATION_DURATION = 0.25;
     self.swipeDownGestureRecognizer.direction = UISwipeGestureRecognizerDirectionDown;
     [self.view addGestureRecognizer:self.swipeDownGestureRecognizer];
     
+    // Register for Facebook events
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(facebookAccountActivity:) name:FBM_ACCOUNT_ACTIVITY_KEY object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(facebookGetBasicInfoSuccess:) name:FBM_GET_BASIC_INFO_AND_EMAIL_SUCCESS_KEY object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(facebookGetBasicInfoFailure:) name:FBM_GET_BASIC_INFO_AND_EMAIL_FAILURE_KEY object:nil];
+    // Register for keyboard events
+	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardWillShow:) name:UIKeyboardWillShowNotification object:nil];
+	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardWillHide:) name:UIKeyboardWillHideNotification object:nil];
     
 }
 
@@ -282,8 +311,6 @@ double const AP_NAV_BUTTONS_ANIMATION_DURATION = 0.25;
     facebookButton = nil;
     [twitterButton release];
     twitterButton = nil;
-    [loginCreateLabel release];
-    loginCreateLabel = nil;
     [cancelButton release];
     cancelButton = nil;
     [doneButton release];
@@ -310,14 +337,10 @@ double const AP_NAV_BUTTONS_ANIMATION_DURATION = 0.25;
     confirmPasswordTextField = nil;
     [namePictureContainer release];
     namePictureContainer = nil;
-    [pictureImageView release];
-    pictureImageView = nil;
     [firstNameTextField release];
     firstNameTextField = nil;
     [lastNameTextField release];
     lastNameTextField = nil;
-    [pictureContainer release];
-    pictureContainer = nil;
     [pictureButton release];
     pictureButton = nil;
     [accountCreationPromptLabel release];
@@ -456,11 +479,36 @@ double const AP_NAV_BUTTONS_ANIMATION_DURATION = 0.25;
 }
 
 - (BOOL)textFieldShouldBeginEditing:(UITextField *)textField {
+    // Scrolling
+    UIView * containerView = textField.superview.superview; // HARD CODED, HACK AVOIDING THE AUTO-SCROLL BEHAVIOR INITIATED BY UITextField OBJECTS THAT ARE SUBVIEWS OF UIScrollView OBJECTS.
+    if (CGRectGetMinY(containerView.frame) - 10 < self.inputContainer.contentOffset.y) {
+        [self.inputContainer setContentOffset:CGPointMake(0, CGRectGetMinY(containerView.frame) - 10) animated:YES];
+    } else {
+        CGFloat visibleHeightOfScrollView = self.inputContainer.frame.size.height - (self.inputContainer.contentInset.top + self.inputContainer.contentInset.bottom);
+        if (CGRectGetMaxY(containerView.frame) + 10 > self.inputContainer.contentOffset.y + visibleHeightOfScrollView) {
+            [self.inputContainer setContentOffset:CGPointMake(0, MIN(CGRectGetMaxY(containerView.frame) - containerView.frame.size.height - 10, self.inputContainer.contentSize.height - visibleHeightOfScrollView)) animated:YES];
+        }
+    }
     if (textField == self.passwordTextField) {
         self.passwordTextField.returnKeyType = confirmPasswordVisible ? UIReturnKeyNext : UIReturnKeySend;
     }
+//    // Total crazy hack, trying to avoid default auto scroll behavior
+//    UIScrollView * wrap = [[[UIScrollView alloc] initWithFrame:textField.frame] autorelease];
+//    wrap.backgroundColor = [UIColor clearColor];
+//    [textField.superview addSubview:wrap];
+//    textField.frame = CGRectMake(0, 0, textField.frame.size.width, textField.frame.size.height);
+//    [wrap addSubview:textField];
     return YES;
 }
+
+//- (BOOL)textFieldShouldEndEditing:(UITextField *)textField {
+//    // Total crazy hack, trying to avoid default auto scroll behavior
+//    UIScrollView * wrap = (UIScrollView *)textField.superview;
+//    textField.frame = wrap.frame;
+//    [wrap.superview addSubview:textField];
+//    [wrap removeFromSuperview];
+//    return YES;
+//}
 
 - (BOOL)textFieldShouldReturn:(UITextField *)textField {
     if (textField == self.firstNameTextField) {
@@ -617,7 +665,7 @@ double const AP_NAV_BUTTONS_ANIMATION_DURATION = 0.25;
         
     } else {
         
-        [self.webConnector accountCreateWithEmail:self.emailTextField.text password:self.passwordTextField.text firstName:self.firstNameTextField.text lastName:self.lastNameTextField.text image:self.pictureImageView.image];
+        [self.webConnector accountCreateWithEmail:self.emailTextField.text password:self.passwordTextField.text firstName:self.firstNameTextField.text lastName:self.lastNameTextField.text image:self.pictureButton.imageView.image];
         [self showWebActivityView];
         
     }
@@ -839,6 +887,10 @@ double const AP_NAV_BUTTONS_ANIMATION_DURATION = 0.25;
         }
     };
     
+    void(^inputContainerContentSizeBlock)(void) = ^{
+        self.inputContainer.contentSize = CGSizeMake(self.inputContainer.frame.size.width, /*MAX(*/CGRectGetMaxY(self.emailPasswordContainer.frame)/*, CGRectGetMaxY(self.emailAccountAssuranceLabel.frame))*/ + 10);
+    };
+    
     accountCreationViewsVisible = shouldShowCreationViews;
     confirmPasswordVisible = shouldShowPasswordConfirmation;    
     if (animated) {
@@ -850,6 +902,7 @@ double const AP_NAV_BUTTONS_ANIMATION_DURATION = 0.25;
                              promptNamePictureAlphaBlock(shouldShowCreationViews);
                              emailPasswordBlock(shouldShowCreationViews, shouldShowPasswordConfirmation);
                              emailAccountAssuranceAlphaBlock(!shouldShowCreationViews);
+                             inputContainerContentSizeBlock();
                          }
                          completion:^(BOOL finished){
                              if (!shouldShowCreationViews) {
@@ -861,6 +914,7 @@ double const AP_NAV_BUTTONS_ANIMATION_DURATION = 0.25;
         promptNamePictureAlphaBlock(shouldShowCreationViews);
         emailPasswordBlock(shouldShowCreationViews, shouldShowPasswordConfirmation);
         emailAccountAssuranceAlphaBlock(!shouldShowCreationViews);
+        inputContainerContentSizeBlock();
         if (!shouldShowCreationViews) {
             resetCreationInputBlock(!confirmPasswordVisible);
         }
@@ -935,6 +989,36 @@ double const AP_NAV_BUTTONS_ANIMATION_DURATION = 0.25;
             [self.delegate accountPromptViewController:self didFinishWithConnection:NO];
         }
     }
+}
+
+- (void) setBottomInset:(CGFloat)bottomInset forScrollView:(UIScrollView *)scrollView {
+    UIEdgeInsets insets = scrollView.contentInset;
+    insets.bottom = bottomInset;
+    scrollView.contentInset = insets;
+    UIEdgeInsets scrollInsets = scrollView.scrollIndicatorInsets;
+    scrollInsets.bottom = bottomInset;
+    scrollView.scrollIndicatorInsets = scrollInsets;
+}
+
+- (void)keyboardWillShow:(NSNotification *)notification {
+    NSDictionary * info = [notification userInfo];
+	CGSize keyboardSize = [[info objectForKey:UIKeyboardFrameBeginUserInfoKey] CGRectValue].size;
+    double keyboardAnimationDuration = [[info objectForKey:UIKeyboardAnimationDurationUserInfoKey] doubleValue];
+    UIViewAnimationCurve keyboardAnimationCurve = [[info objectForKey:UIKeyboardAnimationCurveUserInfoKey] integerValue];
+    [UIView animateWithDuration:keyboardAnimationDuration delay:0.0 options:keyboardAnimationCurve animations:^{
+        [self setBottomInset:keyboardSize.height - self.tabBarController.tabBar.bounds.size.height forScrollView:self.inputContainer];
+    } completion:^(BOOL finished){}];
+    NSLog(@"keyboardWillShow adjustments made, inputContainerContentSize=%@, inputContainerContentInset=%@", NSStringFromCGSize(self.inputContainer.contentSize), NSStringFromUIEdgeInsets(self.inputContainer.contentInset));
+}
+
+- (void)keyboardWillHide:(NSNotification *)notification {
+    NSDictionary * info = [notification userInfo];
+    double keyboardAnimationDuration = [[info objectForKey:UIKeyboardAnimationDurationUserInfoKey] doubleValue];
+    UIViewAnimationCurve keyboardAnimationCurve = [[info objectForKey:UIKeyboardAnimationCurveUserInfoKey] integerValue];
+    [UIView animateWithDuration:keyboardAnimationDuration delay:0.0 options:keyboardAnimationCurve animations:^{
+        [self setBottomInset:0 forScrollView:self.inputContainer];
+    } completion:^(BOOL finished){ }];
+    NSLog(@"keyboardWillHide adjustments made, inputContainerContentSize=%@, inputContainerContentInset=%@", NSStringFromCGSize(self.inputContainer.contentSize), NSStringFromUIEdgeInsets(self.inputContainer.contentInset));
 }
 
 @end
