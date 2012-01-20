@@ -847,7 +847,10 @@ static NSString * AP_IMAGE_PICKER_OPTION_TEXT_LIBRARY = @"Photo Library";
         
     } else {
         
-        [self.webConnector accountCreateWithEmail:self.emailTextField.text password:self.passwordTextField.text firstName:self.firstNameTextField.text lastName:self.lastNameTextField.text image:self.pictureButton.imageView.image];
+        [self resignFirstResponderForAllTextFields];
+        [self setHighlighted:NO forInputSectionContainer:self.namePictureContainer animated:NO];
+        [self setHighlighted:NO forInputSectionContainer:self.emailPasswordContainer animated:NO];
+        [self.webConnector accountCreateWithEmail:self.emailInputString password:self.passwordInputString firstName:self.firstNameInputString lastName:self.lastNameInputString image:self.pictureInputImage];
         [self showWebActivityView];
         
     }
