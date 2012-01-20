@@ -20,6 +20,7 @@ typedef enum {
     AccountConnectPasswordIncorrect = 500,
     AccountConnectAccountDoesNotExist = 501,
     AccountCreateEmailAssociatedWithAnotherAccount = 600,
+    AccountCreateEmailNotValid = 601,
 } WebConnectorFailure;
 
 @protocol WebConnectorDelegate;

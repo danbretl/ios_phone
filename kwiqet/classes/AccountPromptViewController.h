@@ -32,6 +32,7 @@
     IBOutlet UIScrollView * inputContainer;
     IBOutlet UILabel * accountCreationPromptLabel;
     IBOutlet UIView * namePictureContainer;
+    UIView * namePictureContainerHighlight;
     IBOutlet UIImageView * namePictureContainerImageView;
     IBOutlet UIButton * pictureButton;
     IBOutlet UITextField * firstNameTextField;
@@ -39,6 +40,7 @@
     CGFloat emailPasswordOriginYMainStage;
     CGFloat emailPasswordOriginYPartOfForm;
     IBOutlet UIView * emailPasswordContainer;
+    UIView * emailPasswordContainerHighlight;
     IBOutlet UIImageView * emailPasswordContainerImageView;
     IBOutlet UITextField * emailTextField;
     IBOutlet UITextField * passwordTextField;
@@ -55,6 +57,7 @@
     
     WebActivityView * webActivityView;
     UIAlertView * passwordIncorrectAlertView;
+    UIAlertView * emailInvalidAlertView;
     UIAlertView * forgotPasswordConnectionErrorAlertView;
     UIAlertView * anotherAccountWithEmailExistsAlertView;
     

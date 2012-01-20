@@ -12,6 +12,7 @@
 #import "DefaultsModel.h"
 #import "WebUtil.h"
 #import "Facebook+Cancel.h"
+#import "UIView+GetFirstResponder.h"
 
 double const AP_NAV_BUTTONS_ANIMATION_DURATION = 0.25;
 
@@ -34,11 +35,13 @@ double const AP_NAV_BUTTONS_ANIMATION_DURATION = 0.25;
 @property (retain) UIScrollView * inputContainer;
 @property (retain) UILabel * accountCreationPromptLabel;
 @property (retain) UIView * namePictureContainer;
+@property (retain) UIView * namePictureContainerHighlight;
 @property (nonatomic, retain) UIImageView * namePictureContainerImageView;
 @property (retain) UIButton * pictureButton;
 @property (retain)  UITextField * firstNameTextField;
 @property (retain)  UITextField * lastNameTextField;
 @property (retain) UIView * emailPasswordContainer;
+@property (retain) UIView * emailPasswordContainerHighlight;
 @property (nonatomic, retain) UIImageView * emailPasswordContainerImageView;
 @property (retain) UITextField * emailTextField;
 @property (retain) UITextField * passwordTextField;
@@ -58,11 +61,13 @@ double const AP_NAV_BUTTONS_ANIMATION_DURATION = 0.25;
 
 - (void) showContainer:(UIView *)viewsContainer animated:(BOOL)animated;
 - (void) showAccountCreationInputViews:(BOOL)shouldShowCreationViews showPasswordConfirmation:(BOOL)shouldShowPasswordConfirmation activateAppropriateFirstResponder:(BOOL)shouldActivateFirstResponder animated:(BOOL)animated;
+- (void) setHighlighted:(BOOL)shouldHighlight forInputSectionContainer:(UIView *)inputSectionContainer animated:(BOOL)animated;
 
 @property (retain) WebActivityView * webActivityView;
 - (void) showWebActivityView;
 - (void) hideWebActivityView;
 @property (nonatomic, readonly) UIAlertView * passwordIncorrectAlertView;
+@property (nonatomic, readonly) UIAlertView * emailInvalidAlertView;
 @property (nonatomic, readonly) UIAlertView * forgotPasswordConnectionErrorAlertView;
 @property (nonatomic, readonly) UIAlertView * anotherAccountWithEmailExistsAlertView;
 
@@ -85,8 +90,8 @@ double const AP_NAV_BUTTONS_ANIMATION_DURATION = 0.25;
 @synthesize accountOptionsContainer, blurbLabel, emailButton, facebookButton, twitterButton;
 @synthesize inputContainer;
 @synthesize accountCreationPromptLabel;
-@synthesize namePictureContainer, namePictureContainerImageView, pictureButton, firstNameTextField, lastNameTextField;
-@synthesize emailPasswordContainer, emailPasswordContainerImageView, emailTextField, passwordTextField, confirmPasswordTextField;
+@synthesize namePictureContainer, namePictureContainerHighlight, namePictureContainerImageView, pictureButton, firstNameTextField, lastNameTextField;
+@synthesize emailPasswordContainer, emailPasswordContainerHighlight, emailPasswordContainerImageView, emailTextField, passwordTextField, confirmPasswordTextField;
 @synthesize emailAccountAssuranceLabel;
 @synthesize swipeDownGestureRecognizer;
 @synthesize webActivityView;
@@ -117,15 +122,18 @@ double const AP_NAV_BUTTONS_ANIMATION_DURATION = 0.25;
     [emailTextField release];
     [passwordTextField release];
     [emailPasswordContainer release];
+    [emailPasswordContainerHighlight release];
     [emailAccountAssuranceLabel release];
     [webActivityView release];
     [passwordIncorrectAlertView release];
+    [emailInvalidAlertView release];
     [forgotPasswordConnectionErrorAlertView release];
     [anotherAccountWithEmailExistsAlertView release];
     [webConnector release];
     [facebookManager release];
     [confirmPasswordTextField release];
     [namePictureContainer release];
+    [namePictureContainerHighlight release];
     [firstNameTextField release];
     [lastNameTextField release];
     [pictureButton release];
@@ -257,7 +265,7 @@ double const AP_NAV_BUTTONS_ANIMATION_DURATION = 0.25;
     self.emailTextField.backgroundColor = inputBackgroundColor;
     self.passwordTextField.backgroundColor = inputBackgroundColor;
     self.confirmPasswordTextField.backgroundColor = inputBackgroundColor;
-    
+
     self.pictureButton.layer.shadowOffset = CGSizeMake(0.5, 1.0);
     self.pictureButton.layer.shadowColor = [UIColor blackColor].CGColor;
     self.pictureButton.layer.shadowOpacity = 0.4;
@@ -268,6 +276,18 @@ double const AP_NAV_BUTTONS_ANIMATION_DURATION = 0.25;
     self.namePictureContainer.layer.masksToBounds = YES;
     self.emailPasswordContainer.layer.cornerRadius = 5;
     self.emailPasswordContainer.layer.masksToBounds = YES;
+    
+    namePictureContainerHighlight = [[UIView alloc] initWithFrame:CGRectInset(self.namePictureContainer.frame, -2, -2)];
+    emailPasswordContainerHighlight = [[UIView alloc] initWithFrame:CGRectInset(self.emailPasswordContainer.frame, -2, -2)];
+    UIColor * lightBlueHighlightColor = [UIColor colorWithRed:11.0/255.0 green:149.0/255.0 blue:229.0/255.0 alpha:0.25];
+    self.namePictureContainerHighlight.backgroundColor = lightBlueHighlightColor;
+    self.emailPasswordContainerHighlight.backgroundColor = lightBlueHighlightColor;
+    self.namePictureContainerHighlight.alpha = 0.0;
+    self.emailPasswordContainerHighlight.alpha = 0.0;
+    self.namePictureContainerHighlight.layer.cornerRadius = 5 + 2;
+    self.emailPasswordContainerHighlight.layer.cornerRadius = 5 + 2;
+    [self.namePictureContainer.superview insertSubview:self.namePictureContainerHighlight belowSubview:self.namePictureContainer];
+    [self.emailPasswordContainer.superview insertSubview:self.emailPasswordContainerHighlight belowSubview:self.emailPasswordContainer];
         
     CGFloat webActivityViewSize = 60.0;
     webActivityView = [[WebActivityView alloc] initWithSize:CGSizeMake(webActivityViewSize, webActivityViewSize) centeredInFrame:self.view.bounds];
@@ -329,6 +349,8 @@ double const AP_NAV_BUTTONS_ANIMATION_DURATION = 0.25;
     passwordTextField = nil;
     [emailPasswordContainer release];
     emailPasswordContainer = nil;
+    [emailPasswordContainerHighlight release];
+    emailPasswordContainerHighlight = nil;
     [emailAccountAssuranceLabel release];
     emailAccountAssuranceLabel = nil;
     [webActivityView release];
@@ -337,6 +359,8 @@ double const AP_NAV_BUTTONS_ANIMATION_DURATION = 0.25;
     confirmPasswordTextField = nil;
     [namePictureContainer release];
     namePictureContainer = nil;
+    [namePictureContainerHighlight release];
+    namePictureContainerHighlight = nil;
     [firstNameTextField release];
     firstNameTextField = nil;
     [lastNameTextField release];
@@ -478,42 +502,63 @@ double const AP_NAV_BUTTONS_ANIMATION_DURATION = 0.25;
     [self userInputSubmissionAttemptRequested];
 }
 
-- (BOOL)textFieldShouldBeginEditing:(UITextField *)textField {
-    // Scrolling
+- (void)textFieldDidBeginEditing:(UITextField *)textField {
+    
+    NSLog(@"textFieldDidBeginEditing:%@", textField);
+    
     UIView * containerView = textField.superview.superview; // HARD CODED, HACK AVOIDING THE AUTO-SCROLL BEHAVIOR INITIATED BY UITextField OBJECTS THAT ARE SUBVIEWS OF UIScrollView OBJECTS.
+    
+    BOOL shouldScroll = NO;
+    CGFloat contentOffsetY = 0;
     if (CGRectGetMinY(containerView.frame) - 10 < self.inputContainer.contentOffset.y) {
-        [self.inputContainer setContentOffset:CGPointMake(0, CGRectGetMinY(containerView.frame) - 10) animated:YES];
+        shouldScroll = YES;
+        contentOffsetY = CGRectGetMinY(containerView.frame) - 10;
     } else {
         CGFloat visibleHeightOfScrollView = self.inputContainer.frame.size.height - (self.inputContainer.contentInset.top + self.inputContainer.contentInset.bottom);
         if (CGRectGetMaxY(containerView.frame) + 10 > self.inputContainer.contentOffset.y + visibleHeightOfScrollView) {
-            [self.inputContainer setContentOffset:CGPointMake(0, MIN(CGRectGetMaxY(containerView.frame) - containerView.frame.size.height - 10, self.inputContainer.contentSize.height - visibleHeightOfScrollView)) animated:YES];
+            shouldScroll = YES;
+            contentOffsetY = MIN(CGRectGetMaxY(containerView.frame) - containerView.frame.size.height - 10, self.inputContainer.contentSize.height - visibleHeightOfScrollView);
         }
     }
+    
+    [UIView animateWithDuration:0.25 animations:^{
+//        CGFloat alphaOn = 0.25;
+//        if (containerView == self.namePictureContainer) {
+//            self.namePictureContainerHighlight.alpha = alphaOn;
+//        }
+//        if (containerView == self.emailPasswordContainer) {
+//            self.emailPasswordContainerHighlight.alpha = alphaOn;
+//        }
+        if (shouldScroll) {
+            self.inputContainer.contentOffset = CGPointMake(0, contentOffsetY);
+        }
+    }];
+    
+}
+
+- (BOOL)textFieldShouldBeginEditing:(UITextField *)textField {
+    
+    UIView * oldActiveInputSectionContainer = [self.inputContainer getFirstResponder].superview.superview; // HARD CODED
+    UIView * newActiveInputSectionContainer = textField.superview.superview; // HARD CODED
+    if (oldActiveInputSectionContainer != newActiveInputSectionContainer) {
+        [self setHighlighted:NO forInputSectionContainer:oldActiveInputSectionContainer animated:NO];
+        [self setHighlighted:YES forInputSectionContainer:newActiveInputSectionContainer animated:NO];
+    }
+    
     if (textField == self.passwordTextField) {
         self.passwordTextField.returnKeyType = confirmPasswordVisible ? UIReturnKeyNext : UIReturnKeySend;
     }
-//    // Total crazy hack, trying to avoid default auto scroll behavior
-//    UIScrollView * wrap = [[[UIScrollView alloc] initWithFrame:textField.frame] autorelease];
-//    wrap.backgroundColor = [UIColor clearColor];
-//    [textField.superview addSubview:wrap];
-//    textField.frame = CGRectMake(0, 0, textField.frame.size.width, textField.frame.size.height);
-//    [wrap addSubview:textField];
+    
     return YES;
 }
 
-//- (BOOL)textFieldShouldEndEditing:(UITextField *)textField {
-//    // Total crazy hack, trying to avoid default auto scroll behavior
-//    UIScrollView * wrap = (UIScrollView *)textField.superview;
-//    textField.frame = wrap.frame;
-//    [wrap.superview addSubview:textField];
-//    [wrap removeFromSuperview];
-//    return YES;
-//}
-
 - (BOOL)textFieldShouldReturn:(UITextField *)textField {
+//    BOOL shouldTurnContainerHighlightAlphaOff = NO;
+//    UIView * containerView = textField.superview.superview; // HARD CODED, HACK AVOIDING THE AUTO-SCROLL BEHAVIOR INITIATED BY UITextField OBJECTS THAT ARE SUBVIEWS OF UIScrollView OBJECTS.
     if (textField == self.firstNameTextField) {
         [self.lastNameTextField becomeFirstResponder];
     } else if (textField == self.lastNameTextField) {
+//        shouldTurnContainerHighlightAlphaOff = YES;
         [self.emailTextField becomeFirstResponder];
     } else if (textField == self.emailTextField) {
         [self.passwordTextField becomeFirstResponder];
@@ -531,6 +576,41 @@ double const AP_NAV_BUTTONS_ANIMATION_DURATION = 0.25;
     }
     return NO;
 }
+
+//- (void)textFieldDidEndEditing:(UITextField *)textField {
+//    
+//    NSLog(@"textFieldDidEndEditing:%@", textField);
+//    
+//    
+//    [UIView animateWithDuration:0.25 animations:^{
+//        CGFloat alphaOff = 0;
+//        if (containerView == self.namePictureContainer) {
+//            self.namePictureContainerHighlight.alpha = alphaOff;
+//        }
+//        if (containerView == self.emailPasswordContainer) {
+//            self.emailPasswordContainerHighlight.alpha = alphaOff;
+//        }
+//    }];
+//    
+//}
+
+- (void) setHighlighted:(BOOL)shouldHighlight forInputSectionContainer:(UIView *)inputSectionContainer animated:(BOOL)animated {
+    CGFloat alpha = shouldHighlight ? 1.0 : 0.0;
+    void(^alphaBlock)(void) = ^{
+        if (inputSectionContainer == self.namePictureContainer) {
+            self.namePictureContainerHighlight.alpha = alpha;
+        }
+        if (inputSectionContainer == self.emailPasswordContainer) {
+            self.emailPasswordContainerHighlight.alpha = alpha;
+        }        
+    };
+    if (animated) {
+        [UIView animateWithDuration:0.25 animations:alphaBlock];
+    } else {
+        alphaBlock();
+    }
+}
+
 
 - (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex {
     if (alertView == self.passwordIncorrectAlertView ||
@@ -585,13 +665,7 @@ double const AP_NAV_BUTTONS_ANIMATION_DURATION = 0.25;
             [self.webConnector accountConnectWithEmail:self.emailTextField.text password:self.passwordTextField.text];
             [self showWebActivityView];
         } else {
-            UIAlertView * alert = [[UIAlertView alloc] initWithTitle:@"Invalid Email" 
-                                                             message:@"You must enter a valid email address."
-                                                            delegate:nil 
-                                                   cancelButtonTitle:@"OK" 
-                                                   otherButtonTitles:nil];
-            [alert show]; 
-            [alert release];
+            [self.emailInvalidAlertView show];
         }
     } else {
         [self.emailTextField becomeFirstResponder];
@@ -630,8 +704,8 @@ double const AP_NAV_BUTTONS_ANIMATION_DURATION = 0.25;
             // Invalid Email
             // You must enter a valid email address.
             // -> Make email first responder
-            alertTitle = @"Invalid Email";
-            alertMessage = @"You must enter a valid email address.";
+            alertTitle = self.emailInvalidAlertView.title;
+            alertMessage = self.emailInvalidAlertView.message;
             nextFirstResponder = self.emailTextField;
         } else if (!passwordsEntered) {
             // Missing Information
@@ -739,6 +813,11 @@ double const AP_NAV_BUTTONS_ANIMATION_DURATION = 0.25;
         
         [self.anotherAccountWithEmailExistsAlertView show];
         
+    } else if (failureCode == AccountCreateEmailNotValid) {
+        
+        [self.emailInvalidAlertView show];
+        [self.emailTextField becomeFirstResponder];
+        
     } else {
         
         UIAlertView * alert = [[UIAlertView alloc] initWithTitle:@"Connection Error" message:@"Sorry - there was a problem connecting with Kwiqet. Please check your connection and try again." delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil];
@@ -816,6 +895,8 @@ double const AP_NAV_BUTTONS_ANIMATION_DURATION = 0.25;
         [self.emailTextField becomeFirstResponder];
     } else {
         [self resignFirstResponderForAllTextFields];
+        [self setHighlighted:NO forInputSectionContainer:self.namePictureContainer animated:animated];
+        [self setHighlighted:NO forInputSectionContainer:self.emailPasswordContainer animated:animated];
     }
     
 }
@@ -851,6 +932,7 @@ double const AP_NAV_BUTTONS_ANIMATION_DURATION = 0.25;
         }
         emailPasswordContainerFrame.size.height = calculatedHeight;
         self.emailPasswordContainer.frame = emailPasswordContainerFrame;
+        self.emailPasswordContainerHighlight.frame = CGRectInset(self.emailPasswordContainer.frame, -2, -2);
 //        NSLog(@"%d", self.passwordTextField.returnKeyType);
         self.passwordTextField.returnKeyType = shouldExpand ? UIReturnKeyNext : UIReturnKeySend; // If passwordTextField is first responder when this call is made, the returnKeyType does not get updated until another text field becomes first responder, and then this one becomes it once again. It does not help to quickly switch to another and come back right here, either. Strange bug.
 //        NSLog(@"passwordTextField.returnKeyType=%d (where 'Next'=%d & 'Send'=%d)", self.passwordTextField.returnKeyType, UIReturnKeyNext, UIReturnKeySend);
@@ -965,6 +1047,13 @@ double const AP_NAV_BUTTONS_ANIMATION_DURATION = 0.25;
         passwordIncorrectAlertView.delegate = self;
     }
     return passwordIncorrectAlertView;
+}
+
+- (UIAlertView *)emailInvalidAlertView {
+    if (emailInvalidAlertView == nil) {
+        emailInvalidAlertView = [[UIAlertView alloc] initWithTitle:@"Invalid Email" message:@"You must enter a valid email address." delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil];
+    }
+    return emailInvalidAlertView;
 }
 
 - (UIAlertView *) forgotPasswordConnectionErrorAlertView {

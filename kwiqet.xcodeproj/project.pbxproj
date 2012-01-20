@@ -134,6 +134,7 @@
 		322CDFEC13CF4AA6005203C2 /* btn_selectall_full_border@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 322CDFE813CF4AA6005203C2 /* btn_selectall_full_border@2x.png */; };
 		322CDFED13CF4AA6005203C2 /* btn_selectall_full_norightborder.png in Resources */ = {isa = PBXBuildFile; fileRef = 322CDFE913CF4AA6005203C2 /* btn_selectall_full_norightborder.png */; };
 		322CDFEE13CF4AA6005203C2 /* btn_selectall_full_norightborder@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 322CDFEA13CF4AA6005203C2 /* btn_selectall_full_norightborder@2x.png */; };
+		322E463D14C9C1690043D66D /* UIView+GetFirstResponder.m in Sources */ = {isa = PBXBuildFile; fileRef = 322E463C14C9C1690043D66D /* UIView+GetFirstResponder.m */; };
 		322E51AF13FACC4000E69576 /* ico_larger_afternoon.png in Resources */ = {isa = PBXBuildFile; fileRef = 322E519713FACC4000E69576 /* ico_larger_afternoon.png */; };
 		322E51B013FACC4000E69576 /* ico_larger_afternoon@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 322E519813FACC4000E69576 /* ico_larger_afternoon@2x.png */; };
 		322E51B113FACC4000E69576 /* ico_larger_borough.png in Resources */ = {isa = PBXBuildFile; fileRef = 322E519913FACC4000E69576 /* ico_larger_borough.png */; };
@@ -800,6 +801,8 @@
 		322CDFE813CF4AA6005203C2 /* btn_selectall_full_border@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "btn_selectall_full_border@2x.png"; sourceTree = "<group>"; };
 		322CDFE913CF4AA6005203C2 /* btn_selectall_full_norightborder.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = btn_selectall_full_norightborder.png; sourceTree = "<group>"; };
 		322CDFEA13CF4AA6005203C2 /* btn_selectall_full_norightborder@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "btn_selectall_full_norightborder@2x.png"; sourceTree = "<group>"; };
+		322E463B14C9C1690043D66D /* UIView+GetFirstResponder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIView+GetFirstResponder.h"; sourceTree = "<group>"; };
+		322E463C14C9C1690043D66D /* UIView+GetFirstResponder.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIView+GetFirstResponder.m"; sourceTree = "<group>"; };
 		322E519713FACC4000E69576 /* ico_larger_afternoon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = ico_larger_afternoon.png; sourceTree = "<group>"; };
 		322E519813FACC4000E69576 /* ico_larger_afternoon@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "ico_larger_afternoon@2x.png"; sourceTree = "<group>"; };
 		322E519913FACC4000E69576 /* ico_larger_borough.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = ico_larger_borough.png; sourceTree = "<group>"; };
@@ -1922,6 +1925,8 @@
 			children = (
 				326A2C86141A5C7100F44E22 /* UIFont+Kwiqet.h */,
 				326A2C87141A5C7100F44E22 /* UIFont+Kwiqet.m */,
+				322E463B14C9C1690043D66D /* UIView+GetFirstResponder.h */,
+				322E463C14C9C1690043D66D /* UIView+GetFirstResponder.m */,
 			);
 			name = "Obj-C Categories";
 			sourceTree = "<group>";
@@ -3428,6 +3433,7 @@
 				32E4D91B14C48D1600175376 /* FavoritesViewController.m in Sources */,
 				323BBB7B14C8878900C1AD42 /* InnerShadowDrawing.m in Sources */,
 				323BBB8514C89DDD00C1AD42 /* AccountInputFieldDividerView.m in Sources */,
+				322E463D14C9C1690043D66D /* UIView+GetFirstResponder.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

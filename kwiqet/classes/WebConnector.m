@@ -35,6 +35,9 @@ static NSString * const WEB_CONNECTOR_ACCOUNT_USER_INFO_KEY_API_KEY = @"apiKey";
 static NSString * const WEB_CONNECTOR_ACCOUNT_USER_INFO_KEY_NAME_FIRST = @"nameFirst";
 static NSString * const WEB_CONNECTOR_ACCOUNT_USER_INFO_KEY_NAME_LAST = @"nameLast";
 static NSString * const WEB_CONNECTOR_ACCOUNT_USER_INFO_KEY_REQUEST_ORIGINATED_WITH_CONNECTION_REQUEST = @"WEB_CONNECTOR_ACCOUNT_USER_INFO_KEY_REQUEST_ORIGINATED_WITH_CONNECTION_REQUEST";
+static NSString * const WEB_CONNECTOR_ACCOUNT_CREATE_EMAIL_NOT_VALID_EXPECTED_RESPONSE_STRING = @"Enter a valid e-mail address.";
+static NSString * const WEB_CONNECTOR_ACCOUNT_CREATE_EMAIL_IN_USE_EXPECTED_RESPONSE_STRING = @"A user is registered with this e-mail address.";
+
 
 @interface WebConnector()
 @property (retain) NSMutableArray * connectionsInProgress;
@@ -693,6 +696,8 @@ static NSString * const WEB_CONNECTOR_ACCOUNT_USER_INFO_KEY_REQUEST_ORIGINATED_W
         request.userInfo = userInfo;
         [request startAsynchronous];
         
+        NSLog(@"%@", request.url);
+        
     }
     
 }
@@ -701,24 +706,40 @@ static NSString * const WEB_CONNECTOR_ACCOUNT_USER_INFO_KEY_REQUEST_ORIGINATED_W
     
     [self.connectionsInProgress removeObject:request];
     
+    NSLog(@"accountCreate(Maybe)Success: %@", request);
+    NSLog(@"%d", request.responseStatusCode);
+    NSLog(@"%@", request.responseString);
+    
     NSError * error = nil;
     NSDictionary * dictionaryFromJSON = [request.responseString yajl_JSONWithOptions:YAJLParserOptionsAllowComments error:&error];
     NSString * emailFromUserInfo = [request.userInfo valueForKey:WEB_CONNECTOR_ACCOUNT_USER_INFO_KEY_EMAIL];
-    NSString * emailInUseAlreadyIndicator = [dictionaryFromJSON valueForKey:@"email"];
-    BOOL emailInUseAlready = emailInUseAlreadyIndicator != nil;
-    if (emailInUseAlready) {
-        [self.delegate webConnector:self accountCreateFailure:request failureCode:AccountCreateEmailAssociatedWithAnotherAccount withEmail:emailFromUserInfo];
+    if (request && request.responseStatusCode < 400) {
+        NSLog(@"accountCreateSuccess");
+        NSString * apiKey = request.responseString;
+        NSMutableDictionary * userInfo = [NSMutableDictionary dictionaryWithDictionary:request.userInfo];
+        [userInfo setObject:[NSNumber numberWithBool:YES] forKey:WEB_CONNECTOR_ACCOUNT_USER_INFO_KEY_REQUEST_ORIGINATED_WITH_CONNECTION_REQUEST];
+        [userInfo setObject:apiKey forKey:WEB_CONNECTOR_ACCOUNT_USER_INFO_KEY_API_KEY];
+        [self getUserProfileForAPIKey:apiKey fallbackUserInfo:userInfo];
     } else {
-        if (request && request.responseStatusCode < 400) {
-            NSString * apiKey = request.responseString;
-            NSMutableDictionary * userInfo = [NSMutableDictionary dictionaryWithDictionary:request.userInfo];
-            [userInfo setObject:[NSNumber numberWithBool:YES] forKey:WEB_CONNECTOR_ACCOUNT_USER_INFO_KEY_REQUEST_ORIGINATED_WITH_CONNECTION_REQUEST];
-            [userInfo setObject:apiKey forKey:WEB_CONNECTOR_ACCOUNT_USER_INFO_KEY_API_KEY];
-            [self getUserProfileForAPIKey:apiKey fallbackUserInfo:userInfo];
-            
-        } else {
-            [self.delegate webConnector:self accountCreateFailure:request failureCode:GeneralFailure withEmail:emailFromUserInfo];
+        NSLog(@"accountCreateFailure - status code %d >= 400", request.responseStatusCode);
+        // Various possible causes for failure:
+        // - Email is not valid
+        // - Email is in use already
+        // - Other
+        WebConnectorFailure failureCode = GeneralFailure;
+        NSArray * emailRelatedMessages = [dictionaryFromJSON valueForKey:@"email"];
+        NSString * firstEmailRelatedMessage = nil;
+        if (emailRelatedMessages && emailRelatedMessages.count > 0) {
+            firstEmailRelatedMessage = [emailRelatedMessages objectAtIndex:0];
         }
+        if (firstEmailRelatedMessage) {
+            if ([firstEmailRelatedMessage isEqualToString:WEB_CONNECTOR_ACCOUNT_CREATE_EMAIL_IN_USE_EXPECTED_RESPONSE_STRING]) {
+                failureCode = AccountCreateEmailAssociatedWithAnotherAccount;
+            } else if ([firstEmailRelatedMessage isEqualToString:WEB_CONNECTOR_ACCOUNT_CREATE_EMAIL_NOT_VALID_EXPECTED_RESPONSE_STRING]) {
+                failureCode = AccountCreateEmailNotValid;
+            }
+        }
+        [self.delegate webConnector:self accountCreateFailure:request failureCode:failureCode withEmail:emailFromUserInfo];
     }
 
 }
