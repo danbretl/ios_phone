@@ -10,10 +10,24 @@
 #import "WebActivityView.h"
 #import "WebConnector.h"
 #import "FacebookManager.h"
+#import "UIButtonWithDynamicBackgroundColor.h"
 
 @protocol AccountPromptViewControllerDelegate;
 
-@interface AccountPromptViewController : UIViewController <UITextFieldDelegate, WebConnectorDelegate, UIAlertViewDelegate> {
+@interface AccountPromptViewController : UIViewController <UITextFieldDelegate, WebConnectorDelegate, UIAlertViewDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate, UIActionSheetDelegate> {
+    
+    BOOL initialPromptScreenVisible;
+    BOOL accountCreationViewsVisible;
+    BOOL confirmPasswordVisible;
+    BOOL waitingForFacebookAuthentication;
+    BOOL waitingForFacebookInfo;
+    
+    NSString * firstNameInputString;
+    NSString * lastNameInputString;
+    NSString * emailInputString;
+    NSString * passwordInputString;
+    NSString * confirmPasswordInputString;
+    UIImage * pictureInputImage;
     
     IBOutlet UIView * navBar;
     IBOutlet UIButton * logoButton;
@@ -23,7 +37,7 @@
 
     IBOutlet UIView * mainViewsContainer;
     
-    IBOutlet UIView *accountOptionsContainer;
+    IBOutlet UIView * accountOptionsContainer;
     IBOutlet UILabel * blurbLabel;
     IBOutlet UIButton * emailButton;
     IBOutlet UIButton * facebookButton;
@@ -34,7 +48,7 @@
     IBOutlet UIView * namePictureContainer;
     UIView * namePictureContainerHighlight;
     IBOutlet UIImageView * namePictureContainerImageView;
-    IBOutlet UIButton * pictureButton;
+    IBOutlet UIButtonWithDynamicBackgroundColor * pictureButton;
     IBOutlet UITextField * firstNameTextField;
     IBOutlet UITextField * lastNameTextField;
     CGFloat emailPasswordOriginYMainStage;
@@ -48,21 +62,18 @@
     IBOutlet UILabel * emailAccountAssuranceLabel;
     
     UISwipeGestureRecognizer * swipeDownGestureRecognizer;
-    
-    BOOL initialPromptScreenVisible;
-    BOOL accountCreationViewsVisible;
-    BOOL confirmPasswordVisible;
-    BOOL waitingForFacebookAuthentication;
-    BOOL waitingForFacebookInfo;
-    
+        
     WebActivityView * webActivityView;
     UIAlertView * passwordIncorrectAlertView;
     UIAlertView * emailInvalidAlertView;
     UIAlertView * forgotPasswordConnectionErrorAlertView;
     UIAlertView * anotherAccountWithEmailExistsAlertView;
+    UIActionSheet * imagePickerActionSheet;
     
     WebConnector * webConnector;
     FacebookManager * facebookManager;
+    
+    UIImagePickerController * imagePickerController_;
     
     id<AccountPromptViewControllerDelegate> delegate;
     

@@ -13,10 +13,20 @@
 #import "WebUtil.h"
 #import "Facebook+Cancel.h"
 #import "UIView+GetFirstResponder.h"
+#import <MobileCoreServices/UTCoreTypes.h>
 
 double const AP_NAV_BUTTONS_ANIMATION_DURATION = 0.25;
+static NSString * AP_IMAGE_PICKER_OPTION_TEXT_CAMERA = @"Camera";
+static NSString * AP_IMAGE_PICKER_OPTION_TEXT_LIBRARY = @"Photo Library";
 
 @interface AccountPromptViewController()
+
+@property (nonatomic, retain) NSString * firstNameInputString;
+@property (nonatomic, retain) NSString * lastNameInputString;
+@property (nonatomic, retain) NSString * emailInputString;
+@property (nonatomic, retain) NSString * passwordInputString;
+@property (nonatomic, retain) NSString * confirmPasswordInputString;
+@property (nonatomic, retain) UIImage * pictureInputImage;
 
 @property (retain) UIView * navBar;
 @property (retain) UIButton * logoButton;
@@ -37,7 +47,7 @@ double const AP_NAV_BUTTONS_ANIMATION_DURATION = 0.25;
 @property (retain) UIView * namePictureContainer;
 @property (retain) UIView * namePictureContainerHighlight;
 @property (nonatomic, retain) UIImageView * namePictureContainerImageView;
-@property (retain) UIButton * pictureButton;
+@property (retain) UIButtonWithDynamicBackgroundColor * pictureButton;
 @property (retain)  UITextField * firstNameTextField;
 @property (retain)  UITextField * lastNameTextField;
 @property (retain) UIView * emailPasswordContainer;
@@ -50,6 +60,7 @@ double const AP_NAV_BUTTONS_ANIMATION_DURATION = 0.25;
 
 @property (retain) UISwipeGestureRecognizer * swipeDownGestureRecognizer;
 
+- (IBAction) pictureButtonTouched:(UIButton *)button;
 - (IBAction) cancelButtonTouched:(id)sender;
 - (IBAction) doneButtonTouched:(id)sender;
 - (IBAction) accountOptionButtonTouched:(id)accountOptionButton;
@@ -62,6 +73,7 @@ double const AP_NAV_BUTTONS_ANIMATION_DURATION = 0.25;
 - (void) showContainer:(UIView *)viewsContainer animated:(BOOL)animated;
 - (void) showAccountCreationInputViews:(BOOL)shouldShowCreationViews showPasswordConfirmation:(BOOL)shouldShowPasswordConfirmation activateAppropriateFirstResponder:(BOOL)shouldActivateFirstResponder animated:(BOOL)animated;
 - (void) setHighlighted:(BOOL)shouldHighlight forInputSectionContainer:(UIView *)inputSectionContainer animated:(BOOL)animated;
+- (void) setContainerToBeVisible:(UIView *)containerView animated:(BOOL)animated;
 
 @property (retain) WebActivityView * webActivityView;
 - (void) showWebActivityView;
@@ -70,6 +82,7 @@ double const AP_NAV_BUTTONS_ANIMATION_DURATION = 0.25;
 @property (nonatomic, readonly) UIAlertView * emailInvalidAlertView;
 @property (nonatomic, readonly) UIAlertView * forgotPasswordConnectionErrorAlertView;
 @property (nonatomic, readonly) UIAlertView * anotherAccountWithEmailExistsAlertView;
+@property (nonatomic, readonly) UIActionSheet * imagePickerActionSheet;
 
 - (void) keyboardWillHide:(NSNotification *)notification;
 - (void) keyboardWillShow:(NSNotification *)notification;
@@ -80,10 +93,13 @@ double const AP_NAV_BUTTONS_ANIMATION_DURATION = 0.25;
 - (void) facebookGetBasicInfoSuccess:(NSNotification *)notification;
 - (void) facebookGetBasicInfoFailure:(NSNotification *)notification;
 
+@property (nonatomic, retain) UIImagePickerController * imagePickerController;
+
 @end
 
 @implementation AccountPromptViewController
 
+@synthesize firstNameInputString, lastNameInputString, emailInputString, passwordInputString, confirmPasswordInputString, pictureInputImage;
 @synthesize navBar, logoButton, cancelButton, doneButton;
 @synthesize titleImageView;
 @synthesize mainViewsContainer;
@@ -95,6 +111,8 @@ double const AP_NAV_BUTTONS_ANIMATION_DURATION = 0.25;
 @synthesize emailAccountAssuranceLabel;
 @synthesize swipeDownGestureRecognizer;
 @synthesize webActivityView;
+@synthesize imagePickerController=imagePickerController_;
+@synthesize imagePickerActionSheet;
 @synthesize delegate;
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
@@ -102,11 +120,20 @@ double const AP_NAV_BUTTONS_ANIMATION_DURATION = 0.25;
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
     if (self) {
         // Custom initialization
+        initialPromptScreenVisible = YES;
+        accountCreationViewsVisible = NO;
+        confirmPasswordVisible = NO;
     }
     return self;
 }
 
 - (void)dealloc {
+    [firstNameInputString release];
+    [lastNameInputString release];
+    [emailInputString release];
+    [passwordInputString release];
+    [confirmPasswordInputString release];
+    [pictureInputImage release];
     [navBar release];
     [titleImageView release];
     [blurbLabel release];
@@ -126,6 +153,7 @@ double const AP_NAV_BUTTONS_ANIMATION_DURATION = 0.25;
     [emailAccountAssuranceLabel release];
     [webActivityView release];
     [passwordIncorrectAlertView release];
+    [imagePickerActionSheet release];
     [emailInvalidAlertView release];
     [forgotPasswordConnectionErrorAlertView release];
     [anotherAccountWithEmailExistsAlertView release];
@@ -141,6 +169,7 @@ double const AP_NAV_BUTTONS_ANIMATION_DURATION = 0.25;
     [swipeDownGestureRecognizer release];
     [namePictureContainerImageView release];
     [emailPasswordContainerImageView release];
+    [imagePickerController_ release];
     [super dealloc];
 }
 
@@ -202,7 +231,6 @@ double const AP_NAV_BUTTONS_ANIMATION_DURATION = 0.25;
     [orLine.layer addSublayer:dividerWhiteLayer];
     [self.accountOptionsContainer addSubview:orLine];
     
-    accountCreationViewsVisible = YES;
     emailPasswordOriginYPartOfForm = self.emailPasswordContainer.frame.origin.y; // Just making dev easier. Otherwise would probably just be hard coded. We could be smarter here, but this is OK for now.
     emailPasswordOriginYMainStage = 64; // HARD CODED VALUE
     
@@ -265,12 +293,15 @@ double const AP_NAV_BUTTONS_ANIMATION_DURATION = 0.25;
     self.emailTextField.backgroundColor = inputBackgroundColor;
     self.passwordTextField.backgroundColor = inputBackgroundColor;
     self.confirmPasswordTextField.backgroundColor = inputBackgroundColor;
+    
+    UIColor * lightBlueHighlightColor = [UIColor colorWithRed:11.0/255.0 green:149.0/255.0 blue:229.0/255.0 alpha:0.25];
 
     self.pictureButton.layer.shadowOffset = CGSizeMake(0.5, 1.0);
     self.pictureButton.layer.shadowColor = [UIColor blackColor].CGColor;
     self.pictureButton.layer.shadowOpacity = 0.4;
     self.pictureButton.layer.shadowRadius = 1.0;
     self.pictureButton.layer.shadowPath = [UIBezierPath bezierPathWithRect:self.pictureButton.bounds/*CGRectMake(0, 0, self.pictureButton.frame.size.width - .5, self.pictureButton.frame.size.height)*/].CGPath;
+    self.pictureButton.backgroundColorHighlight = lightBlueHighlightColor;
     
     self.namePictureContainer.layer.cornerRadius = 5;
     self.namePictureContainer.layer.masksToBounds = YES;
@@ -279,7 +310,6 @@ double const AP_NAV_BUTTONS_ANIMATION_DURATION = 0.25;
     
     namePictureContainerHighlight = [[UIView alloc] initWithFrame:CGRectInset(self.namePictureContainer.frame, -2, -2)];
     emailPasswordContainerHighlight = [[UIView alloc] initWithFrame:CGRectInset(self.emailPasswordContainer.frame, -2, -2)];
-    UIColor * lightBlueHighlightColor = [UIColor colorWithRed:11.0/255.0 green:149.0/255.0 blue:229.0/255.0 alpha:0.25];
     self.namePictureContainerHighlight.backgroundColor = lightBlueHighlightColor;
     self.emailPasswordContainerHighlight.backgroundColor = lightBlueHighlightColor;
     self.namePictureContainerHighlight.alpha = 0.0;
@@ -299,10 +329,6 @@ double const AP_NAV_BUTTONS_ANIMATION_DURATION = 0.25;
     [self.mainViewsContainer addSubview:self.inputContainer];
     self.inputContainer.frame = CGRectMake(self.mainViewsContainer.frame.size.width, 0, self.inputContainer.frame.size.width, self.inputContainer.frame.size.height);
     
-    initialPromptScreenVisible = YES;
-    [self showAccountCreationInputViews:NO showPasswordConfirmation:NO activateAppropriateFirstResponder:NO animated:NO];
-    [self showContainer:self.accountOptionsContainer animated:NO];
-    
     swipeDownGestureRecognizer = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(swipedDown:)];
     self.swipeDownGestureRecognizer.direction = UISwipeGestureRecognizerDirectionDown;
     [self.view addGestureRecognizer:self.swipeDownGestureRecognizer];
@@ -315,6 +341,15 @@ double const AP_NAV_BUTTONS_ANIMATION_DURATION = 0.25;
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardWillShow:) name:UIKeyboardWillShowNotification object:nil];
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardWillHide:) name:UIKeyboardWillHideNotification object:nil];
     
+    // The view might have unloaded due to a memory warning. If so, get back to where we were now.
+    [self showContainer:initialPromptScreenVisible ? self.accountOptionsContainer : self.inputContainer animated:NO];
+    [self showAccountCreationInputViews:accountCreationViewsVisible showPasswordConfirmation:confirmPasswordVisible activateAppropriateFirstResponder:NO animated:NO];
+    self.firstNameTextField.text = self.firstNameInputString;
+    self.lastNameTextField.text = self.lastNameInputString;
+    self.emailTextField.text = self.emailInputString;
+    self.passwordTextField.text = self.passwordInputString;
+    self.confirmPasswordTextField.text = self.confirmPasswordInputString;
+    //self.pictureButton setImage...
 }
 
 - (void)viewDidUnload
@@ -395,6 +430,7 @@ double const AP_NAV_BUTTONS_ANIMATION_DURATION = 0.25;
     if (accountOptionButton == self.emailButton) {
         
         [self showContainer:self.inputContainer animated:YES];
+        [self.emailTextField becomeFirstResponder];
         
     } else if (accountOptionButton == self.facebookButton) {
         
@@ -502,37 +538,120 @@ double const AP_NAV_BUTTONS_ANIMATION_DURATION = 0.25;
     [self userInputSubmissionAttemptRequested];
 }
 
+- (void)pictureButtonTouched:(UIButton *)button {
+    
+    [self resignFirstResponderForAllTextFields];
+    [self setHighlighted:NO forInputSectionContainer:self.namePictureContainer animated:NO];
+    [self setHighlighted:NO forInputSectionContainer:self.emailPasswordContainer animated:NO];
+    
+    BOOL cameraAvailable = [UIImagePickerController isSourceTypeAvailable:UIImagePickerControllerSourceTypeCamera];
+    if (cameraAvailable) {
+        [self.imagePickerActionSheet showFromRect:self.pictureButton.bounds inView:self.pictureButton animated:YES];
+    } else {
+        self.imagePickerController = [[[UIImagePickerController alloc] init] autorelease];
+        self.imagePickerController.delegate = self;
+        [self presentModalViewController:self.imagePickerController animated:YES];
+    }
+
+}
+
+- (UIActionSheet *)imagePickerActionSheet {
+    if (imagePickerActionSheet == nil) {
+        imagePickerActionSheet = [[UIActionSheet alloc] initWithTitle:@"Set Profile Picture" delegate:self cancelButtonTitle:@"Cancel" destructiveButtonTitle:nil otherButtonTitles:@"Camera", @"Photo Library", nil];
+    }
+    return imagePickerActionSheet;
+}
+
+- (void)actionSheet:(UIActionSheet *)actionSheet didDismissWithButtonIndex:(NSInteger)buttonIndex {
+    
+    if (buttonIndex != actionSheet.cancelButtonIndex) {
+        
+        UIImagePickerControllerSourceType sourceType = UIImagePickerControllerSourceTypePhotoLibrary;
+        NSArray * mediaTypes = [NSArray arrayWithObject:(NSString *)kUTTypeImage];
+        
+        NSString * buttonTitle = [actionSheet buttonTitleAtIndex:buttonIndex];
+        if ([buttonTitle isEqualToString:AP_IMAGE_PICKER_OPTION_TEXT_CAMERA]) {
+            // Camera
+            sourceType = UIImagePickerControllerSourceTypeCamera;
+        } else if ([buttonTitle isEqualToString:AP_IMAGE_PICKER_OPTION_TEXT_LIBRARY]) {
+            // Photo Library
+            // ...
+        }
+        
+        self.imagePickerController = [[[UIImagePickerController alloc] init] autorelease];
+        self.imagePickerController.sourceType = sourceType;
+        self.imagePickerController.mediaTypes = mediaTypes;
+        self.imagePickerController.allowsEditing = YES;
+        self.imagePickerController.delegate = self;
+        [self presentModalViewController:self.imagePickerController animated:YES];
+        
+    }
+    
+}
+
+- (void)imagePickerController:(UIImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary *)info {
+    NSLog(@"imagePickerController:didFinishPickingMediaWithInfo:");
+    [self dismissModalViewControllerAnimated:YES];
+}
+
+- (void)imagePickerControllerDidCancel:(UIImagePickerController *)picker {
+    NSLog(@"imagePickerControllerDidCancel:");
+    [self dismissModalViewControllerAnimated:YES];
+}
+
 - (void)textFieldDidBeginEditing:(UITextField *)textField {
     
     NSLog(@"textFieldDidBeginEditing:%@", textField);
     
     UIView * containerView = textField.superview.superview; // HARD CODED, HACK AVOIDING THE AUTO-SCROLL BEHAVIOR INITIATED BY UITextField OBJECTS THAT ARE SUBVIEWS OF UIScrollView OBJECTS.
     
-    BOOL shouldScroll = NO;
-    CGFloat contentOffsetY = 0;
-    if (CGRectGetMinY(containerView.frame) - 10 < self.inputContainer.contentOffset.y) {
-        shouldScroll = YES;
-        contentOffsetY = CGRectGetMinY(containerView.frame) - 10;
-    } else {
-        CGFloat visibleHeightOfScrollView = self.inputContainer.frame.size.height - (self.inputContainer.contentInset.top + self.inputContainer.contentInset.bottom);
-        if (CGRectGetMaxY(containerView.frame) + 10 > self.inputContainer.contentOffset.y + visibleHeightOfScrollView) {
-            shouldScroll = YES;
-            contentOffsetY = MIN(CGRectGetMaxY(containerView.frame) - containerView.frame.size.height - 10, self.inputContainer.contentSize.height - visibleHeightOfScrollView);
-        }
-    }
+    [self setContainerToBeVisible:containerView animated:YES];
     
-    [UIView animateWithDuration:0.25 animations:^{
-//        CGFloat alphaOn = 0.25;
-//        if (containerView == self.namePictureContainer) {
-//            self.namePictureContainerHighlight.alpha = alphaOn;
-//        }
-//        if (containerView == self.emailPasswordContainer) {
-//            self.emailPasswordContainerHighlight.alpha = alphaOn;
-//        }
+}
+
+- (void)textFieldDidEndEditing:(UITextField *)textField {
+    SEL setInputStringSelector = NULL;
+    if (textField == self.firstNameTextField) {
+        setInputStringSelector = @selector(setFirstNameInputString:);
+    } else if (textField == self.lastNameTextField) {
+        setInputStringSelector = @selector(setLastNameInputString:);
+    } else if (textField == self.emailTextField) {
+        setInputStringSelector = @selector(setEmailInputString:); 
+    } else if (textField == self.passwordTextField) {
+        setInputStringSelector = @selector(setPasswordInputString:);
+    } else if (textField == self.confirmPasswordTextField) {
+        setInputStringSelector = @selector(setConfirmPasswordInputString:);
+    } else {
+        NSLog(@"ERROR in AccountPromptViewController - unrecognized textFieldDidEndEditing:%@", textField);
+    }
+    [self performSelector:setInputStringSelector withObject:textField.text];
+}
+
+- (void) setContainerToBeVisible:(UIView *)containerView animated:(BOOL)animated {
+    
+    void(^adjustmentsBlock)(void) = ^{
+        BOOL shouldScroll = NO;
+        CGFloat contentOffsetY = 0;
+        if (CGRectGetMinY(containerView.frame) - 10 < self.inputContainer.contentOffset.y) {
+            shouldScroll = YES;
+            contentOffsetY = CGRectGetMinY(containerView.frame) - 10;
+        } else {
+            CGFloat visibleHeightOfScrollView = self.inputContainer.frame.size.height - (self.inputContainer.contentInset.top + self.inputContainer.contentInset.bottom);
+            if (CGRectGetMaxY(containerView.frame) + 10 > self.inputContainer.contentOffset.y + visibleHeightOfScrollView) {
+                shouldScroll = YES;
+                contentOffsetY = MIN(CGRectGetMaxY(containerView.frame) - containerView.frame.size.height - 10, self.inputContainer.contentSize.height - visibleHeightOfScrollView);
+            }
+        }
         if (shouldScroll) {
             self.inputContainer.contentOffset = CGPointMake(0, contentOffsetY);
         }
-    }];
+    };
+    
+    if (animated) {
+        [UIView animateWithDuration:0.25 animations:adjustmentsBlock];
+    } else {
+        adjustmentsBlock();
+    }
     
 }
 
@@ -553,12 +672,9 @@ double const AP_NAV_BUTTONS_ANIMATION_DURATION = 0.25;
 }
 
 - (BOOL)textFieldShouldReturn:(UITextField *)textField {
-//    BOOL shouldTurnContainerHighlightAlphaOff = NO;
-//    UIView * containerView = textField.superview.superview; // HARD CODED, HACK AVOIDING THE AUTO-SCROLL BEHAVIOR INITIATED BY UITextField OBJECTS THAT ARE SUBVIEWS OF UIScrollView OBJECTS.
     if (textField == self.firstNameTextField) {
         [self.lastNameTextField becomeFirstResponder];
     } else if (textField == self.lastNameTextField) {
-//        shouldTurnContainerHighlightAlphaOff = YES;
         [self.emailTextField becomeFirstResponder];
     } else if (textField == self.emailTextField) {
         [self.passwordTextField becomeFirstResponder];
@@ -577,23 +693,6 @@ double const AP_NAV_BUTTONS_ANIMATION_DURATION = 0.25;
     return NO;
 }
 
-//- (void)textFieldDidEndEditing:(UITextField *)textField {
-//    
-//    NSLog(@"textFieldDidEndEditing:%@", textField);
-//    
-//    
-//    [UIView animateWithDuration:0.25 animations:^{
-//        CGFloat alphaOff = 0;
-//        if (containerView == self.namePictureContainer) {
-//            self.namePictureContainerHighlight.alpha = alphaOff;
-//        }
-//        if (containerView == self.emailPasswordContainer) {
-//            self.emailPasswordContainerHighlight.alpha = alphaOff;
-//        }
-//    }];
-//    
-//}
-
 - (void) setHighlighted:(BOOL)shouldHighlight forInputSectionContainer:(UIView *)inputSectionContainer animated:(BOOL)animated {
     CGFloat alpha = shouldHighlight ? 1.0 : 0.0;
     void(^alphaBlock)(void) = ^{
@@ -610,7 +709,6 @@ double const AP_NAV_BUTTONS_ANIMATION_DURATION = 0.25;
         alphaBlock();
     }
 }
-
 
 - (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex {
     if (alertView == self.passwordIncorrectAlertView ||
@@ -891,9 +989,7 @@ double const AP_NAV_BUTTONS_ANIMATION_DURATION = 0.25;
             [self showAccountCreationInputViews:NO showPasswordConfirmation:NO activateAppropriateFirstResponder:NO animated:NO];
         }
     }
-    if (shouldShowInputViews) {
-        [self.emailTextField becomeFirstResponder];
-    } else {
+    if (!shouldShowInputViews) {
         [self resignFirstResponderForAllTextFields];
         [self setHighlighted:NO forInputSectionContainer:self.namePictureContainer animated:animated];
         [self setHighlighted:NO forInputSectionContainer:self.emailPasswordContainer animated:animated];
@@ -1090,12 +1186,14 @@ double const AP_NAV_BUTTONS_ANIMATION_DURATION = 0.25;
 }
 
 - (void)keyboardWillShow:(NSNotification *)notification {
+    NSLog(@"keyboardWillShow:");
     NSDictionary * info = [notification userInfo];
 	CGSize keyboardSize = [[info objectForKey:UIKeyboardFrameBeginUserInfoKey] CGRectValue].size;
     double keyboardAnimationDuration = [[info objectForKey:UIKeyboardAnimationDurationUserInfoKey] doubleValue];
     UIViewAnimationCurve keyboardAnimationCurve = [[info objectForKey:UIKeyboardAnimationCurveUserInfoKey] integerValue];
     [UIView animateWithDuration:keyboardAnimationDuration delay:0.0 options:keyboardAnimationCurve animations:^{
         [self setBottomInset:keyboardSize.height - self.tabBarController.tabBar.bounds.size.height forScrollView:self.inputContainer];
+        [self setContainerToBeVisible:[self.inputContainer getFirstResponder].superview.superview animated:NO];
     } completion:^(BOOL finished){}];
     NSLog(@"keyboardWillShow adjustments made, inputContainerContentSize=%@, inputContainerContentInset=%@", NSStringFromCGSize(self.inputContainer.contentSize), NSStringFromUIEdgeInsets(self.inputContainer.contentInset));
 }

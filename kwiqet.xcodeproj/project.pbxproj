@@ -135,6 +135,7 @@
 		322CDFED13CF4AA6005203C2 /* btn_selectall_full_norightborder.png in Resources */ = {isa = PBXBuildFile; fileRef = 322CDFE913CF4AA6005203C2 /* btn_selectall_full_norightborder.png */; };
 		322CDFEE13CF4AA6005203C2 /* btn_selectall_full_norightborder@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 322CDFEA13CF4AA6005203C2 /* btn_selectall_full_norightborder@2x.png */; };
 		322E463D14C9C1690043D66D /* UIView+GetFirstResponder.m in Sources */ = {isa = PBXBuildFile; fileRef = 322E463C14C9C1690043D66D /* UIView+GetFirstResponder.m */; };
+		322E464014C9E33E0043D66D /* UIButtonWithDynamicBackgroundColor.m in Sources */ = {isa = PBXBuildFile; fileRef = 322E463F14C9E33E0043D66D /* UIButtonWithDynamicBackgroundColor.m */; };
 		322E51AF13FACC4000E69576 /* ico_larger_afternoon.png in Resources */ = {isa = PBXBuildFile; fileRef = 322E519713FACC4000E69576 /* ico_larger_afternoon.png */; };
 		322E51B013FACC4000E69576 /* ico_larger_afternoon@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 322E519813FACC4000E69576 /* ico_larger_afternoon@2x.png */; };
 		322E51B113FACC4000E69576 /* ico_larger_borough.png in Resources */ = {isa = PBXBuildFile; fileRef = 322E519913FACC4000E69576 /* ico_larger_borough.png */; };
@@ -803,6 +804,8 @@
 		322CDFEA13CF4AA6005203C2 /* btn_selectall_full_norightborder@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "btn_selectall_full_norightborder@2x.png"; sourceTree = "<group>"; };
 		322E463B14C9C1690043D66D /* UIView+GetFirstResponder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIView+GetFirstResponder.h"; sourceTree = "<group>"; };
 		322E463C14C9C1690043D66D /* UIView+GetFirstResponder.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIView+GetFirstResponder.m"; sourceTree = "<group>"; };
+		322E463E14C9E33E0043D66D /* UIButtonWithDynamicBackgroundColor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UIButtonWithDynamicBackgroundColor.h; sourceTree = "<group>"; };
+		322E463F14C9E33E0043D66D /* UIButtonWithDynamicBackgroundColor.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UIButtonWithDynamicBackgroundColor.m; sourceTree = "<group>"; };
 		322E519713FACC4000E69576 /* ico_larger_afternoon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = ico_larger_afternoon.png; sourceTree = "<group>"; };
 		322E519813FACC4000E69576 /* ico_larger_afternoon@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "ico_larger_afternoon@2x.png"; sourceTree = "<group>"; };
 		322E519913FACC4000E69576 /* ico_larger_borough.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = ico_larger_borough.png; sourceTree = "<group>"; };
@@ -1451,6 +1454,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				32FD38A813AFF5A7007549B6 /* MobileCoreServices.framework in Frameworks */,
 				3232ED8F14698EB30086D545 /* AddressBookUI.framework in Frameworks */,
 				3232ED8D14698B6D0086D545 /* AddressBook.framework in Frameworks */,
 				325FBB72144825EB007255FA /* libsqlite3.dylib in Frameworks */,
@@ -1463,7 +1467,6 @@
 				32FD38B213AFF5CE007549B6 /* EventKitUI.framework in Frameworks */,
 				32FD38AE13AFF5C4007549B6 /* MediaPlayer.framework in Frameworks */,
 				32FD38AC13AFF5BE007549B6 /* CFNetwork.framework in Frameworks */,
-				32FD38A813AFF5A7007549B6 /* MobileCoreServices.framework in Frameworks */,
 				32FD38A613AFF594007549B6 /* MapKit.framework in Frameworks */,
 				32FD38A413AFF58A007549B6 /* MessageUI.framework in Frameworks */,
 				32FD38A213AFF56E007549B6 /* CoreLocation.framework in Frameworks */,
@@ -2068,6 +2071,8 @@
 				325A0941148406EF00CA5538 /* AccountPromptViewController.h */,
 				325A0942148406EF00CA5538 /* AccountPromptViewController.m */,
 				325A0943148406EF00CA5538 /* AccountPromptViewController.xib */,
+				322E463E14C9E33E0043D66D /* UIButtonWithDynamicBackgroundColor.h */,
+				322E463F14C9E33E0043D66D /* UIButtonWithDynamicBackgroundColor.m */,
 				323BBB8314C89DDD00C1AD42 /* AccountInputFieldDividerView.h */,
 				323BBB8414C89DDD00C1AD42 /* AccountInputFieldDividerView.m */,
 				32FD384713AFF52F007549B6 /* LoginViewController.h */,
@@ -3434,6 +3439,7 @@
 				323BBB7B14C8878900C1AD42 /* InnerShadowDrawing.m in Sources */,
 				323BBB8514C89DDD00C1AD42 /* AccountInputFieldDividerView.m in Sources */,
 				322E463D14C9C1690043D66D /* UIView+GetFirstResponder.m in Sources */,
+				322E464014C9E33E0043D66D /* UIButtonWithDynamicBackgroundColor.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
