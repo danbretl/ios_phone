@@ -21,6 +21,7 @@
     BOOL confirmPasswordVisible;
     BOOL waitingForFacebookAuthentication;
     BOOL waitingForFacebookInfo;
+//    CGFloat pictureWidthHeight;
     
     NSString * firstNameInputString;
     NSString * lastNameInputString;

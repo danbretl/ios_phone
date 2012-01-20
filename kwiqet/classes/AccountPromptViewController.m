@@ -123,6 +123,8 @@ static NSString * AP_IMAGE_PICKER_OPTION_TEXT_LIBRARY = @"Photo Library";
         initialPromptScreenVisible = YES;
         accountCreationViewsVisible = NO;
         confirmPasswordVisible = NO;
+//        pictureWidthHeight = self.pictureButton.frame.size.width - (self.pictureButton.contentEdgeInsets.left + self.pictureButton.contentEdgeInsets.right);
+        self.pictureInputImage = [UIImage imageNamed:@"profile_photo_inner.png"];
     }
     return self;
 }
@@ -349,7 +351,8 @@ static NSString * AP_IMAGE_PICKER_OPTION_TEXT_LIBRARY = @"Photo Library";
     self.emailTextField.text = self.emailInputString;
     self.passwordTextField.text = self.passwordInputString;
     self.confirmPasswordTextField.text = self.confirmPasswordInputString;
-    //self.pictureButton setImage...
+    [self.pictureButton setImage:self.pictureInputImage forState:UIControlStateNormal];
+    [self.pictureButton setImage:self.pictureInputImage forState:UIControlStateHighlighted];
 }
 
 - (void)viewDidUnload
@@ -591,6 +594,9 @@ static NSString * AP_IMAGE_PICKER_OPTION_TEXT_LIBRARY = @"Photo Library";
 
 - (void)imagePickerController:(UIImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary *)info {
     NSLog(@"imagePickerController:didFinishPickingMediaWithInfo:");
+    self.pictureInputImage = [info valueForKey:UIImagePickerControllerEditedImage];
+    [self.pictureButton setImage:self.pictureInputImage forState:UIControlStateNormal];
+    [self.pictureButton setImage:self.pictureInputImage forState:UIControlStateHighlighted];
     [self dismissModalViewControllerAnimated:YES];
 }
 
@@ -833,7 +839,11 @@ static NSString * AP_IMAGE_PICKER_OPTION_TEXT_LIBRARY = @"Photo Library";
         [alertView show];
         [alertView release];
         
-        [nextFirstResponder becomeFirstResponder];
+        if (nextFirstResponder == [self.inputContainer getFirstResponder]) {
+            [self setContainerToBeVisible:nextFirstResponder.superview.superview animated:YES];
+        } else {
+            [nextFirstResponder becomeFirstResponder];
+        }
         
     } else {
         
