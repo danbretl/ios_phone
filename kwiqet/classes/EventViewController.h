@@ -84,11 +84,10 @@ typedef enum {
 
     UIView * darkOverlayViewForMainView;
     UIView * darkOverlayViewForScrollView;
-    UITapGestureRecognizer * tapVenueGestureRecognizer;
     UISwipeGestureRecognizer * swipeToPullInOccurrencesControls;
     UISwipeGestureRecognizer * swipeToPushOutOccurrencesControls;
     UITapGestureRecognizer * tapToPullInOccurrencesControls;
-    IBOutlet UITapGestureRecognizer * tapToSetLocationGestureRecognizer;
+    UITapGestureRecognizer * tapToSetLocationGestureRecognizer;
     
     BOOL occurrencesControlsPulledOut;
     IBOutlet UIView      * occurrencesControlsContainer;

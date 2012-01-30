@@ -1,6 +1,6 @@
 //
 //  Analytics.h
-//  kwiqet
+//  Kwiqet
 //
 //  Created by Dan Bretl on 7/22/11.
 //  Copyright 2011 Abextra Technologies. All rights reserved.

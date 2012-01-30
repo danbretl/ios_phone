@@ -1,6 +1,6 @@
 //
 //  EventsWebQuery.h
-//  kwiqet
+//  Kwiqet
 //
 //  Created by Dan Bretl on 9/13/11.
 //  Copyright (c) 2011 Abextra Technologies. All rights reserved.

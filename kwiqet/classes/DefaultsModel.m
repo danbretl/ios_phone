@@ -60,13 +60,13 @@ static NSString * const DM_TAB_BAR_SELECTED_INDEX_KEY = @"DM_TAB_BAR_SELECTED_IN
 }
 
 + (void) saveKwiqetUserIdentifierToUserDefaults:(NSString *)identifier {
-    [[NSUserDefaults standardUserDefaults] setObject:identifier forKey:@"kwiqetUserIdentifier"];
+    [[NSUserDefaults standardUserDefaults] setObject:identifier forKey:@"KwiqetUserIdentifier"];
 }
 + (NSString *) retrieveKwiqetUserIdentifierFromUserDefaults {
-    return [[NSUserDefaults standardUserDefaults] objectForKey:@"kwiqetUserIdentifier"];
+    return [[NSUserDefaults standardUserDefaults] objectForKey:@"KwiqetUserIdentifier"];
 }
 + (void) deleteKwiqetUserIdentifier {
-    [[NSUserDefaults standardUserDefaults] removeObjectForKey:@"kwiqetUserIdentifier"];
+    [[NSUserDefaults standardUserDefaults] removeObjectForKey:@"KwiqetUserIdentifier"];
 }
 
 + (void) saveFacebookAccessToken:(NSString *)accessToken expirationDate:(NSDate *)expirationDate attachedToKwiqetIdentifier:(NSString *)kwiqetIdentifier {

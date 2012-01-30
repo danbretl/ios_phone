@@ -16,7 +16,6 @@
 			<string>IBUIImageView</string>
 			<string>IBUILabel</string>
 			<string>IBProxyObject</string>
-			<string>IBUITapGestureRecognizer</string>
 			<string>IBUITableView</string>
 			<string>IBUIScrollView</string>
 			<string>IBUIButton</string>
@@ -1463,7 +1462,6 @@
 				</object>
 				<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
 			</object>
-			<object class="IBUITapGestureRecognizer" id="435192551"/>
 		</object>
 		<object class="IBObjectContainer" key="IBDocument.Objects">
 			<object class="NSMutableArray" key="connectionRecords">
@@ -1925,14 +1923,6 @@
 					<int key="connectionID">188</int>
 				</object>
 				<object class="IBConnectionRecord">
-					<object class="IBCocoaTouchOutletConnection" key="connection">
-						<string key="label">tapToSetLocationGestureRecognizer</string>
-						<reference key="source" ref="372490531"/>
-						<reference key="destination" ref="435192551"/>
-					</object>
-					<int key="connectionID">191</int>
-				</object>
-				<object class="IBConnectionRecord">
 					<object class="IBCocoaTouchEventConnection" key="connection">
 						<string key="label">backButtonTouched</string>
 						<reference key="source" ref="713456888"/>
@@ -2104,32 +2094,6 @@
 						<int key="IBEventType">7</int>
 					</object>
 					<int key="connectionID">174</int>
-				</object>
-				<object class="IBConnectionRecord">
-					<object class="IBCocoaTouchOutletCollectionConnection" key="connection">
-						<string key="label">gestureRecognizers</string>
-						<reference key="source" ref="351188421"/>
-						<reference key="destination" ref="435192551"/>
-						<string key="cachedDesigntimeCollectionClassName">NSArray</string>
-						<bool key="addsContentToExistingCollection">YES</bool>
-					</object>
-					<int key="connectionID">184</int>
-				</object>
-				<object class="IBConnectionRecord">
-					<object class="IBCocoaTouchEventConnection" key="connection">
-						<string key="label">occurrencesControlsDatesVenuesNavBarTouched:</string>
-						<reference key="source" ref="435192551"/>
-						<reference key="destination" ref="372490531"/>
-					</object>
-					<int key="connectionID">185</int>
-				</object>
-				<object class="IBConnectionRecord">
-					<object class="IBCocoaTouchOutletConnection" key="connection">
-						<string key="label">delegate</string>
-						<reference key="source" ref="435192551"/>
-						<reference key="destination" ref="372490531"/>
-					</object>
-					<int key="connectionID">186</int>
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBCocoaTouchEventConnection" key="connection">
@@ -2559,11 +2523,6 @@
 						<reference key="parent" ref="492140017"/>
 					</object>
 					<object class="IBObjectRecord">
-						<int key="objectID">183</int>
-						<reference key="object" ref="435192551"/>
-						<reference key="parent" ref="0"/>
-					</object>
-					<object class="IBObjectRecord">
 						<int key="objectID">23</int>
 						<reference key="object" ref="924353041"/>
 						<object class="NSMutableArray" key="children">
@@ -2642,7 +2601,6 @@
 					<string>168.IBPluginDependency</string>
 					<string>17.IBPluginDependency</string>
 					<string>18.IBPluginDependency</string>
-					<string>183.IBPluginDependency</string>
 					<string>187.IBPluginDependency</string>
 					<string>19.IBPluginDependency</string>
 					<string>20.IBPluginDependency</string>
@@ -2713,7 +2671,6 @@
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<real value="0.0"/>
-					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
@@ -2935,7 +2892,6 @@
 							<string>priceOccurrenceInfoButton</string>
 							<string>scrollView</string>
 							<string>shareButton</string>
-							<string>tapToSetLocationGestureRecognizer</string>
 							<string>timeContainer</string>
 							<string>timeEndLabel</string>
 							<string>timeOccurrenceInfoButton</string>
@@ -2995,7 +2951,6 @@
 							<string>UIButton</string>
 							<string>UIScrollView</string>
 							<string>UIButton</string>
-							<string>UITapGestureRecognizer</string>
 							<string>UIView</string>
 							<string>UILabel</string>
 							<string>UIButton</string>
@@ -3058,7 +3013,6 @@
 							<string>priceOccurrenceInfoButton</string>
 							<string>scrollView</string>
 							<string>shareButton</string>
-							<string>tapToSetLocationGestureRecognizer</string>
 							<string>timeContainer</string>
 							<string>timeEndLabel</string>
 							<string>timeOccurrenceInfoButton</string>
@@ -3267,10 +3221,6 @@
 							<object class="IBToOneOutletInfo">
 								<string key="name">shareButton</string>
 								<string key="candidateClassName">UIButton</string>
-							</object>
-							<object class="IBToOneOutletInfo">
-								<string key="name">tapToSetLocationGestureRecognizer</string>
-								<string key="candidateClassName">UITapGestureRecognizer</string>
 							</object>
 							<object class="IBToOneOutletInfo">
 								<string key="name">timeContainer</string>

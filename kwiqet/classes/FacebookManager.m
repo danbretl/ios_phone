@@ -1,6 +1,6 @@
 //
 //  FacebookManager.m
-//  kwiqet
+//  Kwiqet
 //
 //  Created by Dan Bretl on 6/23/11.
 //  Copyright 2011 Abextra Technologies. All rights reserved.
@@ -95,7 +95,7 @@ static NSString * const FBM_REQUEST_PROFILE_PICTURE = @"FBM_REQUEST_PROFILE_PICT
 //    NSLog(@"FacebookManager pullAuthenticationInfoFromDefaults");
     NSString * kwiqetIdentifier = [DefaultsModel retrieveKwiqetUserIdentifierFromUserDefaults];
     if (!kwiqetIdentifier) {
-//        NSLog(@"no kwiqet id available");
+//        NSLog(@"no Kwiqet id available");
         kwiqetIdentifier = FBM_NO_ASSOCIATED_KWIQET_IDENTIFIER;
     }
     NSDictionary * accessInfo = [DefaultsModel retrieveFacebookAccessInfoAttachedToKwiqetIdentifier:kwiqetIdentifier];

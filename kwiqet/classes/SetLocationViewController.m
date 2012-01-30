@@ -1,6 +1,6 @@
 //
 //  SetLocationViewController.m
-//  kwiqet
+//  Kwiqet
 //
 //  Created by Dan Bretl on 10/25/11.
 //  Copyright (c) 2011 __MyCompanyName__. All rights reserved.

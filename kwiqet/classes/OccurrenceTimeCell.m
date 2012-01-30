@@ -1,6 +1,6 @@
 //
 //  OccurrenceTimeCell.m
-//  kwiqet
+//  Kwiqet
 //
 //  Created by Dan Bretl on 9/7/11.
 //  Copyright 2011 Abextra Technologies. All rights reserved.

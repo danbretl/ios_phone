@@ -134,7 +134,7 @@
     NSDictionary * userInfo = [notification userInfo];
     NSString * action = [userInfo valueForKey:@"action"];
     if ([action isEqualToString:@"logout"]) {
-        // If user signs out of Kwiqet, then their potential Facebook connection should also be undone. We should in this case however, hang on to the Facebook access token attached to their kwiqet id though, so that if they reconnect their kwiqet account, their Facebook connection will come back along for the ride as well.
+        // If user signs out of Kwiqet, then their potential Facebook connection should also be undone. We should in this case however, hang on to the Facebook access token attached to their Kwiqet id though, so that if they reconnect their Kwiqet account, their Facebook connection will come back along for the ride as well.
 //        [self.facebookManager logoutAndForgetFacebookAccessToken:NO associatedWithKwiqetIdentfier:nil];
         self.facebookManager.fb.accessToken = nil;
         self.facebookManager.fb.expirationDate = nil;

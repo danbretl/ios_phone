@@ -1,6 +1,6 @@
 //
 //  ActionsManagement.m
-//  kwiqet
+//  Kwiqet
 //
 //  Created by Dan Bretl on 7/5/11.
 //  Copyright 2011 Abextra Technologies. All rights reserved.
@@ -245,7 +245,7 @@
         }
     }
     if (event.url) {
-        [facebookEventDescription appendFormat:@"View this event on Kwiqet.com: %@", event.url];
+        [facebookEventDescription appendFormat:@"View this event on kwiqet.com: %@", event.url];
     }
     [parameters setObject:facebookEventDescription forKey:@"description"];
 

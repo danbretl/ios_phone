@@ -1,6 +1,6 @@
 //
 //  CategoryBreadcrumb.m
-//  kwiqet
+//  Kwiqet
 //
 //  Created by Dan Bretl on 6/27/11.
 //  Copyright (c) 2011 Abextra Technologies. All rights reserved.

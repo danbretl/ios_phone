@@ -1,9 +1,9 @@
 //
 //  CryptoUtilities.m
-//  kwiqet
+//  Kwiqet
 //
 //  Created by Dan Bretl on 07/08/11.
-//  Copyright 2011 kwiqet. All rights reserved.
+//  Copyright 2011 Kwiqet. All rights reserved.
 //
 
 #import "CryptoUtilities.h"

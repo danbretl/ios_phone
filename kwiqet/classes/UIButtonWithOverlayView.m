@@ -1,6 +1,6 @@
 //
 //  UIButtonWithOverlayView.m
-//  kwiqet
+//  Kwiqet
 //
 //  Created by Dan Bretl on 8/3/11.
 //  Copyright 2011 Abextra Technologies. All rights reserved.

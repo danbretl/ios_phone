@@ -1,6 +1,6 @@
 //
 //  AccountPromptViewController.m
-//  kwiqet
+//  Kwiqet
 //
 //  Created by Dan Bretl on 11/28/11.
 //  Copyright (c) 2011 __MyCompanyName__. All rights reserved.
@@ -874,7 +874,7 @@ static NSString * AP_IMAGE_PICKER_OPTION_TEXT_LIBRARY = @"Photo Library";
     
 }
 
-//- (void)webConnector:(WebConnector *)webConnector accountConnectSuccess:(ASIHTTPRequest *)request withEmail:(NSString *)emailString kwiqetIdentifier:(NSString *)identifierString apiKey:(NSString *)apiKey {
+//- (void)webConnector:(WebConnector *)webConnector accountConnectSuccess:(ASIHTTPRequest *)request withEmail:(NSString *)emailString KwiqetIdentifier:(NSString *)identifierString apiKey:(NSString *)apiKey {
 //    
 //    [self hideWebActivityView];
 //    
@@ -903,7 +903,7 @@ static NSString * AP_IMAGE_PICKER_OPTION_TEXT_LIBRARY = @"Photo Library";
     
 }
 
-//- (void)webConnector:(WebConnector *)webConnector accountCreateSuccess:(ASIHTTPRequest *)request withEmail:(NSString *)emailString kwiqetIdentifier:(NSString *)identifierString apiKey:(NSString *)apiKey {
+//- (void)webConnector:(WebConnector *)webConnector accountCreateSuccess:(ASIHTTPRequest *)request withEmail:(NSString *)emailString KwiqetIdentifier:(NSString *)identifierString apiKey:(NSString *)apiKey {
 //    
 //    [self hideWebActivityView];
 //    

@@ -1,6 +1,6 @@
 //
 //  WebActivityView.m
-//  kwiqet
+//  Kwiqet
 //
 //  Created by Dan Bretl on 6/23/11.
 //  Copyright 2011 Abextra Technologies. All rights reserved.

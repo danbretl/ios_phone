@@ -76,11 +76,10 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
 @property (retain) UIView * shadowDescriptionContainer;
 @property (retain) UIView * darkOverlayViewForMainView;
 @property (retain) UIView * darkOverlayViewForScrollView;
-@property (retain, nonatomic) IBOutlet UITapGestureRecognizer *tapToSetLocationGestureRecognizer;
-@property (retain) UITapGestureRecognizer * tapVenueGestureRecognizer;
+@property (retain, nonatomic) UITapGestureRecognizer *tapToSetLocationGestureRecognizer;
+@property (retain) UITapGestureRecognizer * tapToPullInOccurrencesControls;
 @property (retain) UISwipeGestureRecognizer * swipeToPullInOccurrencesControls;
 @property (retain) UISwipeGestureRecognizer * swipeToPushOutOccurrencesControls;
-@property (retain) UITapGestureRecognizer * tapToPullInOccurrencesControls;
 @property BOOL occurrencesControlsPulledOut;
 @property (retain) IBOutlet UIView * occurrencesControlsContainer;
 @property (retain) IBOutlet UIImageView * occurrencesControlsHandleImageView;
@@ -178,11 +177,10 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
 @end
 
 @implementation EventViewController
-@synthesize tapToSetLocationGestureRecognizer;
 
 @synthesize backgroundColorView, navigationBar, backButton, logoButton, actionBar, letsGoButton, shareButton, deleteButton, scrollView, titleBar, shadowTitleBar, imageView, breadcrumbsBar, breadcrumbsLabel, occurrenceInfoContainer, occurrenceInfoContainerIsCollapsed, shadowOccurrenceInfoContainer, occurrenceInfoOverlayView, dateContainer, dateOccurrenceInfoButton, monthLabel, dayNumberLabel, dayNameLabel, timeContainer, timeOccurrenceInfoButton, timeStartLabel, timeEndLabel, priceContainer, priceOccurrenceInfoButton, priceLabel, locationContainer, locationOccurrenceInfoButton, venueButton, addressLabel, cityStateZipLabel, phoneNumberButton, mapButton, descriptionContainer, descriptionBackgroundColorView, descriptionLabel, shadowDescriptionContainer;
 @synthesize darkOverlayViewForMainView, darkOverlayViewForScrollView;
-@synthesize tapVenueGestureRecognizer, swipeToPullInOccurrencesControls, swipeToPushOutOccurrencesControls, tapToPullInOccurrencesControls;
+@synthesize swipeToPullInOccurrencesControls, swipeToPushOutOccurrencesControls, tapToPullInOccurrencesControls, tapToSetLocationGestureRecognizer;
 @synthesize occurrencesControlsPulledOut;
 @synthesize occurrencesControlsContainer, occurrencesControlsHandleImageView, occurrencesControlsNavBar, occurrencesControlsTableViewContainer, occurrencesControlsTableViewOverlay, occurrencesControlsTableViewsContainer, occurrencesControlsDatesTableView, occurrencesControlsVenuesTableView, occurrencesControlsDatesVenuesSeparatorView, occurrencesControlsVenuesTimesSeparatorView, occurrencesControlsTimesTableView, occurrencesControlsNavBarsContainer, occurrencesControlsDatesVenuesNavBar, occurrencesControlsTimesNavBar, occurrencesControlsVenuesNearHeaderLabel, occurrencesControlsVenuesNearLocationLabel, occurrencesControlsTimesOnDateLabel, occurrencesControlsTimesAtVenueLabel, occurrencesControlsCancelButton, occurrencesControlsBackButton;
 
@@ -265,10 +263,10 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
     [occurrencesControlsTimesAtVenueLabel release];
     [occurrencesControlsCancelButton release];
     [occurrencesControlsBackButton release];
-    [tapVenueGestureRecognizer release];
     [swipeToPullInOccurrencesControls release];
     [swipeToPushOutOccurrencesControls release];
     [tapToPullInOccurrencesControls release];
+    [tapToSetLocationGestureRecognizer release];
     [userLocation_ release];
 //    [userLocationString_ release];
     [event release];
@@ -289,7 +287,6 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
     [shareChoiceActionSheet release];
     [shareChoiceActionSheetSelectors release];
     [setLocationViewController_ release];
-    [tapToSetLocationGestureRecognizer release];
     [coreDataModel release];
     [super dealloc];
 	
@@ -462,6 +459,14 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
     self.tapToPullInOccurrencesControls.delegate = self;
     self.tapToPullInOccurrencesControls.cancelsTouchesInView = NO;
     [self.scrollView addGestureRecognizer:self.tapToPullInOccurrencesControls];
+    
+    // Tap to set location
+    tapToSetLocationGestureRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(occurrencesControlsDatesVenuesNavBarTouched:)];
+    self.tapToSetLocationGestureRecognizer.delegate = self;
+    self.tapToSetLocationGestureRecognizer.cancelsTouchesInView = YES;
+    self.tapToSetLocationGestureRecognizer.delaysTouchesBegan = NO;
+    self.tapToSetLocationGestureRecognizer.delaysTouchesEnded = YES;
+    [self.occurrencesControlsDatesVenuesNavBar addGestureRecognizer:self.tapToSetLocationGestureRecognizer];
     
     // Dark overlay views for when occurrence controls are showing
     // To be subview of main view (above everything else)
@@ -1576,7 +1581,6 @@ static NSString * const EVC_OCCURRENCE_INFO_LOAD_FAILED_STRING = @"Failed to loa
 }
 
 - (void)viewDidUnload {
-    [self setTapToSetLocationGestureRecognizer:nil];
     [super viewDidUnload];
     // Release any retained subviews of the main view.
     // e.g. self.myOutlet = nil;

@@ -70,7 +70,7 @@
 		32041B4E13AFFC700072F95C /* tab_home@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 32041AB413AFFC700072F95C /* tab_home@2x.png */; };
 		32041B5313AFFC700072F95C /* tab_settings.png in Resources */ = {isa = PBXBuildFile; fileRef = 32041AB913AFFC700072F95C /* tab_settings.png */; };
 		32041B5413AFFC700072F95C /* tab_settings@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 32041ABA13AFFC700072F95C /* tab_settings@2x.png */; };
-		32041B6913AFFD5D0072F95C /* kwiqetAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 32041B6813AFFD5D0072F95C /* kwiqetAppDelegate.m */; };
+		32041B6913AFFD5D0072F95C /* KwiqetAppDelegate.m- in Sources */ = {isa = PBXBuildFile; fileRef = 32041B6813AFFD5D0072F95C /* KwiqetAppDelegate.m- */; };
 		32041B6B13AFFE330072F95C /* YAJL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 32041B6A13AFFE330072F95C /* YAJL.framework */; };
 		32041B6D13AFFE7B0072F95C /* Entitlements.plist in Resources */ = {isa = PBXBuildFile; fileRef = 32041B6C13AFFE7B0072F95C /* Entitlements.plist */; };
 		320556F91457231100847D77 /* SetLocationViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 320556F71457231100847D77 /* SetLocationViewController.m */; };
@@ -719,8 +719,8 @@
 		32041AB413AFFC700072F95C /* tab_home@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "tab_home@2x.png"; sourceTree = "<group>"; };
 		32041AB913AFFC700072F95C /* tab_settings.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = tab_settings.png; sourceTree = "<group>"; };
 		32041ABA13AFFC700072F95C /* tab_settings@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "tab_settings@2x.png"; sourceTree = "<group>"; };
-		32041B6713AFFD5D0072F95C /* kwiqetAppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = kwiqetAppDelegate.h; sourceTree = "<group>"; };
-		32041B6813AFFD5D0072F95C /* kwiqetAppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = kwiqetAppDelegate.m; sourceTree = "<group>"; };
+		32041B6713AFFD5D0072F95C /* KwiqetAppDelegate.h- */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "KwiqetAppDelegate.h-"; sourceTree = "<group>"; };
+		32041B6813AFFD5D0072F95C /* KwiqetAppDelegate.m- */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "KwiqetAppDelegate.m-"; sourceTree = "<group>"; };
 		32041B6A13AFFE330072F95C /* YAJL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = YAJL.framework; path = kwiqet/YAJL.framework; sourceTree = "<group>"; };
 		32041B6C13AFFE7B0072F95C /* Entitlements.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Entitlements.plist; sourceTree = "<group>"; };
 		320556F61457231100847D77 /* SetLocationViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SetLocationViewController.h; sourceTree = "<group>"; };
@@ -1354,12 +1354,12 @@
 		32F43AA913EB46A7008EFC4D /* ico_walking@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "ico_walking@2x.png"; sourceTree = "<group>"; };
 		32F43AAA13EB46A7008EFC4D /* ico_weekend.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = ico_weekend.png; sourceTree = "<group>"; };
 		32F43AAB13EB46A7008EFC4D /* ico_weekend@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "ico_weekend@2x.png"; sourceTree = "<group>"; };
-		32FD31EC13AFD82C007549B6 /* kwiqet.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = kwiqet.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		32FD31EC13AFD82C007549B6 /* Kwiqet.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Kwiqet.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		32FD31F013AFD82C007549B6 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		32FD31F213AFD82C007549B6 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		32FD31F413AFD82C007549B6 /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
 		32FD31F613AFD82C007549B6 /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = System/Library/Frameworks/CoreData.framework; sourceTree = SDKROOT; };
-		32FD31FE13AFD82C007549B6 /* kwiqet-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "kwiqet-Prefix.pch"; sourceTree = "<group>"; };
+		32FD31FE13AFD82C007549B6 /* Kwiqet-Prefix.pch- */ = {isa = PBXFileReference; lastKnownFileType = text; path = "Kwiqet-Prefix.pch-"; sourceTree = "<group>"; };
 		32FD364E13AFF3B6007549B6 /* kwiqet 001.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "kwiqet 001.xcdatamodel"; sourceTree = "<group>"; };
 		32FD365513AFF3F7007549B6 /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		32FD381513AFF451007549B6 /* urls.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = urls.plist; sourceTree = "<group>"; };
@@ -1438,7 +1438,7 @@
 		32FD38AF13AFF5CE007549B6 /* EventKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = EventKit.framework; path = System/Library/Frameworks/EventKit.framework; sourceTree = SDKROOT; };
 		32FD38B013AFF5CE007549B6 /* EventKitUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = EventKitUI.framework; path = System/Library/Frameworks/EventKitUI.framework; sourceTree = SDKROOT; };
 		32FD38B313AFF5DB007549B6 /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
-		32FD38B913AFF9AA007549B6 /* kwiqet-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "kwiqet-Info.plist"; sourceTree = "<group>"; };
+		32FD38B913AFF9AA007549B6 /* Kwiqet-Info.plist- */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = "Kwiqet-Info.plist-"; sourceTree = "<group>"; };
 		32FF9B2F13D4F01500B29E72 /* btn_createacct_touch.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = btn_createacct_touch.png; sourceTree = "<group>"; };
 		32FF9B3013D4F01500B29E72 /* btn_createacct_touch@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "btn_createacct_touch@2x.png"; sourceTree = "<group>"; };
 		32FF9B3113D4F01500B29E72 /* btn_createacct.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = btn_createacct.png; sourceTree = "<group>"; };
@@ -2662,7 +2662,7 @@
 		32FD31E113AFD82C007549B6 = {
 			isa = PBXGroup;
 			children = (
-				32FD31F813AFD82C007549B6 /* kwiqet */,
+				32FD31F813AFD82C007549B6 /* Kwiqet */,
 				32FD31EF13AFD82C007549B6 /* Frameworks */,
 				32FD31ED13AFD82C007549B6 /* Products */,
 				AB6FBAD513AFE42A0099B7DF /* Resources */,
@@ -2672,7 +2672,7 @@
 		32FD31ED13AFD82C007549B6 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				32FD31EC13AFD82C007549B6 /* kwiqet.app */,
+				32FD31EC13AFD82C007549B6 /* Kwiqet.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -2705,28 +2705,29 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
-		32FD31F813AFD82C007549B6 /* kwiqet */ = {
+		32FD31F813AFD82C007549B6 /* Kwiqet */ = {
 			isa = PBXGroup;
 			children = (
-				32041B6713AFFD5D0072F95C /* kwiqetAppDelegate.h */,
-				32041B6813AFFD5D0072F95C /* kwiqetAppDelegate.m */,
+				32041B6713AFFD5D0072F95C /* KwiqetAppDelegate.h- */,
+				32041B6813AFFD5D0072F95C /* KwiqetAppDelegate.m- */,
 				32FD381913AFF52F007549B6 /* classes */,
 				32D7FEE313B0BD6A005E8406 /* core data */,
 				32FD31F913AFD82C007549B6 /* Supporting Files */,
 			);
+			name = Kwiqet;
 			path = kwiqet;
 			sourceTree = "<group>";
 		};
 		32FD31F913AFD82C007549B6 /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
-				32FD38B913AFF9AA007549B6 /* kwiqet-Info.plist */,
+				32FD38B913AFF9AA007549B6 /* Kwiqet-Info.plist- */,
 				32D7FEDB13B0BC43005E8406 /* InfoPlist.strings */,
 				32041B6C13AFFE7B0072F95C /* Entitlements.plist */,
 				32FD381513AFF451007549B6 /* urls.plist */,
 				3232ED90146996B00086D545 /* USStateAbbreviations.plist */,
 				32D7FEDE13B0BC5A005E8406 /* MainWindow.xib */,
-				32FD31FE13AFD82C007549B6 /* kwiqet-Prefix.pch */,
+				32FD31FE13AFD82C007549B6 /* Kwiqet-Prefix.pch- */,
 				32FD365513AFF3F7007549B6 /* main.m */,
 			);
 			name = "Supporting Files";
@@ -2758,9 +2759,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		32FD31EB13AFD82C007549B6 /* kwiqet */ = {
+		32FD31EB13AFD82C007549B6 /* Kwiqet */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 32FD320C13AFD82D007549B6 /* Build configuration list for PBXNativeTarget "kwiqet" */;
+			buildConfigurationList = 32FD320C13AFD82D007549B6 /* Build configuration list for PBXNativeTarget "Kwiqet" */;
 			buildPhases = (
 				32FD31E813AFD82C007549B6 /* Sources */,
 				32FD31E913AFD82C007549B6 /* Frameworks */,
@@ -2770,9 +2771,9 @@
 			);
 			dependencies = (
 			);
-			name = kwiqet;
+			name = Kwiqet;
 			productName = kwiqet;
-			productReference = 32FD31EC13AFD82C007549B6 /* kwiqet.app */;
+			productReference = 32FD31EC13AFD82C007549B6 /* Kwiqet.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -2783,7 +2784,7 @@
 			attributes = {
 				LastUpgradeCheck = 0420;
 			};
-			buildConfigurationList = 32FD31E613AFD82C007549B6 /* Build configuration list for PBXProject "kwiqet" */;
+			buildConfigurationList = 32FD31E613AFD82C007549B6 /* Build configuration list for PBXProject "Kwiqet" */;
 			compatibilityVersion = "Xcode 3.2";
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
@@ -2795,7 +2796,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				32FD31EB13AFD82C007549B6 /* kwiqet */,
+				32FD31EB13AFD82C007549B6 /* Kwiqet */,
 			);
 		};
 /* End PBXProject section */
@@ -3355,7 +3356,7 @@
 				32FD389E13AFF52F007549B6 /* WebConnector.m in Sources */,
 				32FD389F13AFF52F007549B6 /* WebDataTranslator.m in Sources */,
 				32FD38A013AFF52F007549B6 /* WebUtil.m in Sources */,
-				32041B6913AFFD5D0072F95C /* kwiqetAppDelegate.m in Sources */,
+				32041B6913AFFD5D0072F95C /* KwiqetAppDelegate.m- in Sources */,
 				32D7FF5B13B0D382005E8406 /* Reachability.m in Sources */,
 				32733E1013B0FBBA0053C44A /* Facebook.m in Sources */,
 				32733E1313B0FBBA0053C44A /* FBDialog.m in Sources */,
@@ -3513,9 +3514,9 @@
 				);
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "kwiqet/kwiqet-Prefix.pch";
+				GCC_PREFIX_HEADER = "kwiqet/Kwiqet-Prefix.pch";
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
-				INFOPLIST_FILE = "kwiqet/kwiqet-Info.plist";
+				INFOPLIST_FILE = "kwiqet/Kwiqet-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 4.0;
 				OTHER_LDFLAGS = (
 					"-ObjC",
@@ -3545,9 +3546,9 @@
 					"\"$(SRCROOT)\"",
 				);
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "kwiqet/kwiqet-Prefix.pch";
+				GCC_PREFIX_HEADER = "kwiqet/Kwiqet-Prefix.pch";
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
-				INFOPLIST_FILE = "kwiqet/kwiqet-Info.plist";
+				INFOPLIST_FILE = "kwiqet/Kwiqet-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 4.0;
 				OTHER_LDFLAGS = (
 					"-ObjC",
@@ -3590,9 +3591,9 @@
 					"\"$(SRCROOT)\"",
 				);
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "kwiqet/kwiqet-Prefix.pch";
+				GCC_PREFIX_HEADER = "kwiqet/Kwiqet-Prefix.pch";
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
-				INFOPLIST_FILE = "kwiqet/kwiqet-Info.plist";
+				INFOPLIST_FILE = "kwiqet/Kwiqet-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 4.0;
 				OTHER_LDFLAGS = (
 					"-ObjC",
@@ -3609,7 +3610,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		32FD31E613AFD82C007549B6 /* Build configuration list for PBXProject "kwiqet" */ = {
+		32FD31E613AFD82C007549B6 /* Build configuration list for PBXProject "Kwiqet" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				32FD320A13AFD82D007549B6 /* Debug */,
@@ -3619,7 +3620,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		32FD320C13AFD82D007549B6 /* Build configuration list for PBXNativeTarget "kwiqet" */ = {
+		32FD320C13AFD82D007549B6 /* Build configuration list for PBXNativeTarget "Kwiqet" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				32FD320D13AFD82D007549B6 /* Debug */,

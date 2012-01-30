@@ -1,13 +1,13 @@
 //
 //  FeaturedHubConstants.h
-//  kwiqet
+//  Kwiqet
 //
 //  Created by Dan Bretl on 1/13/12.
 //  Copyright (c) 2012 __MyCompanyName__. All rights reserved.
 //
 
-#ifndef kwiqet_FeaturedHubConstants_h
-#define kwiqet_FeaturedHubConstants_h
+#ifndef Kwiqet_FeaturedHubConstants_h
+#define Kwiqet_FeaturedHubConstants_h
 
 #define FHC_BUBBLE_VERTICAL_MARGIN              5
 #define FHC_BUBBLE_HORIZONTAL_MARGIN            5

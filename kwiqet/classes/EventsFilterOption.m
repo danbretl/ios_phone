@@ -1,6 +1,6 @@
 //
 //  EventsFilterOption.m
-//  kwiqet
+//  Kwiqet
 //
 //  Created by Dan Bretl on 7/28/11.
 //  Copyright 2011 Abextra Technologies. All rights reserved.

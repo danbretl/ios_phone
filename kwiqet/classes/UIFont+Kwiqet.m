@@ -1,6 +1,6 @@
 //
 //  UIFont+Kwiqet.m
-//  kwiqet
+//  Kwiqet
 //
 //  Created by Dan Bretl on 9/9/11.
 //  Copyright 2011 Abextra Technologies. All rights reserved.

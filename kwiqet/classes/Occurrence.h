@@ -1,6 +1,6 @@
 //
 //  Occurrence.h
-//  kwiqet
+//  Kwiqet
 //
 //  Created by Dan Bretl on 8/1/11.
 //  Copyright (c) 2011 Abextra Technologies. All rights reserved.

@@ -1,6 +1,6 @@
 //
 //  LocationUpdatedFeedbackView.m
-//  kwiqet
+//  Kwiqet
 //
 //  Created by Dan Bretl on 11/9/11.
 //  Copyright (c) 2011 __MyCompanyName__. All rights reserved.
