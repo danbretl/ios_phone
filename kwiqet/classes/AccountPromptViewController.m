@@ -232,6 +232,7 @@ static NSString * AP_IMAGE_PICKER_OPTION_TEXT_LIBRARY = @"Photo Library";
     [orLine.layer addSublayer:dividerGrayLayer];
     [orLine.layer addSublayer:dividerWhiteLayer];
     [self.accountOptionsContainer addSubview:orLine];
+    [orLine release];
     
     emailPasswordOriginYPartOfForm = self.emailPasswordContainer.frame.origin.y; // Just making dev easier. Otherwise would probably just be hard coded. We could be smarter here, but this is OK for now.
     emailPasswordOriginYMainStage = 64; // HARD CODED VALUE

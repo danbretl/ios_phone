@@ -40,9 +40,12 @@
     NSLog(@"Created bugSenseCrashController %@", crash);
     
     BOOL previousUserLocationExists = [self.coreDataModel getMostRecentUserLocation] != nil;
+    NSLog(@"Got if previous user location exists.");
     if (!previousUserLocationExists) {
         [self.coreDataModel addSeedUserLocationNYC]; // This should obviously change / become more sophisticated once we operate in cities other than NYC.
+        NSLog(@"Added seed user location");
         [self.coreDataModel coreDataSave];
+        NSLog(@"Saved core data model");
     }
     
     // Setup stuff
@@ -450,8 +453,10 @@
  If the context doesn't already exist, it is created and bound to the persistent store coordinator for the application.
  */
 - (NSManagedObjectContext *)managedObjectContext {
+    NSLog(@"getManagedObjectContext start");
     
     if (managedObjectContext_ != nil) {
+        NSLog(@"getManagedObjectContext end");
         return managedObjectContext_;
     }
     
@@ -460,6 +465,7 @@
         managedObjectContext_ = [[NSManagedObjectContext alloc] init];
         [managedObjectContext_ setPersistentStoreCoordinator:coordinator];
     }
+    NSLog(@"getManagedObjectContext end");
     return managedObjectContext_;
 }
 
@@ -469,12 +475,15 @@
  If the model doesn't already exist, it is created from the application's model.
  */
 - (NSManagedObjectModel *)managedObjectModel {
-    
+    NSLog(@"getManagedObjectModel start");
     if (managedObjectModel_ != nil) {
+        NSLog(@"getManagedObjectModel end");
         return managedObjectModel_;
     }
-    NSURL *modelURL = [[NSBundle mainBundle] URLForResource:@"Kwiqet" withExtension:@"momd"];
+    NSURL * modelURL = [[NSBundle mainBundle] URLForResource:@"kwiqet" withExtension:@"momd"];
     managedObjectModel_ = [[NSManagedObjectModel alloc] initWithContentsOfURL:modelURL];    
+    NSLog(@"getManagedObjectModel end");
+    NSLog(@"managedObjectModel %@", managedObjectModel_);
     return managedObjectModel_;
 }
 
@@ -484,21 +493,26 @@
  If the coordinator doesn't already exist, it is created and the application's store added to it.
  */
 - (NSPersistentStoreCoordinator *)persistentStoreCoordinator {
+    NSLog(@"getPersistentStoreCoordinator start");
     
     if (persistentStoreCoordinator_ != nil) {
+        NSLog(@"getPersistentStoreCoordinator end");
         return persistentStoreCoordinator_;
     }
     
     NSURL *storeURL = [[self applicationDocumentsDirectory] URLByAppendingPathComponent:@"Kwiqet.sqlite"];
     
     NSError *error = nil;
+    NSLog(@"about to initWithManagedObjectModel");
     persistentStoreCoordinator_ = [[NSPersistentStoreCoordinator alloc] initWithManagedObjectModel:[self managedObjectModel]];
+    NSLog(@"just finished initWithManagedObjectModel");
     
     NSDictionary * options = [NSDictionary dictionaryWithObjectsAndKeys:
                               [NSNumber numberWithBool:YES], NSMigratePersistentStoresAutomaticallyOption,
                               [NSNumber numberWithBool:YES], NSInferMappingModelAutomaticallyOption, 
                               nil];
     
+    NSLog(@"about to addPersistentStoreWithType");
     if (![persistentStoreCoordinator_ addPersistentStoreWithType:NSSQLiteStoreType configuration:nil URL:storeURL options:options error:&error]) {
         /*
          Replace this implementation with code to handle the error appropriately.
@@ -525,8 +539,9 @@
          */
         NSLog(@"Unresolved error %@, %@", error, [error userInfo]);
         abort();
-    }    
+    }
     
+    NSLog(@"getPersistentStoreCoordinator end");
     return persistentStoreCoordinator_;
 }
 

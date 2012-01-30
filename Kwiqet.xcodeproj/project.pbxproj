@@ -198,6 +198,7 @@
 		32377E2A14C14CA900B1A355 /* FeaturedEventCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 32377E2914C14CA700B1A355 /* FeaturedEventCell.m */; };
 		32377E3514C173F500B1A355 /* FeaturedVenueEventsCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 32377E3414C173F400B1A355 /* FeaturedVenueEventsCell.m */; };
 		32377E3B14C1841100B1A355 /* fakeFeaturedEvent_4.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 32377E3A14C1841100B1A355 /* fakeFeaturedEvent_4.jpg */; };
+		323791AB14D723A700D95F70 /* Kwiqet.xcdatamodeld in Resources */ = {isa = PBXBuildFile; fileRef = 32FD364D13AFF3B6007549B6 /* Kwiqet.xcdatamodeld */; };
 		3239BF521419861900783BED /* LTe50050.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 3239BF501419861900783BED /* LTe50050.ttf */; };
 		3239BF531419861900783BED /* LTe50052.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 3239BF511419861900783BED /* LTe50052.ttf */; };
 		3239BF55141986DD00783BED /* LTe50054.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 3239BF54141986DD00783BED /* LTe50054.ttf */; };
@@ -599,7 +600,7 @@
 		32FD31F313AFD82C007549B6 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 32FD31F213AFD82C007549B6 /* Foundation.framework */; };
 		32FD31F513AFD82C007549B6 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 32FD31F413AFD82C007549B6 /* CoreGraphics.framework */; };
 		32FD31F713AFD82C007549B6 /* CoreData.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 32FD31F613AFD82C007549B6 /* CoreData.framework */; };
-		32FD364F13AFF3B6007549B6 /* kwiqet.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 32FD364D13AFF3B6007549B6 /* kwiqet.xcdatamodeld */; };
+		32FD364F13AFF3B6007549B6 /* Kwiqet.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 32FD364D13AFF3B6007549B6 /* Kwiqet.xcdatamodeld */; };
 		32FD365613AFF3F7007549B6 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 32FD365513AFF3F7007549B6 /* main.m */; };
 		32FD381613AFF451007549B6 /* urls.plist in Resources */ = {isa = PBXBuildFile; fileRef = 32FD381513AFF451007549B6 /* urls.plist */; };
 		32FD387413AFF52F007549B6 /* ASIAuthenticationDialog.m in Sources */ = {isa = PBXBuildFile; fileRef = 32FD381B13AFF52F007549B6 /* ASIAuthenticationDialog.m */; };
@@ -2373,7 +2374,7 @@
 		32D7FEE313B0BD6A005E8406 /* core data */ = {
 			isa = PBXGroup;
 			children = (
-				32FD364D13AFF3B6007549B6 /* kwiqet.xcdatamodeld */,
+				32FD364D13AFF3B6007549B6 /* Kwiqet.xcdatamodeld */,
 				32FD383013AFF52F007549B6 /* CoreDataModel.h */,
 				32FD383113AFF52F007549B6 /* CoreDataModel.m */,
 				32FD382E13AFF52F007549B6 /* Category.h */,
@@ -2806,6 +2807,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				323791AB14D723A700D95F70 /* Kwiqet.xcdatamodeld in Resources */,
 				32FD381613AFF451007549B6 /* urls.plist in Resources */,
 				32FD388913AFF52F007549B6 /* LoginViewController.xib in Resources */,
 				32FD388B13AFF52F007549B6 /* MapViewController.xib in Resources */,
@@ -3326,7 +3328,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				32FD364F13AFF3B6007549B6 /* kwiqet.xcdatamodeld in Sources */,
+				32FD364F13AFF3B6007549B6 /* Kwiqet.xcdatamodeld in Sources */,
 				32FD365613AFF3F7007549B6 /* main.m in Sources */,
 				32FD387413AFF52F007549B6 /* ASIAuthenticationDialog.m in Sources */,
 				32FD387513AFF52F007549B6 /* ASIDataCompressor.m in Sources */,
@@ -3633,7 +3635,7 @@
 /* End XCConfigurationList section */
 
 /* Begin XCVersionGroup section */
-		32FD364D13AFF3B6007549B6 /* kwiqet.xcdatamodeld */ = {
+		32FD364D13AFF3B6007549B6 /* Kwiqet.xcdatamodeld */ = {
 			isa = XCVersionGroup;
 			children = (
 				3247BDCA14BE66690027A821 /* kwiqet 017.xcdatamodel */,
@@ -3655,6 +3657,7 @@
 				32FD364E13AFF3B6007549B6 /* kwiqet 001.xcdatamodel */,
 			);
 			currentVersion = 3247BDCA14BE66690027A821 /* kwiqet 017.xcdatamodel */;
+			name = Kwiqet.xcdatamodeld;
 			path = kwiqet.xcdatamodeld;
 			sourceTree = "<group>";
 			versionGroupType = wrapper.xcdatamodel;
